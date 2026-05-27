@@ -1,0 +1,13 @@
+# ── Production dependencies ───────────────────────────────────────────────────
+click>=8.1.0            # CLI framework (formalizer formalize / retry / status …)
+python-dotenv>=1.0.0    # Loads .env into os.environ at import time
+scikit-learn>=1.4.0     # TF-IDF vectorizer + cosine similarity for polib search
+
+# ── Development / test dependencies ──────────────────────────────────────────
+# Install with: pip install -e ".[dev]"  OR  pip install pytest
+pytest>=8.0.0
+
+# ── System requirements (not pip-installable) ─────────────────────────────────
+# lean   >= 4.x   — Lean 4 proof assistant  https://lean-lang.org
+# lake   >= 4.x   — Lean build system (bundled with Lean 4)
+# claude >= 0.2   — Claude Code SDK CLI     https://github.com/anthropics/claude-code

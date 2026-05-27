@@ -1,0 +1,26 @@
+# Python bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+
+# pytest
+.pytest_cache/
+
+# Environment / secrets
+.env
+.env.*
+
+# Runtime state & logs
+store.json
+*.bak
+logs/
+
+# Lean / Lake build artefacts
+.lake/
+build/
+lake-packages/
+lakefile.olean
+lake-manifest.json
+
+# Temp compilation scratch dir
+polib/Polib/_Temp/
