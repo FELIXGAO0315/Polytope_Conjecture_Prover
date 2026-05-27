@@ -1,0 +1,32 @@
+{
+  "conjecture_id": "C3",
+  "conjecture_latex": "$\\text{If }\\;\\text{simple} \\;\\wedge\\; f_2 \\geq 13 \\;\\wedge\\; \\sum_{k \\geq 7} p_k \\geq 1,\\;\\text{then }\\;p_6 \\geq -2\\,\\sum_{k \\geq 7} p_k + 4$",
+  "hypotheses": [
+    "\\text{simple}",
+    "f_2 \\geq 13",
+    "\\sum_{k \\geq 7} p_k \\geq 1"
+  ],
+  "conclusion": "p_6 \\geq -2\\,\\sum_{k \\geq 7} p_k + 4",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      0,
+      1,
+      11,
+      0,
+      1
+    ],
+    "p3": 0,
+    "p4": 1,
+    "p5": 11,
+    "p6": 0,
+    "p7": 1,
+    "f2": 13,
+    "num_vertices": 22,
+    "num_edges": 33
+  },
+  "found_by": "llm_finder",
+  "found_at_round": 1,
+  "violation_detail": "p6=0.0 < RHS=2.0000 (violation)",
+  "found_at": "2026-05-27T12:26:22.054479+00:00"
+}

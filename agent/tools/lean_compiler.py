@@ -174,10 +174,11 @@ def _sanitize_module_name(raw: str) -> str:
 
 
 class LeanCompiler:
-    def __init__(self, workspace: Path, timeout: int = 120, keep_on_failure: bool = False):
+    def __init__(self, workspace: Path, timeout: int = 120, keep_on_failure: bool = False, lake_binary: str = "lake"):
         self._workspace = Path(workspace)
         self._timeout = timeout
         self._keep_on_failure = keep_on_failure
+        self._lake_binary = lake_binary
 
     def compile(self, lean_code: str, module_name: str) -> CompileResult:
         safe_name = _sanitize_module_name(module_name)
@@ -191,7 +192,7 @@ class LeanCompiler:
         start = time.monotonic()
         try:
             result = subprocess.run(
-                ["lake", "build", f"Polib._Temp.{safe_name}"],
+                [self._lake_binary, "build", f"Polib._Temp.{safe_name}"],
                 cwd=self._workspace,
                 capture_output=True,
                 text=True,

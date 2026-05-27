@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-import hashlib
 import re
 from dataclasses import dataclass, field
 
-from agent.tools.latex_parser import ParsedTheorem, ProofStep
-
-
-def _sha256(text: str) -> str:
-    return hashlib.sha256(text.encode()).hexdigest()
+from agent.tools.latex_parser import ParsedTheorem, ProofStep, _sha256
 
 
 @dataclass

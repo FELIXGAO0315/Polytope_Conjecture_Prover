@@ -31,18 +31,15 @@ def _resolve_polib_path() -> Path:
 class Config:
     polib_path: Path = field(default_factory=_resolve_polib_path)
     store_path: Path = field(default_factory=lambda: _PROJECT_ROOT / "store.json")
-    lean_binary: str = field(default_factory=lambda: os.environ.get("LEAN_BINARY", "lean"))
     lake_binary: str = field(default_factory=lambda: os.environ.get("LAKE_BINARY", "lake"))
     max_rounds_per_node: int = field(default_factory=lambda: int(os.environ.get("MAX_ROUNDS_PER_NODE", "3")))
     max_sorry_total: int = field(default_factory=lambda: int(os.environ.get("MAX_SORRY_TOTAL", "999")))
-    quality_threshold: float = field(default_factory=lambda: float(os.environ.get("QUALITY_THRESHOLD", "0.85")))
     model_main: str = field(
         default_factory=lambda: os.environ.get("MODEL_MAIN", "claude-sonnet-4-6")
     )
     model_fast: str = field(
         default_factory=lambda: os.environ.get("MODEL_FAST", "claude-haiku-4-5-20251001")
     )
-    max_tokens: int = 8192
     compile_timeout_seconds: int = 60
     keep_temp_on_failure: bool = field(
         default_factory=lambda: os.environ.get("KEEP_TEMP_ON_FAILURE", "").lower() == "true"

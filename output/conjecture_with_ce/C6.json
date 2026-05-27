@@ -1,0 +1,49 @@
+{
+  "conjecture_id": "C6",
+  "conjecture_latex": "$\\text{If }\\;\\text{simple} \\;\\wedge\\; f_2 \\geq 23,\\;\\text{then }\\;p_6 \\geq - \\tfrac{11}{2}\\,\\sum_{k \\geq 7} p_k + 11$",
+  "hypotheses": [
+    "\\text{simple}",
+    "f_2 \\geq 23"
+  ],
+  "conclusion": "p_6 \\geq - \\tfrac{11}{2}\\,\\sum_{k \\geq 7} p_k + 11",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      0,
+      0,
+      22,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "p3": 0,
+    "p4": 0,
+    "p5": 22,
+    "p6": 0,
+    "p7": 0,
+    "p8": 0,
+    "p9": 0,
+    "p10": 0,
+    "p11": 0,
+    "p12": 0,
+    "p13": 0,
+    "p14": 0,
+    "p15": 0,
+    "p16": 1,
+    "f2": 23,
+    "num_vertices": 42,
+    "num_edges": 63
+  },
+  "found_by": "llm_finder",
+  "found_at_round": 1,
+  "violation_detail": "p6=0.0 < RHS=5.5000 (violation)",
+  "found_at": "2026-05-27T12:38:39.940309+00:00"
+}

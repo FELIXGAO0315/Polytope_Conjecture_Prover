@@ -1,11 +1,12 @@
-# ── Production dependencies ───────────────────────────────────────────────────
-click>=8.1.0            # CLI framework (formalizer formalize / retry / status …)
-python-dotenv>=1.0.0    # Loads .env into os.environ at import time
-scikit-learn>=1.4.0     # TF-IDF vectorizer + cosine similarity for polib search
-
-# ── Development / test dependencies ──────────────────────────────────────────
-# Install with: pip install -e ".[dev]"  OR  pip install pytest
-pytest>=8.0.0
+# ── Python dependencies ────────────────────────────────────────────────────────
+python-dotenv>=1.1.0    # Loads .env into os.environ at import time
+scikit-learn>=1.7.0     # TF-IDF vectorizer + cosine similarity for polib search
+numpy>=2.0.0            # Numerical computation
+matplotlib>=3.10.0      # Plotting (counterexample agent)
+networkx>=3.5           # Graph structures (counterexample agent)
+tqdm>=4.67.0            # Progress bars (RL training)
+torch>=2.0.0            # PyTorch — PPO/RL counterexample agent
+graphcalc>=2.0.0        # Graph property calculations (counterexample agent)
 
 # ── System requirements (not pip-installable) ─────────────────────────────────
 # lean   >= 4.x   — Lean 4 proof assistant  https://lean-lang.org
