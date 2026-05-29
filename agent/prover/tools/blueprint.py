@@ -44,10 +44,10 @@ will be REUSED (not re-proved) by theorem B if theorem B also produces a node wi
 To prevent incorrect reuse across theorems:
 - **FIRST**: check `Already-proved Polib lemmas` above. If an existing lemma covers the same
   mathematical content, name your node identically to that lemma and mark it as proved via that lemma.
-- **Otherwise**: prefix generic names with the theorem name.
-  BAD:  `"node_id": "InequalityPart"`   — too generic, will collide across theorems
-  GOOD: `"node_id": "P6InequalityPart"` — theorem-scoped, no collision risk
-  GOOD: `"node_id": "InequalityPart"`   — only if it reuses an existing Polib lemma of the same name
+- **Otherwise**: prefix generic names with `{node_prefix}`.
+  BAD:  `"node_id": "InequalityPart"`          — too generic, will collide across theorems
+  GOOD: `"node_id": "{node_prefix}InequalityPart"` — theorem-scoped, no collision risk
+  GOOD: `"node_id": "InequalityPart"`          — only if it reuses an existing Polib lemma of the same name
 - Exception: nodes that define shared structure (defs, type classes) may keep generic names
   IF they are mathematically identical to their Polib counterpart.
 
@@ -260,8 +260,11 @@ class BlueprintDecomposer:
             avail = "  (none yet)"
         # Escape any curly braces in interpolated values so .format() doesn't choke
         avail = avail.replace("{", "{{").replace("}", "}}")
+        _m = re.search(r'_(\d+)$', parsed.name)
+        node_prefix = f"c{_m.group(1)}" if _m else parsed.name
         user_content = BLUEPRINT_PROMPT.format(
             theorem_name=parsed.name,
+            node_prefix=node_prefix,
             lean_signature=locked_goal.lean_signature,
             hypotheses="\n".join(f"  - {h}" for h in parsed.hypotheses),
             conclusion=parsed.conclusion,

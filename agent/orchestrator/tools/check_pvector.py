@@ -279,7 +279,7 @@ def _check_realizability(
     # Exotic targets with very large faces (k >= 10) need more A* search time.
     kmax = max(nonzero.keys(), default=3)
     if kmax >= 10:
-        timeout = max(timeout, 60.0)
+        timeout = max(timeout, 20.0)
 
     # ── Tier 1: exact known polytopes ─────────────────────────────────────────
     for known_pv, name in _KNOWN_POLYTOPES:

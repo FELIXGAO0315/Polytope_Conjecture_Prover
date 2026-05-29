@@ -453,7 +453,7 @@ class AdaptiveCubicGraphEnv:
                 continue
             key = 'sum_pk_after_p6' if k == 'sum_pk' else k
             delta = self.props.get(key, 0) - old_props.get(key, 0)
-            if (coef < 0 and delta > 0) or (coef > 0 and delta < 0):
+            if (coef > 0 and delta > 0) or (coef < 0 and delta < 0):
                 reward += 5.0 * abs(coef) * abs(delta)
 
         if self.props['is_polytope']:
@@ -471,7 +471,7 @@ class AdaptiveCubicGraphEnv:
             else:
                 m_old = float(old_props.get('p6', 0)) - rhs_old
                 m_new = float(self.props.get('p6', 0)) - rhs_new
-            reward += 2.0 * (max(m_new, 0) - max(m_old, 0)) + 0.5 * m_new
+            reward += 2.0 * (max(m_new, 0) - max(m_old, 0))
 
         # 直接奖励条件 margin 的改善（无论条件是否已满足）
         reward += 1.5 * (cond_margin_prev - cond_margin_now)
@@ -896,8 +896,14 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
             max_gap = max(gaps[-100:]) if gaps else -100
             print(f"[rl ce finding] Episode {episode} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f}")
 
+    if not counterexamples and (stop_event is None or not stop_event.is_set()):
+        r_avg = np.mean(episode_rewards[-100:]) if episode_rewards else 0.0
+        len_avg = np.mean(ep_lens[-100:]) if ep_lens else 0.0
+        max_gap = max(gaps[-100:]) if gaps else -100
+        print(f"[rl ce finding] Episode {num_episodes} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f} no ce found")
+
     total_time = time.time() - start_time
-    
+
     actual_episodes = len(episode_rewards)
     avg_ops_per_episode = total_operations / actual_episodes if actual_episodes > 0 else 0.0
     avg_time_per_episode = total_time / actual_episodes if actual_episodes > 0 else 0.0

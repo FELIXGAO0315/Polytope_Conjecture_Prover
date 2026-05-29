@@ -4332,3 +4332,65 @@ lemma C2_VertexCountLowerBound (maps : SimplyCon3ConnectedMap 0)
   -- [SORRY] impact: blocks C2_VertexCountLowerBound
   -- [SORRY] suggested_next: fix compilation error then remove sorry
   sorry
+
+-- === Auto20260310142638_2EulerFormula (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T08:54:47.297269+00:00
+lemma Auto20260310142638_2EulerFormula : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2HandshakingLemma (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T08:55:05.641352+00:00
+lemma Auto20260310142638_2HandshakingLemma : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2FaceCountEquation (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T08:55:22.425511+00:00
+lemma Auto20260310142638_2FaceCountEquation : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2SimpleCubicLemma (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T08:55:53.125913+00:00
+lemma Auto20260310142638_2SimpleCubicLemma : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2DehnSommervilleLemma (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T08:59:01.940253+00:00
+lemma Auto20260310142638_2DehnSommervilleLemma : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2VertexCountBound (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T09:01:33.511294+00:00
+lemma Auto20260310142638_2VertexCountBound : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2EdgeCountBound (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T09:04:01.150115+00:00
+lemma Auto20260310142638_2EdgeCountBound : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2HandshakingExpansion (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T09:09:19.408699+00:00
+lemma Auto20260310142638_2HandshakingExpansion : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === Auto20260310142638_2LowerDegreeFacesBound (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T09:13:40.216572+00:00
+lemma Auto20260310142638_2LowerDegreeFacesBound {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+    3 * (maps.p_i 3 : ℤ) + 2 * (maps.p_i 4 : ℤ) + (maps.p_i 5 : ℤ) ≥ 12 - 2 * g := by
+  sorry
+
+-- === Auto20260310142638_2P6HigherFacesCombination (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T09:16:29.963841+00:00
+lemma Auto20260310142638_2P6HigherFacesCombination {g : ℤ} (maps : SimplyCon3ConnectedMap g) 
+    (hm : maps.m ≥ 6) : 
+    (maps.p_i 6 : ℤ) + 5 * (∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ)) ≥ 10 := by
+  -- [SORRY] Prerequisite constraint lemmas not available in this session
+  sorry

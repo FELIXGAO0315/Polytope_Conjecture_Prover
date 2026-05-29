@@ -37,6 +37,19 @@ If a hypothesis says  Σ_{k≥7} p_k ≥ 1:
 2. Work out what p6 value would VIOLATE the conclusion at this s.
 3. Build a DS-valid p-vector with that p6 and that s, large enough to meet f2 bounds.
 4. Verify ALL hypotheses numerically before submitting.
+
+━━━ REALIZABILITY RULES (Tier 4 hard gate) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DS=12 is NECESSARY but NOT SUFFICIENT — a p-vector must also be constructible as
+an actual simple convex polytope.  Candidates that fail realizability are useless.
+
+Rules of thumb for staying realizable:
+• Use AT MOST 2–3 distinct face sizes above k=6.  Mixing many different rare large
+  faces (e.g. p9=1, p14=1, p17=1, p21=2 all at once) almost always fails.
+• Prefer one dominant large face type: e.g. p7=2 and fill the rest with p3/p5.
+• Prisms are always realizable: {p4=n, p_n=2} for any n≥3.
+• Keep total face count f2 moderate (≤ 40).  Larger polytopes are harder to build.
+• If your last candidates all failed Tier 4, simplify: drop to a single large face
+  type and increase its count before adding variety.
 """
 
 LLM_CE_ROUND_PROMPT = """\

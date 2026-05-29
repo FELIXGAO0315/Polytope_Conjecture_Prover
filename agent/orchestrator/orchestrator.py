@@ -426,7 +426,7 @@ class Orchestrator:
         conjecture_name: str,
         json_path: str | None = None,
         rl_episodes: int = 600,
-        llm_rounds: int = 30,
+        llm_rounds: int = 15,
     ) -> None:
         """Single-conjecture entry point by name."""
         conjecture = self._load_conjecture(conjecture_name, json_path)
@@ -436,7 +436,7 @@ class Orchestrator:
         self,
         conjecture: ParsedConjecture,
         rl_episodes: int = 600,
-        llm_rounds: int = 30,
+        llm_rounds: int = 15,
     ) -> None:
         """Single-conjecture pipeline: CE search → ProverAgent fallback."""
         _sep = "=" * 70
@@ -459,7 +459,7 @@ class Orchestrator:
         self,
         json_path: str | None = None,
         rl_episodes: int = 600,
-        llm_rounds: int = 30,
+        llm_rounds: int = 15,
     ) -> None:
         """Batch pipeline: 7 parallel IRIS-sort workers compete to find CEs.
 
@@ -835,8 +835,8 @@ def main() -> None:
                         "(default: conjectures/conjectures.json)")
     p.add_argument("--rl-episodes", type=int, default=600, metavar="N",
                    help="RL episodes per conjecture (default: 600)")
-    p.add_argument("--llm-rounds", type=int, default=30, metavar="N",
-                   help="LLM CE search rounds per conjecture (default: 30)")
+    p.add_argument("--llm-rounds", type=int, default=15, metavar="N",
+                   help="LLM CE search rounds per conjecture (default: 15)")
     p.add_argument("--skip-ce", action="store_true",
                    help="Skip CE search and go directly to ProverAgent")
     args = p.parse_args()

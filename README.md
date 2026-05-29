@@ -1,4 +1,4 @@
-# Polytope Conjecture Prover — v2.0
+# Polytope Conjecture Prover — v2.1
 
 An automated pipeline for deciding conjectures about simple convex 3-polytopes.
 Given a conjecture in JSON formula format, the system either finds a **verified counterexample** (backed by an explicit witness polytope) or produces a **Lean 4 formalization** of the proof.
@@ -157,7 +157,8 @@ Two tracks run as concurrent threads. Both share a single `stop_event`: the firs
 ### RL Track (PPO + FiLM-GNN)
 
 - A **PPO policy** with a FiLM-conditioned graph neural network learns to build cubic planar graphs via repeated **node-chop** operations (replace a degree-3 vertex with a triangle)
-- The environment reward is: `polytopehood_bonus + 100 × max(0, violation_gap)`
+- The reward combines: polytope validity bonus, a shaped term that rewards moves pushing coefficients in the direction of violation (e.g. increasing a variable with positive RHS coefficient), a gap-improvement term, and `+100` on CE
+- At each episode reset, if the formula has a threshold hypothesis (e.g. `sum_pk_k>=7 >= 1`), the environment pre-expands the graph to satisfy it before the policy takes over, so no steps are wasted on the feasibility phase
 - Any episode that produces a graph satisfying the hypotheses and violating the conclusion is extracted as a CE candidate and sent to the 4-Check Validator
 - Trained for up to **600 episodes**; stops early if a CE is validated
 
@@ -167,11 +168,14 @@ Terminal output during Stage 2:
 [Stage 2] RL episodes: 600  |  LLM rounds: 30
 [rl ce finding] Episode 1/600
 [LLM ce finding] Round 1/30: Asking LLM to find ces
-[rl ce finding] Episode 100 | R: 22.62 | Len: 12.3 | ...
+[rl ce finding] Episode 100 | R: 22.62 | Len: 12.3 | Stop0: 5.00% | CE: 0.00% | Gap:  3.532
 [rl ce finding] Episode 137 ce found! p_vector=[38, 7, 6, ...]
 [LLM ce finding] Round 1/30: skipping (call aborted: stop_event set)
 [LLM ce finding] Stopped and waiting ce candidate to be checked
 [validation check ce from rl] 1 CE candidate(s) found, running 4 checks
+
+# If RL exhausts all episodes without a CE:
+[rl ce finding] Episode 600 | R: -1.33 | Len:  2.3 | Stop0:30.17% | CE:0.00% | Gap: -8.000 no ce found
 ```
 
 ---
@@ -257,7 +261,7 @@ After construction, `graphcalc` verifies the graph's p-vector matches the target
 
 The output filename uses the **short ID** (`C43.json`) derived from the trailing number of the full conjecture name.
 
-### No counterexample → `output/conjecture_without_ce/{id}.lean`
+### No counterexample → `output/conjecture_without_ce/c{N}.lean`
 
 If both Stage 1 and Stage 2 exhaust their budgets, the conjecture is passed to **ProverAgent** which:
 

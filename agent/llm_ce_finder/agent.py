@@ -95,7 +95,6 @@ class LLMCEFinder:
                 print("[LLM ce finding] Stopped and waiting ce candidate to be checked")
                 return None
 
-            print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: Asking LLM to find ces", flush=True)
             try:
                 prompt = self._build_prompt(rnd, failed, all_tried)
                 full_prompt = f"[System]\n{LLM_CE_SYSTEM}\n\n[User]\n{prompt}"

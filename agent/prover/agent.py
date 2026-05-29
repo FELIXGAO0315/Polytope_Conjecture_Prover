@@ -2902,9 +2902,16 @@ class FormalizerAgent:
 
         if self._flog:
             self._flog.finish_run()
-            self._log(verbose, f"[log] formalization log → {self._flog.log_path()}")
 
         sorry_total = self._sorry_get()
+
+        if tex_path:
+            lean_out_path, _, _ = self._write_complete_proof_file(
+                tex_path,
+                parsed.name if parsed is not None else "(unknown)",
+                nodes_proved, nodes_partial, nodes_failed, sorry_total,
+            )
+            self._log(verbose, f"[log] formalization → {lean_out_path}")
 
         if nodes_failed and not (nodes_proved or nodes_partial):
             _status = "failed"
@@ -3254,7 +3261,7 @@ class ProverAgent(FormalizerAgent):
         tex_path = str(
             Path(__file__).resolve().parent.parent
             / "conjectures" / "individual"
-            / f"{conjecture.conjecture_id}.tex"
+            / f"{conjecture.short_id.lower()}.tex"
         )
         parsed_theorem = conjecture.to_parsed_theorem()
         return self.formalize(
