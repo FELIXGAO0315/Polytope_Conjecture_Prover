@@ -123,12 +123,14 @@ class ClaudeSDKClient:
         return "".join(kept) or prompt
 
     def _call(self, prompt: str, model: str | None = None, timeout: int | None = None,
-              fast_model: str | None = None, system: str | None = None) -> str:
+              fast_model: str | None = None, system: str | None = None,
+              stop_event: threading.Event | None = None) -> str:
         """Call the claude CLI binary.
 
         timeout defaults to the CLAUDE_TIMEOUT env var (default 240s).
         Pass timeout explicitly to override per-call.
         fast_model: if provided, used for attempt 0 only; attempts 1+ use the main model.
+        stop_event: if set, kills the subprocess immediately so the call can return fast.
         """
         if timeout is None:
             timeout = int(os.environ.get("CLAUDE_TIMEOUT", "150"))
@@ -150,6 +152,10 @@ class ClaudeSDKClient:
         last_exc: Exception | None = None
         stdout, stderr = "", ""
         for attempt in range(3):
+            # Abort immediately if stop_event was already set before we start
+            if stop_event is not None and stop_event.is_set():
+                raise RuntimeError("call aborted: stop_event set")
+
             # Scale attempt timeouts from the caller-supplied timeout.
             # Give full budget on attempt 0; scale down for retries.
             attempt_timeout = timeout if attempt == 0 else (max(60, timeout - 60) if attempt == 1 else max(60, timeout - 120))
@@ -173,7 +179,27 @@ class ClaudeSDKClient:
                         text=True,
                         preexec_fn=os.setsid,
                     )
-                    stdout, stderr = proc.communicate(timeout=attempt_timeout)
+
+                    # Watchdog: if stop_event fires, kill the subprocess immediately.
+                    def _kill_on_stop(p=proc):
+                        if stop_event is not None:
+                            stop_event.wait()
+                            try:
+                                os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+                            except Exception:
+                                pass
+
+                    _watchdog: threading.Thread | None = None
+                    if stop_event is not None:
+                        _watchdog = threading.Thread(target=_kill_on_stop, daemon=True)
+                        _watchdog.start()
+
+                    try:
+                        stdout, stderr = proc.communicate(timeout=attempt_timeout)
+                    finally:
+                        if _watchdog is not None:
+                            _watchdog.join(timeout=1)
+
                 except subprocess.TimeoutExpired:
                     try:
                         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
@@ -194,6 +220,10 @@ class ClaudeSDKClient:
                         time.sleep(10 * (attempt + 1) + random.uniform(0, 5))
                         continue
                     raise last_exc
+
+                # stop_event killed the process — abort without retrying
+                if stop_event is not None and stop_event.is_set():
+                    raise RuntimeError("call aborted: stop_event set")
 
                 # Retry on non-zero exit code (transient errors: rate limit, OOM, etc.)
                 if proc.returncode != 0:

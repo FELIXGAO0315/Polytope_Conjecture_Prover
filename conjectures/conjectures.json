@@ -1,0 +1,278 @@
+{
+  "unsolved": [
+    {
+      "name": "auto_20260310_142638_1",
+      "formula": "if (is_simple), then p6 >= (0)"
+    },
+    {
+      "name": "auto_20260310_142638_10",
+      "formula": "if ((is_simple)  and  (f_2>=_19)), then p6 >= (-3.5*sum_pk_after_p6 + 7)"
+    },
+    {
+      "name": "auto_20260310_142638_11",
+      "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (-3*sum_pk_after_p6 + 6)"
+    },
+    {
+      "name": "auto_20260310_142638_12",
+      "formula": "if ((is_simple)  and  (f_2>=_26)), then p6 >= (-7*sum_pk_after_p6 + 14)"
+    },
+    {
+      "name": "auto_20260310_142638_13",
+      "formula": "if (((is_simple)  and  (f_2>=_18))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-4*sum_pk_after_p6 + 8)"
+    },
+    {
+      "name": "auto_20260310_142638_14",
+      "formula": "if ((is_simple)  and  (f_2>=_27)), then p6 >= (-7.5*sum_pk_after_p6 + 15)"
+    },
+    {
+      "name": "auto_20260310_142638_15",
+      "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-5*sum_pk_after_p6 + 10)"
+    },
+    {
+      "name": "auto_20260310_142638_16",
+      "formula": "if (((is_simple)  and  (f_2>=_21))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-6*sum_pk_after_p6 + 12)"
+    },
+    {
+      "name": "auto_20260310_142638_17",
+      "formula": "if ((is_simple)  and  (f_2>=_28)), then p6 >= (-8*sum_pk_after_p6 + 16)"
+    },
+    {
+      "name": "auto_20260310_142638_18",
+      "formula": "if ((is_simple)  and  (f_2>=_29)), then p6 >= (-8.5*sum_pk_after_p6 + 17)"
+    },
+    {
+      "name": "auto_20260310_142638_19",
+      "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (-9*sum_pk_after_p6 + 18)"
+    },
+    {
+      "name": "auto_20260310_142638_2",
+      "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (-5*sum_pk_after_p6 + 10)"
+    },
+    {
+      "name": "auto_20260310_142638_20",
+      "formula": "if ((is_simple)  and  (f_2>=_31)), then p6 >= (-9.5*sum_pk_after_p6 + 19)"
+    },
+    {
+      "name": "auto_20260310_142638_21",
+      "formula": "if ((is_simple)  and  (f_2>=_32)), then p6 >= (-10*sum_pk_after_p6 + 20)"
+    },
+    {
+      "name": "auto_20260310_142638_22",
+      "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (-11*sum_pk_after_p6 + 22)"
+    },
+    {
+      "name": "auto_20260310_142638_23",
+      "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7916666667*p3 + -3.166666667*sum_pk_after_p6 + 6.333333333)"
+    },
+    {
+      "name": "auto_20260310_142638_24",
+      "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7857142857*p3 + -3.142857143*sum_pk_after_p6 + 6.285714286)"
+    },
+    {
+      "name": "auto_20260310_142638_25",
+      "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 1)), then p6 <= (7.5*sum_pk_after_p6 + -15)"
+    },
+    {
+      "name": "auto_20260310_142638_28",
+      "formula": "if ((is_simple)  and  (f_2>=_42)), then p6 >= (0.6481481481*p3 + -2.333333333*sum_pk_after_p6 + 4.666666667)"
+    },
+    {
+      "name": "auto_20260310_142638_30",
+      "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (2.5*p3 + -10*sum_pk_after_p6 + 10)"
+    },
+    {
+      "name": "auto_20260310_142638_31",
+      "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (2.823529412*p3 + -12*sum_pk_after_p6 + 12)"
+    },
+    {
+      "name": "auto_20260310_142638_32",
+      "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (2.25*p3 + -9*sum_pk_after_p6 + 9)"
+    },
+    {
+      "name": "auto_20260310_142638_33",
+      "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (2.655172414*p3 + -11*sum_pk_after_p6 + 11)"
+    },
+    {
+      "name": "auto_20260310_142638_34",
+      "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (2*p3 + -8*sum_pk_after_p6 + 8)"
+    },
+    {
+      "name": "auto_20260310_142638_35",
+      "formula": "if ((is_simple)  and  (f_2>=_13)), then p6 >= (1.2*p3 + -4*sum_pk_after_p6 + 2)"
+    },
+    {
+      "name": "auto_20260310_142638_36",
+      "formula": "if ((is_simple)  and  (f_2>=_10)), then p6 >= (2*p3 + -6.5*sum_pk_after_p6)"
+    },
+    {
+      "name": "auto_20260310_142638_4",
+      "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (-4.5*sum_pk_after_p6 + 9)"
+    },
+    {
+      "name": "auto_20260310_142638_40",
+      "formula": "if (((is_simple)  and  (f_2>=_48))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.25*p3 + -3*sum_pk_after_p6 + -3.25)"
+    },
+    {
+      "name": "auto_20260310_142638_5",
+      "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (-6*sum_pk_after_p6 + 12)"
+    },
+    {
+      "name": "auto_20260310_142638_50",
+      "formula": "if ((is_simple)  and  (f_2>=_17)), then p6 >= (-3*sum_pk_after_p6 + 5)"
+    },
+    {
+      "name": "auto_20260310_142638_51",
+      "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (1.166666667*p3 + -4*sum_pk_after_p6 + 3.333333333)"
+    },
+    {
+      "name": "auto_20260310_142638_53",
+      "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (1*p3 + -4*sum_pk_after_p6 + 7)"
+    },
+    {
+      "name": "auto_20260310_142638_6",
+      "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (-5.5*sum_pk_after_p6 + 11)"
+    },
+    {
+      "name": "auto_20260310_142638_67",
+      "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8333333333*p3 + -2.166666667*sum_pk_after_p6 + -0.3333333333)"
+    },
+    {
+      "name": "auto_20260310_142638_7",
+      "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (-4*sum_pk_after_p6 + 8)"
+    },
+    {
+      "name": "auto_20260310_142638_8",
+      "formula": "if ((is_simple)  and  (f_2>=_25)), then p6 >= (-6.5*sum_pk_after_p6 + 13)"
+    },
+    {
+      "name": "auto_20260310_142638_9",
+      "formula": "if ((is_simple)  and  (f_2>=_16)), then p6 >= (-2*sum_pk_after_p6 + 4)"
+    }
+  ],
+  "solved": [
+    {
+      "name": "auto_20260310_142638_26",
+      "formula": "if (((is_simple)  and  (f_2>=_42))  and  (sum_pk_k>=7 >= 1)), then p6 <= (3.333333333*sum_pk_after_p6 + -6.666666667)"
+    },
+    {
+      "name": "auto_20260310_142638_27",
+      "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then p6 <= (2.333333333*sum_pk_after_p6 + -4.666666667)"
+    },
+    {
+      "name": "auto_20260310_142638_29",
+      "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 6)), then p6 >= (-3.25*p4 + 0.25*p3 + -0.625*sum_pk_after_p6 + 5)"
+    },
+    {
+      "name": "auto_20260310_142638_3",
+      "formula": "if (((is_simple)  and  (f_2>=_13))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-2*sum_pk_after_p6 + 4)"
+    },
+    {
+      "name": "auto_20260310_142638_37",
+      "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)"
+    },
+    {
+      "name": "auto_20260310_142638_38",
+      "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (1.15*p3 + -0.2*p5 + -2.55*sum_pk_after_p6 + -2.8)"
+    },
+    {
+      "name": "auto_20260310_142638_39",
+      "formula": "if (((is_simple)  and  (f_2>=_16))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1*p4 + -4*sum_pk_after_p6 + 9)"
+    },
+    {
+      "name": "auto_20260310_142638_41",
+      "formula": "if ((is_simple)  and  (f_2>=_6)), then p6 >= (0.03703703704*p4 + 0.8518518519*p3 + -2.074074074*sum_pk_after_p6 + -1.777777778)"
+    },
+    {
+      "name": "auto_20260310_142638_42",
+      "formula": "if ((is_simple)  and  (f_2>=_9)), then p6 >= (1*p3 + -2.833333333*sum_pk_after_p6)"
+    },
+    {
+      "name": "auto_20260310_142638_43",
+      "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.7753846154*p3 + -2.153846154*sum_pk_after_p6 + 0.4307692308)"
+    },
+    {
+      "name": "auto_20260310_142638_44",
+      "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)"
+    },
+    {
+      "name": "auto_20260310_142638_45",
+      "formula": "if ((is_simple)  and  (f_2>=_40)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)"
+    },
+    {
+      "name": "auto_20260310_142638_46",
+      "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.5*p3 + -4*sum_pk_after_p6 + -1.5)"
+    },
+    {
+      "name": "auto_20260310_142638_47",
+      "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.08333333333*p4 + 0.9166666667*p3 + -2*sum_pk_after_p6 + -4.25)"
+    },
+    {
+      "name": "auto_20260310_142638_48",
+      "formula": "if ((is_simple)  and  (f_2>=_5)), then p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)"
+    },
+    {
+      "name": "auto_20260310_142638_49",
+      "formula": "if ((is_simple)  and  (f_2>=_14)), then p6 >= (0.9*p3 + -2.8*sum_pk_after_p6 + 2)"
+    },
+    {
+      "name": "auto_20260310_142638_52",
+      "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 3)), then p6 >= (2*p4 + -11.5*sum_pk_after_p6 + 28.5)"
+    },
+    {
+      "name": "auto_20260310_142638_54",
+      "formula": "if (((is_simple)  and  (f_2>=_30))  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)"
+    },
+    {
+      "name": "auto_20260310_142638_55",
+      "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 6)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))"
+    },
+    {
+      "name": "auto_20260310_142638_56",
+      "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)"
+    },
+    {
+      "name": "auto_20260310_142638_57",
+      "formula": "if (((is_simple)  and  (f_2>=_34))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -3.2*sum_pk_after_p6 + 6.6)"
+    },
+    {
+      "name": "auto_20260310_142638_58",
+      "formula": "if (((is_simple)  and  (f_2>=_31))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6880952381*p4 + -0.85*p3 + -0.6880952381)"
+    },
+    {
+      "name": "auto_20260310_142638_59",
+      "formula": "if (((is_simple)  and  (f_2>=_37))  and  (sum_pk_k>=7 >= 7)), then -(p6) >= (-((((-0.4 * p5) + (1.8 * sum_pk_after_p6)) + -1.6)))"
+    },
+    {
+      "name": "auto_20260310_142638_60",
+      "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.2*sum_pk_after_p6 + 0.6)"
+    },
+    {
+      "name": "auto_20260310_142638_61",
+      "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))"
+    },
+    {
+      "name": "auto_20260310_142638_62",
+      "formula": "if (((is_simple)  and  (f_2>=_39))  and  (sum_pk_k>=7 >= 9)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)"
+    },
+    {
+      "name": "auto_20260310_142638_63",
+      "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)"
+    },
+    {
+      "name": "auto_20260310_142638_64",
+      "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.857142857 * sum_pk_after_p6) + -2.285714286)))"
+    },
+    {
+      "name": "auto_20260310_142638_65",
+      "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-((((0.2777777778 * p4) + (0.8888888889 * sum_pk_after_p6)) + 1)))"
+    },
+    {
+      "name": "auto_20260310_142638_66",
+      "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 9)), then p6 >= (-2.857142857*p4 + -0.2857142857*sum_pk_after_p6 + 6.857142857)"
+    },
+    {
+      "name": "auto_20260310_142638_68",
+      "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1.111111111*p3 + -2.444444444*sum_pk_after_p6 + -4.777777778)"
+    }
+  ]
+}

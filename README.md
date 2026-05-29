@@ -1,273 +1,408 @@
-# Polytope Conjecture Prover
+# Polytope Conjecture Prover — v2.0
 
 An automated pipeline for deciding conjectures about simple convex 3-polytopes.
-Given a conjecture in LaTeX, the system either finds a **verified counterexample** (with an explicit witness polytope graph) or produces a **Lean 4 formalization** of the conjecture.
+Given a conjecture in JSON formula format, the system either finds a **verified counterexample** (backed by an explicit witness polytope) or produces a **Lean 4 formalization** of the proof.
 
 ---
 
-## Overview
+## Quick Start
+
+```bash
+# Run a single conjecture by ID (e.g. conjecture 43)
+python -m run 43
+
+# Equivalently:
+python -m run c43
+
+# Run all conjectures in batch (parallel workers)
+python -m run
+```
+
+The short form `43` or `c43` resolves to any conjecture whose name ends with `_43` in `conjectures/conjectures.json`.
+
+---
+
+## Pipeline Overview
 
 ```
-conjectures/individual/C*.tex
+conjectures/conjectures.json
          │
          ▼
-   [ Conjecture Parser ]
-         │  ParsedConjecture (hypotheses, conclusion, IRIS scores)
+   [ Formula Parser ]
+         │  ParsedConjecture (id, hypotheses, conclusion)
          ▼
-   [ P-Vector Random Walk ]  ──────────────────────────────────┐
-         │                                                      │
-         │  CE candidate found?                                 │
-         │  YES ──► [ 4-Check Validator ] ──► PASS ──► output  │
-         │                          │                           │
-         │                          └── FAIL ──────────────────►│
-         │  NO                                                   │
-         ▼                                                       │
-   [ LLM Track ]  +  [ RL Track ]  (run in parallel) ◄─────────┘
-         │
-         │  CE candidate found?
-         │  YES ──► [ 4-Check Validator ] ──► PASS ──► output/conjecture_with_ce/{id}.json
-         │                          │
-         │                          └── FAIL ──► next candidate
-         │  NO (all tracks exhausted)
-         ▼
-   [ Prover Agent ]
-         │
-         ▼
-   output/conjecture_without_ce/{id}.lean
+┌─────────────────────────────────────────────────────────┐
+│  Stage 1 — P-Vector Random Walk  (no API, <1 min)       │
+│  DS-preserving lattice walk, 60 restarts × 200k steps   │
+└──────────────────────┬──────────────────────────────────┘
+                       │ CE candidate?
+                       │ YES ──► [ 4-Check Validator ] ──► PASS ──► output
+                       │ NO
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│  Stage 2 — Parallel LLM + RL Search  (~10–30 min)       │
+│  ┌──────────────────────┐  ┌──────────────────────────┐ │
+│  │  LLM Track           │  │  RL Track (PPO + GNN)    │ │
+│  │  Claude, 30 rounds   │  │  600 episodes            │ │
+│  │  3–5 candidates each │  │  graph construction      │ │
+│  └──────────┬───────────┘  └──────────┬───────────────┘ │
+│             └──────────┬──────────────┘                  │
+│                        ▼                                  │
+│              [ 4-Check Validator ]                        │
+│              first PASS → stop both tracks               │
+└──────────────────────┬──────────────────────────────────┘
+                       │ CE found?
+                       │ YES ──► output/conjecture_with_ce/{C<id>}.json
+                       │ NO
+                       ▼
+┌─────────────────────────────────────────────────────────┐
+│  Stage 3 — Lean 4 Prover                                │
+│  Blueprint decomposition + compile-fix loop             │
+└──────────────────────┬──────────────────────────────────┘
+                       ▼
+              output/conjecture_without_ce/{id}.lean
 ```
 
 ---
 
 ## Input Format
 
-Each conjecture is a `.tex` file containing a single `theorem` environment:
+All conjectures live in `conjectures/conjectures.json`:
 
-```latex
-\begin{theorem}[C10]
-$\text{If }\;\text{simple} \;\wedge\; f_2 \geq 19,\;\text{then }\;
-p_6 \geq - \tfrac{7}{2}\,\sum_{k \geq 7} p_k + 7$
-\end{theorem}
+```json
+{
+  "unsolved": [
+    {
+      "name": "auto_20260310_142638_43",
+      "formula": "if ((is_simple) and (f_2>=_30)), then p6 >= (-5*sum_pk_after_p6 + 10)"
+    },
+    {
+      "name": "auto_20260310_142638_13",
+      "formula": "if (((is_simple) and (f_2>=_18)) and (sum_pk_k>=7 >= 1)), then p6 >= (-4*sum_pk_after_p6 + 8)"
+    }
+  ],
+  "solved": [
+    {
+      "name": "auto_20260310_142638_2",
+      "formula": "if ((is_simple) and (f_2>=_22)), then p6 >= (-5*sum_pk_after_p6 + 10)"
+    }
+  ]
+}
 ```
 
-- The theorem label (`C10`) becomes the conjecture ID.
-- The system parses the hypothesis block and conclusion automatically.
-- A directory of individual files (`conjectures/individual/C*.tex`) or a combined longtable file can be used.
+### Formula syntax
 
-**Run (single conjecture):**
-```bash
-python -m agent.orchestrator --id C10
+Every formula follows the pattern:
+
+```
+if (<hypothesis> [and <hypothesis> ...]), then p6 >= <expr>
 ```
 
-**Run (batch — all conjectures in parallel):**
-```bash
-python -m agent.orchestrator --batch --tex conjectures/individual/
+or with an upper bound:
+
 ```
+if (<hypothesis> [and <hypothesis> ...]), then p6 <= <expr>
+```
+
+**Supported hypothesis tokens:**
+
+| Token | Meaning |
+|---|---|
+| `is_simple` | polytope is simple (every vertex has degree 3) |
+| `f_2>=_N` | total number of 2-faces $f_2 = \sum p_k \geq N$ |
+| `sum_pk_k>=7 >= N` | $\sum_{k \geq 7} p_k \geq N$ |
+
+**Variables in the RHS expression:**
+
+| Variable | Meaning |
+|---|---|
+| `p3`, `p4`, `p5`, `p6` | number of triangular, quad, pentagonal, hexagonal faces |
+| `sum_pk_after_p6` | $\sum_{k \geq 7} p_k$ |
+
+Coefficients may be integer or decimal (e.g. `-3.5*sum_pk_after_p6 + 7`).
+
+### Name resolution
+
+When you run `python -m run 43`, the system strips any leading `c`/`C` and matches names ending in `_43`. If more than one name matches, it prints the ambiguous options and exits.
 
 ---
 
 ## Stage 1 — P-Vector Random Walk
 
-Before launching the heavier LLM and RL machinery, a fast **Dehn-Sommerville lattice walk** explores the space of valid p-vectors directly (no graph construction, no API calls).
+A fast **Dehn-Sommerville lattice walk** that searches for CE candidates without any API calls or graph construction.
 
-**How it works:**
+Every valid simple 3-polytope p-vector must satisfy Euler's formula combined with 3-regularity:
 
-Every valid simple 3-polytope p-vector satisfies:
+$$\sum_{k \geq 3}(6 - k)\,p_k = 12 \qquad \text{(Dehn-Sommerville constraint)}$$
 
-$$\sum_{k \geq 3} (6-k)\, p_k = 12 \quad \text{(Dehn-Sommerville / Euler)}$$
+The walk stays on this lattice by applying **DS-preserving moves**: for any pair $(k_1 < 6,\; k_2 > 6)$:
 
-The walk stays on this lattice by using DS-preserving moves: for a pair $(k_1 < 6,\; k_2 > 6)$, the move
-$$p_{k_1} \mathrel{+}= (k_2 - 6), \quad p_{k_2} \mathrel{+}= (6 - k_1)$$
-always keeps the DS sum at 12.
+$$p_{k_1} \mathrel{+}= (k_2 - 6), \qquad p_{k_2} \mathrel{+}= (6 - k_1)$$
 
-The walk starts from a perturbed dodecahedron, runs up to 200,000 steps across 60 restarts, and greedily maximises the violation gap (how much the conclusion is broken). Any candidate that achieves a positive gap is immediately sent to the **4-Check Validator**.
-
-If the walk exhausts all restarts without a validated CE, the system falls through to Stage 2.
+This move changes two face counts while keeping the DS sum at exactly 12. The walk starts from a perturbed dodecahedron, runs for up to 200,000 steps per restart across 60 restarts, and greedily maximises the **violation gap** (how strongly the conclusion is broken). Any candidate with a positive gap is sent to the 4-Check Validator.
 
 ---
 
-## Stage 2 — LLM + RL Counterexample Search (parallel)
+## Stage 2 — LLM + RL Parallel Search
 
-Two search tracks run simultaneously, sharing a `stop_event` so that whichever finds a validated CE first terminates the other.
+Two tracks run as concurrent threads. Both share a single `stop_event`: the first track to produce a validated CE sets the event and terminates the other. Both tracks also share a `PVectorCheckAgent` instance.
 
 ### LLM Track
 
-Claude is prompted with the conjecture statement, its hypotheses, conclusion, and a list of previously failed candidates. It returns 3–5 candidate p-vectors per round (up to 30 rounds). Each candidate that passes a quick syntactic check is immediately sent to the 4-Check Validator.
+- Up to **30 rounds**, each asking Claude for 3–5 candidate p-vectors
+- Each round's prompt includes: the conjecture statement, the list of all previously tried candidates (up to 50), and the last 5 failures with reasons
+- All candidates are hard-deduplicated across rounds via frozenset keys; the LLM cannot repeat a vector even if it ignores the prompt
+- Candidates that parse successfully are sent to the 4-Check Validator
 
-### RL Track (PPO)
+### RL Track (PPO + FiLM-GNN)
 
-A graph neural network policy (FiLM-conditioned GNN + PPO) learns to build cubic planar graphs by repeatedly applying the **node-chop** operation (replace one degree-3 vertex with a triangle). The environment rewards graphs that:
+- A **PPO policy** with a FiLM-conditioned graph neural network learns to build cubic planar graphs via repeated **node-chop** operations (replace a degree-3 vertex with a triangle)
+- The environment reward is: `polytopehood_bonus + 100 × max(0, violation_gap)`
+- Any episode that produces a graph satisfying the hypotheses and violating the conclusion is extracted as a CE candidate and sent to the 4-Check Validator
+- Trained for up to **600 episodes**; stops early if a CE is validated
 
-- are valid simple polytopes (`graphcalc.simple_polytope_graph`)
-- satisfy the conjecture's hypotheses
-- violate the conjecture's conclusion
+Terminal output during Stage 2:
 
-Graphs discovered during training that satisfy all three conditions are extracted as CE candidates and sent to the 4-Check Validator.
-
----
-
-## Stage 3 — 4-Check Validator
-
-**Every** CE candidate — from the random walk, the LLM, or the RL agent — must pass all four checks before it is accepted. Failure at any check causes the candidate to be silently discarded and the search to continue.
-
----
-
-### Check 1 — Dehn-Sommerville + Euler Consistency
-
-Verifies that the p-vector is arithmetically consistent with a simple convex 3-polytope:
-
-| Condition | Formula | Why |
-|---|---|---|
-| Non-negativity | $p_k \geq 0$, all $k \geq 3$ | Face counts cannot be negative |
-| Dehn-Sommerville | $\sum_k (6-k)\,p_k = 12$ | Euler's formula + 3-regularity of the vertex graph |
-| Minimum size | $f_2 = \sum p_k \geq 4$ | Tetrahedron is the smallest simple polytope |
-| Euler count | $V = 2(f_2-2) \geq 4$, $E = 3(f_2-2)$ | Follows from 3-regularity and $V-E+F=2$ |
-
-A candidate failing this check is not a valid p-vector at all — it is rejected immediately without running the remaining checks.
+```
+[Stage 2] RL episodes: 600  |  LLM rounds: 30
+[rl ce finding] Episode 1/600
+[LLM ce finding] Round 1/30: Asking LLM to find ces
+[rl ce finding] Episode 100 | R: 22.62 | Len: 12.3 | ...
+[rl ce finding] Episode 137 ce found! p_vector=[38, 7, 6, ...]
+[LLM ce finding] Round 1/30: skipping (call aborted: stop_event set)
+[LLM ce finding] Stopped and waiting ce candidate to be checked
+[validation check ce from rl] 1 CE candidate(s) found, running 4 checks
+```
 
 ---
+
+## The 4-Check Validator
+
+Every CE candidate — from the random walk, the LLM, or the RL agent — must pass all four checks. Failure at any check immediately rejects the candidate.
+
+### Check 1 — Dehn-Sommerville + Euler
+
+| Condition | Formula |
+|---|---|
+| Non-negativity | $p_k \geq 0$ for all $k \geq 3$ |
+| Dehn-Sommerville | $\sum_k(6-k)\,p_k = 12$ |
+| Minimum faces | $f_2 = \sum p_k \geq 4$ |
+| Vertex / edge count | $V = 2(f_2 - 2)$, $E = 3(f_2 - 2)$, Euler: $V - E + f_2 = 2$ |
 
 ### Check 2 — Hypotheses Satisfied
 
-Evaluates each hypothesis of the conjecture against the candidate p-vector. Supported forms:
-
-- `f_2 \geq N` / `f_2 \leq N`
-- `p_k \geq N` / `p_k \leq N` / `p_k = N`
-- `\text{simple}` (assumed structurally — always satisfied for cubic planar graphs)
-
-All hypotheses must be satisfied simultaneously. If any hypothesis fails, the candidate is not in the domain of the conjecture and is rejected.
-
----
+Evaluates each hypothesis (`is_simple`, `f_2>=_N`, `sum_pk_k>=7 >= N`) against the candidate. All must hold — if any hypothesis fails, the candidate is not in the conjecture's domain and is rejected.
 
 ### Check 3 — Conclusion Violated
 
-Evaluates the conjecture conclusion against the candidate p-vector and confirms it is genuinely violated. For conjectures of the form $p_6 \geq \text{RHS}$:
+Substitutes the p-vector into the RHS expression and confirms the inequality is genuinely violated (e.g. $p_6 < \text{RHS}$ for a `>=` conjecture). Computes and reports the **violation margin**.
 
-- Computes `RHS` by substituting the p-vector into the RHS expression (handling fractions, sums $\sum_{k \geq N} p_k$, etc.)
-- Checks that $p_6 < \text{RHS}$ (strict violation)
-- Computes the **violation margin** = $\text{RHS} - p_6$
-- Issues a warning if the margin is $< 0.5$ (potential floating-point precision risk for fractional RHS expressions)
+### Check 4 — Realizability (hard gate)
 
-A candidate where the conclusion actually holds is not a counterexample and is rejected.
+Passing Checks 1–3 proves the p-vector is arithmetically correct and violates the conjecture, but DS = 12 is a *necessary* condition for realizability, not a *sufficient* one. Check 4 requires building an **explicit witness graph**.
 
----
+**Tier 1 — Exact known polytopes** (O(1) lookup):
 
-### Check 4 — Realizability (mandatory hard gate)
-
-**This is the most critical check.** Passing Checks 1–3 proves the p-vector is arithmetically consistent and violates the conjecture, but DS = 12 is a *necessary* condition for realizability, not a *sufficient* one. A p-vector that satisfies DS = 12 does not automatically correspond to a real polytope.
-
-Check 4 requires constructing an **explicit witness graph** — a 3-connected 3-regular planar graph whose face sizes match the candidate p-vector exactly. Without this, the CE is rejected regardless of how well it scores on the other checks.
-
-The check proceeds through three tiers:
-
-#### Tier 1 — Exact known polytopes
-
-Constant-time lookup against a table of verified classical polytopes (each entry is confirmed DS = 12 by hand):
-
-| p-vector | Name |
+| p-vector | Polytope |
 |---|---|
 | `{3:4}` | Tetrahedron |
 | `{4:6}` | Cube |
 | `{5:12}` | Dodecahedron |
 | `{3:2, 4:3}` | Triangular prism |
 | `{4:5, 5:2}` | Pentagonal prism |
-| `{3:4, 6:4}` | Truncated tetrahedron |
-| `{4:6, 6:8}` | Truncated octahedron |
 
-If the candidate matches any entry exactly → **ACCEPTED**.
+**Tier 2 — Proven infinite families:**
 
-#### Tier 2 — Proven infinite families
+- Prism family `{4:n, n:2}` for any $n \geq 7$ → accepted
+- Fullerene family `{5:12, 6:k}` for $k \geq 2$ → accepted
+- `{5:12, 6:1}` → **rejected** (known non-realizable, Grünbaum 1967)
 
-Checks membership in infinite families whose realizability is rigorously established:
+**Tier 4 — PolytopeConstructor (mandatory for all other cases):**
 
-- **Prism family** `{4:n, n:2}` for any $n \geq 7$: DS = $(6-4)n + (6-n)\cdot2 = 12$ ✓. Directly constructible for any $n$.
-- **Fullerene family** `{5:12, 6:k}` for $k \geq 2$: DS = $12$ ✓. Infinite series of realizable polytopes. **Exception**: `{5:12, 6:1}` is a known *non-realizable* combination (Grünbaum 1967) — this specific case is **actively rejected** here rather than passed to Tier 4.
+Physically builds a 3-connected 3-regular planar witness graph using a sequence of strategies (each within a 30 s shared timeout):
 
-If the candidate matches a proven family → **ACCEPTED**. If it matches a known non-realizable pattern → **REJECTED immediately**.
+1. Direct construction for known shapes and prisms
+2. A\* chop-search from dodecahedron (for $f_2 \leq 30$)
+3. A\* chop-search from tetrahedron (for $f_2 \leq 20$)
 
-> **Note on Eberhard's theorem:** The classic Eberhard interior criterion (which would fire when $\sum_{k \neq 6}(6-k)p_k < 12$) is provably unreachable here. Since $(6-6) = 0$, the $p_6$ term contributes nothing to the DS sum, so $\sum_{k \neq 6}(6-k)p_k = \text{DS} = 12$ always after Check 1 passes. There is no "interior" to reach; everything that survives Tier 1 and Tier 2 goes directly to Tier 4.
-
-#### Tier 4 — PolytopeConstructor (mandatory)
-
-If neither Tier 1 nor Tier 2 applies, the system attempts to **physically build a witness graph** using `PolytopeConstructor`. Strategies are tried in order:
-
-1. **Exact known graphs** — O(1) construction for tetrahedron, cube, dodecahedron, prisms
-2. **Prism direct construction** — O(n) edge list for any n-gonal prism
-3. **A\* chop search from dodecahedron** — for targets with $f_2 \leq 30$; heuristic search using node-chop operations, guided by L1 p-vector distance
-4. **A\* chop search from tetrahedron** — fallback for targets with $f_2 \leq 20$
-
-Each strategy runs within a shared 30-second timeout. If any strategy produces a graph $G$:
-
-- **P-vector verification**: `graphcalc` recomputes the p-vector of $G$ and confirms it matches the target exactly. A mismatch is treated as a construction failure.
-- **Simple polytope check**: `graphcalc.simple_polytope_graph(G)` must confirm $G$ is a valid 3-connected cubic planar graph. If not, the CE is rejected.
-
-**If all strategies are exhausted within the timeout, or if the constructor is unavailable, or if post-construction verification fails → the CE is REJECTED with `passed=False, critical=True`.**
-
-This is a hard gate with no fallback. There is no "we couldn't construct it but it looks plausible" path. A CE is only accepted when there exists an explicit, verified, simple polytope graph whose p-vector matches the target.
+After construction, `graphcalc` verifies the graph's p-vector matches the target exactly and confirms it is a valid simple polytope graph. **If all strategies fail, the CE is rejected with no fallback.** There is no "probably realizable" path — only an explicit verified graph is accepted.
 
 ---
 
-## Stage 4 — Output
+## Output
 
-### Counterexample found
-
-Written to `output/conjecture_with_ce/{id}.json`:
+### Counterexample found → `output/conjecture_with_ce/C{id}.json`
 
 ```json
 {
-  "conjecture_id": "C10",
+  "conjecture_id": "auto_20260310_142638_43",
+  "conjecture_latex": "if ((is_simple) and (f_2>=_30)), then p6 >= ...",
+  "hypotheses": ["(is_simple)", "(f_2>=_30)"],
+  "conclusion": "p6 >= (-5*sum_pk_after_p6 + 10)",
   "status": "failed",
   "counterexample": {
-    "p_vector": [0, 0, 14, 1, 0, 1],
-    "p5": 14, "p6": 1, "p8": 1,
-    "f2": 16, "num_vertices": 28, "num_edges": 42
+    "p_vector": [38, 7, 6, 5, 2, 1, 3, 1, 1, 0, 0, 1],
+    "p3": 38, "p4": 7, "p5": 6, "p6": 5,
+    "f2": 70,
+    "num_vertices": 136,
+    "num_edges": 204
   },
-  "found_by": "llm_finder",
-  "violation_detail": "p6=1.0 < RHS=2.0 (violation)"
+  "found_by": "rl_agent",
+  "found_at_round": 137,
+  "violation_detail": "gap=0.0000, margin=-0.3415",
+  "found_at": "2026-05-29T13:34:00+00:00",
+  "other_candidates_not_checked": []
 }
 ```
 
-### No counterexample found → Formalization
+The output filename uses the **short ID** (`C43.json`) derived from the trailing number of the full conjecture name.
 
-If both the random walk and the LLM + RL tracks exhaust their budgets without a validated CE, the conjecture is passed to **ProverAgent** for Lean 4 formalization.
+### No counterexample → `output/conjecture_without_ce/{id}.lean`
 
-ProverAgent:
-1. Decomposes the conjecture into a blueprint of sub-goals
-2. Searches Mathlib and an internal proof library (polib) for relevant lemmas
-3. Generates Lean 4 proof code using Claude, iterating through a compile-fix loop with `lake build`
-4. Writes the result to `output/conjecture_without_ce/{id}.lean`
+If both Stage 1 and Stage 2 exhaust their budgets, the conjecture is passed to **ProverAgent** which:
 
-#### Caveat: `sorry` placeholders
+1. Decomposes the goal into a proof blueprint (sub-goals as a dependency graph)
+2. Searches Mathlib4 (TF-IDF cosine similarity) and `polib/Polib.lean` (user proof library) for relevant lemmas
+3. Generates Lean 4 tactics with Claude and compiles with `lake build` (up to 3 compile-fix rounds per node)
+4. Writes the complete formalization to `output/conjecture_without_ce/{id}.lean`
 
-The formalized proofs currently compile with `sorry` in place of certain sub-goals. This is a deliberate, known limitation — not a bug:
-
-> Lean 4's Mathlib represents graphs as `SimpleGraph` (an abstract combinatorial structure), but our conjectures concern **simple convex 3-polytopes**, which require a planar, 3-connected, 3-regular graph with a fixed embedding. The combinatorial geometry lemmas needed to connect these two representations (e.g., Steinitz's theorem, Eberhard's theorem, counting arguments over planar faces) are not yet available in Mathlib.
-
-Rather than leaving the formalization entirely empty, `sorry` is used as a **placeholder** that:
-- marks exactly which sub-goals remain unproven
-- allows the surrounding proof structure to **type-check and compile** under `lean4`
-- gives a complete, inspectable blueprint for a future human or automated proof
-
-When Mathlib's coverage of planar graph theory matures, the `sorry` stubs can be replaced incrementally without restructuring the proof.
+> **Note on `sorry` placeholders:** Sub-goals that require planar graph geometry lemmas not yet present in Mathlib (Steinitz's theorem, Eberhard's theorem, face-counting for 3-polytopes) are left as `sorry`. The surrounding proof structure still type-checks and compiles. These stubs are explicit, locatable placeholders for future proofs.
 
 ---
 
 ## Project Structure
 
 ```
-agent/
-  orchestrator.py              # Top-level pipeline: CE search → ProverAgent
-  counterexample_finding_agent.py  # RL (PPO) CE search
-  prover_agent.py              # Lean 4 formalization
-  tools/
-    check_pvector.py           # 4-Check Validator (the core CE gate)
-    polytope_constructor.py    # Witness graph builder (Tier 4)
-    conjecture_parser.py       # LaTeX → ParsedConjecture
-    lean_compiler.py           # lake build wrapper
-    blueprint.py               # Proof decomposition
-    search.py                  # Mathlib / polib search
-conjectures/
-  individual/C*.tex            # One conjecture per file
-output/
-  conjecture_with_ce/          # CE JSON files
-  conjecture_without_ce/       # Lean 4 proof files
+Polytope_Conjecture_Prover/
+├── run.py                              # CLI entry point (python -m run <id>)
+├── conjectures/
+│   └── conjectures.json               # All conjectures (unsolved / solved)
+├── agent/
+│   ├── config.py                       # Config (env vars, paths, model names)
+│   ├── claude_sdk.py                   # Thin wrapper around the claude CLI binary
+│   ├── conjectures.py                  # JSON loader + formula canonicalizer
+│   ├── orchestrator/
+│   │   ├── orchestrator.py             # Top-level 3-stage pipeline
+│   │   └── tools/
+│   │       ├── check_pvector.py        # 4-Check Validator
+│   │       ├── polytope_constructor.py # Witness graph builder (Tier 4)
+│   │       └── conjecture_parser.py    # Formula → ParsedConjecture
+│   ├── rl_ce_finder/
+│   │   └── agent.py                    # PPO + FiLM-GNN CE search
+│   ├── llm_ce_finder/
+│   │   └── agent.py                    # Claude-based CE search
+│   └── prover/
+│       ├── agent.py                    # Lean 4 formalization agent
+│       └── tools/
+│           ├── lean_compiler.py        # lake build wrapper
+│           ├── search.py               # Mathlib + polib lemma search
+│           ├── blueprint.py            # Proof decomposition
+│           └── latex_parser.py         # LaTeX theorem parsing
+├── output/
+│   ├── conjecture_with_ce/             # C{id}.json — CE results
+│   └── conjecture_without_ce/         # {id}.lean — Lean proofs
+├── polib/
+│   └── Polib.lean                      # Accumulated user-proved lemmas
+└── requirements.txt
 ```
+
+---
+
+## Installation
+
+### 1. Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Key packages: `torch==2.12.0`, `graphcalc==1.3.1`, `networkx==3.5`, `scikit-learn==1.7.2`, `numpy==2.3.5`, `matplotlib==3.10.6`, `python-dotenv==1.1.0`, `tqdm==4.67.1`.
+
+> **PyTorch CPU-only (recommended unless you have a CUDA GPU):**
+> ```bash
+> pip install torch==2.12.0 --index-url https://download.pytorch.org/whl/cpu
+> ```
+
+### 2. Lean 4 + Mathlib
+
+```bash
+# Install elan (Lean toolchain manager)
+curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
+
+# Fetch Mathlib cache and build (first time: ~30–60 min)
+cd lean_project
+lake exe cache get
+lake build
+```
+
+### 3. Claude CLI
+
+The LLM track and prover agent call Claude through the `claude` CLI binary (no `ANTHROPIC_API_KEY` needed in the environment — authentication is handled by the CLI's own OAuth session).
+
+```bash
+# Requires Node.js >= 18
+npm install -g @anthropic-ai/claude-code
+
+# Authenticate (one-time)
+claude
+```
+
+### 4. Environment variables (optional)
+
+Create a `.env` file at the project root to override defaults:
+
+```dotenv
+# Claude models
+MODEL_MAIN=claude-sonnet-4-6          # prover, LLM CE finder, validation
+MODEL_FAST=claude-haiku-4-5-20251001  # goal extraction, search
+
+# Lean / Lake
+LAKE_BINARY=lake                      # path to lake executable
+POLIB_PATH=polib                      # path to Lean proof library
+
+# RL search
+# (RL episodes and LLM rounds are set per-run via CLI flags or defaults)
+
+# Prover tuning
+MAX_ROUNDS_PER_NODE=3                 # compile-fix iterations per proof node
+COMPILE_TIMEOUT_SECONDS=180           # lake build timeout (seconds)
+MAX_PARALLEL_NODES=6                  # parallel proof threads
+CLAUDE_TIMEOUT=150                    # claude CLI call timeout (seconds)
+```
+
+---
+
+## Usage
+
+```bash
+# Single conjecture — short numeric ID
+python -m run 43          # matches name ending in _43
+python -m run c43         # same (c/C prefix ignored)
+
+# Single conjecture — full name
+python -m run auto_20260310_142638_43
+
+# Batch — all unsolved conjectures in conjectures/conjectures.json
+python -m run
+
+# Via orchestrator directly (more control)
+python -m agent.orchestrator --name auto_20260310_142638_43
+python -m agent.orchestrator --name auto_20260310_142638_43 --rl-episodes 1200 --llm-rounds 50
+python -m agent.orchestrator --name auto_20260310_142638_43 --skip-ce   # prover only
+python -m agent.orchestrator --batch --json conjectures/conjectures.json
+```
+
+---
+
+## Adding New Conjectures
+
+Edit `conjectures/conjectures.json` and add an entry to the `"unsolved"` array:
+
+```json
+{
+  "name": "auto_20260310_142638_99",
+  "formula": "if ((is_simple) and (f_2>=_20)), then p6 >= (-2*sum_pk_after_p6 + 4)"
+}
+```
+
+Names must end with a unique integer suffix (used to derive the short ID `C99`). Run with `python -m run 99`.

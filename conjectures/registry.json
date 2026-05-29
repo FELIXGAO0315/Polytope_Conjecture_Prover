@@ -1,0 +1,1603 @@
+{
+  "auto_20260310_142638_1": {
+    "name": "auto_20260310_142638_1",
+    "formula": "if (is_simple), then p6 >= (0)",
+    "status": "trivial",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_1",
+        "formula": "if (is_simple), then p6 >= (0)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.406269592476489,
+        "R": 0.006172839506172839,
+        "L": 0.7876890679003489,
+        "iris_score": 1.2001314998830108
+      }
+    }
+  },
+  "auto_20260310_142638_2": {
+    "name": "auto_20260310_142638_2",
+    "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (-5*sum_pk_after_p6 + 10)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_2",
+        "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (-5*sum_pk_after_p6 + 10)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10140405616224649,
+        "R": 0.038461538461538464,
+        "L": 0.7457397747512168,
+        "iris_score": 0.8856053693750017
+      }
+    },
+    "last_attempt_at": 1773248871
+  },
+  "auto_20260310_142638_3": {
+    "name": "auto_20260310_142638_3",
+    "formula": "if (((is_simple)  and  (f_2>=_13))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-2*sum_pk_after_p6 + 4)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_3",
+        "formula": "if (((is_simple)  and  (f_2>=_13))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-2*sum_pk_after_p6 + 4)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.0944700460829493,
+        "R": 0.04065040650406504,
+        "L": 0.7445172497082702,
+        "iris_score": 0.8796377022952845
+      }
+    },
+    "last_attempt_at": 1773248087
+  },
+  "auto_20260310_142638_4": {
+    "name": "auto_20260310_142638_4",
+    "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (-4.5*sum_pk_after_p6 + 9)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_4",
+        "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (-4.5*sum_pk_after_p6 + 9)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09270516717325228,
+        "R": 0.040983606557377046,
+        "L": 0.7452933154066053,
+        "iris_score": 0.8789820891372346
+      }
+    },
+    "last_attempt_at": 1773246746
+  },
+  "auto_20260310_142638_5": {
+    "name": "auto_20260310_142638_5",
+    "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (-6*sum_pk_after_p6 + 12)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_5",
+        "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (-6*sum_pk_after_p6 + 12)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.1,
+        "R": 0.03278688524590164,
+        "L": 0.7467726558206761,
+        "iris_score": 0.8795595410665777
+      }
+    },
+    "last_attempt_at": 1773255352
+  },
+  "auto_20260310_142638_6": {
+    "name": "auto_20260310_142638_6",
+    "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (-5.5*sum_pk_after_p6 + 11)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_6",
+        "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (-5.5*sum_pk_after_p6 + 11)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09718875502008033,
+        "R": 0.04132231404958678,
+        "L": 0.7462329190517938,
+        "iris_score": 0.8847439881214609
+      }
+    },
+    "last_attempt_at": 1773246003
+  },
+  "auto_20260310_142638_7": {
+    "name": "auto_20260310_142638_7",
+    "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (-4*sum_pk_after_p6 + 8)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_7",
+        "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (-4*sum_pk_after_p6 + 8)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.0894854586129754,
+        "R": 0.041666666666666664,
+        "L": 0.7448936249612311,
+        "iris_score": 0.8760457502408732
+      }
+    },
+    "last_attempt_at": 1773242364
+  },
+  "auto_20260310_142638_8": {
+    "name": "auto_20260310_142638_8",
+    "formula": "if ((is_simple)  and  (f_2>=_25)), then p6 >= (-6.5*sum_pk_after_p6 + 13)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_8",
+        "formula": "if ((is_simple)  and  (f_2>=_25)), then p6 >= (-6.5*sum_pk_after_p6 + 13)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10178117048346055,
+        "R": 0.03333333333333333,
+        "L": 0.7473588841117168,
+        "iris_score": 0.8824733879285107
+      }
+    },
+    "last_attempt_at": 1773253096
+  },
+  "auto_20260310_142638_9": {
+    "name": "auto_20260310_142638_9",
+    "formula": "if ((is_simple)  and  (f_2>=_16)), then p6 >= (-2*sum_pk_after_p6 + 4)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_9",
+        "formula": "if ((is_simple)  and  (f_2>=_16)), then p6 >= (-2*sum_pk_after_p6 + 4)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.08362863217576187,
+        "R": 0.0423728813559322,
+        "L": 0.7445172497082702,
+        "iris_score": 0.8705187632399642
+      }
+    },
+    "last_attempt_at": 1773241969
+  },
+  "auto_20260310_142638_10": {
+    "name": "auto_20260310_142638_10",
+    "formula": "if ((is_simple)  and  (f_2>=_19)), then p6 >= (-3.5*sum_pk_after_p6 + 7)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_10",
+        "formula": "if ((is_simple)  and  (f_2>=_19)), then p6 >= (-3.5*sum_pk_after_p6 + 7)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.08609271523178808,
+        "R": 0.042735042735042736,
+        "L": 0.7445407787356824,
+        "iris_score": 0.8733685367025132
+      }
+    },
+    "last_attempt_at": 1773241236
+  },
+  "auto_20260310_142638_11": {
+    "name": "auto_20260310_142638_11",
+    "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (-3*sum_pk_after_p6 + 6)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_11",
+        "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (-3*sum_pk_after_p6 + 6)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.08399710354815351,
+        "R": 0.04310344827586207,
+        "L": 0.7442348433573432,
+        "iris_score": 0.8713353951813588
+      }
+    },
+    "last_attempt_at": 1773241010
+  },
+  "auto_20260310_142638_12": {
+    "name": "auto_20260310_142638_12",
+    "formula": "if ((is_simple)  and  (f_2>=_26)), then p6 >= (-7*sum_pk_after_p6 + 14)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_12",
+        "formula": "if ((is_simple)  and  (f_2>=_26)), then p6 >= (-7*sum_pk_after_p6 + 14)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10193321616871705,
+        "R": 0.034482758620689655,
+        "L": 0.7479914946136051,
+        "iris_score": 0.8844074694030118
+      }
+    },
+    "last_attempt_at": 1773251456
+  },
+  "auto_20260310_142638_13": {
+    "name": "auto_20260310_142638_13",
+    "formula": "if (((is_simple)  and  (f_2>=_18))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-4*sum_pk_after_p6 + 8)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_13",
+        "formula": "if (((is_simple)  and  (f_2>=_18))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-4*sum_pk_after_p6 + 8)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09172077922077922,
+        "R": 0.04424778761061947,
+        "L": 0.7434576727632356,
+        "iris_score": 0.8794262395946343
+      }
+    },
+    "last_attempt_at": 1773240538
+  },
+  "auto_20260310_142638_14": {
+    "name": "auto_20260310_142638_14",
+    "formula": "if ((is_simple)  and  (f_2>=_27)), then p6 >= (-7.5*sum_pk_after_p6 + 15)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_14",
+        "formula": "if ((is_simple)  and  (f_2>=_27)), then p6 >= (-7.5*sum_pk_after_p6 + 15)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10226244343891402,
+        "R": 0.035398230088495575,
+        "L": 0.7486703697504119,
+        "iris_score": 0.8863310432778215
+      }
+    },
+    "last_attempt_at": 1773250558
+  },
+  "auto_20260310_142638_15": {
+    "name": "auto_20260310_142638_15",
+    "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-5*sum_pk_after_p6 + 10)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_15",
+        "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-5*sum_pk_after_p6 + 10)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09225700164744646,
+        "R": 0.044642857142857144,
+        "L": 0.7451287629528074,
+        "iris_score": 0.882028621743111
+      }
+    },
+    "last_attempt_at": 1773239790
+  },
+  "auto_20260310_142638_16": {
+    "name": "auto_20260310_142638_16",
+    "formula": "if (((is_simple)  and  (f_2>=_21))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-6*sum_pk_after_p6 + 12)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_16",
+        "formula": "if (((is_simple)  and  (f_2>=_21))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-6*sum_pk_after_p6 + 12)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09267059814658804,
+        "R": 0.045454545454545456,
+        "L": 0.7453873290702282,
+        "iris_score": 0.8835124726713617
+      }
+    },
+    "last_attempt_at": 1773239075
+  },
+  "auto_20260310_142638_17": {
+    "name": "auto_20260310_142638_17",
+    "formula": "if ((is_simple)  and  (f_2>=_28)), then p6 >= (-8*sum_pk_after_p6 + 16)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_17",
+        "formula": "if ((is_simple)  and  (f_2>=_28)), then p6 >= (-8*sum_pk_after_p6 + 16)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10121836925960637,
+        "R": 0.037037037037037035,
+        "L": 0.7493953837891463,
+        "iris_score": 0.8876507900857897
+      }
+    },
+    "last_attempt_at": 1773249764
+  },
+  "auto_20260310_142638_18": {
+    "name": "auto_20260310_142638_18",
+    "formula": "if ((is_simple)  and  (f_2>=_29)), then p6 >= (-8.5*sum_pk_after_p6 + 17)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_18",
+        "formula": "if ((is_simple)  and  (f_2>=_29)), then p6 >= (-8.5*sum_pk_after_p6 + 17)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10182516810758886,
+        "R": 0.03773584905660377,
+        "L": 0.7501664029540944,
+        "iris_score": 0.8897274201182871
+      }
+    },
+    "last_attempt_at": 1773248905
+  },
+  "auto_20260310_142638_19": {
+    "name": "auto_20260310_142638_19",
+    "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (-9*sum_pk_after_p6 + 18)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_19",
+        "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (-9*sum_pk_after_p6 + 18)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.09861932938856016,
+        "R": 0.03,
+        "L": 0.750983285547706,
+        "iris_score": 0.8796026149362661
+      }
+    },
+    "last_attempt_at": 1773262109
+  },
+  "auto_20260310_142638_20": {
+    "name": "auto_20260310_142638_20",
+    "formula": "if ((is_simple)  and  (f_2>=_31)), then p6 >= (-9.5*sum_pk_after_p6 + 19)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_20",
+        "formula": "if ((is_simple)  and  (f_2>=_31)), then p6 >= (-9.5*sum_pk_after_p6 + 19)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10141987829614604,
+        "R": 0.03,
+        "L": 0.7518458820777761,
+        "iris_score": 0.8832657603739222
+      }
+    },
+    "last_attempt_at": 1773261492
+  },
+  "auto_20260310_142638_21": {
+    "name": "auto_20260310_142638_21",
+    "formula": "if ((is_simple)  and  (f_2>=_32)), then p6 >= (-10*sum_pk_after_p6 + 20)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_21",
+        "formula": "if ((is_simple)  and  (f_2>=_32)), then p6 >= (-10*sum_pk_after_p6 + 20)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10291060291060292,
+        "R": 0.030303030303030304,
+        "L": 0.7527540353906652,
+        "iris_score": 0.8859676686042984
+      }
+    },
+    "last_attempt_at": 1773261046
+  },
+  "auto_20260310_142638_22": {
+    "name": "auto_20260310_142638_22",
+    "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (-11*sum_pk_after_p6 + 22)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_22",
+        "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (-11*sum_pk_after_p6 + 22)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10311493018259936,
+        "R": 0.03125,
+        "L": 0.7547063462825743,
+        "iris_score": 0.8890712764651736
+      }
+    },
+    "last_attempt_at": 1773257573
+  },
+  "auto_20260310_142638_23": {
+    "name": "auto_20260310_142638_23",
+    "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7916666667*p3 + -3.166666667*sum_pk_after_p6 + 6.333333333)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_23",
+        "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7916666667*p3 + -3.166666667*sum_pk_after_p6 + 6.333333333)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 1.000000082740371e-09,
+        "T": 0.10792951541850221,
+        "R": 0.05102040816326531,
+        "L": 0.7494888829016485,
+        "iris_score": 0.908438806483416
+      }
+    },
+    "last_attempt_at": 1773236564
+  },
+  "auto_20260310_142638_24": {
+    "name": "auto_20260310_142638_24",
+    "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7857142857*p3 + -3.142857143*sum_pk_after_p6 + 6.285714286)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_24",
+        "formula": "if ((is_simple)  and  (f_2>=_34)), then p6 >= (0.7857142857*p3 + -3.142857143*sum_pk_after_p6 + 6.285714286)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.10792951541850221,
+        "R": 0.05102040816326531,
+        "L": 0.7494888829016485,
+        "iris_score": 0.908438806483416
+      }
+    },
+    "last_attempt_at": 1773238043
+  },
+  "auto_20260310_142638_25": {
+    "name": "auto_20260310_142638_25",
+    "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 1)), then p6 <= (7.5*sum_pk_after_p6 + -15)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_25",
+        "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 1)), then p6 <= (7.5*sum_pk_after_p6 + -15)",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.1111111111111111,
+        "R": 0.03260869565217391,
+        "L": 0.756584160672126,
+        "iris_score": 0.900303967435411
+      }
+    },
+    "last_attempt_at": 1773254359
+  },
+  "auto_20260310_142638_26": {
+    "name": "auto_20260310_142638_26",
+    "formula": "if (((is_simple)  and  (f_2>=_42))  and  (sum_pk_k>=7 >= 1)), then p6 <= (3.333333333*sum_pk_after_p6 + -6.666666667)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_26",
+        "formula": "if (((is_simple)  and  (f_2>=_42))  and  (sum_pk_k>=7 >= 1)), then p6 <= (3.333333333*sum_pk_after_p6 + -6.666666667)",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": -1.9999992773023223e-09,
+        "T": 0.13551401869158877,
+        "R": 0.034482758620689655,
+        "L": 0.6943065053483729,
+        "iris_score": 0.8643032826606514
+      }
+    },
+    "last_attempt_at": 1773256609
+  },
+  "auto_20260310_142638_27": {
+    "name": "auto_20260310_142638_27",
+    "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then p6 <= (2.333333333*sum_pk_after_p6 + -4.666666667)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_27",
+        "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then p6 <= (2.333333333*sum_pk_after_p6 + -4.666666667)",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": -1.9999992773023223e-09,
+        "T": 0.15187713310580206,
+        "R": 0.056179775280898875,
+        "L": 0.7158965589522087,
+        "iris_score": 0.9239534673389096
+      }
+    },
+    "solved_at": 1773233703,
+    "last_attempt_at": 1773233703,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_28": {
+    "name": "auto_20260310_142638_28",
+    "formula": "if ((is_simple)  and  (f_2>=_42)), then p6 >= (0.6481481481*p3 + -2.333333333*sum_pk_after_p6 + 4.666666667)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_28",
+        "formula": "if ((is_simple)  and  (f_2>=_42)), then p6 >= (0.6481481481*p3 + -2.333333333*sum_pk_after_p6 + 4.666666667)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -1.000000082740371e-09,
+        "T": 0.13996889580093314,
+        "R": 0.05555555555555555,
+        "L": 0.7107885599728642,
+        "iris_score": 0.9063130113293528
+      }
+    },
+    "last_attempt_at": 1773235034
+  },
+  "auto_20260310_142638_29": {
+    "name": "auto_20260310_142638_29",
+    "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 6)), then p6 >= (-3.25*p4 + 0.25*p3 + -0.625*sum_pk_after_p6 + 5)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_29",
+        "formula": "if (((is_simple)  and  (f_2>=_38))  and  (sum_pk_k>=7 >= 6)), then p6 >= (-3.25*p4 + 0.25*p3 + -0.625*sum_pk_after_p6 + 5)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.03867403314917127,
+        "R": 0.17857142857142858,
+        "L": 0.3176537911767786,
+        "iris_score": 0.5348992528973784
+      }
+    },
+    "solved_at": 1773224106,
+    "last_attempt_at": 1773224106,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_30": {
+    "name": "auto_20260310_142638_30",
+    "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (2.5*p3 + -10*sum_pk_after_p6 + 10)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_30",
+        "formula": "if ((is_simple)  and  (f_2>=_22)), then p6 >= (2.5*p3 + -10*sum_pk_after_p6 + 10)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.01950078003120125,
+        "R": 0.16,
+        "L": 0.15827445253860836,
+        "iris_score": 0.3377752325698096
+      }
+    },
+    "last_attempt_at": 1773252231
+  },
+  "auto_20260310_142638_31": {
+    "name": "auto_20260310_142638_31",
+    "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (2.823529412*p3 + -12*sum_pk_after_p6 + 12)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_31",
+        "formula": "if ((is_simple)  and  (f_2>=_24)), then p6 >= (2.823529412*p3 + -12*sum_pk_after_p6 + 12)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.013934426229508197,
+        "R": 0.058823529411764705,
+        "L": 0.0,
+        "iris_score": 0.07275795564127291
+      }
+    },
+    "last_attempt_at": 1773268414
+  },
+  "auto_20260310_142638_32": {
+    "name": "auto_20260310_142638_32",
+    "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (2.25*p3 + -9*sum_pk_after_p6 + 9)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_32",
+        "formula": "if ((is_simple)  and  (f_2>=_21)), then p6 >= (2.25*p3 + -9*sum_pk_after_p6 + 9)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.012917933130699088,
+        "R": 0.29411764705882354,
+        "L": 0.15727516505115527,
+        "iris_score": 0.46431074524067795
+      }
+    },
+    "last_attempt_at": 1773232235
+  },
+  "auto_20260310_142638_33": {
+    "name": "auto_20260310_142638_33",
+    "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (2.655172414*p3 + -11*sum_pk_after_p6 + 11)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_33",
+        "formula": "if ((is_simple)  and  (f_2>=_23)), then p6 >= (2.655172414*p3 + -11*sum_pk_after_p6 + 11)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.012048192771084338,
+        "R": 0.13333333333333333,
+        "L": 0.08898401935387827,
+        "iris_score": 0.23436554545829597
+      }
+    },
+    "last_attempt_at": 1773268094
+  },
+  "auto_20260310_142638_34": {
+    "name": "auto_20260310_142638_34",
+    "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (2*p3 + -8*sum_pk_after_p6 + 8)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_34",
+        "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (2*p3 + -8*sum_pk_after_p6 + 8)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.00820283370618941,
+        "R": 0.18181818181818182,
+        "L": 0.07694867595802832,
+        "iris_score": 0.2669696914823996
+      }
+    },
+    "last_attempt_at": 1773267712
+  },
+  "auto_20260310_142638_35": {
+    "name": "auto_20260310_142638_35",
+    "formula": "if ((is_simple)  and  (f_2>=_13)), then p6 >= (1.2*p3 + -4*sum_pk_after_p6 + 2)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_35",
+        "formula": "if ((is_simple)  and  (f_2>=_13)), then p6 >= (1.2*p3 + -4*sum_pk_after_p6 + 2)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -8.881784197001252e-16,
+        "T": 0.004797806716929404,
+        "R": 0.5714285714285714,
+        "L": 0.06236189281801925,
+        "iris_score": 0.6385882709635201
+      }
+    },
+    "last_attempt_at": 1773238653
+  },
+  "auto_20260310_142638_36": {
+    "name": "auto_20260310_142638_36",
+    "formula": "if ((is_simple)  and  (f_2>=_10)), then p6 >= (2*p3 + -6.5*sum_pk_after_p6)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_36",
+        "formula": "if ((is_simple)  and  (f_2>=_10)), then p6 >= (2*p3 + -6.5*sum_pk_after_p6)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.004557291666666667,
+        "R": 0.7142857142857143,
+        "L": 0.15827445253860836,
+        "iris_score": 0.8771174584909893
+      }
+    },
+    "last_attempt_at": 1773200650
+  },
+  "auto_20260310_142638_37": {
+    "name": "auto_20260310_142638_37",
+    "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_37",
+        "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -4.799996400350892e-09,
+        "T": 0.02049469964664311,
+        "R": 0.1724137931034483,
+        "L": 0.11292978229768132,
+        "iris_score": 0.3058382750477727
+      }
+    },
+    "solved_at": 1773265737,
+    "last_attempt_at": 1773265737,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_38": {
+    "name": "auto_20260310_142638_38",
+    "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (1.15*p3 + -0.2*p5 + -2.55*sum_pk_after_p6 + -2.8)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_38",
+        "formula": "if ((is_simple)  and  (f_2>=_20)), then p6 >= (1.15*p3 + -0.2*p5 + -2.55*sum_pk_after_p6 + -2.8)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 2.6645352591003757e-15,
+        "T": 0.0037285607755406414,
+        "R": 1.0,
+        "L": 0.06375096949611861,
+        "iris_score": 1.0674795302716593
+      }
+    },
+    "solved_at": 1773215197,
+    "last_attempt_at": 1773215197,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_39": {
+    "name": "auto_20260310_142638_39",
+    "formula": "if (((is_simple)  and  (f_2>=_16))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1*p4 + -4*sum_pk_after_p6 + 9)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_39",
+        "formula": "if (((is_simple)  and  (f_2>=_16))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1*p4 + -4*sum_pk_after_p6 + 9)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.004464285714285714,
+        "R": 1.0,
+        "L": 0.1188256837953113,
+        "iris_score": 1.123289969509597
+      }
+    },
+    "solved_at": 1773199326,
+    "last_attempt_at": 1773199326,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_40": {
+    "name": "auto_20260310_142638_40",
+    "formula": "if (((is_simple)  and  (f_2>=_48))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.25*p3 + -3*sum_pk_after_p6 + -3.25)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_40",
+        "formula": "if (((is_simple)  and  (f_2>=_48))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.25*p3 + -3*sum_pk_after_p6 + -3.25)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.01929260450160772,
+        "R": 0.8333333333333334,
+        "L": 0.06179752018897322,
+        "iris_score": 0.9144234580239143
+      }
+    },
+    "last_attempt_at": 1773228784
+  },
+  "auto_20260310_142638_41": {
+    "name": "auto_20260310_142638_41",
+    "formula": "if ((is_simple)  and  (f_2>=_6)), then p6 >= (0.03703703704*p4 + 0.8518518519*p3 + -2.074074074*sum_pk_after_p6 + -1.777777778)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_41",
+        "formula": "if ((is_simple)  and  (f_2>=_6)), then p6 >= (0.03703703704*p4 + 0.8518518519*p3 + -2.074074074*sum_pk_after_p6 + -1.777777778)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -1.6600014696166454e-09,
+        "T": 0.004394224733207784,
+        "R": 0.7142857142857143,
+        "L": 0.16814910747909548,
+        "iris_score": 0.8868290464980176
+      }
+    },
+    "solved_at": 1773197470,
+    "last_attempt_at": 1773197470,
+    "ce_polytope_id": "b28b93bdf7210db60156da825436815ab0fffd62"
+  },
+  "auto_20260310_142638_42": {
+    "name": "auto_20260310_142638_42",
+    "formula": "if ((is_simple)  and  (f_2>=_9)), then p6 >= (1*p3 + -2.833333333*sum_pk_after_p6)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_42",
+        "formula": "if ((is_simple)  and  (f_2>=_9)), then p6 >= (1*p3 + -2.833333333*sum_pk_after_p6)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -1.9999992773023223e-09,
+        "T": 0.0025823111684958036,
+        "R": 1.0,
+        "L": 0.15827445253860836,
+        "iris_score": 1.1608567637071041
+      }
+    },
+    "solved_at": 1773194164,
+    "last_attempt_at": 1773194164,
+    "ce_polytope_id": "994759f7c4a9757d96f1f4ae0cb8283b17bce03b"
+  },
+  "auto_20260310_142638_43": {
+    "name": "auto_20260310_142638_43",
+    "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.7753846154*p3 + -2.153846154*sum_pk_after_p6 + 0.4307692308)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_43",
+        "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.7753846154*p3 + -2.153846154*sum_pk_after_p6 + 0.4307692308)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 1.999992949031082e-10,
+        "T": 0.028268551236749116,
+        "R": 0.125,
+        "L": 0.14915735098483546,
+        "iris_score": 0.3024259022215846
+      }
+    },
+    "last_attempt_at": 1773267424
+  },
+  "auto_20260310_142638_44": {
+    "name": "auto_20260310_142638_44",
+    "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_44",
+        "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 1.3322676295501878e-15,
+        "T": 0.006683375104427736,
+        "R": 0.625,
+        "L": 0.11823450757179212,
+        "iris_score": 0.7499178826762198
+      }
+    },
+    "last_attempt_at": 1773211501
+  },
+  "auto_20260310_142638_45": {
+    "name": "auto_20260310_142638_45",
+    "formula": "if ((is_simple)  and  (f_2>=_40)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_45",
+        "formula": "if ((is_simple)  and  (f_2>=_40)), then p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -4.799996400350892e-09,
+        "T": 0.02244039270687237,
+        "R": 0.3125,
+        "L": 0.07345445816386417,
+        "iris_score": 0.40839485087073657
+      }
+    },
+    "solved_at": 1773260200,
+    "last_attempt_at": 1773260200,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_46": {
+    "name": "auto_20260310_142638_46",
+    "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.5*p3 + -4*sum_pk_after_p6 + -1.5)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_46",
+        "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 7)), then p6 >= (1.5*p3 + -4*sum_pk_after_p6 + -1.5)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.02028397565922921,
+        "R": 0.5,
+        "L": 0.06179752018897322,
+        "iris_score": 0.5820814958482025
+      }
+    },
+    "last_attempt_at": 1773245238
+  },
+  "auto_20260310_142638_47": {
+    "name": "auto_20260310_142638_47",
+    "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.08333333333*p4 + 0.9166666667*p3 + -2*sum_pk_after_p6 + -4.25)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_47",
+        "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.08333333333*p4 + 0.9166666667*p3 + -2*sum_pk_after_p6 + -4.25)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -9.399947487054305e-10,
+        "T": 0.022222222222222223,
+        "R": 0.8333333333333334,
+        "L": 0.06537891582699851,
+        "iris_score": 0.9209344713825541
+      }
+    },
+    "last_attempt_at": 1773226521
+  },
+  "auto_20260310_142638_48": {
+    "name": "auto_20260310_142638_48",
+    "formula": "if ((is_simple)  and  (f_2>=_5)), then p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_48",
+        "formula": "if ((is_simple)  and  (f_2>=_5)), then p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -2.000000165480742e-10,
+        "T": 0.00439146800501882,
+        "R": 0.7142857142857143,
+        "L": 0.15794205920174284,
+        "iris_score": 0.8766192414924759
+      }
+    },
+    "solved_at": 1773202175,
+    "last_attempt_at": 1773202175,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_49": {
+    "name": "auto_20260310_142638_49",
+    "formula": "if ((is_simple)  and  (f_2>=_14)), then p6 >= (0.9*p3 + -2.8*sum_pk_after_p6 + 2)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_49",
+        "formula": "if ((is_simple)  and  (f_2>=_14)), then p6 >= (0.9*p3 + -2.8*sum_pk_after_p6 + 2)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.005563282336578581,
+        "R": 0.625,
+        "L": 0.15649352999942084,
+        "iris_score": 0.7870568123359993
+      }
+    },
+    "solved_at": 1773203922,
+    "last_attempt_at": 1773203922,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_50": {
+    "name": "auto_20260310_142638_50",
+    "formula": "if ((is_simple)  and  (f_2>=_17)), then p6 >= (-3*sum_pk_after_p6 + 5)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_50",
+        "formula": "if ((is_simple)  and  (f_2>=_17)), then p6 >= (-3*sum_pk_after_p6 + 5)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.002152080344332855,
+        "R": 0.6666666666666666,
+        "L": 0.033483649583537285,
+        "iris_score": 0.7023023965945369
+      }
+    },
+    "last_attempt_at": 1773262537
+  },
+  "auto_20260310_142638_51": {
+    "name": "auto_20260310_142638_51",
+    "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (1.166666667*p3 + -4*sum_pk_after_p6 + 3.333333333)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_51",
+        "formula": "if ((is_simple)  and  (f_2>=_18)), then p6 >= (1.166666667*p3 + -4*sum_pk_after_p6 + 3.333333333)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -6.999998358736548e-09,
+        "T": 0.002172338884866039,
+        "R": 1.0,
+        "L": 0.1432869396752333,
+        "iris_score": 1.1454592785600992
+      }
+    },
+    "last_attempt_at": 1773195369
+  },
+  "auto_20260310_142638_52": {
+    "name": "auto_20260310_142638_52",
+    "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 3)), then p6 >= (2*p4 + -11.5*sum_pk_after_p6 + 28.5)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_52",
+        "formula": "if (((is_simple)  and  (f_2>=_19))  and  (sum_pk_k>=7 >= 3)), then p6 >= (2*p4 + -11.5*sum_pk_after_p6 + 28.5)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.0027472527472527475,
+        "R": 1.0,
+        "L": 0.1188256837953113,
+        "iris_score": 1.121572936542564
+      }
+    },
+    "last_attempt_at": 1773200043
+  },
+  "auto_20260310_142638_53": {
+    "name": "auto_20260310_142638_53",
+    "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (1*p3 + -4*sum_pk_after_p6 + 7)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_53",
+        "formula": "if ((is_simple)  and  (f_2>=_30)), then p6 >= (1*p3 + -4*sum_pk_after_p6 + 7)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.0029585798816568047,
+        "R": 1.0,
+        "L": 0.08029097109414245,
+        "iris_score": 1.0832495509757991
+      }
+    },
+    "last_attempt_at": 1773208795
+  },
+  "auto_20260310_142638_54": {
+    "name": "auto_20260310_142638_54",
+    "formula": "if (((is_simple)  and  (f_2>=_30))  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_54",
+        "formula": "if (((is_simple)  and  (f_2>=_30))  and  (sum_pk_k>=7 >= 1)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 2.6645352591003757e-15,
+        "T": 0.00597609561752988,
+        "R": 0.8333333333333334,
+        "L": 0.08433460556299727,
+        "iris_score": 0.9236440345138606
+      }
+    },
+    "solved_at": 1773213547,
+    "last_attempt_at": 1773213547,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_55": {
+    "name": "auto_20260310_142638_55",
+    "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 6)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_55",
+        "formula": "if ((is_simple)  and  (sum_pk_k>=7 >= 6)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": -4.000001219139904e-09,
+        "T": 0.002997002997002997,
+        "R": 1.0,
+        "L": 0.19658281753060902,
+        "iris_score": 1.199579820527612
+      }
+    },
+    "solved_at": 1773186955,
+    "last_attempt_at": 1773186955,
+    "ce_polytope_id": "305a9b32ee7e3cada044d1f4c5aba9147986db8a"
+  },
+  "auto_20260310_142638_56": {
+    "name": "auto_20260310_142638_56",
+    "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_56",
+        "formula": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 2.6645352591003757e-15,
+        "T": 0.0053705692803437165,
+        "R": 1.0,
+        "L": 0.08433460556299727,
+        "iris_score": 1.0897051748433408
+      }
+    },
+    "last_attempt_at": 1773205432
+  },
+  "auto_20260310_142638_57": {
+    "name": "auto_20260310_142638_57",
+    "formula": "if (((is_simple)  and  (f_2>=_34))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -3.2*sum_pk_after_p6 + 6.6)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_57",
+        "formula": "if (((is_simple)  and  (f_2>=_34))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -3.2*sum_pk_after_p6 + 6.6)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 3.552713678800501e-15,
+        "T": 0.006165228113440197,
+        "R": 1.0,
+        "L": 0.08433460556299727,
+        "iris_score": 1.0904998336764373
+      }
+    },
+    "solved_at": 1773207503,
+    "last_attempt_at": 1773207503,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_58": {
+    "name": "auto_20260310_142638_58",
+    "formula": "if (((is_simple)  and  (f_2>=_31))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6880952381*p4 + -0.85*p3 + -0.6880952381)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_58",
+        "formula": "if (((is_simple)  and  (f_2>=_31))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6880952381*p4 + -0.85*p3 + -0.6880952381)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.00801068090787717,
+        "R": 0.8333333333333334,
+        "L": 0.29003731707256825,
+        "iris_score": 1.1313813313137788
+      }
+    },
+    "solved_at": 1773181397,
+    "last_attempt_at": 1773181397,
+    "ce_polytope_id": "01e5092aa5f71c74170b7577e6f2368bfbb149e4"
+  },
+  "auto_20260310_142638_59": {
+    "name": "auto_20260310_142638_59",
+    "formula": "if (((is_simple)  and  (f_2>=_37))  and  (sum_pk_k>=7 >= 7)), then -(p6) >= (-((((-0.4 * p5) + (1.8 * sum_pk_after_p6)) + -1.6)))",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_59",
+        "formula": "if (((is_simple)  and  (f_2>=_37))  and  (sum_pk_k>=7 >= 7)), then -(p6) >= (-((((-0.4 * p5) + (1.8 * sum_pk_after_p6)) + -1.6)))",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": 2.220446049250313e-16,
+        "T": 0.03905160390516039,
+        "R": 0.17857142857142858,
+        "L": 0.2863292579833514,
+        "iris_score": 0.5039522904599404
+      }
+    },
+    "solved_at": 1773231320,
+    "last_attempt_at": 1773231320,
+    "ce_polytope_id": null
+  },
+  "auto_20260310_142638_60": {
+    "name": "auto_20260310_142638_60",
+    "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.2*sum_pk_after_p6 + 0.6)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_60",
+        "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8*p3 + -2.2*sum_pk_after_p6 + 0.6)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 1.4432899320127035e-15,
+        "T": 0.00641025641025641,
+        "R": 1.0,
+        "L": 0.06375096949611861,
+        "iris_score": 1.070161225906375
+      }
+    },
+    "last_attempt_at": 1773218057
+  },
+  "auto_20260310_142638_61": {
+    "name": "auto_20260310_142638_61",
+    "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_61",
+        "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.833333333 * sum_pk_after_p6) + -2)))",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": -4.000001219139904e-09,
+        "T": 0.008532423208191127,
+        "R": 1.0,
+        "L": 0.19658281753060902,
+        "iris_score": 1.2051152407388002
+      }
+    },
+    "solved_at": 1773189551,
+    "last_attempt_at": 1773189551,
+    "ce_polytope_id": "5d37bba1b91b1c8463ac1752086abadb80352f3e"
+  },
+  "auto_20260310_142638_62": {
+    "name": "auto_20260310_142638_62",
+    "formula": "if (((is_simple)  and  (f_2>=_39))  and  (sum_pk_k>=7 >= 9)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_62",
+        "formula": "if (((is_simple)  and  (f_2>=_39))  and  (sum_pk_k>=7 >= 9)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.010398613518197574,
+        "R": 0.8333333333333334,
+        "L": 0.29003731707256825,
+        "iris_score": 1.1337692639240993
+      }
+    },
+    "solved_at": 1773184362,
+    "last_attempt_at": 1773184362,
+    "ce_polytope_id": "9ddbd33149f9ecd476e0a0eb17fd861f5f05b33b"
+  },
+  "auto_20260310_142638_63": {
+    "name": "auto_20260310_142638_63",
+    "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_63",
+        "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 0.0,
+        "T": 0.008896797153024912,
+        "R": 1.0,
+        "L": 0.29003731707256825,
+        "iris_score": 1.2989341142255932
+      }
+    },
+    "solved_at": 1773175118,
+    "last_attempt_at": 1773175118,
+    "ce_polytope_id": "58d44ff875728299dfdf4ef57162efc67bdc532a"
+  },
+  "auto_20260310_142638_64": {
+    "name": "auto_20260310_142638_64",
+    "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.857142857 * sum_pk_after_p6) + -2.285714286)))",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_64",
+        "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-(((1.857142857 * sum_pk_after_p6) + -2.285714286)))",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": -2.0000010536591617e-09,
+        "T": 0.005504587155963303,
+        "R": 1.0,
+        "L": 0.17558973976121353,
+        "iris_score": 1.181094326917177
+      }
+    },
+    "last_attempt_at": 1773191846
+  },
+  "auto_20260310_142638_65": {
+    "name": "auto_20260310_142638_65",
+    "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-((((0.2777777778 * p4) + (0.8888888889 * sum_pk_after_p6)) + 1)))",
+    "status": "falsified",
+    "created_at": 1773167224,
+    "attempts_without_ce": 0,
+    "ce_found_count": 1,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_65",
+        "formula": "if (((is_simple)  and  (f_2>=_44))  and  (sum_pk_k>=7 >= 1)), then -(p6) >= (-((((0.2777777778 * p4) + (0.8888888889 * sum_pk_after_p6)) + 1)))",
+        "relation": "upper",
+        "violated": false,
+        "min_slack": 1.999991283696545e-10,
+        "T": 0.005504587155963303,
+        "R": 1.0,
+        "L": 0.24419545524635355,
+        "iris_score": 1.249700042402317
+      }
+    },
+    "solved_at": 1773178337,
+    "last_attempt_at": 1773178337,
+    "ce_polytope_id": "8f873f0c8b8efd765c27d2e84a318c54ab790dd1"
+  },
+  "auto_20260310_142638_66": {
+    "name": "auto_20260310_142638_66",
+    "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 9)), then p6 >= (-2.857142857*p4 + -0.2857142857*sum_pk_after_p6 + 6.857142857)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_66",
+        "formula": "if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 9)), then p6 >= (-2.857142857*p4 + -0.2857142857*sum_pk_after_p6 + 6.857142857)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -1.999982401912348e-10,
+        "T": 0.005813953488372093,
+        "R": 1.0,
+        "L": 0.3163828393640771,
+        "iris_score": 1.3221967928524492
+      }
+    },
+    "last_attempt_at": 1773171874
+  },
+  "auto_20260310_142638_67": {
+    "name": "auto_20260310_142638_67",
+    "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8333333333*p3 + -2.166666667*sum_pk_after_p6 + -0.3333333333)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_67",
+        "formula": "if (((is_simple)  and  (f_2>=_43))  and  (sum_pk_k>=7 >= 3)), then p6 >= (0.8333333333*p3 + -2.166666667*sum_pk_after_p6 + -0.3333333333)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": 2.700000500954758e-09,
+        "T": 0.005988023952095809,
+        "R": 1.0,
+        "L": 0.06375096949611861,
+        "iris_score": 1.0697389934482144
+      }
+    },
+    "last_attempt_at": 1773220150
+  },
+  "auto_20260310_142638_68": {
+    "name": "auto_20260310_142638_68",
+    "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1.111111111*p3 + -2.444444444*sum_pk_after_p6 + -4.777777778)",
+    "status": "unsolved",
+    "created_at": 1773167224,
+    "attempts_without_ce": 1,
+    "ce_found_count": 0,
+    "potentially_valid": false,
+    "metrics": {
+      "iris": {
+        "name": "auto_20260310_142638_68",
+        "formula": "if (((is_simple)  and  (f_2>=_49))  and  (sum_pk_k>=7 >= 3)), then p6 >= (1.111111111*p3 + -2.444444444*sum_pk_after_p6 + -4.777777778)",
+        "relation": "lower",
+        "violated": false,
+        "min_slack": -1.0000009709187907e-09,
+        "T": 0.011111111111111112,
+        "R": 1.0,
+        "L": 0.06375096949611861,
+        "iris_score": 1.0748620806072298
+      }
+    },
+    "last_attempt_at": 1773222307
+  }
+}

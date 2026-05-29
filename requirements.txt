@@ -1,14 +1,70 @@
-# ── Python dependencies ────────────────────────────────────────────────────────
-python-dotenv>=1.1.0    # Loads .env into os.environ at import time
-scikit-learn>=1.7.0     # TF-IDF vectorizer + cosine similarity for polib search
-numpy>=2.0.0            # Numerical computation
-matplotlib>=3.10.0      # Plotting (counterexample agent)
-networkx>=3.5           # Graph structures (counterexample agent)
-tqdm>=4.67.0            # Progress bars (RL training)
-torch>=2.0.0            # PyTorch — PPO/RL counterexample agent
-graphcalc>=2.0.0        # Graph property calculations (counterexample agent)
+# ══════════════════════════════════════════════════════════════════════════════
+# Polytope Conjecture Prover — Python dependencies
+# Tested on Python 3.13.9 (conda base)
+# ══════════════════════════════════════════════════════════════════════════════
 
-# ── System requirements (not pip-installable) ─────────────────────────────────
-# lean   >= 4.x   — Lean 4 proof assistant  https://lean-lang.org
-# lake   >= 4.x   — Lean build system (bundled with Lean 4)
-# claude >= 0.2   — Claude Code SDK CLI     https://github.com/anthropics/claude-code
+# ── Core project dependencies ─────────────────────────────────────────────────
+
+# Environment / configuration
+python-dotenv==1.1.0          # Loads .env into os.environ (agent/config.py)
+
+# RL counterexample finder (agent/rl_ce_finder/agent.py)
+torch==2.12.0                 # PPO/RL policy network; install CPU-only build:
+                              #   pip install torch==2.12.0 --index-url https://download.pytorch.org/whl/cpu
+                              # or GPU (CUDA 12.1):
+                              #   pip install torch==2.12.0 --index-url https://download.pytorch.org/whl/cu121
+tqdm==4.67.1                  # Progress bars during RL training
+matplotlib==3.10.6            # Reward-curve plots saved to output/
+networkx==3.5                 # Graph construction and manipulation
+graphcalc==1.3.1              # Checks simple 3-polytope / Dehn-Sommerville / Euler
+
+# Prover search (agent/prover/tools/search.py)
+scikit-learn==1.7.2           # TF-IDF vectorizer + cosine similarity for Mathlib search
+numpy==2.3.5                  # Numerical arrays (TF-IDF matrix, p-vector arithmetic)
+
+# ── Transitive dependencies (pinned for reproducibility) ─────────────────────
+
+# torch transitive
+filelock==3.20.0
+fsspec==2025.10.0
+Jinja2==3.1.6
+sympy==1.14.0
+setuptools==80.9.0
+typing_extensions==4.15.0    # shared with anthropic
+
+# scikit-learn transitive
+scipy==1.16.3
+joblib==1.5.2
+threadpoolctl==3.5.0
+
+# matplotlib transitive
+# (numpy already listed above; pillow / kiwisolver pulled in automatically)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# System / non-pip requirements
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Python  >= 3.13          https://python.org
+#   (uses match-statements, dataclasses, typing.Self — do NOT use < 3.11)
+#
+# Lean 4 + Lake            https://lean-lang.org/lean4/doc/setup.html
+#   elan (toolchain manager) is the recommended installer:
+#     curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
+#   After install:  lean --version  should report  4.x.x
+#   Lake is bundled — no separate install needed.
+#
+# Mathlib4                 https://github.com/leanprover-community/mathlib4
+#   Declared in the project's lakefile.toml / lake-manifest.json.
+#   First build fetches and compiles ~200 k lines of Lean — allow 30-60 min.
+#   Command:  cd <project>/lean_project && lake exe cache get && lake build
+#
+# claude CLI (Claude Code SDK)   https://docs.anthropic.com/claude-code
+#   The prover agent and LLM CE-finder both shell out to the `claude` binary.
+#   Install:  npm install -g @anthropic-ai/claude-code
+#   Verify:   claude --version   (requires Node.js >= 18)
+#   Auth:     claude              # follow the OAuth flow on first run
+#
+# graphcalc C extension    (pip install graphcalc==1.3.1 covers this)
+#   Requires a C compiler (gcc / clang) at install time.
+#   On Ubuntu:  sudo apt install build-essential
+#   On macOS:   xcode-select --install

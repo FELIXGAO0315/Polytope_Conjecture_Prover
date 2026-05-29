@@ -4303,3 +4303,32 @@ lemma C32_FaceCountAndGoalReduction : True := by
 lemma C32_DehnSommervilleBound : True := by
   -- [SORRY] nuclear: all proof attempts failed
   sorry
+
+-- === C2_HandshakingIdentity (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-28T09:30:12.315604+00:00
+lemma C2_HandshakingIdentity : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === C2_SimpleCubicProperty (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-28T09:30:30.564497+00:00
+lemma C2_SimpleCubicProperty : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === C2_EulerFormula (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-28T09:30:56.584203+00:00
+lemma C2_EulerFormula : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === C2_VertexCountLowerBound (partial) ===
+-- quality_score: 0.650 | sorry_count: 1 | saved_at: 2026-05-28T09:37:16.266283+00:00
+lemma C2_VertexCountLowerBound (maps : SimplyCon3ConnectedMap 0)
+    (hf : (maps.total_faces : ℤ) ≥ 22) :
+    (maps.v : ℤ) ≥ 40 := by
+  -- [SORRY] class: A
+  -- [SORRY] reason: omega could not prove the goal:
+  -- [SORRY] impact: blocks C2_VertexCountLowerBound
+  -- [SORRY] suggested_next: fix compilation error then remove sorry
+  sorry

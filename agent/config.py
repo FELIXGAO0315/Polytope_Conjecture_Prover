@@ -40,7 +40,7 @@ class Config:
     model_fast: str = field(
         default_factory=lambda: os.environ.get("MODEL_FAST", "claude-haiku-4-5-20251001")
     )
-    compile_timeout_seconds: int = 60
+    compile_timeout_seconds: int = 180
     keep_temp_on_failure: bool = field(
         default_factory=lambda: os.environ.get("KEEP_TEMP_ON_FAILURE", "").lower() == "true"
     )
