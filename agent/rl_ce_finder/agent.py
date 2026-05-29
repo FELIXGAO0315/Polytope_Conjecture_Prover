@@ -694,7 +694,7 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
                         max_nodes_cap: int = 128, end_on_caps: bool = True,
                         exit_on_first_ce: bool = False, update_steps: int = 512,
                         attempts_without_ce: int = 0, status_file: str = None,
-                        stop_event=None):
+                        stop_event=None, initial_weights=None):
     import time
     start_time = time.time()  
     ce_found_time: float = 0.0  # elapsed seconds when first CE was found
@@ -760,6 +760,8 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
     coeff_dim = 5
     node_dim = env._get_observation()['node_features'].shape[1]
     network = ConditionalGraphPolicy(node_dim=node_dim, global_dim=global_dim, coefficient_dim=coeff_dim)
+    if initial_weights is not None:
+        network.load_state_dict(initial_weights)
     network = network.to(device)
     agent = PPOAgent(network, lr=3e-4, update_steps=update_steps)
 
@@ -937,9 +939,10 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
         'total_ops': total_operations,
         'avg_ops_per_ep': avg_ops_per_episode,
         'avg_time_per_ep': avg_time_per_episode,
-        'total_training_time': total_time,  
+        'total_training_time': total_time,
         'ce_found_time': ce_found_time if ce_found_time > 0 else None,
         "final_lr": final_lr,
+        "final_weights": network.state_dict(),
     }
 
 
@@ -1191,6 +1194,7 @@ def run_loaded_conjectures(source: Optional[str] = None, episodes: int = 2000,
         dynamic_ncols=True,
         bar_format="{desc} {n_fmt}/{total_fmt}",
     )
+    _prev_weights = None  # carry network weights across conjectures (continual learning)
     for spec in work_specs:
         # Skip trivial non‑negative bounds (always true, no CE to find)
         if _is_trivial_nonneg(spec.formula):
@@ -1236,7 +1240,9 @@ def run_loaded_conjectures(source: Optional[str] = None, episodes: int = 2000,
         res = train_on_conjecture(spec.formula, name=spec.name, num_episodes=episodes,
                                   max_nodes_cap=max_nodes_cap, end_on_caps=end_on_caps,
                                   exit_on_first_ce=exit_on_first_ce, update_steps=update_steps,
-                                  attempts_without_ce=attempts_wo_ce, status_file=_status_file)
+                                  attempts_without_ce=attempts_wo_ce, status_file=_status_file,
+                                  initial_weights=_prev_weights)
+        _prev_weights = res.get("final_weights")
         results_list.append((spec.name, res))
 
         ce_found_this = bool(res.get('counterexamples'))

@@ -4394,3 +4394,48 @@ lemma Auto20260310142638_2P6HigherFacesCombination {g : ℤ} (maps : SimplyCon3C
     (maps.p_i 6 : ℤ) + 5 * (∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ)) ≥ 10 := by
   -- [SORRY] Prerequisite constraint lemmas not available in this session
   sorry
+
+-- === P6InequalityDehnSommervilleLemma (partial) ===
+-- quality_score: 0.650 | sorry_count: 1 | saved_at: 2026-05-29T11:01:44.465024+00:00
+lemma P6InequalityDehnSommervilleLemma (maps : SimplyCon3ConnectedMap 0) :
+    ∑ k ∈ Finset.Ico 3 (maps.m + 1), (6 - k : ℤ) * maps.p_i k = 12 := by
+  -- [SORRY] class: A
+  -- [SORRY] reason: `simp` made no progress
+  -- [SORRY] impact: blocks P6InequalityDehnSommervilleLemma
+  -- [SORRY] suggested_next: fix compilation error then remove sorry
+  sorry
+
+-- === P6InequalityLowerDegreeBound (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T11:05:07.415182+00:00
+lemma P6InequalityLowerDegreeBound : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === P6InequalityP6CombinationBound (partial) ===
+-- quality_score: 0.650 | sorry_count: 1 | saved_at: 2026-05-29T11:10:39.457077+00:00
+lemma P6InequalityP6CombinationBound {g : ℤ} (maps : SimplyCon3ConnectedMap g)
+    (h_faces : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k > 7) :
+    (maps.p_i 6 : ℤ) + 5 * ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k ≥ 10 := by
+  -- [SORRY] class: A
+  -- [SORRY] reason: build failed
+  -- [SORRY] impact: blocks P6InequalityP6CombinationBound
+  -- [SORRY] suggested_next: fix compilation error then remove sorry
+  sorry
+
+-- === P6InequalityLargeSumCase (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T11:14:42.149582+00:00
+lemma P6InequalityLargeSumCase : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === P6InequalitySmallSumCase (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T11:18:30.988729+00:00
+lemma P6InequalitySmallSumCase : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
+
+-- === P6Inequality (partial) ===
+-- quality_score: 0.500 | sorry_count: 1 | saved_at: 2026-05-29T11:25:44.437183+00:00
+lemma P6Inequality : True := by
+  -- [SORRY] nuclear: all proof attempts failed
+  sorry
