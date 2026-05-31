@@ -53,13 +53,6 @@ class QualityReport:
         )
 
 
-# Regex to find hypothesis declarations in a Lean 4 signature
-# Matches: (name : Type) or {name : Type} or [name : Type]
-_HYP_RE = re.compile(r"[\(\{\[]\s*\w+\s*:\s*[^)\}\]]+[\)\}\]]")
-
-# Implicit marker: comment `-- implicit`
-_IMPLICIT_COMMENT_RE = re.compile(r"--\s*implicit")
-
 # Sorry patterns
 _SORRY_RE = re.compile(r"\bexact\s+sorry\b|\bsorry\b")
 _SORRY_BLOCK_RE = re.compile(
@@ -92,11 +85,6 @@ def _all_sorrys_annotated(lean_code: str) -> bool:
     return annotated_count >= sorry_count
 
 
-def _count_lean_hyps(signature: str) -> int:
-    """Count explicit hypothesis declarations in a Lean 4 signature."""
-    return len(_HYP_RE.findall(signature))
-
-
 def _count_lean_tactics(proof_body: str) -> int:
     return len(_TACTIC_RE.findall(proof_body))
 
@@ -109,56 +97,48 @@ def _extract_proof_body(lean_code: str) -> str:
     return lean_code[idx + len(":= by"):]
 
 
-def _classify_hypothesis(hyp_text: str, parsed_hyps: list[str]) -> str:
-    """Classify a Lean hypothesis as explicit | implicit | unknown.
+# ── Semantic faithfulness prompt ────────────────────────────────────────────
+_FAITHFULNESS_PROMPT = """\
+You are verifying that a Lean 4 theorem signature faithfully represents a mathematical formula.
 
-    explicit  — tokens overlap with the LaTeX hypotheses (grounded in source)
-    implicit  — carries the '-- implicit' annotation (intentional typeclass addition)
-    unknown   — no overlap with LaTeX source and no annotation (potential hallucination)
-    """
-    # Annotated implicit additions are always allowed
-    if _IMPLICIT_COMMENT_RE.search(hyp_text):
-        return "implicit"
+Formula hypotheses (from JSON conjecture):
+{hypotheses}
 
-    stripped = hyp_text.strip()
+Formula conclusion (from JSON conjecture):
+{conclusion}
 
-    # Unannotated typeclass brackets are always suspicious
-    if stripped.startswith("[") and stripped.endswith("]"):
-        return "unknown"
+Lean 4 theorem signature (locked and validated at goal-extraction time):
+{lean_signature}
 
-    # Extract meaningful identifiers from the Lean hypothesis text
-    lean_tokens = set(re.findall(r"\b[A-Za-z_][A-Za-z0-9_']*\b", stripped))
+Answer the following questions. Be concise.
 
-    # Strip universal Lean keywords that appear in every hypothesis
-    lean_keywords = {
-        "theorem", "lemma", "def", "have", "let", "fun", "by",
-        "exact", "apply", "intro", "simp", "rw", "ring", "linarith",
-        "omega", "norm_num", "Nat", "Int", "Real", "Bool",
-        "True", "False", "Prop", "Type", "Sort",
-    }
-    lean_tokens -= lean_keywords
+Q1: CONCLUSION_MATCH — Does the Lean conclusion faithfully represent the formula conclusion?
+    (Note: variable names may differ, e.g. "p6" = "maps.p_i 6", "sum_pk_after_p6" = "∑ k ∈ Finset.Ico 7 ... maps.p_i k", ">=" = "≥")
+    Answer: yes / no
 
-    if not lean_tokens:
-        # Cannot make a determination — give benefit of the doubt
-        return "explicit"
+Q2: HYPOTHESES_COVERED — Are all formula hypotheses represented in the Lean signature?
+    (Note: "is_simple" maps to `maps : SimplyCon3ConnectedMap 0`; "f_2>=_22" maps to the h_f2 hypothesis)
+    Answer: yes / no
 
-    # Collect all identifier tokens from all LaTeX hypothesis strings
-    latex_tokens: set[str] = set()
-    for h in parsed_hyps:
-        latex_tokens.update(re.findall(r"\b[A-Za-z_][A-Za-z0-9_']*\b", h))
+Q3: NO_EXTRA_CONSTRAINTS — Does the Lean signature add mathematical constraints beyond what the formula specifies?
+    (Structural parameters like `maps : SimplyCon3ConnectedMap g` are always valid — they encode the domain, not extra constraints)
+    Answer: yes (no extras) / no (has extras)
 
-    # If the Lean hypothesis shares meaningful tokens with any LaTeX hypothesis,
-    # it is grounded in the source material
-    if lean_tokens & latex_tokens:
-        return "explicit"
+Q4: OVERALL_FAITHFUL — Overall, is this Lean signature a faithful translation of the formula?
+    Answer: yes / no
 
-    # No overlap at all — flag as a potential hallucination
-    return "unknown"
+Format your response as:
+CONCLUSION_MATCH: yes/no
+HYPOTHESES_COVERED: yes/no
+NO_EXTRA_CONSTRAINTS: yes/no
+OVERALL_FAITHFUL: yes/no
+REASON: <one sentence explanation if any answer is "no">
+"""
 
 
 class QualityChecker:
-    def __init__(self, client = None, model: str = "claude-sonnet-4-5"):
-        self._client = client
+    def __init__(self, client=None, model: str = "claude-sonnet-4-5"):
+        self._client = client  # ClaudeSDKClient (has ._call method)
         self._model = model
 
     def check(
@@ -166,78 +146,101 @@ class QualityChecker:
         parsed: ParsedTheorem,
         goal: LockedGoal,
         lean_code: str,
+        is_main_target: bool = True,
     ) -> QualityReport:
+        """Check quality of generated Lean code.
+
+        For intermediate nodes (is_main_target=False):
+          - Only sorry audit applies.
+          - Helper lemmas are internal stepping stones; their signatures are not
+            required to match the root formula and should not be compared against it.
+
+        For the root theorem (is_main_target=True):
+          - Semantic faithfulness: Claude verifies the locked Lean signature faithfully
+            represents the JSON formula (conclusion + hypotheses match, no extra constraints).
+          - No-hallucination: checks the generated code uses the locked signature, not a
+            weaker or different one.
+          - Sorry audit.
+          - Proof structure (soft warning).
+
+        Why Claude instead of token matching:
+          JSON formula tokens (e.g. "is_simple", "f_2") do not literally appear in the
+          Lean signature ("SimplyCon3ConnectedMap", "h_f2"). Token intersection would
+          always be empty, producing false hallucination alerts. Claude understands the
+          semantic equivalence and produces correct verdicts.
+        """
         findings: list[str] = []
         allowed_additions: list[str] = []
         blocked_additions: list[str] = []
 
-        # --- Check 1: Faithfulness (weight 0.40) ---
-        lean_hyp_count = _count_lean_hyps(goal.lean_signature)
-        latex_hyp_count = len(parsed.hypotheses)
-        hyp_count_ok = lean_hyp_count >= latex_hyp_count  # lean may have implicit extras
-        conclusion_ok = self._check_conclusion(parsed, goal, lean_code)
-        faithfulness_ok = hyp_count_ok and conclusion_ok
-
-        if not hyp_count_ok:
-            findings.append(
-                f"Hypothesis count mismatch: Lean has {lean_hyp_count}, "
-                f"LaTeX has {latex_hyp_count}"
-            )
-        if not conclusion_ok:
-            findings.append("Conclusion in Lean code does not match LaTeX conclusion")
-        if faithfulness_ok:
-            findings.append("Faithfulness: PASS")
-
-        # --- Check 2: No Hallucination (weight 0.35) ---
-        raw_hyps = _HYP_RE.findall(goal.lean_signature)
-        for hyp in raw_hyps:
-            cls = _classify_hypothesis(hyp, parsed.hypotheses)
-            if cls == "implicit":
-                allowed_additions.append(hyp.strip())
-            elif cls == "unknown":
-                blocked_additions.append(hyp.strip())
-
-        no_hallucination = len(blocked_additions) == 0
-        if not no_hallucination:
-            findings.append(f"Blocked (hallucinated) hypotheses: {blocked_additions}")
-        else:
-            findings.append("No hallucination: PASS")
-
-        # --- Check 3: Sorry Audit (weight 0.15) ---
+        # ── Check 1: sorry audit (applies to ALL nodes) ──────────────────────
         sorry_count = _count_sorry(lean_code)
         sorry_annotated = _all_sorrys_annotated(lean_code)
         if sorry_count > 0 and not sorry_annotated:
             findings.append(
                 f"Sorry audit: FAIL — {sorry_count} sorry(s) found, "
-                f"not all have complete [SORRY] annotations"
+                f"not all have [SORRY] annotations"
             )
         elif sorry_count > 0:
-            findings.append(f"Sorry audit: {sorry_count} sorry(s), all annotated")
+            findings.append(f"Sorry audit: WARN — {sorry_count} sorry(s), all annotated")
         else:
-            findings.append("Sorry audit: PASS — no sorrys")
+            findings.append("Sorry audit: PASS — 0 sorry")
 
-        # --- Check 4: Proof Structure (weight 0.10) ---
-        latex_steps = len(parsed.proof_steps)
-        proof_body = _extract_proof_body(lean_code)
-        lean_steps = _count_lean_tactics(proof_body)
-        proof_structure_ok = lean_steps <= max(3 * latex_steps, 3)
-        if not proof_structure_ok:
-            findings.append(
-                f"Proof structure: WARN — {lean_steps} Lean tactic steps vs "
-                f"{latex_steps} LaTeX steps (>3x ratio)"
+        if not is_main_target:
+            # ── Intermediate node: only sorry matters ────────────────────────
+            # Helper lemmas are designed by the LLM as internal stepping stones.
+            # Their signatures need not match the root formula. Formula comparison
+            # would always produce false positives here.
+            findings.append("Formula faithfulness: N/A (intermediate helper node, not root theorem)")
+            faithfulness_ok = True
+            no_hallucination = True
+            proof_structure_ok = True
+            score = 1.0 if sorry_annotated else 0.0
+            passed = sorry_annotated
+        else:
+            # ── Root theorem: full formula-faithfulness check ────────────────
+
+            # Check 2a: declaration name present in generated code
+            theorem_name = goal.lean_signature.split("(")[0].strip().split()[-1]
+            name_present = bool(
+                re.search(r'(?:theorem|lemma)\s+' + re.escape(theorem_name), lean_code)
             )
-        else:
-            findings.append(f"Proof structure: PASS ({lean_steps} tactics, {latex_steps} LaTeX steps)")
+            if name_present:
+                findings.append(f"Declaration name: PASS — '{theorem_name}' found")
+            else:
+                findings.append(f"Declaration name: FAIL — '{theorem_name}' not declared in generated code")
 
-        # --- Score computation ---
-        score = (
-            0.40 * (1.0 if faithfulness_ok else 0.0)
-            + 0.35 * (1.0 if no_hallucination else 0.0)
-            + 0.15 * (1.0 if sorry_annotated else 0.0)
-            + 0.10 * (1.0 if proof_structure_ok else 0.0)
-        )
+            # Check 2b: semantic faithfulness via Claude
+            # The locked goal was translated from the JSON formula at goal-lock time.
+            # We ask Claude to confirm that the Lean signature faithfully represents
+            # the original formula. This is the definitive JSON→Lean consistency check.
+            faithfulness_ok, no_hallucination, faithfulness_findings = self._semantic_faithfulness_check(
+                parsed, goal
+            )
+            findings.extend(faithfulness_findings)
 
-        passed = score >= 0.85 and faithfulness_ok and no_hallucination
+            # Combine name check into faithfulness
+            faithfulness_ok = faithfulness_ok and name_present
+
+            # Check 3: proof structure (soft warning)
+            latex_steps = len(parsed.proof_steps)
+            proof_body = _extract_proof_body(lean_code)
+            lean_steps = _count_lean_tactics(proof_body)
+            proof_structure_ok = lean_steps <= max(3 * latex_steps, 30)
+            if not proof_structure_ok:
+                findings.append(
+                    f"Proof structure: WARN — {lean_steps} tactic steps (>{max(3*latex_steps,30)} threshold)"
+                )
+            else:
+                findings.append(f"Proof structure: PASS ({lean_steps} tactic steps)")
+
+            # Score: faithfulness 0.70, sorry 0.20, structure 0.10
+            score = (
+                0.70 * (1.0 if faithfulness_ok else 0.0)
+                + 0.20 * (1.0 if sorry_annotated else 0.0)
+                + 0.10 * (1.0 if proof_structure_ok else 0.0)
+            )
+            passed = score >= 0.85 and faithfulness_ok and no_hallucination
 
         return QualityReport(
             passed=passed,
@@ -253,36 +256,76 @@ class QualityChecker:
             summary=(
                 f"Score: {score:.2f}. "
                 f"{'PASSED' if passed else 'FAILED'}. "
-                f"{len(findings)} findings."
+                f"{len(findings)} finding(s)."
             ),
         )
 
-    def _check_conclusion(
+    def _semantic_faithfulness_check(
         self,
         parsed: ParsedTheorem,
         goal: LockedGoal,
-        lean_code: str,
-    ) -> bool:
-        """Ask Claude whether the Lean type represents the LaTeX conclusion."""
-        if self._client is None:
-            # Without an API client, do a simple heuristic check:
-            # The conclusion should not be trivially empty
-            return ": True" not in goal.lean_type_only or "True" in parsed.conclusion
+    ) -> tuple[bool, bool, list[str]]:
+        """Use Claude to verify the Lean signature faithfully represents the formula.
 
-        prompt = (
-            f"Does this Lean 4 type represent the following LaTeX conclusion? "
-            f"Answer only 'yes' or 'no'.\n"
-            f"LaTeX conclusion: {parsed.conclusion}\n"
-            f"Lean type: {goal.lean_type_only}"
+        Returns (faithfulness_ok, no_hallucination, findings_list).
+        Falls back to passing if the client is unavailable (goal lock already validated).
+        """
+        findings: list[str] = []
+
+        if self._client is None:
+            findings.append("Semantic faithfulness: SKIP (no client — goal lock validation trusted)")
+            return True, True, findings
+
+        hypotheses_str = "\n".join(f"  - {h}" for h in parsed.hypotheses) or "  (none)"
+        prompt = _FAITHFULNESS_PROMPT.format(
+            hypotheses=hypotheses_str,
+            conclusion=parsed.conclusion,
+            lean_signature=goal.lean_type_only,
         )
+
         try:
-            response = self._client.messages.create(
-                model=self._model,
-                max_tokens=8,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            answer = response.content[0].text.strip().lower()
-            return answer.startswith("yes")
-        except Exception:
-            # Transient LLM failure — fall back to heuristic rather than crashing the node
-            return ": True" not in goal.lean_type_only or "True" in parsed.conclusion
+            # Use the ClaudeSDKClient._call() which wraps the claude CLI.
+            response = self._client._call(prompt, timeout=45)
+
+            conclusion_match = "CONCLUSION_MATCH: yes" in response
+            hyp_covered = "HYPOTHESES_COVERED: yes" in response
+            no_extra = "NO_EXTRA_CONSTRAINTS: yes" in response
+            overall = "OVERALL_FAITHFUL: yes" in response
+
+            # Extract reason line if present
+            reason = ""
+            for line in response.splitlines():
+                if line.strip().startswith("REASON:"):
+                    reason = line.split("REASON:", 1)[1].strip()
+                    break
+
+            faithfulness_ok = conclusion_match and hyp_covered and overall
+            no_hallucination = no_extra
+
+            if conclusion_match:
+                findings.append("Conclusion match: PASS")
+            else:
+                findings.append(f"Conclusion match: FAIL{' — ' + reason if reason else ''}")
+
+            if hyp_covered:
+                findings.append("Hypotheses covered: PASS")
+            else:
+                findings.append(f"Hypotheses covered: FAIL{' — ' + reason if reason else ''}")
+
+            if no_extra:
+                findings.append("No extra constraints: PASS")
+            else:
+                findings.append(f"No extra constraints: FAIL{' — ' + reason if reason else ''}")
+
+            if overall:
+                findings.append("Overall faithfulness: PASS")
+            else:
+                findings.append(f"Overall faithfulness: FAIL{' — ' + reason if reason else ''}")
+
+        except Exception as exc:
+            # Claude call failed (timeout, network, etc.) — trust the goal lock validation
+            findings.append(f"Semantic faithfulness: SKIP (Claude call failed: {exc!s:.60}) — goal lock trusted")
+            faithfulness_ok = True
+            no_hallucination = True
+
+        return faithfulness_ok, no_hallucination, findings

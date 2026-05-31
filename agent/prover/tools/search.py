@@ -49,7 +49,7 @@ class SavedEntry:
             node_id=d["node_id"],
             theorem_name=d.get("theorem_name", d.get("node_id", "")),
             category=d.get("category", "Polytope"),
-            lean_file_path=d.get("lean_file_path", "Polib"),
+            lean_file_path=d.get("lean_file_path", "Inventory"),
             status=d["status"],
             sorry_count=d.get("sorry_count", 0),
             quality_score=d.get("quality_score", 0.0),
@@ -61,7 +61,7 @@ class SavedEntry:
         )
 
 
-class PolibSearch:
+class InventorySearch:
     def __init__(self, store):
         """store: StoreManager instance (or None for empty search)."""
         self._store = store
@@ -635,7 +635,7 @@ class LLMProofReasoningHintGenerator:
     a concrete Lean 4 proof sketch.
 
     Unlike hint generators that produce lemma names, this generator:
-    1. Reads all available Polib lemma signatures
+    1. Reads all available Inventory lemma signatures
     2. Asks the model to think step-by-step through the proof
     3. Returns a full proof sketch the code-generation model can follow
 
@@ -662,7 +662,7 @@ LaTeX: {latex_fragment}
 {goal_signature}
 ```
 
-## Available Polib lemmas (use via `import Polib`, call by exact name)
+## Available Inventory lemmas (use via `import Inventory`, call by exact name)
 ```lean
 {polib_signatures}
 ```
@@ -678,7 +678,7 @@ LaTeX: {latex_fragment}
 ## Instructions
 Think step by step:
 1. What does the goal assert mathematically?
-2. Which Polib lemma(s) directly establish the key fact? (name them exactly)
+2. Which Inventory lemma(s) directly establish the key fact? (name them exactly)
 3. What `have` statements are needed to connect lemmas to the goal?
 4. Which tactic closes the final goal: `linarith`, `omega`, `ring`, `simp`, etc.?
 
@@ -746,14 +746,14 @@ Description: {description}
 ## Available hints / lemma names
 {hints}
 
-## Available Polib lemmas
+## Available Inventory lemmas
 ```lean
 {polib_signatures}
 ```
 
 ## Your task
 1. Identify exactly which `sorry`(s) remain and what each one needs to prove.
-2. Determine whether the available hints and Polib lemmas are sufficient to fill them.
+2. Determine whether the available hints and Inventory lemmas are sufficient to fill them.
 3. Answer with EXACTLY one of:
    - `FEASIBLE` — you can write a concrete proof for every sorry
    - `INFEASIBLE` — critical lemmas or information are still missing
@@ -808,12 +808,12 @@ INFEASIBLE: <reason>
             return False, []
 
     def _read_polib_signatures(self) -> str:
-        """Extract lemma signatures (not full proofs) from Polib.lean."""
+        """Extract lemma signatures (not full proofs) from Inventory.lean."""
         if self._polib_sig_cache is not None:
             return self._polib_sig_cache
-        polib_lean = self._polib_path / "Polib.lean"
+        polib_lean = self._polib_path / "Inventory.lean"
         if not polib_lean.exists():
-            return "(Polib.lean not found)"
+            return "(Inventory.lean not found)"
 
         content = polib_lean.read_text(encoding="utf-8")
         marker_re = re.compile(r"^-- === (.+?) \(proved\)", re.MULTILINE)
@@ -835,3 +835,7 @@ INFEASIBLE: <reason>
         result = "\n\n".join(sections) if sections else "(no proved lemmas)"
         self._polib_sig_cache = result
         return result
+
+
+# Backwards-compatible alias — agent.py imports this name
+PolibSearch = InventorySearch

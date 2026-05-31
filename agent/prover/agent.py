@@ -33,7 +33,7 @@ from agent.prover.tools.goal_lock import GoalExtractor, GoalLock, GoalValidator,
 from agent.prover.tools.latex_parser import LatexParser, ParsedTheorem
 from agent.prover.tools.lean_compiler import LeanCompiler
 from agent.prover.tools.polib_manager import DepGraphManager, PolibManager, SessionState, StoreManager
-from agent.prover.tools.quality_checker import QualityChecker
+from agent.prover.tools.quality_checker import QualityChecker, QualityReport
 from agent.prover.tools.search import CombinedHintGenerator, GitHubLean4Search, MathlibSearch, PolibSearch
 from agent.prover.tools.prompt_optimizer import extract_signature, filter_dep_imports_to_direct
 from agent.prover.tools.output_search import OutputSearch
@@ -262,6 +262,10 @@ class FormalizerAgent:
         # Per-run code collection: blueprint node_id → final Lean code
         self._run_codes: dict[str, str] = {}
         self._run_codes_lock = threading.Lock()
+        # Per-run quality reports: blueprint node_id → QualityReport
+        self._run_quality_reports: dict[str, QualityReport] = {}
+        # Nodes loaded from Polib (skipped, already proved) — shown as "Retrying..." in quality step
+        self._run_skipped_nodes: set[str] = set()
 
     # ------------------------------------------------------------------
     # Shared sorry counter callbacks
@@ -282,21 +286,19 @@ class FormalizerAgent:
 
     @staticmethod
     def _ensure_polib_lean(polib_path: Path) -> None:
-        """Create polib/Polib.lean if missing, or update its header if the shared content changed."""
+        """Create polib/Polib.lean if missing, and ensure Polib/_Temp exists.
+        Inventory.lean is hand-crafted and never touched here.
+        Polib.lean only needs imports — foundational content lives in Inventory.lean."""
         from agent.prover.tools.polib_manager import _SECTION_MARKER
         polib_lean = polib_path / "Polib.lean"
-        # Also ensure _Temp directory exists for compilation
         (polib_path / "Polib" / "_Temp").mkdir(parents=True, exist_ok=True)
 
-        # Strip leading "import Mathlib" from SHARED_MODULE_CONTENT to avoid duplication
-        shared_body = re.sub(r"^import\s+Mathlib\s*\n", "", SHARED_MODULE_CONTENT, count=1)
         header = (
             "-- Polib.lean\n"
-            "-- Single-file proof library — auto-managed by FormalizerAgent.\n"
-            "-- Struct definitions and all proved lemmas/theorems are appended below.\n"
-            "import Mathlib\n\n"
-            + shared_body
-            + "\n"
+            "-- Dynamic proof accumulation — auto-managed by FormalizerAgent.\n"
+            "-- Foundational axioms are in Inventory.lean; proved conjectures are appended here.\n"
+            "import Mathlib\n"
+            "import Inventory\n\n"
         )
 
         if not polib_lean.exists():
@@ -309,7 +311,6 @@ class FormalizerAgent:
         else:
             proved_part = _SECTION_MARKER
 
-        # Only rewrite if the header has changed
         if not existing.startswith(header):
             polib_lean.write_text(header + proved_part, encoding="utf-8")
             FormalizerAgent._invalidate_polib_content(polib_lean)
@@ -432,6 +433,7 @@ class FormalizerAgent:
         proven_deps: list[str],
         proven_dep_imports: dict[str, str] | None = None,
         existing_code: str | None = None,
+        cross_run_errors: list[dict] | None = None,
     ) -> str:
         """Generate Lean 4 code for `node`.
 
@@ -530,15 +532,27 @@ class FormalizerAgent:
                 + "\n```\n"
             )
 
+        # Cross-run failure memory: previous attempts that failed across retries
+        cross_run_str = ""
+        if cross_run_errors:
+            lines = ["\n## Previous failed attempts across retries — do NOT repeat these approaches:\n"]
+            for i, rec in enumerate(cross_run_errors, 1):
+                lines.append(f"### Failed attempt {i}:")
+                lines.append(f"Error: {rec['error']}")
+                if rec.get("code_snippet"):
+                    lines.append(f"```lean\n{rec['code_snippet']}\n```")
+            cross_run_str = "\n".join(lines) + "\n"
+
         # Prior attempt context — included only when a non-trivial partial exists
         if existing_code is not None:
             prior_context = (
-                partial_inline_str
+                cross_run_str
+                + partial_inline_str
                 + "\n## Prior attempt (this compiled but has sorrys — fix the sorrys):\n"
                 f"```lean\n{existing_code}\n```\n"
             )
         else:
-            prior_context = partial_inline_str
+            prior_context = cross_run_str + partial_inline_str
 
         prompt = LEAN_GENERATION_PROMPT.format(
             node_id=node.node_id,
@@ -582,7 +596,7 @@ class FormalizerAgent:
             banned_block = (
                 f"## ⛔ IDENTIFIERS THAT DO NOT EXIST — NEVER USE THESE\n"
                 f"The following names were rejected by Lean as unknown. They do NOT exist\n"
-                f"in Lean, Mathlib, or Polib. Do NOT use any of them:\n"
+                f"in Lean, Mathlib, or Inventory. Do NOT use any of them:\n"
                 f"  {banned_list}\n"
                 f"Instead use the geometric axiom lemmas (standalone, not structure fields):\n"
                 f"  euler_formula maps, handshake maps, regularity maps,\n"
@@ -613,8 +627,9 @@ class FormalizerAgent:
             f"- ALWAYS use `import Mathlib` (umbrella). NEVER use specific submodule\n"
             f"  paths like `import Mathlib.Algebra.BigOperators.Basic` — they are\n"
             f"  version-dependent and will break the build\n"
-            f"- ⚡ If you cannot fix the error, replace the failing proof body with `sorry`\n"
-            f"  (annotated with [SORRY] class/reason). A compilable sorry is the correct fallback.\n"
+            f"- ⚡ If you cannot fix the error, try using Inventory lemmas:\n"
+            f"  P6EdgeCountEquation, P6InequalityPart, Juc_EulerFormula (see Inventory reference above).\n"
+            f"- Do NOT write sorry — the system rejects sorry and will ask you to fix it.\n"
             f"- Return ONLY the complete corrected Lean 4 file inside a ```lean fence.\n"
             f"  Do not write any prose or explanation outside the fence."
         )
@@ -628,6 +643,61 @@ class FormalizerAgent:
         elif round_num < self._ESCALATION_DECOMPOSE:  return 1
         elif round_num < self._ESCALATION_DECIDE:     return 2
         else:                                          return 3
+
+    def _targeted_fix_sorry_removal(
+        self,
+        lean_code: str,
+        node: BlueprintNode,
+        hints: list[str],
+        round_num: int,
+    ) -> str:
+        """Ask Claude to remove all sorry from successfully-compiled code by using Inventory lemmas.
+
+        Called when the code compiles but contains sorry that the prover refuses to accept.
+        """
+        sorry_blocks = self._find_sorry_blocks(lean_code)
+        n_sorry = len(sorry_blocks)
+        hints_str = "\n".join(f"  - {h}" for h in hints) or "  (none)"
+        sorry_list = "\n".join(
+            f"  {i+1}. {b['desc'][:300]}" for i, b in enumerate(sorry_blocks)
+        )
+        local_refs = self._local_refs_block(node)
+        prompt = (
+            f"This Lean 4 code compiles successfully but contains {n_sorry} sorry(s). "
+            f"The system requires zero sorry in the final proof. "
+            f"Your job: REMOVE ALL sorry by replacing them with real proofs.\n\n"
+            f"## Node\n{node.node_id}: {node.description}\n\n"
+            f"## Sorry blocks to fix (must ALL be replaced)\n{sorry_list}\n\n"
+            f"## Current Lean 4 Source (compiles, but has sorry)\n```lean\n{lean_code}\n```\n\n"
+            + local_refs
+            + FIX_LOOP_POLIB_REF + "\n"
+            + f"## Key Inventory lemmas to use instead of sorry:\n"
+            f"- `P6EdgeCountEquation maps`   (proved): 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
+            f"  → rearranges to: 3*p₃ + 2*p₄ + p₅ = 12*(1-g) + Σ_{{k≥7}}(k-6)*p_k\n"
+            f"  → call: `have h := P6EdgeCountEquation maps; linarith`\n"
+            f"- `Juc_EulerFormula maps`      (proved, g=0): 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
+            f"- `P6InequalityPart maps hm`   (Inventory axiom): 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{{k≥7}}((k+1)/2-6)*p_k\n"
+            f"  → hm : maps.m ≥ 6 is required; derive from hypotheses or add as hypothesis\n"
+            f"- `Juc_InequalityPart maps hm` (Inventory axiom, g=0): same bound\n"
+            f"- `euler_formula maps`, `handshake maps`, `regularity maps` (axioms)\n"
+            f"- `occupation_conservation maps`, `occupation_bound maps k hk` (axioms)\n\n"
+            f"## Strategy\n"
+            f"1. For each sorry, identify what fact is needed.\n"
+            f"2. Find an Inventory lemma that provides it (see list above).\n"
+            f"3. Replace `sorry` with `have h := <Inventory lemma>; linarith` or `exact h`.\n"
+            f"4. Calling P6InequalityPart/Juc_InequalityPart is NOT a new sorry — "
+            f"they are accepted Inventory axioms.\n\n"
+            f"## Available Mathlib Lemmas\n{hints_str}\n\n"
+            f"## Instructions\n"
+            f"- Replace EVERY sorry with a real proof or Inventory lemma call\n"
+            f"- Do NOT write any new sorry under any circumstances\n"
+            f"- Do NOT change the theorem statement or its type signature\n"
+            f"- Return ONLY the complete Lean 4 file inside a ```lean fence."
+        )
+        raw = self._sdk._call(prompt, timeout=180)
+        fixed = self._normalize_lean(self._strip_markdown(raw))
+        fixed = self._ensure_preamble(fixed)
+        return fixed if fixed.strip() else lean_code
 
     def _targeted_fix_strict(
         self,
@@ -648,7 +718,7 @@ class FormalizerAgent:
             banned_list = ", ".join(f"`{x}`" for x in sorted(banned_ids))
             banned_block = (
                 f"## ⛔ IDENTIFIERS THAT DO NOT EXIST — NEVER USE THESE\n"
-                f"These names do NOT exist anywhere in Lean/Mathlib/Polib:\n"
+                f"These names do NOT exist anywhere in Lean/Mathlib/Inventory:\n"
                 f"  {banned_list}\n"
                 f"Use only names from the verified list below or the structure fields.\n\n"
             )
@@ -665,13 +735,14 @@ class FormalizerAgent:
             + FIX_LOOP_POLIB_REF + "\n"
             + f"## Verified Mathlib Lemmas (ONLY use names from this list)\n{hints_str}\n\n"
             f"Instructions:\n"
-            f"- ONLY reference lemma names that appear in the Polib reference or verified list above\n"
+            f"- ONLY reference lemma names that appear in the Inventory reference or verified list above\n"
             f"- You MAY also use lemma names that appear verbatim in the Reference proofs above\n"
             f"- When you cannot find the right lemma, use omega, simp, linarith, or ring\n"
             f"- Do NOT invent or guess lemma names\n"
             f"- Do NOT change the theorem statement or its type signature\n"
-            f"- ⚡ If the proof cannot be fixed, replace the failing body with annotated `sorry`.\n"
-            f"  A compilable sorry is the correct fallback — do NOT leave non-compiling tactics.\n"
+            f"- ⚡ If the proof cannot be fixed with standard tactics, try Inventory lemmas:\n"
+            f"  P6EdgeCountEquation, P6InequalityPart, Juc_EulerFormula, etc.\n"
+            f"- Do NOT write sorry — the system rejects sorry and will ask you to fix it.\n"
             f"- Return ONLY the complete corrected Lean 4 file inside a ```lean fence."
         )
         raw = self._sdk._call(prompt, timeout=150)
@@ -717,7 +788,7 @@ class FormalizerAgent:
             f"Instructions:\n"
             f"- Break the proof body into small `have h : ... := by ...` steps\n"
             f"- Each step must be dischargeable by exactly one tactic: omega, simp, linarith, ring, or norm_num\n"
-            f"- Use the Polib geometric axiom lemmas listed above as building blocks\n"
+            f"- Use the Inventory geometric axiom lemmas listed above as building blocks\n"
             f"- You MAY reuse helper lemmas shown verbatim in the Reference proofs above\n"
             f"- Do NOT change the theorem statement or type signature\n"
             f"- ALWAYS use `import Mathlib` (umbrella), never specific submodule paths\n"
@@ -918,7 +989,7 @@ class FormalizerAgent:
 
     @staticmethod
     def _ensure_preamble(code: str) -> str:
-        """Guarantee that import Mathlib + import Polib.Shared are at the top.
+        """Guarantee that import Mathlib + import Inventory.Shared are at the top.
 
         If the code is empty or already has the shared import, return as-is.
         Otherwise strip stale import lines and prepend the canonical two-line header.
@@ -928,11 +999,11 @@ class FormalizerAgent:
             return LEAN_PREAMBLE
         # Strip any inlined shared structure definition
         code = FormalizerAgent._strip_inline_shared_struct(code)
-        if "import Polib.Shared" in code:
+        if "import Inventory.Shared" in code:
             return code
         # Remove stale import lines and prepend canonical preamble
         code = re.sub(r"^import Mathlib[^\n]*\n?", "", code, flags=re.MULTILINE)
-        code = re.sub(r"^import Polib\.Basic[^\n]*\n?", "", code, flags=re.MULTILINE)
+        code = re.sub(r"^import Inventory\.Basic[^\n]*\n?", "", code, flags=re.MULTILINE)
         return LEAN_PREAMBLE + "\n" + code.lstrip()
 
     @staticmethod
@@ -1045,6 +1116,70 @@ class FormalizerAgent:
 
         return None
 
+    # Inventory-based proof templates tried before LLM generation.
+    # Each entry is a tactic block injected after `:= by`.
+    _INVENTORY_TEMPLATES: list[str] = [
+        # Single lemma + linarith (most common pattern)
+        "  have h := P6EdgeCountEquation maps\n  push_cast\n  linarith",
+        "  have h := Juc_EulerFormula maps\n  push_cast\n  linarith",
+        "  have h := P6InequalityPart maps hm\n  linarith",
+        "  have h := Juc_InequalityPart maps hm\n  linarith",
+        # Combinations
+        "  have h1 := P6EdgeCountEquation maps\n  have h2 := P6InequalityPart maps hm\n  push_cast\n  linarith",
+        "  have h1 := Juc_EulerFormula maps\n  have h2 := Juc_InequalityPart maps hm\n  linarith",
+        # Three axioms
+        "  have he := euler_formula maps\n  have hh := handshake maps\n  have hr := regularity maps\n  push_cast\n  linarith",
+        # JucovicTheorem direct
+        "  exact (JucovicTheorem maps h1).1",
+        # omega variant
+        "  have h := P6EdgeCountEquation maps\n  push_cast at *\n  omega",
+        # edge count + euler
+        "  have h1 := P6EdgeCountEquation maps\n  have he := euler_formula maps\n  have hh := handshake maps\n  push_cast\n  linarith",
+    ]
+
+    def _inventory_template_probe(
+        self, lean_code: str, node_id: str, verbose: bool
+    ) -> tuple[str, bool]:
+        """Try to prove this node using Inventory lemma templates compiled in parallel.
+
+        Takes the LLM-generated code, finds where the proof body starts (':= by'),
+        replaces it with each template, and compiles all candidates concurrently.
+        Returns (proved_code, True) on first success, (lean_code, False) if all fail.
+        """
+        import re as _re
+
+        # Find the last ':= by' — that is where the main declaration's proof body starts.
+        by_matches = list(_re.finditer(r':=\s*by\b', lean_code))
+        if not by_matches:
+            return lean_code, False
+        last_by = by_matches[-1]
+        before_proof = lean_code[:last_by.end()]
+
+        candidates = [
+            (before_proof + "\n" + tmpl + "\n", tmpl)
+            for tmpl in self._INVENTORY_TEMPLATES
+        ]
+
+        # Compile all candidates in parallel
+        with ThreadPoolExecutor(max_workers=min(len(candidates), 4)) as pool:
+            futures = {
+                pool.submit(self._compiler.compile, code, node_id + "_inv"): (code, tmpl)
+                for code, tmpl in candidates
+            }
+            for fut in as_completed(futures):
+                code, tmpl = futures[fut]
+                try:
+                    result = fut.result()
+                except Exception:
+                    continue
+                if result.success and not self._has_sorry(code):
+                    self._log(verbose,
+                        f"  [inv-probe] {node_id}: proved by Inventory template "
+                        f"({tmpl.strip()[:60]}...)")
+                    return code, True
+
+        return lean_code, False
+
     def _partial_solver(
         self,
         node: "BlueprintNode",
@@ -1056,46 +1191,26 @@ class FormalizerAgent:
         node_id: str,
         verbose: bool,
         existing_code: str | None = None,
+        cross_run_errors: list[dict] | None = None,
     ) -> tuple[str, bool, list]:
         """Generate a fresh proof, compile through the fix loop, and return."""
-        lean_code = ""
-        compile_ok = False
-        last_errors: list = []
-
         lean_code = self._generate_lean(
             node, goal_lock.goal, hints, proven_node_ids,
             proven_dep_imports=proven_dep_imports,
             existing_code=existing_code,
+            cross_run_errors=cross_run_errors,
         )
+
+        # Fast Inventory-first probe: try simple Inventory lemma + linarith templates
+        # before entering the full fix loop.  No LLM call needed — pure compilation.
+        probe_code, probe_ok = self._inventory_template_probe(lean_code, node_id, verbose)
+        if probe_ok:
+            return probe_code, True, []
+
         lean_code, compile_ok, last_errors = self._compile_loop(
             lean_code, node, hints, node_id, verbose,
             goal_signature=goal_lock.goal.lean_signature,
         )
-
-        # Nuclear fallback: if every compile attempt (including internal sorry
-        # insertions) failed, guarantee at least a sorry stub so the node is
-        # always saved as partial rather than failed.
-        # Chain: (1) validated goal signature, (2) bare `lemma NodeId : True`.
-        if not compile_ok:
-            _sig = ""
-            if goal_lock and goal_lock.goal:
-                _sig = (goal_lock.goal.lean_signature or "").strip()
-            _nuclear_sigs = ([_sig] if _sig else []) + [f"lemma {node_id} : True"]
-            for _ns in _nuclear_sigs:
-                _nuclear = (
-                    f"import Mathlib\nimport Polib\n\n"
-                    f"{_ns} := by\n"
-                    f"  -- [SORRY] nuclear: all proof attempts failed\n"
-                    f"  sorry\n"
-                )
-                _nr = self._compiler.compile(_nuclear, node_id)
-                self._write_output(_nuclear, node_id, _nr.success)
-                if _nr.success:
-                    lean_code = _nuclear
-                    compile_ok = True
-                    self._log(verbose,
-                        f"  [partial-decided] {node_id}: partially proved accepted")
-                    break
 
         return lean_code, compile_ok, last_errors
 
@@ -1124,7 +1239,7 @@ class FormalizerAgent:
         # fields change (e.g. new axioms added), so the blueprint is regenerated with
         # the updated field set in scope.
         # NOTE: polib_hash intentionally excluded — new proved lemmas are always
-        # available via `import Polib` without needing a blueprint regeneration.
+        # available via `import Inventory` without needing a blueprint regeneration.
         # Including it caused blueprint churn (different strategy each run → worse results).
         from agent.prover.prompts.lean_generation import SHARED_MODULE_CONTENT
         struct_hash = hashlib.sha256(SHARED_MODULE_CONTENT.encode()).hexdigest()[:8]
@@ -1161,7 +1276,7 @@ class FormalizerAgent:
             return None
         try:
             bp = Blueprint.from_dict(data)
-            self._log(verbose, f"      [cache hit] blueprint loaded from store (key={key})")
+            self._log(False, f"      [cache hit] blueprint loaded from store (key={key})")
             return bp
         except Exception:
             return None
@@ -1207,7 +1322,7 @@ class FormalizerAgent:
     def _verify_polib_builds(self, node_id: str, verbose: bool) -> bool:
         """Compile a minimal file importing Polib to check the package still builds cleanly."""
         _result = self._compiler.compile(
-            "import Mathlib\nimport Polib\n", f"_polib_verify_{node_id}"
+            "import Mathlib\nimport Inventory\n", f"_polib_verify_{node_id}"
         )
         if not _result.success:
             err = (_result.errors[0].raw_message[:80] if _result.errors
@@ -1243,7 +1358,7 @@ class FormalizerAgent:
             self._log(verbose, f"  [sorry-save-err] {node_id}: sorry'd version also failed to compile")
             return None
         try:
-            _sr_report = self._quality.check(parsed, goal_lock.goal, _sorried)
+            _sr_report = self._quality.check(parsed, goal_lock.goal, _sorried, is_main_target=node.is_main_target)
             with self._polib_lock:
                 self._polib_mgr.save(node, _sorried, _sr_report, category, parsed)
                 if not self._verify_polib_builds(node_id, verbose):
@@ -1347,7 +1462,7 @@ class FormalizerAgent:
                     start = content.index(marker)
                     next_marker = content.find("\n-- === ", start + 1)
                     section = content[start:] if next_marker == -1 else content[start:next_marker]
-                    return f"import Mathlib\nimport Polib\n\n{section.strip()}\n"
+                    return f"import Mathlib\nimport Inventory\n\n{section.strip()}\n"
         output_file = self._output_root / "Output" / f"{node_id}.lean"
         if output_file.exists():
             code = output_file.read_text(encoding="utf-8")
@@ -1466,7 +1581,7 @@ class FormalizerAgent:
 
         # Wrap statement in a compilable file
         code = (
-            f"import Mathlib\nimport Polib\n\n"
+            f"import Mathlib\nimport Inventory\n\n"
             f"{stmt}\n"
         )
         code = self._normalize_lean(code)
@@ -1555,7 +1670,7 @@ class FormalizerAgent:
                f"{', '.join(failed_names)}\n\n" if failed_names else "")
             + f"## Available Mathlib Lemmas\n{hints_str}\n\n"
             f"Instructions:\n"
-            f"- Start with `import Mathlib\\nimport Polib`\n"
+            f"- Start with `import Mathlib\\nimport Inventory`\n"
             f"- Include all proved sub-lemma code verbatim\n"
             f"- Then write the main lemma `{node.node_id}` calling the sub-lemmas\n"
             f"- Use `∑ x ∈ s, f x` notation (∈ not `in`)\n"
@@ -1635,6 +1750,7 @@ class FormalizerAgent:
         # Used for cross-identifier stagnation: even if the LLM switches to a different
         # non-existent name each round, the error *class* is the same → escalate sooner.
         _unknown_id_rounds = 0
+        _fix_attempt = 0  # counts fix attempts across all rounds
 
         for round_num in range(self._config.max_rounds_per_node):
             result = self._compiler.compile(lean_code, node_id)
@@ -1643,8 +1759,30 @@ class FormalizerAgent:
                 self._flog.log_compile_round(node_id, "compile_loop", current_strategy, lean_code, result)
 
             if result.success:
-                compile_ok = True
-                self._log(verbose, f"  [ok]  {node_id} compiled (round {round_num})")
+                if not self._has_sorry(lean_code):
+                    compile_ok = True
+                    self._log(verbose, f"  [ok]  {node_id} compiled (round {round_num})")
+                    break
+                # Compiled with sorry — try mechanical tactics first, then sorry-removal fix.
+                n_sorry = len(self._find_sorry_blocks(lean_code))
+                self._log(verbose,
+                    f"  [sorry] {node_id} round {round_num}: compiled with {n_sorry} sorry(s), attempting removal")
+                mechanical = self._try_mechanical_tactics(lean_code, node_id, verbose)
+                if mechanical is not None and not self._has_sorry(mechanical):
+                    lean_code = mechanical
+                    compile_ok = True
+                    self._log(verbose, f"  [ok]  {node_id}: sorry removed by mechanical tactic")
+                    break
+                if round_num < self._config.max_rounds_per_node - 1:
+                    _fix_attempt += 1
+                    self._log(verbose, f"  [fix]  {node_id} round {round_num}, fix #{_fix_attempt}: attempting sorry removal")
+                    fixed = self._targeted_fix_sorry_removal(lean_code, node, active_hints, round_num)
+                    if fixed and fixed.strip() != lean_code.strip():
+                        lean_code = fixed
+                        current_strategy = "sorry_removal"
+                        continue
+                # No more rounds or fix unchanged — sorry could not be removed, node fails
+                self._log(verbose, f"  [sorry-fail] {node_id}: sorry could not be removed, failing node")
                 break
 
             last_errors = result.errors
@@ -1686,16 +1824,9 @@ class FormalizerAgent:
                         self._log(verbose,
                             f"  [already-partial] {node_id}: partial in Polib, accepting existing")
                         return existing_code, True, []
-                    # Name exists but code not loadable — insert sorry into current code
+                    # Name exists but code not loadable — fail (no sorry insertion)
                     self._log(verbose,
-                        f"  [already-declared] {node_id}: name conflict, inserting sorry")
-                    if self._sorry_get() < self._config.max_sorry_total:
-                        self._sorry_inc()
-                        _sc = self._insert_sorry(lean_code, result, node)
-                        _sr = self._compiler.compile(_sc, node_id)
-                        self._write_output(_sc, node_id, _sr.success)
-                        if _sr.success:
-                            return _sc, True, []
+                        f"  [already-declared] {node_id}: name conflict, failing node")
                     return lean_code, False, result.errors
                 # Track unknown/invalid identifiers for the banned list
                 for pat in (
@@ -1723,18 +1854,8 @@ class FormalizerAgent:
             ))
 
             if round_num == self._config.max_rounds_per_node - 1:
-                if self._sorry_get() < self._config.max_sorry_total:
-                    self._sorry_inc()
-                    lean_code = self._insert_sorry(lean_code, result, node)
-                    _sorry_result = self._compiler.compile(lean_code, node_id)
-                    self._write_output(lean_code, node_id, _sorry_result.success)
-                    if _sorry_result.success:
-                        compile_ok = True
-                        self._log(verbose, f"  [sorry-ok] {node_id}: sorry inserted, compiled as partial")
-                    else:
-                        _err = (_sorry_result.errors[0].raw_message[:80] if _sorry_result.errors
-                                else (_sorry_result.stderr or "unknown")[:80])
-                        self._log(verbose, f"  [sorry-fail] {node_id}: sorry recompile failed: {_err}")
+                # All rounds exhausted without a sorry-free proof — fail the node
+                self._log(verbose, f"  [fail] {node_id}: max rounds exhausted, no sorry-free proof found")
                 break
 
             # Stagnation detection via hash-based counting (Fix 4 + Fix 8).
@@ -1751,19 +1872,10 @@ class FormalizerAgent:
                     f"  [id-stagnant] {node_id}: {_unknown_id_rounds} rounds with unknown "
                     f"identifier errors — banned: {sorted(banned_ids)}")
 
-            # Early-sorry fast path: if stagnant after round 1,
-            # skip further fix attempts and insert sorry immediately.
+            # Stagnant after round 1 — no more fix attempts, fail the node
             if round_num >= 1 and is_stagnant:
                 self._log(verbose,
-                    f"  [early-sorry] {node_id}: stagnant at round {round_num}, inserting sorry immediately")
-                if self._sorry_get() < self._config.max_sorry_total:
-                    self._sorry_inc()
-                    lean_code = self._insert_sorry(lean_code, result, node)
-                    _sorry_result = self._compiler.compile(lean_code, node_id)
-                    self._write_output(lean_code, node_id, _sorry_result.success)
-                    if _sorry_result.success:
-                        compile_ok = True
-                        self._log(verbose, f"  [sorry-ok] {node_id}: early sorry compiled as partial")
+                    f"  [stagnant-fail] {node_id}: stagnant at round {round_num}, failing node")
                 break
 
             # Early decompose check: after DECOMPOSE_CHECK_AFTER failures, ask LLM
@@ -1810,6 +1922,8 @@ class FormalizerAgent:
                     _lv = getattr(self, '_loogle_validator', None)
                     active_hints = _lv.filter_existing(fresh) if _lv else fresh
                     _phase1_refreshed = True
+                _fix_attempt += 1
+                self._log(verbose, f"  [fix]  {node_id} round {round_num}, fix #{_fix_attempt}: trying targeted_fix + targeted_fix_strict in parallel")
                 with ThreadPoolExecutor(max_workers=2) as _pex:
                     _f0 = _pex.submit(self._targeted_fix, lean_code, result, node, active_hints, round_num, banned_ids)
                     _f1 = _pex.submit(self._targeted_fix_strict, lean_code, result, node, active_hints, round_num, banned_ids)
@@ -1821,69 +1935,45 @@ class FormalizerAgent:
                 self._write_output(_c0, node_id, _res0.success)
                 self._write_output(_c1, node_id, _res1.success)
                 if _res0.success or _res1.success:
-                    lean_code = _c0 if _res0.success else _c1
-                    compile_ok = True
+                    _best_code = _c0 if _res0.success else _c1
                     _winner = "targeted_fix_parallel" if _res0.success else "targeted_fix_strict_parallel"
-                    self._log(verbose, f"  [ok]  {node_id} compiled via parallel fix ({_winner}, round {round_num})")
-                    if self._flog:
-                        self._flog.log_compile_round(node_id, "compile_loop", _winner, lean_code,
-                                                     _res0 if _res0.success else _res1)
-                    break
+                    if not self._has_sorry(_best_code):
+                        lean_code = _best_code
+                        compile_ok = True
+                        self._log(verbose, f"  [ok]  {node_id} compiled via parallel fix ({_winner}, round {round_num}, fix #{_fix_attempt})")
+                        if self._flog:
+                            self._flog.log_compile_round(node_id, "compile_loop", _winner, lean_code,
+                                                         _res0 if _res0.success else _res1)
+                        break
+                    # Parallel fix succeeded but still has sorry — treat as needing removal
+                    lean_code = _best_code
+                    current_strategy = _winner
                 # Neither succeeded — use the one with fewer errors for the next round
                 fixed, next_strategy = (
                     (_c0, "targeted_fix_parallel") if len(_res0.errors) <= len(_res1.errors)
                     else (_c1, "targeted_fix_strict_parallel")
                 )
             elif phase == 2:
-                self._log(verbose, f"  [escalate] {node_id}: decomposing into sub-steps")
+                _fix_attempt += 1
+                self._log(verbose, f"  [escalate] {node_id}: decomposing into sub-steps (round {round_num}, fix #{_fix_attempt})")
                 fixed = self._targeted_fix_decompose(lean_code, result, node, active_hints, round_num, banned_ids)
                 next_strategy = "targeted_fix_decompose"
             else:
-                # phase 3: try mechanical tactics, else insert sorry and break
+                # phase 3: try mechanical tactics; if they fail, fail the node (no sorry)
                 mechanical = self._try_mechanical_tactics(lean_code, node_id, verbose)
-                if mechanical is not None:
+                if mechanical is not None and not self._has_sorry(mechanical):
                     lean_code = mechanical
                     current_strategy = "mechanical_tactic"
                     continue
-                if self._sorry_get() < self._config.max_sorry_total:
-                    self._sorry_inc()
-                    lean_code = self._insert_sorry(lean_code, result, node)
-                    _sorry_result = self._compiler.compile(lean_code, node_id)
-                    self._write_output(lean_code, node_id, _sorry_result.success)
-                    if _sorry_result.success:
-                        compile_ok = True
-                        self._log(verbose, f"  [sorry-ok] {node_id}: phase3 sorry compiled as partial")
+                self._log(verbose, f"  [fail] {node_id}: phase3 exhausted, no sorry-free proof found")
                 break
 
             if fixed and fixed.strip() != lean_code.strip():
                 lean_code = fixed
                 current_strategy = next_strategy
             else:
-                self._log(verbose, f"  [fix-skip] {node_id} round {round_num}: no change from Claude")
-                if phase >= 2:
-                    if self._sorry_get() < self._config.max_sorry_total:
-                        self._sorry_inc()
-                        lean_code = self._insert_sorry(lean_code, result, node)
-                        _sorry_result = self._compiler.compile(lean_code, node_id)
-                        self._write_output(lean_code, node_id, _sorry_result.success)
-                        if _sorry_result.success:
-                            compile_ok = True
-                            self._log(verbose, f"  [sorry-ok] {node_id}: fix-skip sorry compiled as partial")
-                    break
-                # LLM returned identical code — recompiling would give the same error.
-                # Break rather than waste a compile round.
+                self._log(verbose, f"  [fix-skip] {node_id} round {round_num}: no change from Claude, failing node")
                 break
-
-        # Last-resort sorry: all rounds exhausted without compiling.
-        # Guarantees every node lands as partial rather than failed.
-        if not compile_ok and self._sorry_get() < self._config.max_sorry_total:
-            self._sorry_inc()
-            lean_code = self._insert_sorry(lean_code, result, node)
-            _sorry_result = self._compiler.compile(lean_code, node_id)
-            self._write_output(lean_code, node_id, _sorry_result.success)
-            if _sorry_result.success:
-                compile_ok = True
-                self._log(verbose, f"  [sorry-ok] {node_id}: rounds exhausted, last-resort sorry as partial")
 
         # Expose banned_ids so _process_node can use them in the structure-augment fallback
         self._thread_local.last_banned_ids = banned_ids
@@ -1923,8 +2013,11 @@ class FormalizerAgent:
                     if code:
                         self._log(verbose, f"  [skip-recover] {node_id} code recovered via {fallback.node_id}")
             if code:
+                _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
                 with self._run_codes_lock:
                     self._run_codes[node_id] = code
+                    self._run_quality_reports[node_id] = _skip_report
+                    self._run_skipped_nodes.add(node_id)
                 return "proved"
             # Code not found despite session saying proved — stale state.
             # Clear it and fall through to re-prove.
@@ -1942,14 +2035,20 @@ class FormalizerAgent:
             if _polib_exact.status == "proved" and code and not self._has_sorry(code):
                 self._log(verbose, f"  [skip] {node_id} (proved in polib, session stale)")
                 self._session.mark_done(node_id, "proved")
+                _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
                 with self._run_codes_lock:
                     self._run_codes[node_id] = code
+                    self._run_quality_reports[node_id] = _skip_report
+                    self._run_skipped_nodes.add(node_id)
                 return "proved"
             elif _polib_exact.status == "partial" and code:
                 self._log(verbose, f"  [skip] {node_id} (partial in polib, session stale)")
                 self._session.mark_partial(node_id, 0, "recovered from polib")
+                _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
                 with self._run_codes_lock:
                     self._run_codes[node_id] = code
+                    self._run_quality_reports[node_id] = _skip_report
+                    self._run_skipped_nodes.add(node_id)
                 return "partial"
 
         # Guard: all declared dependencies must be proved/partial
@@ -1967,14 +2066,20 @@ class FormalizerAgent:
             if existing.status == "proved" and code and not self._has_sorry(code):
                 self._log(verbose, f"  [found] {node_id} in polib (proved)")
                 self._session.mark_done(node_id, "proved")
+                _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
                 with self._run_codes_lock:
                     self._run_codes[node_id] = code
+                    self._run_quality_reports[node_id] = _skip_report
+                    self._run_skipped_nodes.add(node_id)
                 return "proved"
             elif existing.status == "partial" and code:
                 self._log(verbose, f"  [found] {node_id} in polib (partial)")
                 self._session.mark_partial(node_id, 0, "recovered from polib")
+                _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
                 with self._run_codes_lock:
                     self._run_codes[node_id] = code
+                    self._run_quality_reports[node_id] = _skip_report
+                    self._run_skipped_nodes.add(node_id)
                 return "partial"
             elif existing.status == "proved":
                 self._log(verbose, f"  [found] {node_id} matched polib but code has sorry — will re-prove")
@@ -2036,7 +2141,7 @@ class FormalizerAgent:
 
         # For retry-partial: if the node already has a section in Polib.lean,
         # remove it before the compile attempt.  Without this, the temp file
-        # does `import Polib` + redefines the lemma → "has already been
+        # does `import Inventory` + redefines the lemma → "has already been
         # declared" on round 0, so no LLM-generated code ever gets tested.
         # Save a backup so we can restore if the retry completely fails (keeps
         # the node as partial for downstream dependency resolution).
@@ -2051,64 +2156,21 @@ class FormalizerAgent:
                 self._log(verbose,
                     f"  [pre-remove] {node_id}: removed old partial from Polib before retry")
 
+        # Load cross-run failure history so the LLM can avoid repeating past mistakes
+        cross_run_errors = self._session.get_cross_run_errors(node_id) or None
+
         self._thread_local.pending_decompose = None
         try:
             lean_code, compile_ok, last_errors = self._partial_solver(
                 node, goal_lock, hints, proven_node_ids, proven_dep_imports,
                 category, node_id, verbose, existing_code,
+                cross_run_errors=cross_run_errors,
             )
         except GoalTamperedError:
             raise  # always propagate goal-tamper errors
         except Exception as _solver_exc:
-            # Any unexpected exception (API timeout, network error, etc.) —
-            # restore the backup so downstream deps don't lose access to it.
+            # Any unexpected exception (API timeout, network error, etc.) — fail the node.
             self._log(verbose, f"  [solver-exc] {node_id}: {_solver_exc}")
-            if _partial_backup is not None:
-                try:
-                    _br = self._quality.check(parsed, goal_lock.goal, _partial_backup)
-                    with self._polib_lock:
-                        self._polib_mgr.save(node, _partial_backup, _br, category, parsed)
-                        self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                    self._session.mark_partial(node_id, 0, f"solver exception: {_solver_exc}")
-                    self._log(verbose, f"  [restore-on-exc] {node_id}: restored old partial after exception")
-                    with self._run_codes_lock:
-                        self._run_codes[node_id] = _partial_backup
-                    if self._flog:
-                        self._flog.finish_node(node_id, "partial", sorry_count=1)
-                    return "partial"
-                except Exception:
-                    pass
-            # Nuclear sorry fallback: guarantee at least a sorry stub even when the
-            # solver threw (e.g. API timeout before any compile round could run).
-            _sig = (goal_lock.goal.lean_signature or "").strip() if goal_lock and goal_lock.goal else ""
-            _nuclear_sigs = ([_sig] if _sig else []) + [f"lemma {node_id} : True"]
-            for _ns in _nuclear_sigs:
-                _nuclear = (
-                    f"import Mathlib\nimport Polib\n\n"
-                    f"{_ns} := by\n"
-                    f"  -- [SORRY] nuclear: all proof attempts failed\n"
-                    f"  sorry\n"
-                )
-                _nr = self._compiler.compile(_nuclear, node_id)
-                if _nr.success:
-                    try:
-                        _nr_report = self._quality.check(parsed, goal_lock.goal, _nuclear)
-                        with self._polib_lock:
-                            self._polib_mgr.save(node, _nuclear, _nr_report, category, parsed)
-                            if not self._verify_polib_builds(node_id, verbose):
-                                self._polib_mgr.remove(node_id)
-                                self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                                raise PolibSaveError(f"Node '{node_id}': nuclear sorry broke Polib build")
-                            self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                        self._session.mark_partial(node_id, 0, f"nuclear sorry (solver-exc: {_solver_exc})")
-                        with self._run_codes_lock:
-                            self._run_codes[node_id] = _nuclear
-                        if self._flog:
-                            self._flog.finish_node(node_id, "partial", sorry_count=1)
-                        return "partial"
-                    except Exception as _save_exc:
-                        self._log(verbose, f"  [nuclear-save-err] {node_id}: {_save_exc}")
-                        # Save failed — don't break; try next sig (e.g. `lemma N : True`)
             self._session.mark_pending(node_id, 0, str(_solver_exc))
             if self._flog:
                 self._flog.finish_node(node_id, "failed", sorry_count=0)
@@ -2125,24 +2187,15 @@ class FormalizerAgent:
                 compile_ok = True
                 last_errors = []
             elif assembled_code and assembled_code.strip():
-                # Assembly failed to compile — try inserting sorry into the assembled body
-                # so at least a partial result can be saved rather than losing all work.
-                if self._sorry_get() < self._config.max_sorry_total:
-                    self._sorry_inc()
-                    from agent.prover.tools.lean_compiler import CompileResult as _CR
-                    _dummy = _CR(success=False, exit_code=1, stdout="", stderr="assembly failed",
-                                 errors=[], warnings=[], compile_time_seconds=0.0, module_name=node_id)
-                    _sorried = self._insert_sorry(assembled_code, _dummy, node)
-                    _res = self._compiler.compile(_sorried, node_id)
-                    self._write_output(_sorried, node_id, _res.success)
-                    if _res.success:
-                        lean_code = _sorried
-                        compile_ok = True
-                        last_errors = []
-                        self._log(verbose, f"  [sorry-ok] {node_id}: assembly sorry compiled as partial")
+                # Assembly failed to compile — node fails (no sorry insertion)
+                self._log(verbose, f"  [assemble-fail] {node_id}: assembled code failed to compile, failing node")
 
         # ── Phase 4: quality check + save ─────────────────────────────
-        report = self._quality.check(parsed, goal_lock.goal, lean_code)
+        report = self._quality.check(
+            parsed, goal_lock.goal, lean_code, is_main_target=node.is_main_target
+        )
+        with self._run_codes_lock:
+            self._run_quality_reports[node_id] = report
         # Reject imports-only files: an empty body compiles with 0 sorrys but
         # contains no actual proof — accepting it would mark the node as proved
         # with no code (the false-positive that burned P6GenusG).
@@ -2229,135 +2282,24 @@ class FormalizerAgent:
                     self._flog.finish_node(node_id, entry.status, sorry_count=0)
                 return entry.status
             except PolibSaveError as exc:
-                self._log(verbose, f"  [save-err] {node_id}: {exc}")
-                if _partial_backup is not None:
-                    try:
-                        _br = self._quality.check(parsed, goal_lock.goal, _partial_backup)
-                        with self._polib_lock:
-                            self._polib_mgr.save(node, _partial_backup, _br, category, parsed)
-                            self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                        self._session.mark_partial(node_id, self._config.max_rounds_per_node, f"save-err, restored: {exc}")
-                        self._log(verbose, f"  [restore-partial] {node_id}: save failed, restored old partial")
-                        if self._flog:
-                            self._flog.finish_node(node_id, "partial", sorry_count=report.sorry_count)
-                        return "partial"
-                    except Exception:
-                        pass
-                # Proof compiled but broke Polib — save a sorry'd version so the node
-                # is at least partial (not failed) and downstream deps can reference it.
-                _fallback = self._try_sorry_save(
-                    lean_code, node, node_id, parsed, goal_lock, category, verbose, str(exc)
-                )
-                if _fallback:
-                    return _fallback
+                self._log(verbose, f"  [save-err] {node_id}: {exc} — failing node")
                 self._session.mark_pending(node_id, self._config.max_rounds_per_node, str(exc))
                 if self._flog:
                     self._flog.finish_node(node_id, "failed", sorry_count=report.sorry_count)
                 return "pending"
 
         elif compile_ok and report.sorry_count > 0:
-            try:
-                with self._polib_lock:
-                    entry = self._polib_mgr.save(node, lean_code, report, category, parsed)
-                    # Verify inside the lock: atomic save→verify→remove prevents false
-                    # positives where a concurrent write is the actual Polib breaker.
-                    if not self._verify_polib_builds(node_id, verbose):
-                        self._polib_mgr.remove(node_id)
-                        self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                        raise PolibSaveError(f"Node '{node_id}': partial entry broke Polib.lean build, rolled back")
-                    self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                with self._save_lock:
-                    self._dep_graph.record_edges(entry.node_id, lean_code, parsed)
-                    self._dep_graph.save()
-                self._session.mark_partial(
-                    node_id, self._config.max_rounds_per_node, f"{report.sorry_count} sorry(s) remain"
-                )
-                self._log(verbose, f"  [partial] {node_id} — {report.sorry_count} sorry(s), saved to Polib")
-                with self._run_codes_lock:
-                    self._run_codes[node_id] = lean_code
-                if self._flog:
-                    self._flog.finish_node(node_id, "partial", sorry_count=report.sorry_count)
-                return "partial"
-            except PolibSaveError as exc:
-                self._log(verbose, f"  [save-err] {node_id}: {exc}")
-                if _partial_backup is not None:
-                    try:
-                        _br = self._quality.check(parsed, goal_lock.goal, _partial_backup)
-                        with self._polib_lock:
-                            self._polib_mgr.save(node, _partial_backup, _br, category, parsed)
-                            self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                        self._session.mark_partial(node_id, self._config.max_rounds_per_node, f"save-err, restored: {exc}")
-                        self._log(verbose, f"  [restore-partial] {node_id}: save failed, restored old partial")
-                        if self._flog:
-                            self._flog.finish_node(node_id, "partial", sorry_count=report.sorry_count)
-                        return "partial"
-                    except Exception:
-                        pass
-                # Partial code broke Polib — try a simpler sorry'd stub so the node
-                # is reachable by downstream deps rather than completely absent.
-                _fallback = self._try_sorry_save(
-                    lean_code, node, node_id, parsed, goal_lock, category, verbose, str(exc)
-                )
-                if _fallback:
-                    return _fallback
-                self._session.mark_pending(node_id, self._config.max_rounds_per_node, str(exc))
-                if self._flog:
-                    self._flog.finish_node(node_id, "failed", sorry_count=report.sorry_count)
-                return "pending"
+            # Code compiled but still has sorry — reject as failure (no new sorry accepted)
+            last_err_msg = f"compiled with {report.sorry_count} sorry(s) — sorry not accepted"
+            self._log(verbose, f"  [sorry-reject] {node_id} — {report.sorry_count} sorry(s), failing node")
+            self._session.mark_pending(node_id, self._config.max_rounds_per_node, last_err_msg, failed_code=lean_code)
+            if self._flog:
+                self._flog.finish_node(node_id, "failed", sorry_count=report.sorry_count)
+            return "pending"
 
         else:
             last_err_msg = last_errors[0].raw_message[:120] if last_errors else "compile failed"
-            if _partial_backup is not None:
-                try:
-                    _br = self._quality.check(parsed, goal_lock.goal, _partial_backup)
-                    with self._polib_lock:
-                        self._polib_mgr.save(node, _partial_backup, _br, category, parsed)
-                        self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                    self._session.mark_partial(node_id, self._config.max_rounds_per_node, "retry failed — kept old partial")
-                    self._log(verbose, f"  [restore-partial] {node_id}: retry failed, restored old partial to Polib")
-                    with self._run_codes_lock:
-                        self._run_codes[node_id] = _partial_backup
-                    if self._flog:
-                        self._flog.finish_node(node_id, "partial", sorry_count=report.sorry_count)
-                    return "partial"
-                except Exception as _re:
-                    self._log(verbose, f"  [restore-err] {node_id}: could not restore partial: {_re}")
-            # Nuclear-sorry fallback: code either compiled without the target declaration
-            # (LLM used wrong name) or all fix attempts failed after the compile loop.
-            # Guarantee at least a sorry stub so the node is always partial, never failed.
-            _sig = (goal_lock.goal.lean_signature or "").strip() if goal_lock and goal_lock.goal else ""
-            _nuclear_sigs = ([_sig] if _sig else []) + [f"lemma {node_id} : True"]
-            for _ns in _nuclear_sigs:
-                _nuclear = (
-                    f"import Mathlib\nimport Polib\n\n"
-                    f"{_ns} := by\n"
-                    f"  -- [SORRY] nuclear: all proof attempts failed\n"
-                    f"  sorry\n"
-                )
-                _nr = self._compiler.compile(_nuclear, node_id)
-                if _nr.success:
-                    lean_code = _nuclear
-                    compile_ok = True
-                    self._log(verbose, f"  [partial-decided] {node_id}: partially proved accepted")
-                    try:
-                        _nr_report = self._quality.check(parsed, goal_lock.goal, lean_code)
-                        with self._polib_lock:
-                            entry = self._polib_mgr.save(node, lean_code, _nr_report, category, parsed)
-                            if not self._verify_polib_builds(node_id, verbose):
-                                self._polib_mgr.remove(node_id)
-                                self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                                raise PolibSaveError(f"Node '{node_id}': nuclear sorry broke Polib build")
-                            self._invalidate_polib_content(self._polib_mgr._polib_lean)
-                        self._session.mark_partial(node_id, self._config.max_rounds_per_node, "nuclear sorry")
-                        with self._run_codes_lock:
-                            self._run_codes[node_id] = lean_code
-                        if self._flog:
-                            self._flog.finish_node(node_id, "partial", sorry_count=1)
-                        return "partial"
-                    except Exception as _save_exc:
-                        self._log(verbose, f"  [nuclear-save-err] {node_id}: {_save_exc}")
-                        # Save failed — don't break; try next sig (e.g. `lemma N : True`)
-            self._session.mark_pending(node_id, self._config.max_rounds_per_node, last_err_msg)
+            self._session.mark_pending(node_id, self._config.max_rounds_per_node, last_err_msg, failed_code=lean_code)
             self._log(verbose, f"  [fail] {node_id} — saved to output/ for inspection")
             if self._flog:
                 self._flog.finish_node(node_id, "failed", sorry_count=report.sorry_count)
@@ -2424,13 +2366,63 @@ class FormalizerAgent:
             f"-- Complete formalization: {Path(tex_path).stem}.tex",
             f"-- Theorem: {theorem_name}",
             f"-- Generated: {ts}",
-            f"-- Proved ({len(nodes_proved)}): {', '.join(nodes_proved) or 'none'}",
+            f"-- Proved — 0 new sorry ({len(nodes_proved)}): {', '.join(nodes_proved) or 'none'}",
         ]
         if nodes_partial:
-            lines.append(f"-- Partial ({len(nodes_partial)}): {', '.join(nodes_partial)}")
+            lines.append(f"-- Partial — has new sorry ({len(nodes_partial)}): {', '.join(nodes_partial)}")
         if nodes_failed:
             lines.append(f"-- Failed ({len(nodes_failed)}): {', '.join(nodes_failed)}")
-        lines += [f"-- Sorry count: {total_sorry_count}", ""]
+        lines += [f"-- New sorry count: {total_sorry_count}", ""]
+
+        # ── Sorry report (only new sorries — Inventory.lean sorries are pre-approved) ──
+        if total_sorry_count > 0:
+            lines += [
+                "-- ════════════════════════════════════════════════════════════════════",
+                f"-- SORRY REPORT  ({total_sorry_count} new sorry(s) from Partial nodes — each must be justified below)",
+                "-- Inventory.lean sorries are foundational axioms and are NOT counted here.",
+                "-- ════════════════════════════════════════════════════════════════════",
+            ]
+            # Collect sorry details from run_codes (partial nodes)
+            _sorry_re = re.compile(r"\bsorry\b")
+            _anno_re  = re.compile(r"^[ \t]*--\s*\[SORRY\]\s*(\w+)\s*:\s*(.*)", re.MULTILINE)
+            for nid in nodes_partial:
+                node_code = self._run_codes.get(nid, "")
+                if not node_code or not self._has_sorry(node_code):
+                    continue
+                lines.append(f"--")
+                lines.append(f"-- Node: {nid}")
+                # Extract every [SORRY] annotation block
+                node_lines = node_code.splitlines()
+                sorry_n = 0
+                for i, ln in enumerate(node_lines):
+                    if ln.strip().startswith("--"):
+                        continue
+                    if not _sorry_re.search(ln):
+                        continue
+                    sorry_n += 1
+                    j = i - 1
+                    anno: dict[str, str] = {}
+                    while j >= 0 and re.match(r"^[ \t]*--\s*\[SORRY\]", node_lines[j]):
+                        m = re.match(r"^[ \t]*--\s*\[SORRY\]\s*(\w+)\s*:\s*(.*)",
+                                     node_lines[j])
+                        if m:
+                            anno[m.group(1).lower()] = m.group(2).strip()
+                        j -= 1
+                    cls    = anno.get("class",          "unclassified")
+                    reason = anno.get("reason",         "(no reason given)")
+                    nxt    = anno.get("suggested_next", "(none)")
+                    impact = anno.get("impact",         "(unknown)")
+                    lines += [
+                        f"--   Sorry #{sorry_n}:",
+                        f"--     class          : {cls}",
+                        f"--     reason         : {reason}",
+                        f"--     suggested_next : {nxt}",
+                        f"--     impact         : {impact}",
+                    ]
+            lines += [
+                "-- ════════════════════════════════════════════════════════════════════",
+                "",
+            ]
 
         lines += header_lines
         lines.append("")
@@ -2695,6 +2687,8 @@ class FormalizerAgent:
         # Reset per-run code collection
         with self._run_codes_lock:
             self._run_codes.clear()
+            self._run_quality_reports.clear()
+            self._run_skipped_nodes.clear()
 
         # Initialise per-run formalization logger
         import uuid as _uuid
@@ -2704,7 +2698,7 @@ class FormalizerAgent:
 
         try:
             # ── Step 1: Parse ──────────────────────────────────────────
-            self._log(verbose, "[1/5] Parsing LaTeX...")
+            self._log(verbose, "[1/6] Parsing conjecture...")
             if parsed is None:
                 parsed = self._parser.parse_with_llm(latex_source, self._sdk_fast, self._config.model_fast)
             self._log(verbose, f"      theorem: {parsed.name} ({len(parsed.proof_steps)} steps)")
@@ -2712,7 +2706,7 @@ class FormalizerAgent:
             self._flog._flush()
 
             # ── Step 2: Lock goal (cached) ─────────────────────────────
-            self._log(verbose, "[2/5] Extracting & locking goal...")
+            self._log(verbose, "[2/6] Extracting & locking goal...")
             goal_lock = self._load_cached_goal(parsed, verbose=verbose) or GoalLock.create(
                 parsed, self._extractor, self._validator, max_attempts=3
             )
@@ -2753,7 +2747,7 @@ class FormalizerAgent:
             self._log(verbose, f"      signature: {goal_lock.goal.lean_signature[:80]}...")
 
             # ── Step 3: Blueprint (cached) ─────────────────────────────
-            self._log(verbose, "[3/5] Decomposing blueprint...")
+            self._log(verbose, "[3/6] Decomposing blueprint...")
             _proved_lemmas = [
                 {
                     "node_id": e["node_id"],
@@ -2773,7 +2767,7 @@ class FormalizerAgent:
             self._log(verbose, f"      topo order: {blueprint.topo_order}")
 
             # ── Step 4: Per-node loop (parallel by dependency level) ───
-            self._log(verbose, "[4/5] Formalizing nodes...")
+            self._log(verbose, "[4/6] Formalizing nodes...")
             levels = self._compute_parallel_levels(blueprint)
             proven_node_ids: list[str] = []
             # Maps node_id → Lean import path for nodes saved to polib this session
@@ -2871,9 +2865,26 @@ class FormalizerAgent:
                 session_state_path=session_state_path,
             )
 
-        # ── Step 4.5: Validate and repair Polib integrity ─────────────
+        # ── Step 5: Quality check summary ─────────────────────────────
+        self._log(verbose, "[5/6] Checking formalization quality...")
+        with self._run_codes_lock:
+            _qr_snapshot = dict(self._run_quality_reports)
+            _skipped_snapshot = set(self._run_skipped_nodes)
+        for _qr_node_id in blueprint.topo_order:
+            _qr = _qr_snapshot.get(_qr_node_id)
+            if _qr is None:
+                self._log(verbose, f"  [{_qr_node_id}] — not reached (dependency failed)")
+                continue
+            _tag = "PASS" if _qr.passed else "FAIL"
+            if _qr_node_id in _skipped_snapshot:
+                self._log(verbose, f"  [{_qr_node_id}] Retrying... (loaded from Polib)")
+            self._log(verbose, f"    Quality: {_tag} (score={_qr.score:.2f})")
+            for _finding in _qr.findings:
+                self._log(verbose, f"    • {_finding}")
+
+        # ── Step 5.5: Validate and repair Polib integrity ─────────────
         from agent.prover.tools.polib_validator import PolibValidator
-        self._log(verbose, "[4.5/5] Validating Polib...")
+        self._log(verbose, "[5.5/6] Validating Polib...")
         _val = PolibValidator(
             polib_lean=self._polib_mgr._polib_lean,
             workspace=Path(self._config.polib_path),
@@ -2911,7 +2922,7 @@ class FormalizerAgent:
                 parsed.name if parsed is not None else "(unknown)",
                 nodes_proved, nodes_partial, nodes_failed, sorry_total,
             )
-            self._log(verbose, f"[log] formalization → {lean_out_path}")
+            self._log(verbose, f"[6/6] Formalization saved → {lean_out_path}")
 
         if nodes_failed and not (nodes_proved or nodes_partial):
             _status = "failed"
@@ -3042,7 +3053,7 @@ You are a Lean 4 proof discovery expert working in the domain of combinatorial
 polytope theory. Your task is to devise a proof strategy for the following
 UNPROVEN conjecture and express it as a directed acyclic graph (DAG) of
 blueprint nodes. There is no known proof — you must figure out how to prove
-it from first principles using Lean 4 / Mathlib tactics and the Polib lemmas
+it from first principles using Lean 4 / Mathlib tactics and the Inventory lemmas
 listed below.
 
 Conjecture name: {theorem_name}
@@ -3064,7 +3075,7 @@ Conclusion: {conclusion}
   f_2 (total face count) = ∑ k in Finset.Ico 3 (maps.m + 1), maps.p_i k.
   Do NOT add IsSimple, maps.simple, or any simplicity hypothesis — it is not defined.
 
-## Polib lemmas (available via `import Polib`)
+## Polib lemmas (available via `import Inventory`)
 Two kinds are listed below:
 - **proved** (no tag): fully verified, zero sorry — safe to depend on directly.
 - **partial** (tagged `[partial — has sorry…]`): proof structure exists but incomplete.
@@ -3092,7 +3103,7 @@ in the `description` field.
   states (no verbatim proof exists — summarise the sub-goal instead).
 
 ## CRITICAL — Node naming
-All nodes live in a shared Polib namespace. You MUST prefix every new node
+All nodes live in a shared Inventory namespace. You MUST prefix every new node
 you define with the exact conjecture identifier: `{theorem_name}`.
 
   REQUIRED prefix: `{theorem_name}`
@@ -3100,7 +3111,7 @@ you define with the exact conjecture identifier: `{theorem_name}`.
   BAD:   "P6InequalityBound"      ← wrong conjecture prefix
   GOOD:  "{theorem_name}InequalityBound"  ← correct
 
-Exception: nodes that intentionally REUSE an existing Polib lemma listed above
+Exception: nodes that intentionally REUSE an existing Inventory lemma listed above
 must use that lemma's exact name unchanged.
 
 ## CRITICAL — Dependency rules
@@ -3110,8 +3121,8 @@ or B's type mentions a type defined in A. When in doubt, omit the dependency.
 ## CRITICAL — Cross-theorem dependencies are FORBIDDEN
 Dependencies must only reference node_ids defined WITHIN THIS blueprint.
 Do NOT list a node_id from another theorem's blueprint (e.g. "C2_DehnSommerville"
-for a C4 blueprint) — those lemmas are already available via `import Polib` and
-must NOT appear as dependency entries. If you need a proved Polib lemma, just
+for a C4 blueprint) — those lemmas are already available via `import Inventory` and
+must NOT appear as dependency entries. If you need a proved Inventory lemma, just
 reference it by name in the `description` field; leave `dependencies` empty for that edge.
 
 Respond with ONLY valid JSON — no prose, no markdown fences.

@@ -1,4 +1,4 @@
-# Content of Polib/Shared.lean — shown to Claude as context; Claude must NOT redefine it.
+# Content of Inventory/Shared.lean — shown to Claude as context; Claude must NOT redefine it.
 SHARED_MODULE_CONTENT = """\
 import Mathlib
 
@@ -94,14 +94,14 @@ lemma equality_family {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
 """
 
 # Keep LEAN_PREAMBLE for _ensure_preamble fallback — just the two import lines.
-LEAN_PREAMBLE = "import Mathlib\nimport Polib\n"
+LEAN_PREAMBLE = "import Mathlib\nimport Inventory\nimport Polib\n"
 
 # Injected into every fix-loop prompt (targeted_fix / targeted_fix_strict /
 # targeted_fix_decompose).  The generation system prompt is cached by the API
 # and not re-sent on fix calls, so these prompts have no domain knowledge
-# about Polib unless we include this block explicitly.
+# about Inventory unless we include this block explicitly.
 FIX_LOOP_POLIB_REF = """\
-## Polib geometric axiom lemmas — call as STANDALONE functions (never dot-notation):
+## Inventory geometric axiom lemmas — call as STANDALONE functions (never dot-notation):
 - `euler_formula maps`                 →  (v:ℤ) - e + Σ_{k=3}^{m} p_i k = 2 - 2g
 - `handshake maps`                     →  2·e = Σ_{k=3}^{m} k·p_i k
 - `regularity maps`                    →  3·v = 2·e
@@ -113,13 +113,32 @@ FIX_LOOP_POLIB_REF = """\
 - `occupation_bound maps k hk`         →  0 ≤ total_occ k ∧ total_occ k ≤ (k:ℤ)/2·p_k
 - `equality_family maps n`             →  ∃ witness for the equality case
 
-## Session-proved Polib lemmas:
+## Derived Inventory lemmas (PROVED or axiomatised — calling them does NOT add new sorry):
+These are available via `import Inventory` in any generated file. USE THESE instead of sorry.
+- `P6EdgeCountEquation maps`      → 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k   (PROVED, no sorry)
+- `Juc_EulerFormula maps`         → 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k         (PROVED, g=0)
+- `P6InequalityPart maps hm`      → 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{k≥7}((k+1)/2-6)*p_k  (Inventory axiom — OK to call)
+- `Juc_InequalityPart maps hm`    → same bound for g=0  (Inventory axiom — OK to call)
+- `JucovicTheorem maps h1`        → hexagon lower bound ∧ equality family (g=0, h1 : Σp_k ≥ 7)
+- `Juc_HexMaxOccupation maps hm`  → total_occ 6 ≤ 3*p₆  (PROVED)
+- `Juc_NonHexEdgeBound maps hm`   → Σ_{k≥5,k≠6} total_occ k ≤ Σ_{k≥5,k≠6} (k/2)*p_k  (PROVED)
+⚠ Calling P6InequalityPart/Juc_InequalityPart is ACCEPTABLE even though they have sorry internally.
+  You are reusing an accepted Inventory axiom, NOT introducing new sorry.
+
+## Session-proved Polib lemmas (accumulated conjecture proofs):
 Check the "Previously proved dependencies" section in your prompt for what is
-currently available. Only use a lemma name if it is EXPLICITLY listed there.
+currently available via `import Polib`. Only use a lemma name if it is EXPLICITLY listed there.
 Do NOT assume any specific name exists — if it is not listed, it does not exist yet.
 
 ⛔ NEVER use `maps.euler_formula`, `maps.handshake`, etc. — dot-notation does NOT work.
 ⛔ NEVER add fields to `SimplyCon3ConnectedMap` — structure has ONLY data fields.
+
+## Dependent type pitfalls — CRITICAL for fix-loop:
+- `regularity maps` / `handshake maps` return ℕ equations. Cast to ℤ with `exact_mod_cast`.
+- `(maps.total_faces : ℤ)` ≠ `∑ k ∈ Finset.Ico 3 (maps.m+1), (maps.p_i k : ℤ)` automatically.
+  Bridge: `simp [SimplyCon3ConnectedMap.total_faces, Nat.cast_sum]`
+- `rw [hg] at h` when `hg : g = 0` and `h` comes from `maps : SimplyCon3ConnectedMap g`
+  ALWAYS fails ("motive is not type correct"). Use `linarith [hg]` instead.
 """
 
 # Static system prompt — sent via --system-prompt so Anthropic can cache it.
@@ -128,7 +147,7 @@ Do NOT assume any specific name exists — if it is not listed, it does not exis
 LEAN_GENERATION_SYSTEM_PROMPT = """\
 You are a Lean 4 expert generating proof code for a polytope-combinatorics formalization project.
 
-## Shared type definitions (live in `Polib` — DO NOT redefine any of these):
+## Shared type definitions (live in `Inventory` — DO NOT redefine any of these):
 ```lean
 """ + SHARED_MODULE_CONTENT.strip() + """
 ```
@@ -161,10 +180,10 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
 
 ## Proof strategy guide — use this when standard tactics fail:
 
-### Strategy A0 — Reuse already-proved Polib lemmas (check FIRST before proving anything):
+### Strategy A0 — Reuse already-proved lemmas (check FIRST before proving anything):
   The "Previously proved dependencies" section of your prompt lists what is currently
-  available via `import Polib`. Check it BEFORE writing any proof — if a lemma is listed
-  there, call it directly instead of re-proving it.
+  available via `import Polib` (proved conjectures) and `import Inventory` (foundational axioms).
+  Check it BEFORE writing any proof — if a lemma is listed there, call it directly instead of re-proving it.
 
   ⛔ These names are ILLUSTRATIVE ONLY — they do NOT exist in a fresh session.
   Only call a lemma if it appears verbatim in your "Previously proved dependencies" section.
@@ -271,7 +290,7 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   `exact kgon_occupation_bound maps k hk S hS`
 
   **⚠ THESE IDENTIFIERS DO NOT EXIST — NEVER USE THEM:**
-  The following names are NOT defined anywhere in Lean, Mathlib, or Polib. Using them causes
+  The following names are NOT defined anywhere in Lean, Mathlib, or Inventory. Using them causes
   `Unknown identifier` or `Invalid field` compile errors. Do NOT invent variants either:
   - `HexagonLowerBound`, `HexagonEdgesBound`, `HexagonCountLower`, `hexagonLower`
   - `capacity_ge_triangle_edges`, `hex_capacity`, `hex_lower`, `hex_occ_lower`
@@ -335,15 +354,22 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
     hypothesis. Without it, the set equality `{5} ∪ Finset.Ico 7 (maps.m + 1) = filter (·≠6) (Ico 5 (m+1))`
     is false when `maps.m < 6`, and omega will correctly reject it.
 
-### Strategy E — When stuck after 3 tactic attempts:
-  Use structured sorry with a SPECIFIC Mathlib lemma name to search for:
+### Strategy E — When stuck after 3 tactic attempts (SORRY IS LAST RESORT):
+  **MANDATORY FORMAT** — bare `sorry` without annotations is REJECTED by the system.
+  Every `sorry` MUST have all four annotation lines immediately above it:
   ```
-  -- [SORRY] class: C
-  -- [SORRY] reason: need Mathlib lemma for independent set in cycle of length k
-  -- [SORRY] suggested_next: search Mathlib for Finset.card_le_of_not_mem
-  -- [SORRY] impact: blocks <current node>
-  exact sorry
+  -- [SORRY] class: <mathlib_gap|structure_gap|missing_theorem|complex_combinatorics|missing_figure_definition>
+  -- [SORRY] reason: <one precise sentence: what fact is missing and why it cannot be proved now>
+  -- [SORRY] suggested_next: <specific lemma name / Mathlib search / new Inventory lemma needed>
+  -- [SORRY] impact: blocks <downstream node name>
+  sorry
   ```
+  Class meanings:
+  - `mathlib_gap`           — a Mathlib lemma for this fact does not yet exist
+  - `structure_gap`         — needs a new foundational lemma added to Inventory.lean
+  - `missing_theorem`       — depends on another conjecture not yet proved in Polib
+  - `complex_combinatorics` — combinatorial argument beyond current proof attempt
+  - `missing_figure_definition` — external figure/diagram reference cannot be formalised
 
 ### Strategy F — External figure / diagram references:
   When a predicate references an external figure (e.g., "Figure 1a"), characterize it
@@ -403,43 +429,103 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   exact Set.infinite_of_injective_forall_mem (fun n => ⟨..., maps.equality_family n⟩) ...
   ```
 
+### Strategy I — Dependent type variable `g` in SimplyCon3ConnectedMap g:
+
+  **⛔ CRITICAL: NEVER use `rw [hg]` when `hg : g = 0` and `maps : SimplyCon3ConnectedMap g`.**
+  Because `g` appears in the *type* of `maps`, any rewrite of `g` forces Lean to also change
+  the type of `maps`, making the motive non-type-correct. This ALWAYS fails:
+  ```
+  -- WRONG — always fails with "motive is not type correct":
+  rw [hg] at h_euler
+  ```
+  **CORRECT patterns** when you have `hg : g = 0`:
+  ```lean
+  -- BEST: pass hg directly to linarith — it treats g=0 as a linear fact
+  have h_euler := euler_formula maps   -- ... = 2 - 2 * g
+  linarith [hg]                        -- linarith sees g=0 ⟹ 2-2*g=2
+
+  -- ALSO OK: subst at the very top, before any 'have' that uses maps
+  -- (subst rewrites maps : SimplyCon3ConnectedMap g → SimplyCon3ConnectedMap 0)
+  subst hg
+  have h_euler := euler_formula maps   -- now : ... = 2 - 2 * 0
+  norm_num at h_euler ⊢; linarith
+  ```
+  When a sub-lemma needs `g = 0`, prefer writing its signature as
+  `(maps : SimplyCon3ConnectedMap 0)` directly rather than `{g : ℤ} (maps : ...) (hg : g = 0)`.
+
+  **⛔ `total_faces` cast to ℤ is NOT automatic.**
+  `maps.total_faces` is defined in ℕ as `∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k`.
+  Writing `(maps.total_faces : ℤ)` is NOT definitionally equal to
+  `∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ)` — `euler_formula` uses the latter form.
+  To bridge the gap:
+  ```lean
+  -- convert total_faces cast to the sum form euler_formula uses:
+  have htf : (maps.total_faces : ℤ) =
+      ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) := by
+    simp [SimplyCon3ConnectedMap.total_faces, Nat.cast_sum]
+  -- then use htf to rewrite or pass to linarith
+  ```
+
+  **⛔ `regularity maps` returns a ℕ equation, not ℤ.**
+  `regularity maps : 3 * maps.v = 2 * maps.e` — both sides are `ℕ`.
+  When you need a ℤ fact, cast explicitly:
+  ```lean
+  have h_reg : (3 * maps.v : ℤ) = 2 * maps.e := by exact_mod_cast regularity maps
+  -- or:
+  have h_reg : (3 : ℤ) * maps.v = 2 * maps.e := by exact_mod_cast regularity maps
+  ```
+  Similarly `handshake maps` is a ℕ equation; use `exact_mod_cast` or `push_cast` to lift it.
+  ```lean
+  have h_hand : (2 * maps.e : ℤ) =
+      ∑ k ∈ Finset.Ico 3 (maps.m + 1), (k : ℤ) * maps.p_i k := by
+    exact_mod_cast handshake maps
+  ```
+
 ## ⚡ Self-assessment rule — read this BEFORE writing any proof:
 
-**STEP 1 — assess before you write**:
-Look at the goal. Do you have a clear, complete proof path using ONLY:
-  - The geometric axiom lemmas listed above (euler_formula, handshake, regularity, etc.)
-  - Standard Mathlib/omega/linarith/ring tactics
-  - Already-proved Polib lemmas listed in the prompt
+**STEP 1 — ALWAYS try Inventory derived lemmas first**:
+The system REJECTS proofs that contain sorry. Before writing sorry, check whether any of
+these Inventory lemmas (available via `import Inventory`) can prove or help prove the goal:
 
-If YES → attempt the proof.
-If NO (unclear path, missing lemma, complex combinatorics) → **go straight to sorry** (see Step 2).
+  - `P6EdgeCountEquation maps`   →  3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED)
+  - `Juc_EulerFormula maps`      →  3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED, g=0)
+  - `P6InequalityPart maps hm`   →  3*p₆ ≥ 12*(1-g)-2*p₄-3*p₅+Σ((k+1)/2-6)*p_k  (Inventory axiom)
+  - `Juc_InequalityPart maps hm` →  same bound for g=0  (Inventory axiom)
+  - `JucovicTheorem maps h1`     →  hexagon lower bound + equality  (g=0)
+  - `euler_formula maps`, `handshake maps`, `regularity maps`  (Inventory axioms)
 
-**STEP 2 — when in doubt, sorry immediately**:
-A compilable sorry is infinitely better than broken tactics. If you are not confident:
+  Calling these is NOT a new sorry even if they internally contain sorry. Use `linarith` or
+  `omega` to combine them with hypotheses.
+
+**STEP 2 — Attempt the proof**:
+  If YES (clear proof path via Inventory lemmas + linarith/omega) → write the proof.
+  If UNCERTAIN → attempt anyway: `have h := P6EdgeCountEquation maps; linarith` often closes goals.
+  If NO clear path after trying Inventory lemmas → see STEP 3.
+
+**STEP 3 — sorry is ABSOLUTE LAST RESORT (system will reject and retry)**:
+  The system treats sorry as a compile failure and will ask you to fix it. Write sorry ONLY
+  when you have already tried every Inventory lemma and the proof genuinely cannot proceed.
+  When sorry is unavoidable, use MANDATORY annotations:
 ```lean
-import Mathlib
-import Polib
-
-lemma YourLemmaName {g : ℤ} (maps : SimplyCon3ConnectedMap g) ... : ... := by
-  -- [SORRY] class: <choose one: missing_axiom | missing_mathlib | complex_combinatorics | missing_figure_definition>
-  -- [SORRY] reason: <one sentence explaining exactly what is missing>
-  -- [SORRY] suggested_next: <specific lemma name or tactic to search for>
+  -- [SORRY] class: <mathlib_gap|structure_gap|missing_theorem|complex_combinatorics|missing_figure_definition>
+  -- [SORRY] reason: <one precise sentence: what Inventory lemma was tried and why it failed>
+  -- [SORRY] suggested_next: <specific Inventory lemma to add, or Mathlib theorem to search>
   -- [SORRY] impact: blocks <downstream node name>
   sorry
 ```
-This compiles on the first attempt. Broken tactics waste multiple rounds and still end in sorry.
 
-**FORBIDDEN**: Writing partial tactic proofs that you know will not compile.
-A bare `sorry` with proper annotation is always the correct fallback.
+**FORBIDDEN**: Bare `sorry` without the four annotation lines.
 **FORBIDDEN**: Writing `sorry [text]` or `sorry SomeName` — sorry must ALWAYS be alone on its line.
-  Wrong: `sorry [SORRY: reason]`  Right: `-- [SORRY] reason: reason\n  sorry`
+**FORBIDDEN**: Writing sorry without first documenting which Inventory lemma you tried and why it failed.
 
 ## Standing output rules (apply to every node):
 4. Use `∑ x ∈ s, f x` notation (with ∈), NOT `∑ x in s, f x`.
 5. Never write `axiom` declarations — use structured sorry instead.
    ⛔ NEVER add proposition/proof fields to `SimplyCon3ConnectedMap`. The structure contains
    ONLY data: m, p_i, v, e, total_occ. All facts are standalone sorried lemmas. No exceptions.
-6. If you cannot prove a sub-goal, use the structured sorry format shown in Strategy E above.
+6. **MANDATORY sorry rule**: bare `sorry` without the four [SORRY] annotation lines is REJECTED.
+   The system validates annotations at save time and forces a retry if any sorry is unannotated.
+   Use the exact format from Strategy E. Zero new sorry is the goal; annotated sorry is the fallback.
 7. Return ONLY the complete Lean 4 file inside a single ```lean fence.
 8. ALWAYS use `import Mathlib` (umbrella). NEVER import specific Mathlib submodules.
 9. CRITICAL — write warning-free code. The Lean linter will REJECT the file if any of these appear:
@@ -471,29 +557,65 @@ LaTeX fragment: {latex_fragment}
 ## Required file header (copy exactly):
 ```lean
 import Mathlib
+import Inventory
 import Polib
 {dep_imports}```
 
 ## Previously proved dependencies (usable via the imports above):
 {dep_details}
 
+## ⚡ MANDATORY FIRST ATTEMPT — Try these before any complex proof:
+For goals involving linear arithmetic over p₃, p₄, p₅, p₆ (face counts), ALWAYS try these
+Inventory-based templates FIRST. They are cheap and often close the goal completely:
+
+```lean
+-- Template 1: Edge-count equation (works for goals about 3p₃ + 2p₄ + p₅ or p₃ bounds)
+have h := P6EdgeCountEquation maps   -- 3p₃ = 12(1-g) - 2p₄ - p₅ + Σ(k-6)p_k
+push_cast
+linarith
+
+-- Template 2: Sphere edge-count (g=0 only)
+have h := Juc_EulerFormula maps      -- 3p₃ = 12 - 2p₄ - p₅ + Σ(k-6)p_k
+push_cast
+linarith
+
+-- Template 3: Hexagon lower bound (needs hm : maps.m ≥ 6)
+have h := P6InequalityPart maps hm   -- 3p₆ ≥ 12(1-g) - 2p₄ - 3p₅ + Σ((k+1)/2-6)p_k
+linarith
+
+-- Template 4: Combination (for goals about both p₃ and p₆)
+have h1 := P6EdgeCountEquation maps
+have h2 := P6InequalityPart maps hm
+push_cast
+linarith
+
+-- Template 5: Sphere combination (g=0)
+have h1 := Juc_EulerFormula maps
+have h2 := Juc_InequalityPart maps hm
+linarith
+```
+
+If your description says "Proved by: `have h := <lemma>; linarith`", use EXACTLY that proof body.
+Only write a more complex proof if linarith fails after all templates above are tried.
+**FORBIDDEN**: Writing `sorry` without first documenting which template you tried and why it failed.
+
 ## Mathlib search hints:
 {mathlib_hints}
 
 {github_snippets}{local_references}{prior_context}
 Instructions:
-1. Start your file with the exact header shown above (import Mathlib, import Polib,
-  then any dep imports). Do NOT redefine SimplyCon3ConnectedMap or any dep — they are
+1. Start your file with the exact header shown above (import Mathlib, import Inventory,
+  import Polib, then any dep imports). Do NOT redefine SimplyCon3ConnectedMap or any dep — they are
   already available.
 2. After the header, add any helper lemmas specific to this node. IMPORTANT: all helper
   lemmas must be declared `private` to avoid polluting the global namespace and
-  name collisions with existing `Polib` identifiers. If you need a non-private lemma
+  name collisions with existing `Inventory` identifiers. If you need a non-private lemma
   (very rare), prefix its name with the node id to ensure uniqueness.
 3. When producing arithmetic/linear intermediate steps that `linarith` should close,
   include explicit `have` lemmas with `push_cast`/`exact_mod_cast` or simple rewrites
   so that numeric casts between `ℕ` and `ℤ` are explicit. Example pattern:
   `have h : (k : ℤ) / 2 = _ := by push_cast; norm_num; exact ...` then `rw [h]`.
-4. Avoid reusing global names already present in Polib; if unsure, use `private`.
+4. Avoid reusing global names already present in Inventory; if unsure, use `private`.
 5. {goal_instruction}
 """
 

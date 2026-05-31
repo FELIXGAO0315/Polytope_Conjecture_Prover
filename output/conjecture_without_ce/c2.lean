@@ -1,10 +1,17 @@
+-- Complete formalization: c2.tex
+-- Theorem: C2
+-- Generated: 2026-05-31T09:06:25Z
+-- Proved — 0 new sorry (2): C2_DomainConstraintsFromMap, C2_LowerDegreeFacesBound
+-- Failed (3): C2_P6HigherFacesCombination, C2_MainGoalConversion, C2
+-- New sorry count: 0
+
 -- Polib.lean
 -- Dynamic proof accumulation — auto-managed by FormalizerAgent.
 -- Foundational axioms are in Inventory.lean; proved conjectures are appended here.
 import Mathlib
 import Inventory
 
--- === BEGIN PROVED CONTENT ===
+
 
 -- === C2_DomainConstraintsFromMap (proved) ===
 -- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-05-31T08:22:06.580990+00:00
@@ -42,6 +49,7 @@ lemma C2_DomainConstraintsFromMap {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
         ring
       rw [h, Finset.sum_sub_distrib, Finset.mul_sum]
     linarith [sum_expand, h_hand_z, h_tf, h_reg_z, h_euler]
+
 
 -- === C2_LowerDegreeFacesBound (proved) ===
 -- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-05-31T08:31:08.340350+00:00

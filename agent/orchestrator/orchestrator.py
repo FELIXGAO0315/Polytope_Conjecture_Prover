@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import multiprocessing as _mp
 import re
 import threading
 import time
@@ -53,11 +54,19 @@ from agent.llm_ce_finder.agent import LLMCEFinder
 
 try:
     from agent.rl_ce_finder.agent import train_on_conjecture as _agents_train_on_conjecture
-    _RL2_AVAILABLE = True
-    _RL2_IMPORT_ERR = ""
+    _RL_AVAILABLE = True
+    _RL_IMPORT_ERR = ""
 except Exception as _e2:
-    _RL2_AVAILABLE = False
-    _RL2_IMPORT_ERR = str(_e2)
+    _RL_AVAILABLE = False
+    _RL_IMPORT_ERR = str(_e2)
+
+try:
+    from agent.hopper_ce_finder.agent import HopperCEFinder as _HopperCEFinder
+    _HOPPER_AVAILABLE = True
+    _HOPPER_IMPORT_ERR = ""
+except Exception as _e3:
+    _HOPPER_AVAILABLE = False
+    _HOPPER_IMPORT_ERR = str(_e3)
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -261,23 +270,32 @@ class PVectorCEFinder:
         return None
 
 
-def _rl2_finder_thread(
+def _set_torch_threads(n: int) -> None:
+    """Limit PyTorch intra-op and inter-op thread pools for this process."""
+    try:
+        import torch
+        torch.set_num_threads(max(1, n))
+        torch.set_num_interop_threads(max(1, n // 2))
+    except Exception:
+        pass
+
+
+def _rl_finder_process(
     formula: str,
     name: str,
     num_episodes: int,
-    result_holder: list,
-    lock: threading.Lock,
-    ce_found_event: threading.Event,
-    llm_stop_event: threading.Event,
-    label: str = "",
+    result_queue: "_mp.Queue[dict]",
+    stop_event: "_mp.Event",
     conjecture=None,
-    check_agent=None,
-    llm_finished_event: threading.Event | None = None,
+    num_threads: int = 0,
 ) -> None:
-    """Run RL CE finder, then validate each CE candidate with 4 checks."""
+    """Run RL CE finder in a separate process, push validated CE to result_queue."""
+    if num_threads > 0:
+        _set_torch_threads(num_threads)
+
     tag = "[validation check ce from rl]"
-    if not _RL2_AVAILABLE:
-        print(f"{tag} disabled: {_RL2_IMPORT_ERR}")
+    if not _RL_AVAILABLE:
+        print(f"{tag} disabled: {_RL_IMPORT_ERR}")
         return
 
     agents_formula = _to_agents_formula(formula)
@@ -288,7 +306,7 @@ def _rl2_finder_thread(
             name=name,
             num_episodes=num_episodes,
             exit_on_first_ce=False,
-            stop_event=llm_stop_event,
+            stop_event=stop_event,
         )
     except Exception as exc:
         print(f"{tag} train_on_conjecture raised: {exc}")
@@ -298,18 +316,13 @@ def _rl2_finder_thread(
     if not ces:
         return
 
-    # Wait for the LLM thread to finish printing its stop messages before
-    # printing the validation header, so output ordering is deterministic.
-    if llm_finished_event is not None:
-        llm_finished_event.wait(timeout=5.0)
-
     print(f"{tag} {len(ces)} CE candidate(s) found, running 4 checks")
 
     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
-    checker = check_agent or (PVectorCheckAgent(client=None) if conjecture else None)
+    checker = PVectorCheckAgent(client=None) if conjecture else None
 
     for idx, raw in enumerate(ces):
-        if ce_found_event.is_set():
+        if stop_event.is_set():
             return
 
         p_vec_list = raw.get("p_vector", [])
@@ -344,18 +357,78 @@ def _rl2_finder_thread(
             "other_candidates_not_checked": other_candidates,
             "found_at": raw.get("found_at", datetime.now(timezone.utc).isoformat()),
         }
-        # Write CE JSON immediately — don't wait for main thread
         if conjecture:
             try:
                 out_path = _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
-                print(f"{tag} The ce candidate is valid, saved  CE JSON → {out_path}")
+                print(f"{tag} The ce candidate is valid, saved CE JSON → {out_path}")
             except Exception as exc:
                 print(f"{tag} warning: could not write CE JSON: {exc}")
-        with lock:
-            if not ce_found_event.is_set():
-                result_holder.append(ce_record)
-                ce_found_event.set()
+        result_queue.put(ce_record)
+        stop_event.set()
         return
+
+
+def _hopper_finder_process(
+    conjecture,
+    num_steps: int,
+    result_queue: "_mp.Queue[dict]",
+    stop_event: "_mp.Event",
+    num_threads: int = 0,
+) -> None:
+    """Run Hopper CE finder in a separate process, push validated CE to result_queue."""
+    if num_threads > 0:
+        _set_torch_threads(num_threads)
+
+    tag = "[validation check ce from hopper]"
+    if not _HOPPER_AVAILABLE:
+        print(f"{tag} disabled: {_HOPPER_IMPORT_ERR}")
+        return
+
+    try:
+        hopper = _HopperCEFinder(
+            conjecture=conjecture,
+            num_steps=num_steps,
+            stop_event=stop_event,
+        )
+        result = hopper.run()
+    except Exception as exc:
+        print(f"{tag} HopperCEFinder raised: {exc}")
+        return
+
+    if result is None:
+        return
+
+    p_vec = result.get("p_vector", {})
+    detail = result.get("violation_detail", "")
+
+    from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
+    checker = PVectorCheckAgent(client=None)
+    report = checker.run_silent(p_vec, conjecture)
+
+    print(f"{tag} CE candidate from Hopper, running 4 checks")
+    for r in report.results:
+        mark = "√" if r.passed else "✗"
+        print(f"{tag} {mark} {r.label}: {r.detail}")
+
+    if not report.all_passed:
+        print(f"{tag} CE not valid — Hopper exhausted")
+        return
+
+    ce_record = {
+        "p_vector": p_vec,
+        "found_by": "hopper_agent",
+        "found_at_round": result.get("found_at_round", 0),
+        "violation_detail": detail,
+        "other_candidates_not_checked": [],
+        "found_at": result.get("found_at", datetime.now(timezone.utc).isoformat()),
+    }
+    try:
+        out_path = _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
+        print(f"{tag} CE valid, saved CE JSON → {out_path}")
+    except Exception as exc:
+        print(f"{tag} warning: could not write CE JSON: {exc}")
+    result_queue.put(ce_record)
+    stop_event.set()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -533,13 +606,6 @@ class Orchestrator:
         """Run parallel LLM + RL CE search. Returns validated CE info or None."""
         tag = f"[{conjecture.conjecture_id}{':' + label if label else ''}]"
 
-        # ce_found_event: set only after a CE is validated and in result_holder
-        # llm_stop_event: set when RL finds (unvalidated) CE — stops the LLM promptly
-        ce_found_event = threading.Event()
-        llm_stop_event = threading.Event()
-        result_holder: list[dict] = []
-        lock = threading.Lock()
-
         formula_str = conjecture_to_formula_string(conjecture)
 
         # ── Fast p-vector lattice walk (no API, no graph construction) ────────
@@ -561,64 +627,80 @@ class Orchestrator:
                 pvec_result["violation_detail"] = detail
                 print(f"Counterexample validated at round {rnd}")
                 return pvec_result
-        print("Random walk exhausted, falling back to LLM + RL...")
+        print("Random walk exhausted, falling back to LLM + RL + Hopper...")
 
-        # ── Stage 2: LLM + agents/ RL in parallel ─────────────────────────────
-        print(f"[Stage 2] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}")
+        # ── Stage 2: LLM + RL + Hopper in parallel ────────────────────────────
+        print(f"[Stage 2] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}  |  Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}")
 
-        # Shared check_agent (LLM + RL share the same client)
-        check_agent = PVectorCheckAgent(client=self.client)
+        # Unified stop signal and result queue shared across all three processes.
+        stop_event = _mp.Event()
+        result_queue: _mp.Queue = _mp.Queue()
 
-        # llm_finished_event: set by the main thread once LLMCEFinder.run() returns,
-        # so the RL validation thread can wait for LLM stop-messages to be printed.
-        llm_finished_event = threading.Event()
+        # Give RL 2/3 of cores, Hopper 1/3 (LLM is I/O-bound, takes nothing)
+        _cpu_total = _mp.cpu_count() or 4
+        _rl_threads = max(1, _cpu_total * 2 // 3)
+        _hopper_threads = max(1, _cpu_total // 3)
 
-        # RL track (daemon thread) — sets llm_stop_event on first CE find
-        rl2_thread: threading.Thread | None = None
-        if _RL2_AVAILABLE and formula_str:
-            rl2_thread = threading.Thread(
-                target=_rl2_finder_thread,
+        # RL track (separate process — CPU-heavy, avoids GIL + PyTorch thread contention)
+        rl_proc: _mp.Process | None = None
+        if _RL_AVAILABLE and formula_str:
+            rl_proc = _mp.Process(
+                target=_rl_finder_process,
                 args=(formula_str, conjecture.conjecture_id, rl_episodes,
-                      result_holder, lock, ce_found_event, llm_stop_event, label),
-                kwargs={"conjecture": conjecture, "check_agent": check_agent,
-                        "llm_finished_event": llm_finished_event},
+                      result_queue, stop_event),
+                kwargs={"conjecture": conjecture, "num_threads": _rl_threads},
                 daemon=True,
-                name=f"RL2-{conjecture.conjecture_id}-{label}",
+                name=f"RL-{conjecture.conjecture_id}-{label}",
             )
-            rl2_thread.start()
+            rl_proc.start()
         else:
-            reason = _RL2_IMPORT_ERR if not _RL2_AVAILABLE else "formula conversion failed"
+            reason = _RL_IMPORT_ERR if not _RL_AVAILABLE else "formula conversion failed"
             print(f"[rl ce finding] disabled: {reason}")
 
-        # LLM track (this thread) — stops when llm_stop_event is set
+        # Hopper track (separate process — CPU-heavy, avoids GIL + PyTorch thread contention)
+        hopper_proc: _mp.Process | None = None
+        if _HOPPER_AVAILABLE:
+            hopper_proc = _mp.Process(
+                target=_hopper_finder_process,
+                args=(conjecture, 5_000, result_queue, stop_event),
+                kwargs={"num_threads": _hopper_threads},
+                daemon=True,
+                name=f"Hopper-{conjecture.conjecture_id}-{label}",
+            )
+            hopper_proc.start()
+        else:
+            print(f"[Hopper ce finding] disabled: {_HOPPER_IMPORT_ERR}")
+
+        # LLM track (main thread — I/O bound, no CPU contention)
+        check_agent = PVectorCheckAgent(client=self.client)
         llm_result = LLMCEFinder(
             conjecture=conjecture,
             client=self.client,
             num_rounds=llm_rounds,
-            stop_event=llm_stop_event,
+            stop_event=stop_event,
             check_agent=check_agent,
             model=self.config.model_main,
         ).run()
 
-        # Signal the RL thread that LLM output is complete.
-        llm_finished_event.set()
-
         if llm_result:
-            with lock:
-                if not ce_found_event.is_set():
-                    result_holder.append(llm_result)
-                    ce_found_event.set()
-                    llm_stop_event.set()
+            result_queue.put(llm_result)
+            stop_event.set()
 
-        # Always wait for RL thread — it may still be running the validator
-        if rl2_thread and rl2_thread.is_alive():
-            rl2_thread.join()
+        # Wait for RL and Hopper processes to finish (they respect stop_event)
+        if rl_proc and rl_proc.is_alive():
+            rl_proc.join()
+        if hopper_proc and hopper_proc.is_alive():
+            hopper_proc.join()
 
-        if not result_holder:
+        try:
+            ce_info = result_queue.get_nowait()
+        except Exception:
+            ce_info = None
+
+        if not ce_info:
             print(f"[Stage 2] No CE found.")
             return None
 
-        ce_info = result_holder[0]
         return ce_info
 
     # ── Batch worker ───────────────────────────────────────────────────────────
@@ -688,22 +770,39 @@ class Orchestrator:
         else:
             print(f"[Orchestrator] Warning: lake build Polib exited {result.returncode}")
 
-    def _run_prover(self, conjecture: ParsedConjecture) -> None:
+    def _run_prover(self, conjecture: ParsedConjecture, max_retries: int = 3) -> None:
         from agent.prover.agent import ProverAgent
 
         self._ensure_polib_built()
-        print(f"\n[Orchestrator] ProverAgent starting for {conjecture.conjecture_id} …")
+
         agent = ProverAgent(self.config)
-        # Route ProverAgent output directly into conjecture_without_ce/
         agent._proof_subdir = "conjecture_without_ce"
 
-        try:
-            result = agent.prove_conjecture(conjecture)
-        except Exception as exc:
-            print(f"[Orchestrator] ProverAgent raised: {exc}")
-            raise
+        for attempt in range(1, max_retries + 1):
+            if attempt == 1:
+                print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
+            else:
+                print(f"\n[Stage 3] Retrying {conjecture.conjecture_id} (attempt {attempt}/{max_retries}) — proved nodes reloaded from Polib, retrying failed nodes …")
 
-        print(f"\n[Orchestrator] Done. Result: {result.status}")
+            try:
+                result = agent.prove_conjecture(conjecture)
+            except Exception as exc:
+                print(f"[Orchestrator] ProverAgent raised: {exc}")
+                raise
+
+            print(f"\n[Stage 3] Attempt {attempt}/{max_retries} result: {result.status}")
+
+            if result.status == "success":
+                break
+
+            if result.nodes_failed:
+                print(f"  Failed nodes: {result.nodes_failed}")
+            if attempt < max_retries and result.status != "success":
+                print(f"  → Will retry …")
+            else:
+                print(f"  → Max retries reached. Final result: {result.status}")
+
+        print(f"\n[Stage 3] Done. Result: {result.status}")
 
     def _load_all_conjectures(self, json_path: str | None = None) -> list[ParsedConjecture]:
         """Load every conjecture from a JSON file or directory of individual *.json files.

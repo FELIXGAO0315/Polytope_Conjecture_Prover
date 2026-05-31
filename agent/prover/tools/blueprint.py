@@ -23,12 +23,50 @@ Conclusion: {conclusion}
 Proof steps:
 {proof_steps}
 
-## Already-proved Polib lemmas (available via `import Polib` — do NOT re-prove these)
+## Already-proved Inventory lemmas (available via `import Inventory` — do NOT re-prove these)
 {available_lemmas}
+
+## ⛔ PROHIBITED NODES — NEVER create nodes for these (they are already in Inventory):
+These mathematical facts are ALREADY PROVED in Inventory.lean. Creating a blueprint node to
+re-derive them is FORBIDDEN. Instead, the node that needs them should call them directly.
+
+| Mathematical content | Inventory lemma to call |
+|---|---|
+| Euler formula: V − E + F = 2 − 2g | `euler_formula maps` |
+| Handshaking lemma: 2E = Σ k·p_k | `handshake maps` |
+| 3-regularity: 3V = 2E | `regularity maps` |
+| Dehn-Sommerville / edge-count eq: 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `P6EdgeCountEquation maps` |
+| Edge-count equation for sphere (g=0): 3p₃ = 12 − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `Juc_EulerFormula maps` |
+| Hexagon lower bound (general g): 3p₆ ≥ 12(1−g) − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋−6)p_k | `P6InequalityPart maps hm` |
+| Hexagon lower bound (sphere g=0): same bound | `Juc_InequalityPart maps hm` |
+| Jučovič theorem: lower bound ∧ equality family | `JucovicTheorem maps h1` |
+
+**Naming test**: If your node title contains any of these words — "Euler", "Handshak", "Dehn-Sommerville",
+"edge count equation", "regularity", "Hexagon lower bound" — STOP. That content is already in Inventory.
+Do NOT create the node. Instead, in the CALLING node's description, write:
+  "Uses `P6EdgeCountEquation maps` (or the relevant lemma) directly via linarith."
+
+## Inventory lemma exact Lean signatures (for reference):
+- `P6EdgeCountEquation maps` : `3 * (maps.p_i 3 : ℤ) = 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ)`
+- `Juc_EulerFormula maps` : same for g=0 (M : SimplyCon3ConnectedMap 0)
+- `P6InequalityPart maps hm` : `3 * (maps.p_i 6 : ℤ) ≥ 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - 3 * (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ)`  where `hm : maps.m ≥ 6`
+- `euler_formula maps` : `(maps.v : ℤ) - maps.e + ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) = 2 - 2 * g`
+- `handshake maps` : `2 * maps.e = ∑ k ∈ Finset.Ico 3 (maps.m + 1), k * maps.p_i k`
+- `regularity maps` : `3 * maps.v = 2 * maps.e`
+
+## When a node's proof IS just Inventory + linarith:
+If a node's conclusion follows directly from one or two Inventory lemma calls + `linarith`,
+write this verbatim in the description field:
+  "Proved by: `have h := P6EdgeCountEquation maps; linarith`"
+  OR "Proved by: `have h := Juc_EulerFormula maps; linarith`"
+  OR "Proved by: `have h1 := P6EdgeCountEquation maps; have h2 := P6InequalityPart maps hm; linarith`"
+The prover will use this as a fast first attempt before running the full proof search.
+
 For any node whose proof can directly call one of these lemmas, say so explicitly in the
-`description` field (e.g. "Follows directly from `EdgeCountEquation` and `NonHexOccupationTotal`").
-A node that is already fully covered by an existing Polib lemma should still appear in the
-blueprint (for name-stability) but its description must reference the lemma by name.
+`description` field (e.g. "Follows directly from `P6EdgeCountEquation` via linarith").
+A node that is already fully covered by an existing Inventory lemma should still appear in the
+blueprint (for name-stability) but its description must reference the lemma by name and include
+the verbatim proof template as shown above.
 
 ## Instructions
 
@@ -38,18 +76,18 @@ blueprint (for name-stability) but its description must reference the lemma by n
 - Exactly ONE node must have "is_main_target": true (the main theorem).
 - "latex_fragment" must be a verbatim excerpt from the proof above — do not paraphrase.
 
-### CRITICAL — Node naming to avoid Polib collisions
-All nodes live in a shared global library (Polib). A node named `InequalityPart` from theorem A
+### CRITICAL — Node naming to avoid Inventory collisions
+All nodes live in a shared global library (Inventory). A node named `InequalityPart` from theorem A
 will be REUSED (not re-proved) by theorem B if theorem B also produces a node with that name.
 To prevent incorrect reuse across theorems:
-- **FIRST**: check `Already-proved Polib lemmas` above. If an existing lemma covers the same
+- **FIRST**: check `Already-proved Inventory lemmas` above. If an existing lemma covers the same
   mathematical content, name your node identically to that lemma and mark it as proved via that lemma.
 - **Otherwise**: prefix generic names with `{node_prefix}`.
   BAD:  `"node_id": "InequalityPart"`          — too generic, will collide across theorems
   GOOD: `"node_id": "{node_prefix}InequalityPart"` — theorem-scoped, no collision risk
-  GOOD: `"node_id": "InequalityPart"`          — only if it reuses an existing Polib lemma of the same name
+  GOOD: `"node_id": "InequalityPart"`          — only if it reuses an existing Inventory lemma of the same name
 - Exception: nodes that define shared structure (defs, type classes) may keep generic names
-  IF they are mathematically identical to their Polib counterpart.
+  IF they are mathematically identical to their Inventory counterpart.
 
 ### CRITICAL — Dependency rules (read carefully)
 A node B should list node A as a dependency ONLY IF:

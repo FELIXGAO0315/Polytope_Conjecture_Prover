@@ -60,8 +60,10 @@ class ParsedConjecture:
             hypotheses = [c.strip() for c in re.split(r'\s+and\s+', cond_raw) if c.strip()]
         else:
             hypotheses, conclusion = [], formula
+        m = re.search(r'_(\d+)$', spec.name)
+        cid = f"C{m.group(1)}" if m else spec.name
         return cls(
-            conjecture_id=spec.name,
+            conjecture_id=cid,
             statement_latex=formula,
             hypotheses=hypotheses,
             conclusion=conclusion,
