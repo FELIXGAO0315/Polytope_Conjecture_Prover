@@ -263,8 +263,23 @@ def _check_realizability(
     p_vec: dict[int, int],
     timeout: float = 30.0,
     rl_verified: bool = False,
+    witness_graph=None,
 ) -> CheckResult:
     nonzero = {k: v for k, v in p_vec.items() if v > 0}
+
+    # ── Explicit witness graph (e.g. extracted from Hopper's dual hull) ───────
+    # Not trusted: the graph is re-verified here with graphcalc and its
+    # p-vector must match the candidate exactly. Falls through to the tiers
+    # if verification fails.
+    if witness_graph is not None:
+        from agent.orchestrator.tools.polytope_constructor import _pvec_of
+        wpv = _pvec_of(witness_graph)
+        if wpv == nonzero:
+            return CheckResult(
+                True, "Realizability",
+                "[witness] explicit graph verified as simple 3-polytope by "
+                "graphcalc; p-vector matches candidate exactly",
+            )
 
     # ── RL-verified shortcut ──────────────────────────────────────────────────
     # The RL environment calls gc.simple_polytope_graph(G) before marking any
@@ -321,6 +336,13 @@ def _check_realizability(
     G, method = PolytopeConstructor().build(p_vec, timeout=timeout)
 
     if G is None:
+        if method == "plantri_nonrealizable":
+            return CheckResult(
+                False, "Realizability",
+                "[Tier 4 plantri] exhaustively NON-realizable — no sphere "
+                "triangulation with this degree multiset exists (proof by "
+                "exhaustion); candidate definitively rejected",
+            )
         return CheckResult(
             False, "Realizability",
             f"[Tier 4 Constructor] all construction strategies exhausted "
@@ -397,6 +419,7 @@ class PVectorCheckAgent:
         conjecture,
         constructor_timeout: float = 30.0,
         rl_verified: bool = False,
+        witness_graph=None,
     ) -> CheckReport:
         """Run all checks without printing — caller decides what to show."""
         report = CheckReport()
@@ -407,5 +430,6 @@ class PVectorCheckAgent:
             p_vec,
             timeout=constructor_timeout,
             rl_verified=rl_verified,
+            witness_graph=witness_graph,
         ))
         return report

@@ -1,7 +1,40 @@
-# Polytope Conjecture Prover — v2.4
+# Polytope Conjecture Prover — v2.6
 
 An automated pipeline for deciding conjectures about simple convex 3-polytopes.
 Given a conjecture in JSON formula format, the system either finds a **verified counterexample** (backed by an explicit witness polytope) or produces a **Lean 4 formalization** of the proof.
+
+---
+
+## What's New in v2.6
+
+**Headline result: conjecture C2 (`auto_20260310_142638_2`) is REFUTED.** The counterexample `{3:1, 5:16, 6:4, 13:1}` (f2 = 22, p6 = 4 < RHS = 5) has exactly **2** realizations as a simple 3-polytope in the entire space — found and validated autonomously by the new pipeline in 31 seconds (`output/conjecture_with_ce/C2.json`, full witness edge list included). Notably, all five triangle-free candidates at f2 = 22 are exhaustively **non**-realizable; the unique counterexample family member needs exactly one triangle.
+
+- **plantri exhaustive tier** (decisive, both directions): `PolytopeConstructor` now calls [plantri 5.8](https://users.cecs.anu.edu.au/~bdm/plantri/) (Brinkmann & McKay, `allowed_deg` plugin, bundled in `tools/plantri/`) as Strategy 3. plantri enumerates *all* sphere triangulations with the target degree multiset, isomorph-free, in parallel `res/mod` splits — so a candidate either yields an explicit witness graph (dual of the triangulation, face-traced from the embedding) or is **proven non-realizable by exhaustion**. Definitive rejections surface in the 4-Check output as `[Tier 4 plantri] exhaustively NON-realizable`.
+- **Cross-run realizability cache** (`output/realizability_cache.json`): exhaustive verdicts (never timeouts) persist across runs, so retries skip already-decided candidates instantly.
+- **Explicit witness validation**: the 4-Check Validator accepts a `witness_graph` — re-verified with graphcalc (never trusted), exact p-vector match required.
+- **Hopper witness fix** (critical): Hopper used to discard its own dual-hull geometry and route validation through the chop constructor, self-rejecting every exotic CE it found. It now extracts the primal witness graph from the dual hull (`hull.neighbors` facet adjacency) and submits it for verification.
+- **Dual-space perturbation search** (Strategy 3b): hill-climbing with annealing + cap seeding over point configurations on the unit sphere; reaches topologies chop search cannot.
+- **A\* chop search gated on p3 ≥ 1** (provable): every chop's last triangle persists in the final graph, so triangle-free targets are unreachable by chopping — the budget goes to the dual-space strategies instead.
+- **Standalone batch decider**: `python tools/plantri/decide_ce_plantri.py --name <conjecture>` exhaustively decides all enumerated candidates of a conjecture (cheapest-first, resumable, stops on the first realizable hit).
+- RL-track caveat documented: its chop-only action space provably cannot reach p3 = 0 targets.
+
+---
+
+## What's New in v2.5
+
+**Counterexample side**
+
+- **Tier-4 realizability constructor revived**: a stale `graphcalc.graphs.polytopes` import (that path no longer exists in graphcalc ≥ 1.3) silently failed and permanently disabled the Tier-4 witness constructor — every CE candidate outside the known families was auto-rejected with `graphcalc_unavailable`. Fixed to top-level imports. **All "no CE found" verdicts produced before this fix are unreliable and should be re-run.**
+- **Stage 1.5 — Boundary Enumeration** (new, no API, seconds): exhaustively enumerates *every* DS-valid p-vector within bounds that satisfies the hypotheses and violates the conclusion (the random walk only samples this space), then tries to realize the most constructible candidates via the 4-Check Validator.
+
+**Prover side**
+
+- **Inventory-entailment pre-check**: before Stage 3, the orchestrator searches for *countermodels* — p-vectors satisfying the per-map arithmetic content of every Inventory axiom while violating the conjecture's conclusion. If any exist, no honest Lean proof can be derived from the current Inventory; Stage 3 is skipped with an explicit verdict naming sample countermodels (override: `FORCE_PROVER=true`).
+- **Soundness guard**: proofs that construct a `SimplyCon3ConnectedMap` instance (`.mk`, structure literal, `where`-definition, `{ maps with … }` copy-update) are hard-rejected before compilation on every code path and fail the quality check. A fabricated instance lets a proof derive `False` from the sorried axioms (e.g. v = 0, e = 0 makes `euler_formula` yield `0 = 2`), making everything "provable".
+- **Axiom soundness fix**: `kgon_occupation_bound` is restated on `total_occ` and is now **proved** from `occupation_bound` (the old formulation quantified over arbitrary `Finset ℕ` and was refutable inside Lean); `quad_occ_reduction` and the phantom `quad_adj_constraint` are removed — their faithful statements need face-adjacency data the structure does not carry.
+- **Inline node retry** replaces the v2.4 orchestrator-level 3-attempt restart: failed nodes are retried inside the prover run (parse/goal/blueprint are not redone), with a per-node budget (`MAX_NODE_RETRIES`, default 4), dependency gating (nodes whose deps are still failing are skipped), and stall/exhaustion exits.
+- **Claude CLI retries escalate timeouts** (150 s → 210 s → 270 s; previously they *shrank* to 90 s/60 s, guaranteeing repeat failures), and infrastructure failures (CLI timeouts, unresolved deps, aborts) are no longer recorded into cross-run failure memory.
+- **Dependency-signature injection**: generation and fix prompts include the exact Polib signatures of proved dependencies so the LLM cannot hallucinate argument counts; helper-lemma prompts pin the parent theorem's genus.
 
 ---
 
@@ -57,6 +90,15 @@ conjectures/conjectures.json
                          │ NO
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
+│  Stage 1.5 — Boundary Enumeration  (no API, seconds)        │
+│  Exhaustive sweep of ALL DS-valid violating p-vectors       │
+│  within bounds → realize best 40 via 4-Check Validator      │
+└────────────────────────┬────────────────────────────────────┘
+                         │ CE realized?
+                         │ YES ──► output
+                         │ NO
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
 │  Stage 2 — LLM + RL + Hopper  (three independent processes) │
 │  ┌───────────────┐  ┌──────────────────┐  ┌─────────────┐  │
 │  │  LLM Track    │  │  RL Track        │  │Hopper Track │  │
@@ -71,6 +113,12 @@ conjectures/conjectures.json
 └────────────────────────┬────────────────────────────────────┘
                          │ CE found?
                          │ YES ──► output/conjecture_with_ce/{C<id>}.json
+                         │ NO
+                         ▼
+            [ Inventory-entailment pre-check ]
+                         │ countermodels exist?
+                         │ YES ──► explicit verdict, Stage 3 skipped
+                         │         (override: FORCE_PROVER=true)
                          │ NO
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
@@ -169,6 +217,36 @@ Random walk exhausted, falling back to LLM + RL + Hopper...
 
 ---
 
+## Stage 1.5 — Boundary Enumeration
+
+The random walk *samples* the DS lattice; Stage 1.5 *exhausts* it within bounds.
+It enumerates every p-vector that
+
+- is non-negative with DS sum = 12,
+- satisfies all conjecture hypotheses, and
+- violates the conclusion,
+
+over all large-face multisets (sizes 7..`CE_ENUM_KMAX`, at most
+`CE_ENUM_NLARGE_MAX` faces ≥ 7) and total face counts up to `CE_ENUM_F2_MAX`.
+Candidates are sorted for constructibility (small f₂, small max face, more
+triangles) and the best `CE_ENUM_REALIZE_MAX` are sent to the 4-Check
+Validator with `CE_ENUM_REALIZE_TIMEOUT` (default 90) seconds of constructor
+budget each — enough for the plantri exhaustive tier to fully decide f₂ ≈ 22
+candidates on a multicore machine.
+
+```
+[Stage 1.5] 374 arithmetic CE candidate(s) within bounds; trying to realize the 40 most constructible (90s each)...
+[Stage 1.5] CE realized: {3: 1, 5: 16, 6: 4, 13: 1}
+[Check p-vector] ✓ Realizability: [Tier 4 Constructor] plantri_exhaustive: witness graph with 40 vertices, ...
+```
+
+A realized candidate is a **verified counterexample** (`found_by:
+"boundary_enumeration"`). This is exactly how C2 was refuted (31 s end-to-end).
+If *no* arithmetic candidate exists at all, the conjecture is arithmetically
+tight in this region — strong evidence for Stage 3.
+
+---
+
 ## Stage 2 — LLM + RL + Hopper Parallel Search
 
 Three tracks run in **true parallel** — each track is isolated from the others: the RL and Hopper tracks run as separate OS processes (`multiprocessing.Process`) so they have independent CPU cores and no GIL or PyTorch thread-pool contention. All three share a single `multiprocessing.Event` stop signal: the first track to produce a validated CE sets the event and causes the others to exit promptly.
@@ -246,6 +324,8 @@ Adapts the **Hopper algorithm** (Swirszcz et al., 2025) for simple 3-polytopes. 
 - Every simple 3-polytope P has a dual simplicial polytope P* (all faces triangles). The vertex valences of P* equal the p-vector of P.
 - The Dehn-Sommerville constraint is automatically satisfied because it is equivalent to Euler's formula on P*, which always holds — so no DS-check is needed after each hop.
 - A **hop** moves one dual vertex to a new position determined by a random hyperplane. ~96% of hops produce a valid simplicial hull (vs. 0% in primal simple-polytope space).
+
+When Hopper finds a violating p-vector, it extracts the **primal witness graph** directly from its dual hull (facet adjacency via `hull.neighbors`) and submits it to the 4-Check Validator's `witness_graph` path — the graph is re-verified with graphcalc, so exotic candidates no longer die at the chop constructor.
 
 The neural network (`HopperBrain`) scores each candidate hyperplane as one of three classes:
 - `0` — good hop (predicts improvement in violation gap)
@@ -342,13 +422,18 @@ Passing Checks 1–3 proves the p-vector is arithmetically correct and violates 
 
 **Tier 4 — PolytopeConstructor (mandatory for all other cases):**
 
-Physically builds a 3-connected 3-regular planar witness graph using a sequence of strategies (each within a 30 s shared timeout):
+> Requires `graphcalc` ≥ 1.3 (top-level `simple_polytope_graph` / `p_vector` API). If the import fails, every Tier-4 candidate is rejected with `graphcalc_unavailable` — treat that message as a broken environment, not a mathematical verdict.
+
+Physically builds a 3-connected 3-regular planar witness graph using a sequence of strategies within a shared timeout:
 
 1. Direct construction for known shapes and prisms
-2. A\* chop-search from dodecahedron (for $f_2 \leq 30$)
-3. A\* chop-search from tetrahedron (for $f_2 \leq 20$)
+2. **plantri exhaustive decision** (for $f_2 \leq$ `PLANTRI_F2_MAX`, default 26): enumerates *all* dual triangulations with the target degree multiset in parallel splits — returns a witness graph, or **proves non-realizability by exhaustion** (verdict cached across runs in `output/realizability_cache.json`)
+3. Dual-space perturbation search (annealed point-configuration search on the sphere; handles triangle-free and single-large-face targets)
+4. A\* chop-search from dodecahedron / tetrahedron / $k_{max}$-gon prism — only attempted when the target has $p_3 \geq 1$ (chop results always contain a triangle, so triangle-free targets are provably unreachable)
 
-After construction, `graphcalc` verifies the graph's p-vector matches the target exactly and confirms it is a valid simple polytope graph. **If all strategies fail, the CE is rejected with no fallback.** There is no "probably realizable" path — only an explicit verified graph is accepted.
+After construction, `graphcalc` verifies the graph's p-vector matches the target exactly and confirms it is a valid simple polytope graph. **If all strategies fail, the CE is rejected with no fallback.** There is no "probably realizable" path — only an explicit verified graph is accepted. A plantri exhaustion verdict is stronger than a rejection: it *proves* the p-vector is not realizable.
+
+CE finders that hold their own geometric witness (Hopper's dual hull) submit it via the validator's `witness_graph` parameter — the graph is re-verified with graphcalc, never trusted.
 
 Check output format (all four checks printed for each candidate):
 
@@ -394,13 +479,13 @@ Check output format (all four checks printed for each candidate):
 }
 ```
 
-`found_by` is one of `"pvector_walk"`, `"llm_agent"`, `"rl_agent"`, or `"hopper_agent"`.
+`found_by` is one of `"pvector_walk"`, `"boundary_enumeration"`, `"llm_agent"`, `"rl_agent"`, or `"hopper_agent"`. CE JSONs produced via an explicit witness include the full edge list and the reproduction command (see `output/conjecture_with_ce/C2.json`).
 
 The output filename uses the **short ID** (`C43.json`) derived from the trailing number of the full conjecture name.
 
 ### No counterexample → `output/conjecture_without_ce/{id}.lean`
 
-If all three tracks in Stage 2 exhaust their budgets, the conjecture is passed to **ProverAgent** (Stage 3). See the [Stage 3](#stage-3--lean-4-prover) section below for the full 6-step pipeline, quality checker, auto-retry loop, and cross-run failure memory.
+If all three tracks in Stage 2 exhaust their budgets, the conjecture goes through the **Inventory-entailment pre-check** and then (if it passes) to **ProverAgent** (Stage 3). See the [Stage 3](#stage-3--lean-4-prover) section below for the pre-check, the full 6-step pipeline, quality checker, inline retry loop, and cross-run failure memory.
 
 > **Note on `sorry` placeholders:** Sub-goals that require planar graph geometry lemmas not yet present in Mathlib (Steinitz's theorem, Eberhard's theorem, face-counting for 3-polytopes) are left as `sorry`. The surrounding proof structure still type-checks and compiles.
 
@@ -409,6 +494,22 @@ If all three tracks in Stage 2 exhaust their budgets, the conjecture is passed t
 ## Stage 3 — Lean 4 Prover
 
 When no counterexample is found, **ProverAgent** produces a Lean 4 formalization through a 6-step pipeline.
+
+### Inventory-Entailment Pre-Check (gate before Stage 3)
+
+Before any prover work, the orchestrator searches for **countermodels**: p-vectors that satisfy the per-map arithmetic content of every `Inventory.lean` axiom (Euler/handshake/regularity, occupation feasibility `3·p₃ ≤ Σ_{k≥4}⌊k/2⌋·p_k`, the Jučovič inequality when m ≥ 6) yet violate the conjecture's conclusion. If one exists, **no honest Lean proof can be derived from the current Inventory** — either the conjecture is false (the countermodels are unrealized CE candidates) or Inventory needs new geometric content. Stage 3 is skipped with an explicit verdict:
+
+```
+[Entailment pre-check] FAIL — conclusion is NOT entailed by Inventory.lean
+  374 p-vector(s) within bounds satisfy every Inventory axiom (arithmetic content) yet violate the conclusion, e.g.:
+    {5: 17, 6: 4, 11: 1}  (f2=22)
+  Consequence: no honest Lean proof exists from the current Inventory.
+  Skipping Stage 3. (set FORCE_PROVER=true to override)
+```
+
+### Soundness Guard
+
+Generated proofs must work only with the `maps` parameter given in the theorem signature. Any construction of a `SimplyCon3ConnectedMap` instance — `.mk`, a structure literal `{ m := …, p_i := … }`, an ascribed anonymous constructor `⟨…⟩ : SimplyCon3ConnectedMap`, a `where`-definition, or a `{ maps with … }` copy-update — is rejected **before compilation** (error class `X`, fed back to the fix loop) and independently fails the quality check. Reason: the geometric axioms are sorried statements that hold only for maps of real polytopes; applied to fabricated data they yield `False` (e.g. v = 0, e = 0 ⟹ `euler_formula` gives `0 = 2`), from which any goal is "provable".
 
 ### The 6-Step Pipeline
 
@@ -424,6 +525,8 @@ When no counterexample is found, **ProverAgent** produces a Lean 4 formalization
 ### Quality Checker
 
 The quality checker runs after all nodes are compiled and applies different criteria depending on the node type.
+
+**All nodes** — soundness guard first: a proof that constructs a `SimplyCon3ConnectedMap` instance hard-fails with score 0 regardless of anything else (see [Soundness Guard](#soundness-guard)).
 
 **Intermediate helper nodes** — only a sorry audit is performed. The node passes if it introduces no new `sorry` statements (sorried axioms in `Inventory.lean` are allowed). The node's signature does not need to match the root formula.
 
@@ -443,13 +546,19 @@ score = faithfulness * 0.70 + sorry_audit * 0.20 + proof_structure * 0.10
 passed = score >= 0.85 and faithfulness_ok
 ```
 
-### Auto-Retry Loop
+### Inline Retry Loop
 
-The orchestrator runs up to **3 attempts** per conjecture. After each attempt, nodes that compiled successfully are recorded as proved in Polib. On the next attempt, proved nodes are loaded from Polib and skipped — only the nodes that failed are re-attempted. This means partial progress from earlier attempts is never discarded.
+Failed nodes are retried **inside** the prover run — parse/goal/blueprint are not redone (this replaces the v2.4 orchestrator-level 3-attempt restart). Proved nodes are saved to Polib and skipped; per sweep, failed nodes are retried in topological order with:
+
+- **Dependency gating** — a node whose direct dependencies are still failing is skipped (`[skip] waiting on failed dep(s)`) instead of burning a Claude call + lake build on a near-certain failure. It unblocks within the same sweep the moment its deps succeed.
+- **Per-node budget** — each node is retried at most `MAX_NODE_RETRIES` times (default 4), logged as `retry N/4`.
+- **Stall / exhaustion exit** — the loop stops after 2 consecutive sweeps without progress, when every remaining node is blocked or out of budget, or after 20 sweeps, whichever comes first.
+
+Each retry regenerates with updated dependency signatures and cross-run failure memory.
 
 ### Cross-Run Failure Memory
 
-When a node fails to compile after all fix rounds, the last error message plus up to 1 200 characters of the failed Lean code are stored in `store.json` (up to 4 records per node). On the next attempt, `_generate_lean` reads these records and prepends a block to the Claude prompt:
+When a node fails to compile after all fix rounds, the last error message plus up to 600 characters of the failed Lean code are stored in `store.json` (up to 3 records per node — older attempts are stale baggage). **Infrastructure failures (claude CLI timeouts, unresolved deps, aborts) are not recorded** — they carry no information about the proof approach. On the next attempt, `_generate_lean` reads these records and prepends a block to the Claude prompt:
 
 ```
 Previous failed attempts — do NOT repeat these approaches:
@@ -491,11 +600,24 @@ Within each formalization round, fix attempts are numbered with a `fix #N` count
   [fix]  C2_LowerDegreeFacesBound round 0, fix #1: trying targeted_fix + targeted_fix_strict in parallel
   [ok]  C2_LowerDegreeFacesBound compiled via parallel fix (targeted_fix_parallel, round 0, fix #1)
   [saved] C2_LowerDegreeFacesBound → polib (proved)
+  [err] C2_MainGoalConversion round 2: linarith failed
+  [dep-fail] C2 — unresolved deps: ['C2_MainGoalConversion']
+
+[retrying]
+  [C2_MainGoalConversion] previous failure: linarith failed
+  [C2_MainGoalConversion] retry 1/4: regenerate with updated dep signatures + cross-run failure memory
+  [C2_MainGoalConversion] retry successfully → proved
+  [C2] previous failure: unresolved deps: ['C2_MainGoalConversion']
+  [C2] retry 1/4: regenerate with updated dep signatures + cross-run failure memory
+  [C2] retry successfully → proved
+  [retrying] all nodes resolved after 1 iteration(s)
 [5/6] Checking formalization quality...
   [C2_DomainConstraintsFromMap] Quality: PASS (score=1.00)
+    • Soundness guard: PASS — no instance construction
     • Sorry audit: PASS — 0 sorry
     • Formula faithfulness: N/A (intermediate helper node, not root theorem)
   [C2] Quality: PASS (score=0.90)
+    • Soundness guard: PASS — no instance construction
     • Sorry audit: PASS — 0 sorry
     • Conclusion match: PASS
     • Hypotheses covered: PASS
@@ -505,29 +627,6 @@ Within each formalization round, fix attempts are numbered with a `fix #N` count
 [5.5/6] Validating Polib...
   [polib-validate] Polib builds cleanly — no repairs needed
 [6/6] Formalization saved → /home/.../output/conjecture_without_ce/c2.lean
-
-[Stage 3] Attempt 1/3 result: partial
-  Failed nodes: ['C2_MainGoalConversion', 'C2']
-  → Will retry …
-
-[Stage 3] Retrying C2 (attempt 2/3) — proved nodes reloaded from Polib, retrying failed nodes …
-[4/6] Formalizing nodes...
-  [skip] C2_DomainConstraintsFromMap (proved)
-  [skip] C2_LowerDegreeFacesBound (proved)
-  [hints] C2_MainGoalConversion: 9 (combined, verified)
-  [gen] C2_MainGoalConversion — 9 hints (validated)   ← uses cross-run failure context
-  [ok]  C2_MainGoalConversion compiled (round 0)
-  [saved] C2_MainGoalConversion → polib (proved)
-[5/6] Checking formalization quality...
-  [C2_DomainConstraintsFromMap] Retrying... (loaded from Polib)
-    Quality: PASS (score=1.00)
-    • Sorry audit: PASS — 0 sorry
-    • Formula faithfulness: N/A (intermediate helper node, not root theorem)
-  [C2_LowerDegreeFacesBound] Retrying... (loaded from Polib)
-    Quality: PASS (score=1.00)
-    ...
-
-[Stage 3] Attempt 2/3 result: success
 
 [Stage 3] Done. Result: success
 ```
@@ -566,19 +665,24 @@ These are the **only** permitted `sorry` in the file. They axiomatize geometric 
 | `euler_formula` | $V - E + F = 2 - 2g$ |
 | `handshake` | $2E = \sum_k k \cdot p_k$ |
 | `regularity` | $3V = 2E$ (3-regularity) |
-| `kgon_occupation_bound` | a $k$-gon occupies at most $\lfloor k/2 \rfloor$ triangle-edges |
-| `quad_occ_reduction` | when $p_4 > 0$, adjacent $r$-gon occupation drops by 1 |
 | `p_range` | $p_k = 0$ for $k > m$ |
 | `occupation_conservation` | $\sum_{k \geq 4} \text{occ}(k) = 3p_3$ |
 | `occupation_bound` | $0 \leq \text{occ}(k) \leq \lfloor k/2 \rfloor \cdot p_k$ |
 | `equality_family` | existence of infinite equality family |
 
+Derived in §2 (proved, **not** an axiom):
+
+| Lemma | Statement |
+|---|---|
+| `kgon_occupation_bound` | $\text{occ}(k) \leq \lfloor k/2 \rfloor \cdot p_k$ — proved from `occupation_bound` |
+
+> **Soundness fix (2026-06)**: the former `kgon_occupation_bound` and `quad_occ_reduction` quantified over arbitrary `Finset ℕ` instead of the map's occupation data and were refutable inside Lean (e.g. occ = {0,1,2}, k = 4 gives 3 ≤ 2), making the axiom base inconsistent. `kgon_occupation_bound` is restated on `total_occ` and proved; `quad_occ_reduction` ("an $r$-gon adjacent to a quad occupies $\leq \lfloor r/2 \rfloor - 1$") is **removed** — its faithful statement needs face-adjacency data the structure does not carry (the same Mathlib gap that blocks `Juc_InequalityPart`).
+
 ### §3 — Jučovič Theorem (sphere, g = 0)
 
 **Proved without sorry:**
 
-- `Juc_KGonMaxOccupation` — $k$-gon occupies at most $\lfloor k/2 \rfloor$ triangle-edges
-- `Juc_QuadAdjacencyConstraint` — when $p_4 > 0$, adjacent $r$-gon occupation $\leq \lfloor r/2 \rfloor - 1$
+- `Juc_KGonMaxOccupation` — $\text{occ}(k) \leq \lfloor k/2 \rfloor \cdot p_k$ for $k \geq 4$ (alias of `kgon_occupation_bound`)
 - `Juc_HexMaxOccupation` — hexagonal face occupies at most 3 triangle-edges
 - `Juc_NonHexEdgeBound` — total non-hex occupation $\leq \sum_{k \neq 6} \lfloor k/2 \rfloor \cdot p_k$
 - `Juc_EulerFormula` — $3p_3 = 12 - 2p_4 - p_5 + \sum_{k \geq 7}(k-6)p_k$
@@ -625,10 +729,11 @@ Polytope_Conjecture_Prover/
 │   ├── claude_sdk.py                   # Thin wrapper around the claude CLI binary
 │   ├── conjectures.py                  # JSON loader + formula canonicalizer
 │   ├── orchestrator/
-│   │   ├── orchestrator.py             # Top-level 3-stage pipeline
+│   │   ├── orchestrator.py             # Top-level pipeline (stages 1–3 + pre-check)
 │   │   └── tools/
 │   │       ├── check_pvector.py        # 4-Check Validator
 │   │       ├── polytope_constructor.py # Witness graph builder (Tier 4)
+│   │       ├── ce_enumerator.py        # Stage 1.5 enumeration + entailment pre-check
 │   │       └── conjecture_parser.py    # Formula → ParsedConjecture
 │   ├── rl_ce_finder/
 │   │   └── agent.py                    # PPO + FiLM-GNN CE search
@@ -645,9 +750,16 @@ Polytope_Conjecture_Prover/
 │           ├── quality_checker.py      # Semantic quality checker (Claude-verified)
 │           ├── polib_manager.py        # Polib I/O + SessionState (cross-run failure memory)
 │           └── latex_parser.py         # LaTeX theorem parsing
+├── tools/
+│   └── plantri/
+│       ├── plantri_ad                  # plantri 5.8 + allowed_deg plugin (patched)
+│       ├── decide_ce_plantri.py        # standalone batch realizability decider
+│       └── plantri-guide.txt           # upstream documentation (Apache 2.0)
 ├── output/
-│   ├── conjecture_with_ce/             # C{id}.json — CE results
-│   └── conjecture_without_ce/         # {id}.lean — Lean proofs
+│   ├── conjecture_with_ce/             # C{id}.json — CE results (incl. witness edges)
+│   ├── conjecture_without_ce/         # {id}.lean — Lean proofs
+│   ├── realizability_cache.json        # cross-run exhaustive verdicts
+│   └── plantri_verdicts_{id}.json      # batch decider results
 ├── polib/
 │   ├── Inventory.lean                  # Foundational lemma library
 │   └── lakefile.lean                   # Lake build config for polib
@@ -710,9 +822,23 @@ POLIB_PATH=polib                      # path to Lean proof library
 
 # Prover tuning
 MAX_ROUNDS_PER_NODE=3                 # compile-fix iterations per proof node
+MAX_NODE_RETRIES=4                    # per-node budget in the inline retry loop
 COMPILE_TIMEOUT_SECONDS=180           # lake build timeout (seconds)
 MAX_PARALLEL_NODES=6                  # parallel proof threads
-CLAUDE_TIMEOUT=150                    # claude CLI call timeout (seconds)
+CLAUDE_TIMEOUT=150                    # claude CLI timeout (s); retries escalate +60 s each
+FORCE_PROVER=false                    # run Stage 3 even if the entailment pre-check fails
+
+# Stage 1.5 / entailment pre-check bounds
+CE_ENUM_F2_MAX=36                     # max total face count enumerated
+CE_ENUM_KMAX=20                       # max face size enumerated
+CE_ENUM_NLARGE_MAX=2                  # max number of faces with k >= 7
+CE_ENUM_MAX_RESULTS=400               # cap on candidates kept
+CE_ENUM_REALIZE_MAX=40                # candidates sent to the witness constructor
+CE_ENUM_REALIZE_TIMEOUT=90            # seconds per construction attempt
+
+# plantri exhaustive tier
+PLANTRI_AD=tools/plantri/plantri_ad   # path to the plantri_ad binary
+PLANTRI_F2_MAX=26                     # max f2 decided exhaustively (runtime grows fast)
 ```
 
 ---
@@ -735,6 +861,10 @@ python -m agent.orchestrator --name auto_20260310_142638_43
 python -m agent.orchestrator --name auto_20260310_142638_43 --rl-episodes 1200 --llm-rounds 50
 python -m agent.orchestrator --name auto_20260310_142638_43 --skip-ce   # prover only
 python -m agent.orchestrator --batch --json conjectures/conjectures.json
+
+# Exhaustively decide ALL enumerated CE candidates of one conjecture (standalone,
+# resumable, stops on the first realizable hit). This is how C2 was refuted.
+python tools/plantri/decide_ce_plantri.py --name auto_20260310_142638_43 --f2-max 24
 ```
 
 ---

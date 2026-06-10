@@ -157,8 +157,11 @@ class ClaudeSDKClient:
                 raise RuntimeError("call aborted: stop_event set")
 
             # Scale attempt timeouts from the caller-supplied timeout.
-            # Give full budget on attempt 0; scale down for retries.
-            attempt_timeout = timeout if attempt == 0 else (max(60, timeout - 60) if attempt == 1 else max(60, timeout - 120))
+            # Retries get MORE time, not less — if attempt 0 timed out, retrying
+            # with a smaller budget is guaranteed to fail again. The prompt is
+            # also trimmed harder on retries, so time↑ + prompt↓ gives the retry
+            # a real chance.
+            attempt_timeout = timeout + 60 * attempt
             trimmed = self._trim_prompt(prompt, attempt)
             # Attempt 0 uses fast_model (haiku) when provided; later attempts escalate to main model.
             effective_model = (fast_model if fast_model and attempt == 0 else None) or model or self.model

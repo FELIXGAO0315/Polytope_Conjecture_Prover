@@ -47,24 +47,16 @@ lemma handshake {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
 lemma regularity {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
     3 * maps.v = 2 * maps.e := by sorry
 
-/-- A k-gon (k ≥ 4) can occupy at most ⌊k/2⌋ edges of triangular faces. -/
+/-- k-gons (k ≥ 4) occupy at most ⌊k/2⌋ triangle-edges each; aggregated:
+    total_occ k ≤ ⌊k/2⌋·p_k. (PROVED from occupation_bound, not an axiom.) -/
 lemma kgon_occupation_bound {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
-    ∀ k : ℕ, k ≥ 4 →
-    ∀ (occupied : Finset ℕ), (∀ i ∈ occupied, i < k) →
-    occupied.card ≤ k / 2 := by sorry
+    ∀ k ∈ Finset.Ico 4 (maps.m + 1),
+    maps.total_occ k ≤ ((k : ℤ) / 2) * (maps.p_i k : ℤ) :=
+  fun k hk => (occupation_bound maps k hk).2
 
-/-- When a quadrangular face occupies one triangle edge, at least one
-    adjacent r-gon (r > 4) has its effective occupation reduced by 1. -/
-lemma quad_adj_constraint {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
-    ∀ (r : ℕ), r > 4 →
-    ∃ (penalty : ℕ), penalty ≥ 1 ∧ penalty ≤ (maps.p_i 4) * (maps.p_i r) := by sorry
-
-/-- When p₄ > 0 and an r-gon (r > 4) is present, the r-gon can occupy at
-    most ⌊r/2⌋ - 1 edges of triangular faces. -/
-lemma quad_occ_reduction {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
-    ∀ (r : ℕ), r > 4 → maps.p_i 4 > 0 → maps.p_i r > 0 →
-    ∀ (occupied : Finset ℕ), (∀ i ∈ occupied, i < r) →
-    occupied.card ≤ r / 2 - 1 := by sorry
+-- NOTE: `quad_occ_reduction` and `quad_adj_constraint` DO NOT EXIST.
+-- Never call them — they were removed (their faithful statements need
+-- face-adjacency data the structure does not carry).
 
 /-- Face range: p_i k = 0 for all k > m. -/
 lemma p_range {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
@@ -105,9 +97,7 @@ FIX_LOOP_POLIB_REF = """\
 - `euler_formula maps`                 →  (v:ℤ) - e + Σ_{k=3}^{m} p_i k = 2 - 2g
 - `handshake maps`                     →  2·e = Σ_{k=3}^{m} k·p_i k
 - `regularity maps`                    →  3·v = 2·e
-- `kgon_occupation_bound maps k hk occupied h_mem`  →  occupied.card ≤ k/2
-- `quad_adj_constraint maps r hr`      →  ∃ penalty ≥ 1, penalty ≤ p₄·p_r
-- `quad_occ_reduction maps r hr h4 hr0 occupied h_mem`  →  occupied.card ≤ r/2-1
+- `kgon_occupation_bound maps k hk`    →  total_occ k ≤ (k:ℤ)/2 · p_k  (hk : k ∈ Finset.Ico 4 (maps.m+1))
 - `p_range maps k hk`                  →  p_i k = 0  (when maps.m < k)
 - `occupation_conservation maps`       →  Σ_{k≥4} total_occ k = 3·p₃
 - `occupation_bound maps k hk`         →  0 ≤ total_occ k ∧ total_occ k ≤ (k:ℤ)/2·p_k
@@ -190,12 +180,11 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   If it is not listed → it does not exist → prove it yourself or use sorry.
   **Do NOT assume any lemma exists unless it is explicitly listed in your prompt.**
 
-### Strategy A — Local geometry lemmas (occupation bounds, adjacency):
-  These are standalone sorried lemmas (geometric axioms). Call them as functions:
-  - `kgon_occupation_bound maps k hk occupied h_mem`  proves `occupied.card ≤ k / 2`
-  - `quad_adj_constraint maps r hr`  gives `∃ penalty ≥ 1, penalty ≤ p₄ * p_r` (quadrangle adjacency penalty)
-  - `quad_occ_reduction maps r hr h4 hr0 occupied h_mem`  proves `occupied.card ≤ r / 2 - 1`
-    (use this when p₄ > 0 and the r-gon is present; it is strictly stronger than kgon_occupation_bound)
+### Strategy A — Local geometry lemmas (occupation bounds):
+  These are standalone lemmas. Call them as functions:
+  - `kgon_occupation_bound maps k hk`  proves `maps.total_occ k ≤ ((k : ℤ) / 2) * maps.p_i k`
+    where `hk : k ∈ Finset.Ico 4 (maps.m+1)` (PROVED — same bound as occupation_bound's RHS)
+  - ⛔ `quad_occ_reduction` and `quad_adj_constraint` DO NOT EXIST (removed) — never call them.
   - `p_range maps k hk`  proves `maps.p_i k = 0` when `hk : maps.m < k`.
     Use this to show `maps.p_i 6 = 0` when `maps.m < 6`.
   - `occupation_conservation maps`  proves
@@ -237,9 +226,9 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   which produces `-4*p₄` in the final bound instead of the required `-2*p₄`.
   The paper's argument (tex line 25-28) says k=4 contributes NET ZERO because
   each quadrangle occupation forces an equal reduction in some r-gon (r > 4).
-  The current structure axioms (`occupation_bound`, `quad_occ_reduction`) do NOT
-  directly encode this combined net-zero effect for total_occ 4 — `quad_occ_reduction`
-  only bounds individual face occupations, not total_occ.
+  The current structure axioms (`occupation_bound`) do NOT encode this combined
+  net-zero effect for total_occ 4 — the quad-adjacency reduction needs
+  face-adjacency data the structure does not carry.
 
   CORRECT APPROACH — use a private sorry helper for the gap, then close with linarith:
   ```lean
@@ -287,7 +276,7 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
     h1: `p₃+p₄+p₅ ≥ 8`, and p₆=0 → goal `0 ≥ 12*(1-g)-2*p₄-3*p₅ = 3*p₃-2*p₅`.
     Use `linarith` after establishing these via `have` steps with `push_cast`.
   Apply the axiom lemmas directly:
-  `exact kgon_occupation_bound maps k hk S hS`
+  `have h := kgon_occupation_bound maps k hk; linarith`
 
   **⚠ THESE IDENTIFIERS DO NOT EXIST — NEVER USE THEM:**
   The following names are NOT defined anywhere in Lean, Mathlib, or Inventory. Using them causes
@@ -297,7 +286,8 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   - `triangle_edge_occupation`, `occupation_identity`, `triangle_occupation_eq`
   - Any dot-notation access `maps.euler_formula`, `maps.handshake`, etc. — these are now
     standalone lemmas; call them as `euler_formula maps`, `handshake maps`, `regularity maps`,
-    `kgon_occupation_bound maps`, `quad_occ_reduction maps`, `equality_family maps`, etc.
+    `kgon_occupation_bound maps`, `equality_family maps`, etc.
+  - `quad_occ_reduction`, `quad_adj_constraint` — REMOVED from Inventory; do not call.
   ⛔ ABSOLUTE PROHIBITION — adding ANY proposition/proof field to `SimplyCon3ConnectedMap`
     is FORBIDDEN under any circumstances. This is considered cheating. The structure MUST
     contain ONLY data fields (m, p_i, v, e, total_occ). All mathematical facts MUST be
@@ -453,6 +443,16 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   When a sub-lemma needs `g = 0`, prefer writing its signature as
   `(maps : SimplyCon3ConnectedMap 0)` directly rather than `{g : ℤ} (maps : ...) (hg : g = 0)`.
 
+  **⛔ GENUS MISMATCH IS THE #1 SOURCE OF "Application type mismatch" ERRORS.**
+  If the parent theorem's signature says `(maps : SimplyCon3ConnectedMap 0)` (check the
+  "Parent theorem signature" in your prompt), then ALL helper lemmas you write for it MUST
+  also use `(maps : SimplyCon3ConnectedMap 0)`. If you write `{g : ℤ} (maps : SimplyCon3ConnectedMap g)`
+  instead, calling any genus-0 proved dependency (e.g. `Juc_InequalityPart maps hm`,
+  or any helper lemma whose signature fixes genus 0) will fail with "Application type mismatch" because
+  `maps : SimplyCon3ConnectedMap g` ≠ `maps : SimplyCon3ConnectedMap 0`.
+  Rule: **default to the parent theorem's genus; only generalize if the description
+  explicitly says the result holds for all genus.**
+
   **⛔ `total_faces` cast to ℤ is NOT automatic.**
   `maps.total_faces` is defined in ℕ as `∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k`.
   Writing `(maps.total_faces : ℤ)` is NOT definitionally equal to
@@ -523,6 +523,11 @@ these Inventory lemmas (available via `import Inventory`) can prove or help prov
 5. Never write `axiom` declarations — use structured sorry instead.
    ⛔ NEVER add proposition/proof fields to `SimplyCon3ConnectedMap`. The structure contains
    ONLY data: m, p_i, v, e, total_occ. All facts are standalone sorried lemmas. No exceptions.
+   ⛔ NEVER construct a `SimplyCon3ConnectedMap` instance — no `.mk`, no `{ m := …, p_i := … }`,
+   no `⟨…⟩ : SimplyCon3ConnectedMap`, no `def M : SimplyCon3ConnectedMap … where`, no
+   `{ maps with … }` copy-update. The geometric axiom lemmas are true ONLY for the `maps`
+   parameter given in the signature; applying them to a fabricated instance is unsound and
+   the system hard-rejects the file before compilation.
 6. **MANDATORY sorry rule**: bare `sorry` without the four [SORRY] annotation lines is REJECTED.
    The system validates annotations at save time and forces a retry if any sorry is unannotated.
    Use the exact format from Strategy E. Zero new sorry is the goal; annotated sorry is the fallback.
@@ -538,8 +543,8 @@ these Inventory lemmas (available via `import Inventory`) can prove or help prov
    - NEVER write `{M : Type*}` or generic function arguments like `(pvec : M → ℕ → ℤ)`.
    - Access face counts as `maps.p_i k`, edge count as `maps.e`, vertex count as `maps.v`.
    - Call geometric axioms as standalone lemmas: `euler_formula maps`, `handshake maps`,
-     `regularity maps`, `kgon_occupation_bound maps`, `quad_adj_constraint maps`,
-     `quad_occ_reduction maps`, `occupation_conservation maps`, etc.
+     `regularity maps`, `kgon_occupation_bound maps`, `occupation_conservation maps`,
+     `occupation_bound maps`, etc. (`quad_occ_reduction`/`quad_adj_constraint` do NOT exist.)
 """
 
 # Dynamic user prompt — contains only node-specific content.
@@ -563,6 +568,13 @@ import Polib
 
 ## Previously proved dependencies (usable via the imports above):
 {dep_details}
+
+## ⛔ DEPENDENCY-CALL RULES — read before calling any of the above:
+- The "Signature" block under each dep is the EXACT API. Pass EXACTLY the arguments shown — no more, no less.
+- If a dep's signature is `theorem Foo (maps : SimplyCon3ConnectedMap 0) : ...`, call `Foo maps` (one arg). Writing `Foo maps h_f2` causes "Function expected at Foo" because after `maps` the result is a Prop, not a function.
+- If a dep's signature is `lemma Bar {{g : ℤ}} (maps : SimplyCon3ConnectedMap g) (hm : maps.m ≥ 6) : ...`, call `Bar maps hm` (two explicit args; the `{{g}}` is implicit and inferred).
+- NEVER add hypotheses to a dep call that aren't in its signature. Common mistake: passing the parent theorem's `h_f2` to a dep that doesn't take it. This is the #1 cause of "Function expected at" errors.
+- If you need a fact that the dep doesn't directly provide, derive it from the dep's conclusion using `have h := DepName maps; linarith` — do NOT try to pass extra args to "make it stronger".
 
 ## ⚡ MANDATORY FIRST ATTEMPT — Try these before any complex proof:
 For goals involving linear arithmetic over p₃, p₄, p₅, p₆ (face counts), ALWAYS try these
@@ -629,6 +641,13 @@ _GOAL_CONTEXT_MAIN = (
 _GOAL_CONTEXT_INTERMEDIATE = (
     "Final theorem this node supports: `{theorem_name}` (do NOT write it here —\n"
     "this file must only contain the `{node_id}` {node_type} described above).\n"
+    "Parent theorem signature (for reference — DO NOT re-prove it here):\n"
+    "  {parent_signature}\n"
+    "⚠ GENUS RULE: Your helper {node_type} MUST use the SAME genus as the parent theorem.\n"
+    "  • If parent uses `SimplyCon3ConnectedMap 0` → write `(maps : SimplyCon3ConnectedMap 0)`\n"
+    "  • If parent uses `{{g : ℤ}} (maps : SimplyCon3ConnectedMap g)` → match that exactly\n"
+    "  • NEVER default to generic `{{g : ℤ}}` when the parent theorem fixes genus to 0.\n"
+    "  • Mismatching genus causes 'Application type mismatch' when calling proved dependencies.\n"
     "**CRITICAL — NAMING**: The last declaration MUST start with exactly "
     "`{node_type} {node_id}` — this identifier is fixed by the system and cannot be changed."
 )

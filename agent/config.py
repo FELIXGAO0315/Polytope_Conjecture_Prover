@@ -33,6 +33,7 @@ class Config:
     store_path: Path = field(default_factory=lambda: _PROJECT_ROOT / "store.json")
     lake_binary: str = field(default_factory=lambda: os.environ.get("LAKE_BINARY", "lake"))
     max_rounds_per_node: int = field(default_factory=lambda: int(os.environ.get("MAX_ROUNDS_PER_NODE", "3")))
+    max_node_retries: int = field(default_factory=lambda: int(os.environ.get("MAX_NODE_RETRIES", "4")))
     max_sorry_total: int = field(default_factory=lambda: int(os.environ.get("MAX_SORRY_TOTAL", "0")))
     model_main: str = field(
         default_factory=lambda: os.environ.get("MODEL_MAIN", "claude-sonnet-4-6")

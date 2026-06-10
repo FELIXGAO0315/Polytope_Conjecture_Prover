@@ -114,6 +114,24 @@ def _pvec_from_dual(hull: ConvexHull) -> dict[int, int]:
     return dict(Counter(deg.values()))
 
 
+def _primal_graph_from_dual(hull: ConvexHull):
+    """Extract the primal simple-polytope graph from the dual simplicial hull.
+
+    Primal vertices = dual facets (triangles); primal edges = pairs of facets
+    sharing a ridge. scipy's `hull.neighbors[i]` lists the 3 facets adjacent to
+    facet i, so the result is 3-regular by construction. This is the explicit
+    witness graph that the 4-check validator re-verifies with graphcalc.
+    """
+    import networkx as nx
+    G = nx.Graph()
+    G.add_nodes_from(range(len(hull.simplices)))
+    for i, nbrs in enumerate(hull.neighbors):
+        for j in nbrs:
+            if int(j) >= 0:
+                G.add_edge(i, int(j))
+    return G
+
+
 # ── Hyperplane computation ─────────────────────────────────────────────────────
 
 def _hyperplanes(verts: np.ndarray) -> list[np.ndarray]:
@@ -269,7 +287,18 @@ class HopperCEFinder:
                     print(f"{_TAG} Step {step}/{self.num_steps}: CE found — {c_pvec} — {detail}")
                     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
                     checker = self.check_agent or PVectorCheckAgent(client=None)
-                    report = checker.run_silent(c_pvec, self.conjecture)
+                    # Extract the explicit primal witness graph from the dual
+                    # hull — the validator re-verifies it with graphcalc.
+                    # Without this, exotic candidates die at the Tier-4 chop
+                    # constructor even though Hopper holds a live witness.
+                    witness = None
+                    try:
+                        witness = _primal_graph_from_dual(ConvexHull(cand["dual_verts"]))
+                    except (QhullError, Exception):
+                        pass
+                    report = checker.run_silent(
+                        c_pvec, self.conjecture, witness_graph=witness,
+                    )
                     if report.all_passed:
                         return {
                             "p_vector": c_pvec,

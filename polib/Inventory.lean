@@ -58,14 +58,16 @@ lemma handshake {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 lemma regularity {g : ℤ} (M : SimplyCon3ConnectedMap g) : 3 * M.v = 2 * M.e := by
   sorry
 
-lemma kgon_occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
-    ∀ k : ℕ, k ≥ 4 → ∀ (occ : Finset ℕ), (∀ i ∈ occ, i < k) → occ.card ≤ k / 2 := by
-  sorry
-
-lemma quad_occ_reduction {g : ℤ} (M : SimplyCon3ConnectedMap g) :
-    ∀ (r : ℕ), r > 4 → M.p_i 4 > 0 → M.p_i r > 0 →
-    ∀ (occ : Finset ℕ), (∀ i ∈ occ, i < r) → occ.card ≤ r / 2 - 1 := by
-  sorry
+-- NOTE (soundness fix 2026-06-10): the former `kgon_occupation_bound` and
+-- `quad_occ_reduction` quantified over arbitrary `Finset ℕ` instead of the
+-- map's own occupation data and were refutable inside Lean (e.g. occ = {0,1,2},
+-- k = 4 gives 3 ≤ 2), making the axiom base inconsistent.
+--   • kgon_occupation_bound is restated on `total_occ` below (after
+--     occupation_bound, from which it is now PROVED — no longer an axiom).
+--   • quad_occ_reduction ("an r-gon adjacent to a quad occupies ≤ ⌊r/2⌋ − 1")
+--     needs face-adjacency data that `SimplyCon3ConnectedMap` does not carry —
+--     the same Mathlib gap that blocks `Juc_InequalityPart`. It is removed from
+--     the axiom base rather than restated unsoundly.
 
 lemma p_range {g : ℤ} (M : SimplyCon3ConnectedMap g) :
     ∀ k : ℕ, M.m < k → M.p_i k = 0 := by
@@ -79,6 +81,14 @@ lemma occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
     ∀ k : ℕ, k ∈ Finset.Ico 4 (M.m + 1) →
     0 ≤ M.total_occ k ∧ M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
   sorry
+
+/-- A k-gon occupies at most ⌊k/2⌋ triangle-edges; aggregated over the p_k
+    k-gons: total_occ k ≤ ⌊k/2⌋·p_k. Proved from occupation_bound (this
+    replaces the former refutable Finset formulation — see note above). -/
+lemma kgon_occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+    ∀ k ∈ Finset.Ico 4 (M.m + 1),
+    M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) :=
+  fun k hk => (occupation_bound M k hk).2
 
 lemma equality_family {g : ℤ} (M : SimplyCon3ConnectedMap g) :
     ∀ n : ℕ, ∃ (p_i_n : ℕ → ℕ) (v_n e_n : ℕ),
@@ -102,18 +112,16 @@ lemma equality_family {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 
 -- §3.1  Proved constituent lemmas
 
-/-- [jucovic] A k-gon (k ≥ 4) occupies at most ⌊k/2⌋ triangle-edges. -/
+/-- [jucovic] k-gons (k ≥ 4) occupy at most ⌊k/2⌋ triangle-edges each;
+    aggregated: total_occ k ≤ ⌊k/2⌋·p_k. -/
 lemma Juc_KGonMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) :
-    ∀ k : ℕ, k ≥ 4 →
-    ∀ (occ : Finset ℕ), (∀ i ∈ occ, i < k) → occ.card ≤ k / 2 :=
+    ∀ k ∈ Finset.Ico 4 (M.m + 1),
+    M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) :=
   kgon_occupation_bound M
 
-/-- [jucovic] When p₄ > 0, any adjacent r-gon (r > 4) has occupation ≤ ⌊r/2⌋ − 1. -/
-lemma Juc_QuadAdjacencyConstraint {g : ℤ} (M : SimplyCon3ConnectedMap g)
-    (h_p4 : M.p_i 4 > 0) :
-    ∀ r : ℕ, r > 4 → M.p_i r > 0 →
-    ∀ (occ : Finset ℕ), (∀ i ∈ occ, i < r) → occ.card ≤ r / 2 - 1 :=
-  fun r hr hp_r occ h_occ => quad_occ_reduction M r hr h_p4 hp_r occ h_occ
+-- Juc_QuadAdjacencyConstraint removed (soundness fix 2026-06-10): it wrapped
+-- the refutable `quad_occ_reduction`; the faithful quad-adjacency statement
+-- requires adjacency data not present in the structure (see note in §2).
 
 /-- [jucovic] Each hexagonal face occupies at most 3 triangle-edges. -/
 lemma Juc_HexMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hm : M.m ≥ 6) :
@@ -240,8 +248,9 @@ lemma Juc_EulerFormula (M : SimplyCon3ConnectedMap 0) :
     3·p₆ ≥ 12 − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋ − 6)·p_k.
     SORRY: the arithmetic step combining occupation_conservation,
     Juc_HexMaxOccupation, and Juc_NonHexEdgeBound into the final inequality
-    requires a lemma bounding total_occ(4) via quad_occ_reduction that is
-    not yet formalized (Mathlib gap: no surface-graph quad-adjacency theory). -/
+    requires the quad-adjacency occupation reduction, which needs face-adjacency
+    data the structure does not carry (Mathlib gap: no surface-graph
+    quad-adjacency theory). -/
 lemma Juc_InequalityPart (M : SimplyCon3ConnectedMap 0) (hm : M.m ≥ 6) :
     3 * (M.p_i 6 : ℤ) ≥
       12 - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +

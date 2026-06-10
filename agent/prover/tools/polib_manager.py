@@ -509,15 +509,28 @@ class SessionState:
         s = self._get()
         return s.get("nodes", {}).get(node_id, {}).get("status") == "partial"
 
+    # Infrastructure failures carry no information about the proof approach —
+    # injecting them as "previous failed attempts — do NOT repeat" only adds
+    # noise to the generation prompt.
+    _INFRA_ERROR_MARKERS = (
+        "claude CLI timed out",
+        "unresolved deps:",
+        "call aborted: stop_event",
+    )
+
     def mark_pending(self, node_id: str, rounds_used: int, last_error: str, failed_code: str | None = None) -> None:
-        # Accumulate cross-run failure records so retries can learn from prior attempts
+        # Accumulate cross-run failure records so retries can learn from prior attempts.
+        # Only keep the most recent 3 — older attempts are stale baggage that misleads
+        # the LLM (the failure mode has usually evolved past them).
         current = self._get().get("nodes", {}).get(node_id, {})
         errors = list(current.get("cross_run_errors", []))
-        errors.append({
-            "error": last_error[:400],
-            "code_snippet": failed_code[:1200] if failed_code else "",
-        })
-        errors = errors[-4:]  # keep last 4 cross-run records
+        is_infra = any(m in last_error for m in self._INFRA_ERROR_MARKERS)
+        if not is_infra:
+            errors.append({
+                "error": last_error[:400],
+                "code_snippet": failed_code[:600] if failed_code else "",
+            })
+        errors = errors[-3:]
         self._store.update_nested("session", "nodes", node_id, {
             "status": "pending",
             "rounds_used": rounds_used,

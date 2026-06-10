@@ -10,6 +10,37 @@ from pathlib import Path
 _ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07]*\x07')
 
 
+# ── Soundness guard: ban construction of SimplyCon3ConnectedMap instances ────
+# The structure is pure data; the geometric axioms (euler_formula, handshake, …)
+# are sorried statements that hold only for maps arising from real polytopes.
+# Instantiating the structure with arbitrary data and applying an axiom to it
+# yields false equations (e.g. v=0,e=0 ⟹ euler_formula gives 0 = 2 → False),
+# from which anything is provable. Such proofs compile but are mathematically
+# meaningless, so they are rejected before compilation on every code path.
+_STRUCT_CONSTRUCTION_PATTERNS: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"SimplyCon3ConnectedMap\.mk\b"), "explicit .mk constructor"),
+    (re.compile(r":\s*SimplyCon3ConnectedMap\b[^:\n]*:=\s*[{⟨]"), "structure literal with type ascription"),
+    (re.compile(r":\s*SimplyCon3ConnectedMap\b[^:=\n]*\bwhere\b"), "`where`-style instance definition"),
+    (re.compile(r"⟨[^⟩]*⟩\s*:\s*SimplyCon3ConnectedMap\b"), "anonymous constructor ascribed to the structure type"),
+    (re.compile(r"\{[^{}]*\bp_i\s*:=", re.S), "structure literal assigning the p_i field"),
+]
+
+
+def find_struct_construction(lean_code: str) -> str | None:
+    """Return a short description + offending snippet if the code constructs a
+    SimplyCon3ConnectedMap instance, else None. Comment lines are ignored."""
+    stripped = "\n".join(
+        line for line in lean_code.splitlines()
+        if not line.strip().startswith("--")
+    )
+    for pat, label in _STRUCT_CONSTRUCTION_PATTERNS:
+        m = pat.search(stripped)
+        if m:
+            snippet = m.group(0).replace("\n", " ")[:120]
+            return f"{label}: `{snippet}`"
+    return None
+
+
 @dataclass
 class LeanError:
     line: int
@@ -182,6 +213,28 @@ class LeanCompiler:
 
     def compile(self, lean_code: str, module_name: str) -> CompileResult:
         safe_name = _sanitize_module_name(module_name)
+
+        # Soundness guard — reject before compiling so every code path
+        # (generation, all fix strategies, sorry elimination) is covered.
+        offending = find_struct_construction(lean_code)
+        if offending:
+            guard_error = LeanError(
+                line=0, column=0, error_class="X",
+                raw_message=(
+                    "BANNED CONSTRUCT — proof builds a SimplyCon3ConnectedMap instance "
+                    f"({offending}). The geometric axioms hold only for the `maps` "
+                    "parameter given in the theorem signature; applying them to a "
+                    "fabricated instance is unsound. Remove the instance construction "
+                    "and work only with the given `maps`."
+                ),
+                lean_excerpt=offending,
+            )
+            return CompileResult(
+                success=False, exit_code=-2, stdout="",
+                stderr="soundness guard: banned instance construction",
+                errors=[guard_error], warnings=[],
+                compile_time_seconds=0.0, module_name=safe_name,
+            )
         temp_dir = self._workspace / "Polib" / "_Temp"
         temp_dir.mkdir(parents=True, exist_ok=True)
         temp_file = temp_dir / f"{safe_name}.lean"

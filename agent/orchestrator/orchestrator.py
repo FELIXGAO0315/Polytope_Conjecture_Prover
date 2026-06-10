@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import multiprocessing as _mp
+import os
 import re
 import threading
 import time
@@ -629,6 +630,11 @@ class Orchestrator:
                 return pvec_result
         print("Random walk exhausted, falling back to LLM + RL + Hopper...")
 
+        # ── Stage 1.5: systematic boundary enumeration (no API) ──────────────
+        enum_ce = self._run_enumeration_stage(conjecture)
+        if enum_ce:
+            return enum_ce
+
         # ── Stage 2: LLM + RL + Hopper in parallel ────────────────────────────
         print(f"[Stage 2] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}  |  Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}")
 
@@ -770,38 +776,113 @@ class Orchestrator:
         else:
             print(f"[Orchestrator] Warning: lake build Polib exited {result.returncode}")
 
-    def _run_prover(self, conjecture: ParsedConjecture, max_retries: int = 3) -> None:
+    def _run_enumeration_stage(self, conjecture: ParsedConjecture) -> Optional[dict]:
+        """Stage 1.5 — exhaustive sweep of small arithmetic CE candidates.
+
+        Complements the random walk (which samples) with a complete enumeration
+        of every DS-valid violating p-vector within bounds, then tries to
+        realize the most constructible ones via the 4-check validator.
+        """
+        from agent.orchestrator.tools.ce_enumerator import enumerate_ce_candidates
+
+        try:
+            candidates = enumerate_ce_candidates(conjecture)
+        except Exception as exc:
+            print(f"[Stage 1.5] enumerator error: {exc} — skipping")
+            return None
+        if not candidates:
+            print("[Stage 1.5] No arithmetic CE candidate exists within bounds — "
+                  "conjecture is arithmetically tight in this region.")
+            return None
+
+        # 90s default gives the plantri exhaustive tier (inside the constructor)
+        # enough budget to fully decide f2≈22 candidates on a multicore box.
+        max_try = int(os.environ.get("CE_ENUM_REALIZE_MAX", "40"))
+        per_timeout = float(os.environ.get("CE_ENUM_REALIZE_TIMEOUT", "90"))
+        n_try = min(max_try, len(candidates))
+        print(f"[Stage 1.5] {len(candidates)} arithmetic CE candidate(s) within bounds; "
+              f"trying to realize the {n_try} most constructible ({per_timeout:.0f}s each)...")
+        checker = PVectorCheckAgent(client=self.client)
+        for i, cand in enumerate(candidates[:n_try], 1):
+            report = checker.run_silent(cand.p_vec, conjecture, constructor_timeout=per_timeout)
+            if report.all_passed:
+                _, detail = _eval_conclusion_violated(conjecture.conclusion, cand.p_vec)
+                print(f"[Stage 1.5] CE realized: {cand.p_vec}")
+                report.print()
+                return {
+                    "p_vector": cand.p_vec,
+                    "found_by": "boundary_enumeration",
+                    "found_at_round": i,
+                    "violation_detail": detail,
+                }
+        print(f"[Stage 1.5] None of the {n_try} tried candidate(s) could be realized — "
+              f"falling through to Stage 2.")
+        return None
+
+    def _entailment_precheck(self, conjecture: ParsedConjecture) -> bool:
+        """Return True if Stage 3 should run.
+
+        A countermodel is a p-vector that satisfies the per-map arithmetic
+        content of every Inventory.lean axiom yet violates the conjecture's
+        conclusion. If one exists, no honest Lean proof of the conjecture can
+        be derived from the current Inventory, so Stage 3 is skipped with an
+        explicit verdict instead of burning prover rounds on an impossible
+        task. Override with FORCE_PROVER=true.
+        """
+        from agent.orchestrator.tools.ce_enumerator import (
+            enumerate_ce_candidates, inventory_countermodels,
+        )
+        try:
+            candidates = enumerate_ce_candidates(conjecture)
+            countermodels = inventory_countermodels(candidates)
+        except Exception as exc:
+            print(f"[Entailment pre-check] error: {exc} — proceeding with prover")
+            return True
+
+        if not countermodels:
+            print("[Entailment pre-check] PASS — no Inventory countermodel within "
+                  "bounds; formalization is plausible.")
+            return True
+
+        print(f"\n[Entailment pre-check] FAIL — conclusion is NOT entailed by Inventory.lean")
+        print(f"  {len(countermodels)} p-vector(s) within bounds satisfy every Inventory "
+              f"axiom (arithmetic content) yet violate the conclusion, e.g.:")
+        for cm in countermodels[:3]:
+            print(f"    {cm.p_vec}  (f2={cm.f2})")
+        print("  Consequence: no honest Lean proof exists from the current Inventory.")
+        print("  Either:")
+        print("    1. the conjecture is FALSE — the above are unrealized CE candidates")
+        print("       (Stage 1.5/2 could not realize them; a stronger constructor or")
+        print("        dual enumeration could decide them), or")
+        print("    2. the conjecture is TRUE — then Inventory needs new geometric")
+        print("       content (a real theorem excluding these p-vectors); more LLM")
+        print("       retries cannot help.")
+        if os.environ.get("FORCE_PROVER", "").lower() == "true":
+            print("  FORCE_PROVER=true — running Stage 3 anyway.")
+            return True
+        print("  Skipping Stage 3. (set FORCE_PROVER=true to override)")
+        return False
+
+    def _run_prover(self, conjecture: ParsedConjecture) -> None:
         from agent.prover.agent import ProverAgent
+
+        if not self._entailment_precheck(conjecture):
+            return
 
         self._ensure_polib_built()
 
         agent = ProverAgent(self.config)
         agent._proof_subdir = "conjecture_without_ce"
 
-        for attempt in range(1, max_retries + 1):
-            if attempt == 1:
-                print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
-            else:
-                print(f"\n[Stage 3] Retrying {conjecture.conjecture_id} (attempt {attempt}/{max_retries}) — proved nodes reloaded from Polib, retrying failed nodes …")
+        print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
+        try:
+            result = agent.prove_conjecture(conjecture)
+        except Exception as exc:
+            print(f"[Orchestrator] ProverAgent raised: {exc}")
+            raise
 
-            try:
-                result = agent.prove_conjecture(conjecture)
-            except Exception as exc:
-                print(f"[Orchestrator] ProverAgent raised: {exc}")
-                raise
-
-            print(f"\n[Stage 3] Attempt {attempt}/{max_retries} result: {result.status}")
-
-            if result.status == "success":
-                break
-
-            if result.nodes_failed:
-                print(f"  Failed nodes: {result.nodes_failed}")
-            if attempt < max_retries and result.status != "success":
-                print(f"  → Will retry …")
-            else:
-                print(f"  → Max retries reached. Final result: {result.status}")
-
+        if result.nodes_failed:
+            print(f"  Failed nodes: {result.nodes_failed}")
         print(f"\n[Stage 3] Done. Result: {result.status}")
 
     def _load_all_conjectures(self, json_path: str | None = None) -> list[ParsedConjecture]:

@@ -162,6 +162,74 @@ class FormalizerAgent:
             cls._polib_content_cache[key] = content
             return content
 
+    def _format_dep_signatures_block(self, dep_ids: list[str]) -> str:
+        """Return a prompt block with exact signatures of proved deps, so fix-loop
+        LLM cannot hallucinate argument counts. Empty string if none found.
+        """
+        lines: list[str] = []
+        for dep_id in dep_ids:
+            entry = self._polib_search.find_by_node_id(dep_id)
+            if entry is None:
+                continue
+            lean_name = entry.theorem_name or dep_id
+            sig = self._extract_polib_signature(lean_name)
+            if not sig:
+                continue
+            lines.append(f"### `{lean_name}` — call with EXACTLY these arguments:")
+            lines.append("```lean")
+            lines.append(sig)
+            lines.append("```")
+        if not lines:
+            return ""
+        return "## Proved-dependency signatures (DO NOT pass extra arguments)\n" + "\n".join(lines) + "\n\n"
+
+    def _extract_polib_signature(self, lean_name: str) -> str:
+        """Extract the type signature (declaration up to `:= by`) for a proved dep
+        from Polib.lean. Returns "" if not found.
+
+        Looks for `theorem|lemma|def <lean_name>` at start of a line, then captures
+        until `:= by` or `:= sorry`. The LLM uses this to know the exact call API
+        (param count, hypothesis names, types) instead of guessing.
+        """
+        try:
+            content = self._get_polib_content(self._polib_lean_path)
+        except Exception:
+            return ""
+        if not content:
+            return ""
+        # Match the declaration line: `<kw> <lean_name>` possibly with whitespace
+        decl_re = re.compile(
+            rf"^(theorem|lemma|def|noncomputable\s+def)\s+{re.escape(lean_name)}\b",
+            re.MULTILINE,
+        )
+        m = decl_re.search(content)
+        if not m:
+            return ""
+        start = m.start()
+        tail = content[start:]
+        # Scope the search to this declaration only — otherwise a term-mode proof
+        # (`:= ⟨…⟩` on the same line) would let the end-of-signature search run
+        # into the NEXT declaration's `:= by` and leak its proof body.
+        next_decl = re.compile(
+            r"^(?:private\s+)?(?:noncomputable\s+)?(?:theorem|lemma|def|abbrev)\s",
+            re.MULTILINE,
+        ).search(tail, 1)
+        scope = tail[:next_decl.start()] if next_decl else tail
+        # Find the end of the signature: first `:= by`, `:= sorry`, or `:=` at EOL
+        end_match = re.search(r":=\s*by\b|:=\s*sorry\b|:=\s*$", scope, re.MULTILINE)
+        if end_match:
+            sig = scope[:end_match.start()].rstrip()
+        else:
+            # term-mode proof (`:= <term>` on the same line): cut at the first `:=`
+            eq = scope.find(":=")
+            if eq == -1:
+                return scope.split("\n", 1)[0]  # fallback: first line only
+            sig = scope[:eq].rstrip()
+        # Trim if signature is unreasonably long (safety)
+        if len(sig) > 1200:
+            sig = sig[:1200] + " …"
+        return sig
+
     @classmethod
     def _invalidate_polib_content(cls, polib_lean: "Path") -> None:
         """Evict cached Polib.lean content. Call inside _polib_lock after any write."""
@@ -229,6 +297,9 @@ class FormalizerAgent:
             self._loogle_validator = None
         self._polib_mgr = PolibManager(polib_path, self._polib_search, self._dep_graph)
         self._session = SessionState(self._store)
+        # Resolve the actual Polib.lean file (polib_path may be a directory).
+        _polib_file = polib_path if polib_path.is_file() else polib_path / "Polib.lean"
+        self._polib_lean_path = _polib_file
 
         # Output directory — Lake project for user inspection
         self._output_root = polib_path.parent / "output"
@@ -457,6 +528,7 @@ class FormalizerAgent:
                 theorem_name=theorem_name,
                 node_id=node.node_id,
                 node_type=node.node_type,
+                parent_signature=goal.lean_signature,
             )
             goal_instruction = _GOAL_INSTR_INTERMEDIATE.format(
                 node_id=node.node_id,
@@ -483,12 +555,19 @@ class FormalizerAgent:
                 actual_name = polib_entry.theorem_name if polib_entry and polib_entry.theorem_name != dep_id else None
                 entry_status = polib_entry.status if polib_entry else "proved"
                 status_note = " — partial, has sorry" if entry_status == "partial" else ""
+                lean_name = actual_name or dep_id
+                # Extract the actual signature from Polib.lean so the LLM sees the
+                # exact API (param count, types, hypotheses) and cannot hallucinate args.
+                dep_sig = self._extract_polib_signature(lean_name)
                 if actual_name:
-                    dep_detail_lines.append(
-                        f"  - `{dep_id}` → Lean identifier: `{actual_name}` (available via import {imp}{status_note})"
-                    )
+                    head = f"  - `{dep_id}` → Lean identifier: `{actual_name}` (available via import {imp}{status_note})"
                 else:
-                    dep_detail_lines.append(f"  - `{dep_id}` (available via import {imp}{status_note})")
+                    head = f"  - `{dep_id}` (available via import {imp}{status_note})"
+                dep_detail_lines.append(head)
+                if dep_sig:
+                    dep_detail_lines.append(f"    Signature (call with EXACTLY these arguments):")
+                    for sline in dep_sig.splitlines():
+                        dep_detail_lines.append(f"      {sline}")
             elif dep_id in node.dependencies:
                 # Partial direct dep: inline its code so the LLM can reference it by name
                 partial_code = self._get_partial_dep_code(dep_id)
@@ -600,13 +679,15 @@ class FormalizerAgent:
                 f"  {banned_list}\n"
                 f"Instead use the geometric axiom lemmas (standalone, not structure fields):\n"
                 f"  euler_formula maps, handshake maps, regularity maps,\n"
-                f"  kgon_occupation_bound maps, quad_occ_reduction maps, equality_family maps\n\n"
+                f"  kgon_occupation_bound maps, occupation_bound maps, equality_family maps\n\n"
             )
+        dep_sigs_block = self._format_dep_signatures_block(node.dependencies)
         prompt = (
             f"Fix this Lean 4 compilation error. Round {round_num + 1}.\n\n"
             f"## Node\n{node.node_id}: {node.description}\n\n"
             f"## Compilation Error\n```\n{error_block}\n```\n\n"
             f"## Current Lean 4 Source\n```lean\n{lean_code}\n```\n\n"
+            + dep_sigs_block
             + local_refs
             + banned_block
             + specific_hints
@@ -662,6 +743,7 @@ class FormalizerAgent:
             f"  {i+1}. {b['desc'][:300]}" for i, b in enumerate(sorry_blocks)
         )
         local_refs = self._local_refs_block(node)
+        dep_sigs_block = self._format_dep_signatures_block(node.dependencies)
         prompt = (
             f"This Lean 4 code compiles successfully but contains {n_sorry} sorry(s). "
             f"The system requires zero sorry in the final proof. "
@@ -669,6 +751,7 @@ class FormalizerAgent:
             f"## Node\n{node.node_id}: {node.description}\n\n"
             f"## Sorry blocks to fix (must ALL be replaced)\n{sorry_list}\n\n"
             f"## Current Lean 4 Source (compiles, but has sorry)\n```lean\n{lean_code}\n```\n\n"
+            + dep_sigs_block
             + local_refs
             + FIX_LOOP_POLIB_REF + "\n"
             + f"## Key Inventory lemmas to use instead of sorry:\n"
@@ -722,6 +805,7 @@ class FormalizerAgent:
                 f"  {banned_list}\n"
                 f"Use only names from the verified list below or the structure fields.\n\n"
             )
+        dep_sigs_block = self._format_dep_signatures_block(node.dependencies)
         prompt = (
             f"CRITICAL: Only use lemma names from the verified list below. "
             f"When uncertain, use omega/simp/linarith/ring instead of guessing names.\n\n"
@@ -729,6 +813,7 @@ class FormalizerAgent:
             f"## Node\n{node.node_id}: {node.description}\n\n"
             f"## Compilation Error\n```\n{error_block}\n```\n\n"
             f"## Current Lean 4 Source\n```lean\n{lean_code}\n```\n\n"
+            + dep_sigs_block
             + local_refs
             + banned_block
             + specific_hints
@@ -774,12 +859,14 @@ class FormalizerAgent:
                 f"Do NOT use them in any `have` step. Use only structure fields and the\n"
                 f"verified lemmas listed below.\n\n"
             )
+        dep_sigs_block = self._format_dep_signatures_block(node.dependencies)
         prompt = (
             f"Rewrite this Lean 4 proof as a chain of `have` sub-steps where each step "
             f"is provable by a single tactic (omega / simp / linarith / ring / norm_num).\n\n"
             f"## Node\n{node.node_id}: {node.description}\n\n"
             f"## Compilation Error\n```\n{error_block}\n```\n\n"
             f"## Current Lean 4 Source\n```lean\n{lean_code}\n```\n\n"
+            + dep_sigs_block
             + local_refs
             + banned_block
             + specific_hints
@@ -2819,6 +2906,91 @@ class FormalizerAgent:
                         if res in ("proved", "partial"):
                             proven_node_ids.append(nid)
                             proven_dep_imports[nid] = "Polib"
+
+            # ── Step 4.5: Inline retry loop for failed nodes ───────────
+            # Instead of restarting the whole pipeline N times (which redoes
+            # parse/goal/blueprint each time), we keep retrying just the failed
+            # nodes here. Each retry feeds the cross-run failure memory + the
+            # newly-available dep signatures back into the generation prompt.
+            def _collect_failed() -> list[str]:
+                _nodes = self._session.data.get("nodes", {})
+                return [
+                    nid for nid in blueprint.topo_order
+                    if _nodes.get(nid, {}).get("status") not in ("proved", "partial")
+                ]
+
+            failed_now = _collect_failed()
+            if failed_now:
+                self._log(verbose, "\n[retrying]")
+                MAX_RETRY_ITERS = 20
+                max_node_retries = self._config.max_node_retries
+                retry_counts: dict[str, int] = {}
+                consecutive_no_progress = 0
+                iter_count = 0
+                while failed_now and iter_count < MAX_RETRY_ITERS:
+                    iter_count += 1
+                    any_progress = False
+                    attempted_any = False
+                    still_failing = set(failed_now)
+                    for nid in failed_now:
+                        # Don't burn a Claude call + lake build on a node whose
+                        # direct deps are still failing — it is near-certain to fail.
+                        blocked = [d for d in blueprint.get_node(nid).dependencies
+                                   if d in still_failing]
+                        if blocked:
+                            self._log(verbose,
+                                f"  [{nid}] skipped — waiting on failed dep(s): {blocked}")
+                            continue
+                        if retry_counts.get(nid, 0) >= max_node_retries:
+                            self._log(verbose,
+                                f"  [{nid}] retry budget exhausted ({max_node_retries})")
+                            continue
+                        retry_counts[nid] = retry_counts.get(nid, 0) + 1
+                        attempted_any = True
+                        node_data = self._session.data.get("nodes", {}).get(nid, {})
+                        last_err = (node_data.get("last_error") or "(unknown)").strip()
+                        last_err_line = last_err.splitlines()[0][:140] if last_err else "(unknown)"
+                        self._log(verbose,
+                            f"  [{nid}] previous failure: {last_err_line}")
+                        self._log(verbose,
+                            f"  [{nid}] retry {retry_counts[nid]}/{max_node_retries}: regenerate with updated dep signatures + cross-run failure memory")
+                        try:
+                            status = self._process_node(
+                                nid, blueprint, goal_lock, parsed,
+                                category, list(proven_node_ids), verbose=False,
+                                proven_dep_imports=dict(proven_dep_imports),
+                            )
+                        except GoalTamperedError:
+                            raise
+                        except Exception as exc:
+                            self._log(verbose, f"  [{nid}] retry crashed: {exc}")
+                            status = "pending"
+
+                        if status in ("proved", "partial"):
+                            self._log(verbose, f"  [{nid}] retry successfully → {status}")
+                            still_failing.discard(nid)
+                            if nid not in proven_node_ids:
+                                proven_node_ids.append(nid)
+                                proven_dep_imports[nid] = "Polib"
+                            any_progress = True
+                        else:
+                            self._log(verbose, f"  [{nid}] still failing")
+
+                    failed_now = _collect_failed()
+                    if not attempted_any:
+                        self._log(verbose,
+                            f"  [retry-exhausted] remaining nodes are blocked or out of retry budget; stopping")
+                        break
+                    if not any_progress:
+                        consecutive_no_progress += 1
+                        if consecutive_no_progress >= 2:
+                            self._log(verbose,
+                                f"  [retry-stall] no progress for 2 consecutive iterations; stopping")
+                            break
+                    else:
+                        consecutive_no_progress = 0
+                if not failed_now:
+                    self._log(verbose, f"  [retrying] all nodes resolved after {iter_count} iteration(s)")
 
         except GoalTamperedError as exc:
             if self._flog:

@@ -173,6 +173,20 @@ class QualityChecker:
         allowed_additions: list[str] = []
         blocked_additions: list[str] = []
 
+        # ── Check 0: soundness guard (applies to ALL nodes) ──────────────────
+        # Constructing a SimplyCon3ConnectedMap instance lets the proof apply
+        # the sorried geometric axioms to fabricated data (e.g. v=0,e=0 makes
+        # euler_formula yield 0 = 2 → False → anything provable). Hard fail.
+        from agent.prover.tools.lean_compiler import find_struct_construction
+        construction = find_struct_construction(lean_code)
+        if construction:
+            findings.append(
+                f"Soundness guard: FAIL — proof constructs a SimplyCon3ConnectedMap "
+                f"instance ({construction}); axioms applied to fabricated data are unsound"
+            )
+        else:
+            findings.append("Soundness guard: PASS — no instance construction")
+
         # ── Check 1: sorry audit (applies to ALL nodes) ──────────────────────
         sorry_count = _count_sorry(lean_code)
         sorry_annotated = _all_sorrys_annotated(lean_code)
@@ -241,6 +255,10 @@ class QualityChecker:
                 + 0.10 * (1.0 if proof_structure_ok else 0.0)
             )
             passed = score >= 0.85 and faithfulness_ok and no_hallucination
+
+        if construction:
+            passed = False
+            score = 0.0
 
         return QualityReport(
             passed=passed,

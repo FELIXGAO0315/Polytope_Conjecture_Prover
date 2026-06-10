@@ -1,6 +1,6 @@
 -- Complete formalization: c2.tex
 -- Theorem: C2
--- Generated: 2026-05-31T09:06:25Z
+-- Generated: 2026-06-10T12:42:24Z
 -- Proved — 0 new sorry (2): C2_DomainConstraintsFromMap, C2_LowerDegreeFacesBound
 -- Failed (3): C2_P6HigherFacesCombination, C2_MainGoalConversion, C2
 -- New sorry count: 0

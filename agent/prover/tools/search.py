@@ -671,9 +671,9 @@ LaTeX: {latex_fragment}
 - `euler_formula maps` : `(v : ℤ) - e + ∑ k ∈ Ico 3 (m+1), p_i k = 2 - 2*g`
 - `handshake maps`    : `2 * e = ∑ k ∈ Ico 3 (m+1), k * p_i k`
 - `regularity maps`   : `3 * v = 2 * e`
-- `kgon_occupation_bound maps k hk occupied h_mem` → `occupied.card ≤ k / 2`
-- `quad_occ_reduction maps r hr h4 hr0 occupied h_mem` → `occupied.card ≤ r / 2 - 1`
+- `kgon_occupation_bound maps k hk` → `maps.total_occ k ≤ ((k:ℤ)/2) * maps.p_i k` (hk : k ∈ Ico 4 (m+1))
 - `equality_family maps n` → existence witness for the equality case
+(NOTE: `quad_occ_reduction` / `quad_adj_constraint` do NOT exist — never suggest them.)
 
 ## Instructions
 Think step by step:

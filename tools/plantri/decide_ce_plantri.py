@@ -1,0 +1,132 @@
+"""Exhaustively decide realizability of a conjecture's arithmetic CE candidates
+using plantri (Brinkmann & McKay) with the allowed_deg plugin.
+
+For each candidate p-vector, the dual simplicial polytope is a sphere
+triangulation whose vertex-degree multiset equals the p-vector. plantri
+enumerates ALL such triangulations (isomorph-free, exhaustive), so:
+
+    count > 0  →  candidate is REALIZABLE  → verified counterexample exists
+    count = 0  →  candidate is NON-REALIZABLE (proof by exhaustion)
+
+This is a decision procedure, not a heuristic. Results are written to
+output/plantri_verdicts_{conjecture}.json as they arrive.
+
+Usage:
+    python tools/plantri/decide_ce_plantri.py [--name auto_..._2] [--f2-max 24]
+        [--timeout-per 3600] [--jobs 16]
+
+Candidates are processed cheapest-first (fewest low-degree dual vertices).
+Each candidate is split into --jobs parallel plantri parts (res/mod).
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(_PROJECT_ROOT))
+
+PLANTRI_AD = Path(__file__).resolve().parent / "plantri_ad"
+
+
+def spec_for(p_vec: dict[int, int]) -> str:
+    """plantri_ad -F switch string: exact count for every degree in support."""
+    return "".join(f"F{k}_{v}^{v}" for k, v in sorted(p_vec.items()))
+
+
+def decide(p_vec: dict[int, int], jobs: int, timeout: float) -> tuple[str, int, float]:
+    """Return (verdict, count, seconds). verdict ∈ realizable|non_realizable|timeout|error."""
+    n = sum(p_vec.values())
+    switch = "-" + spec_for(p_vec)
+    procs = []
+    t0 = time.time()
+    for r in range(jobs):
+        procs.append(subprocess.Popen(
+            [str(PLANTRI_AD), switch, str(n), f"{r}/{jobs}", "-u"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+        ))
+    total = 0
+    try:
+        for p in procs:
+            remaining = max(1.0, timeout - (time.time() - t0))
+            _, err = p.communicate(timeout=remaining)
+            for line in err.splitlines():
+                if "triangulations generated" in line:
+                    total += int(line.split()[0])
+                    break
+            else:
+                if p.returncode != 0:
+                    raise RuntimeError(err.strip()[:200])
+    except subprocess.TimeoutExpired:
+        for p in procs:
+            p.kill()
+        return "timeout", -1, time.time() - t0
+    except Exception as exc:
+        for p in procs:
+            p.kill()
+        print(f"    error: {exc}")
+        return "error", -1, time.time() - t0
+    verdict = "realizable" if total > 0 else "non_realizable"
+    return verdict, total, time.time() - t0
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--name", default="auto_20260310_142638_2")
+    ap.add_argument("--f2-max", type=int, default=24)
+    ap.add_argument("--timeout-per", type=float, default=3600.0)
+    ap.add_argument("--jobs", type=int, default=16)
+    args = ap.parse_args()
+
+    from agent.conjectures import load_conjectures
+    from agent.orchestrator.tools.conjecture_parser import ParsedConjecture
+    from agent.orchestrator.tools.ce_enumerator import enumerate_ce_candidates
+
+    specs = load_conjectures()
+    spec = next((s for s in specs if s.name == args.name), None)
+    if spec is None:
+        sys.exit(f"conjecture {args.name!r} not found")
+    conj = ParsedConjecture.from_conjecture_spec(spec)
+    cands = [c for c in enumerate_ce_candidates(conj) if c.f2 <= args.f2_max]
+    # cheapest first: few low-degree (3/4) dual vertices explode the search least
+    cands.sort(key=lambda c: (c.p_vec.get(3, 0) + c.p_vec.get(4, 0), c.f2))
+    print(f"{len(cands)} candidates with f2 <= {args.f2_max} "
+          f"(jobs={args.jobs}, timeout {args.timeout_per:.0f}s each)")
+
+    out_path = _PROJECT_ROOT / "output" / f"plantri_verdicts_{conj.short_id}.json"
+    results: list[dict] = []
+    if out_path.exists():
+        results = json.loads(out_path.read_text())
+    done = {json.dumps(r["p_vec"], sort_keys=True) for r in results}
+
+    for i, c in enumerate(cands, 1):
+        key = json.dumps({str(k): v for k, v in sorted(c.p_vec.items())}, sort_keys=True)
+        if key in done:
+            continue
+        print(f"[{i}/{len(cands)}] {c.p_vec} (f2={c.f2}) ...", flush=True)
+        verdict, count, secs = decide(c.p_vec, args.jobs, args.timeout_per)
+        print(f"    {verdict.upper()} (count={count}) in {secs:.0f}s")
+        results.append({
+            "p_vec": {str(k): v for k, v in sorted(c.p_vec.items())},
+            "f2": c.f2, "verdict": verdict, "count": count, "seconds": round(secs, 1),
+        })
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(results, indent=2))
+        if verdict == "realizable":
+            print("\n*** REALIZABLE CANDIDATE FOUND — the conjecture is REFUTED. ***")
+            print("*** Re-run with plantri output enabled to extract the witness graph. ***")
+            break
+
+    n_non = sum(1 for r in results if r["verdict"] == "non_realizable")
+    n_to = sum(1 for r in results if r["verdict"] == "timeout")
+    print(f"\nSummary: {len(results)} decided/attempted — "
+          f"{n_non} non-realizable, {n_to} timeout → {out_path}")
+
+
+if __name__ == "__main__":
+    main()

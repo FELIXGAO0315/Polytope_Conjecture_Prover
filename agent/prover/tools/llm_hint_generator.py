@@ -67,8 +67,7 @@ LaTeX        : {latex_fragment}
 - `euler_formula maps`      : (v:ℤ) - e + Σ p_i k = 2 - 2*g
 - `handshake maps`          : 2*e = Σ k * p_i k
 - `regularity maps`         : 3*v = 2*e
-- `kgon_occupation_bound`   : occupied.card ≤ k/2
-- `quad_occ_reduction`      : occupied.card ≤ r/2 - 1 (when p₄ > 0)
+- `kgon_occupation_bound maps k hk` : total_occ k ≤ (k:ℤ)/2 * p_i k
 
 ## Instructions
 Think step by step:
