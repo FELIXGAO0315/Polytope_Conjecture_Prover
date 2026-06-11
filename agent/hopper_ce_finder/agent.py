@@ -328,7 +328,7 @@ class HopperCEFinder:
                 if loss is not None:
                     total_trains += 1
 
-            if step % 100 == 0:
+            if step % 1000 == 0:
                 obj_label = "slack" if self._use_slack_obj else "f2"
                 print(
                     f"{_TAG} Step {step}/{self.num_steps} | "

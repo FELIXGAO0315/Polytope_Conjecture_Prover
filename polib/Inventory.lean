@@ -9,9 +9,28 @@
 --
 -- Design contract
 -- ───────────────
--- §2 foundational lemmas: sorried because Mathlib's SimpleGraph API does
--- not cover surface-embedded maps. These are the ONLY permitted sorry in
--- this file; all other lemmas are proved without sorry.
+-- • The sorried statements below are the accepted axiom base — each one is a
+--   statement or proof step taken verbatim from the three source papers
+--   (Mathlib's SimpleGraph API does not cover surface-embedded maps):
+--     §2  euler_formula, handshake, regularity, p_range,
+--         occupation_conservation, occupation_bound, quad_occ_cancellation,
+--         equality_family
+--     §3.4 JucovicTheorem (inequality conjunct; m < 6 edge case)
+--     §4.3 P6GenusG (both conjuncts; m < 6 edge case / Set.Infinite assembly)
+--   Everything else is proved without sorry. In particular Juc_InequalityPart
+--   and P6InequalityPart are PROVED (2026-06-11) from occupation_conservation
+--   + occupation_bound + quad_occ_cancellation — see §4.3.
+-- • POLICY: this sorry set is CLOSED and hand-curated from the papers. The
+--   prover may CALL these lemmas freely (not a new sorry) but must NEVER add
+--   a new sorried lemma of its own, even one that "looks like" paper content.
+-- • Soundness guard (fix 2026-06-11): every axiom now requires `IsMap M`,
+--   an OPAQUE realizability predicate with no introduction rule. Without
+--   the guard the axiom base was inconsistent inside Lean: the all-zero
+--   instance ⟨3, fun _ => 0, 0, 0, fun _ => 0⟩ refuted euler_formula
+--   (0 = 2), so False — and hence any conjecture — was derivable with
+--   zero sorry. The ONLY sources of an `IsMap` token are (a) hypotheses
+--   of the theorem being proved and (b) the existential witnesses of
+--   `equality_family`. Fabricated instances can never satisfy it.
 -- ════════════════════════════════════════════════════════════════════════
 import Mathlib
 
@@ -21,7 +40,7 @@ import Mathlib
 
 /-- A simple 3-connected map on a closed surface of genus g.
     Only combinatorial data is stored; geometric constraints appear as
-    sorried axioms below. -/
+    sorried axioms below, guarded by `IsMap`. -/
 structure SimplyCon3ConnectedMap (g : ℤ) where
   m         : ℕ          -- max face size (faces are 3-gons … m-gons)
   p_i       : ℕ → ℕ      -- p_i k = number of k-gonal faces
@@ -42,20 +61,31 @@ def total_faces (M : SimplyCon3ConnectedMap g) : ℕ :=
 
 end SimplyCon3ConnectedMap
 
+/-- Realizability predicate: `IsMap M` asserts that the combinatorial data
+    of `M` comes from an actual simple 3-connected map on a closed surface
+    of genus `g`. Deliberately OPAQUE with no introduction rule: proofs can
+    obtain it only from theorem hypotheses or from `equality_family`.
+    This guards the sorried axioms from being applied to fabricated data
+    (soundness fix 2026-06-11 — see header). The witness below merely
+    establishes inhabitation; opacity makes it invisible to proofs. -/
+opaque IsMap : ∀ {g : ℤ}, SimplyCon3ConnectedMap g → Prop :=
+  fun {_} _ => True
+
 -- ════════════════════════════════════════════════════════════════════════
 -- §2  FOUNDATIONAL LEMMAS (sorry: Mathlib lacks surface-embedded graph API)
 -- (from Euler_inductive.tex, jucovic_theorem.tex, p6.tex)
 -- ════════════════════════════════════════════════════════════════════════
 
-lemma euler_formula {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma euler_formula {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     (M.v : ℤ) - M.e + ∑ k ∈ Finset.Ico 3 (M.m + 1), (M.p_i k : ℤ) = 2 - 2 * g := by
   sorry
 
-lemma handshake {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma handshake {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     2 * M.e = ∑ k ∈ Finset.Ico 3 (M.m + 1), k * M.p_i k := by
   sorry
 
-lemma regularity {g : ℤ} (M : SimplyCon3ConnectedMap g) : 3 * M.v = 2 * M.e := by
+lemma regularity {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
+    3 * M.v = 2 * M.e := by
   sorry
 
 -- NOTE (soundness fix 2026-06-10): the former `kgon_occupation_bound` and
@@ -65,19 +95,29 @@ lemma regularity {g : ℤ} (M : SimplyCon3ConnectedMap g) : 3 * M.v = 2 * M.e :=
 --   • kgon_occupation_bound is restated on `total_occ` below (after
 --     occupation_bound, from which it is now PROVED — no longer an axiom).
 --   • quad_occ_reduction ("an r-gon adjacent to a quad occupies ≤ ⌊r/2⌋ − 1")
---     needs face-adjacency data that `SimplyCon3ConnectedMap` does not carry —
---     the same Mathlib gap that blocks `Juc_InequalityPart`. It is removed from
---     the axiom base rather than restated unsoundly.
+--     needs face-adjacency data that `SimplyCon3ConnectedMap` does not carry.
+--     Its faithful AGGREGATE consequence is `quad_occ_cancellation` below
+--     (added 2026-06-11), which is expressible on `total_occ` and is exactly
+--     the form the paper's argument uses.
 
-lemma p_range {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma p_range {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     ∀ k : ℕ, M.m < k → M.p_i k = 0 := by
   sorry
 
-lemma occupation_conservation {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+/-- [p6, p.3] "The equation 3p₃ = … counts the number of edges of triangular
+    faces that must be occupied by k-gons with k ≥ 4."
+    GUARD (faithfulness, 2026-06-11): requires m ≥ 6. The paper first excludes
+    the exceptional maps (tetrahedron, 3-prism, Figure 1b — the only simple
+    3-connected maps with a triangle adjacent to a triangle, etc.); the
+    tetrahedron (m = 3) genuinely violates the unguarded equation (its triangle
+    edges are occupied by triangles, giving 0 = 3p₃ = 12). All exceptional maps
+    have m ≤ 5, so m ≥ 6 excludes them and the equation is exact. -/
+lemma occupation_conservation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
     ∑ k ∈ Finset.Ico 4 (M.m + 1), M.total_occ k = 3 * (M.p_i 3 : ℤ) := by
   sorry
 
-lemma occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     ∀ k : ℕ, k ∈ Finset.Ico 4 (M.m + 1) →
     0 ≤ M.total_occ k ∧ M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
   sorry
@@ -85,19 +125,39 @@ lemma occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 /-- A k-gon occupies at most ⌊k/2⌋ triangle-edges; aggregated over the p_k
     k-gons: total_occ k ≤ ⌊k/2⌋·p_k. Proved from occupation_bound (this
     replaces the former refutable Finset formulation — see note above). -/
-lemma kgon_occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma kgon_occupation_bound {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     ∀ k ∈ Finset.Ico 4 (M.m + 1),
     M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) :=
-  fun k hk => (occupation_bound M k hk).2
+  fun k hk => (occupation_bound M hM k hk).2
 
-lemma equality_family {g : ℤ} (M : SimplyCon3ConnectedMap g) :
-    ∀ n : ℕ, ∃ (p_i_n : ℕ → ℕ) (v_n e_n : ℕ),
-      (v_n : ℤ) - e_n + ∑ k ∈ Finset.Ico 3 (n + 4), (p_i_n k : ℤ) = 2 - 2 * g ∧
-      2 * e_n = ∑ k ∈ Finset.Ico 3 (n + 4), k * p_i_n k ∧
-      3 * v_n = 2 * e_n ∧
-      3 * (p_i_n 6 : ℤ) =
-        12 * (1 - g) - (2 * p_i_n 4 + 3 * p_i_n 5) +
-        ∑ k ∈ Finset.Ico 7 (n + 4), (((k : ℤ) + 1) / 2 - 6) * p_i_n k := by
+/-- [p6, p.4] Quadrangle cancellation (aggregate form): "A quadrangular face
+    … even if it occupies one edge of a triangle, then at least one r-gonal
+    face (r > 4) occupies not more than ⌊r/2⌋ − 1 edges. … So the k-gonal
+    faces with k ≥ 4, k ≠ 6, can occupy at most Σ_{k≥5,k≠6} ⌊k/2⌋·p_k edges
+    of triangles" — i.e. quadrangles contribute net zero.
+    Stated on the map's own `total_occ` data (the former per-face formulation
+    `quad_occ_reduction` needed adjacency data and was removed; this aggregate
+    consequence is exactly what the paper uses and is expressible here).
+    GUARD: m ≥ 6 excludes the exceptional maps (3-prism and Figure 1b violate
+    the bound; both have m ≤ 5). -/
+lemma quad_occ_cancellation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
+    ∑ k ∈ (Finset.Ico 4 (M.m + 1)).erase 6, M.total_occ k ≤
+    ∑ k ∈ (Finset.Ico 5 (M.m + 1)).erase 6, ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
+  sorry
+
+/-- For every n there is a REALIZABLE map of genus g with max face size n+3
+    achieving the p₆ equality case. The `IsMap` conjunct is essential: it is
+    the only introduction route for `IsMap`, and it makes the statement carry
+    real geometric content (existence of bare data satisfying the linear
+    equations alone is trivially provable and was the former formulation). -/
+lemma equality_family {g : ℤ} :
+    ∀ n : ℕ, ∃ (M_n : SimplyCon3ConnectedMap g),
+      IsMap M_n ∧
+      M_n.m = n + 3 ∧
+      3 * (M_n.p_i 6 : ℤ) =
+        12 * (1 - g) - (2 * (M_n.p_i 4 : ℤ) + 3 * (M_n.p_i 5 : ℤ)) +
+        ∑ k ∈ Finset.Ico 7 (M_n.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M_n.p_i k : ℤ) := by
   sorry
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -114,25 +174,27 @@ lemma equality_family {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 
 /-- [jucovic] k-gons (k ≥ 4) occupy at most ⌊k/2⌋ triangle-edges each;
     aggregated: total_occ k ≤ ⌊k/2⌋·p_k. -/
-lemma Juc_KGonMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma Juc_KGonMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     ∀ k ∈ Finset.Ico 4 (M.m + 1),
     M.total_occ k ≤ ((k : ℤ) / 2) * (M.p_i k : ℤ) :=
-  kgon_occupation_bound M
+  kgon_occupation_bound M hM
 
 -- Juc_QuadAdjacencyConstraint removed (soundness fix 2026-06-10): it wrapped
 -- the refutable `quad_occ_reduction`; the faithful quad-adjacency statement
 -- requires adjacency data not present in the structure (see note in §2).
 
 /-- [jucovic] Each hexagonal face occupies at most 3 triangle-edges. -/
-lemma Juc_HexMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hm : M.m ≥ 6) :
+lemma Juc_HexMaxOccupation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
     M.total_occ 6 ≤ 3 * (M.p_i 6 : ℤ) := by
   have h6 : (6 : ℕ) ∈ Finset.Ico 4 (M.m + 1) := by simp [Finset.mem_Ico]; omega
   calc M.total_occ 6
-      ≤ ((6 : ℤ) / 2) * (M.p_i 6 : ℤ) := (occupation_bound M 6 h6).2
+      ≤ ((6 : ℤ) / 2) * (M.p_i 6 : ℤ) := (occupation_bound M hM 6 h6).2
     _ = 3 * (M.p_i 6 : ℤ)              := by norm_num
 
 /-- [jucovic] Non-hex, non-quad faces have total occupation ≤ Σ ⌊k/2⌋·p_k. -/
-lemma Juc_NonHexEdgeBound {g : ℤ} (M : SimplyCon3ConnectedMap g) (hm : M.m ≥ 6) :
+lemma Juc_NonHexEdgeBound {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
     ∑ k ∈ (Finset.Ico 5 (M.m + 1)).erase 6, M.total_occ k ≤
     ∑ k ∈ (Finset.Ico 5 (M.m + 1)).erase 6, ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
   apply Finset.sum_le_sum
@@ -140,39 +202,27 @@ lemma Juc_NonHexEdgeBound {g : ℤ} (M : SimplyCon3ConnectedMap g) (hm : M.m ≥
   have h5 : k ∈ Finset.Ico 5 (M.m + 1) := Finset.mem_of_mem_erase hk
   have h4 : k ∈ Finset.Ico 4 (M.m + 1) := by
     simp only [Finset.mem_Ico] at h5 ⊢; omega
-  exact (occupation_bound M k h4).2
+  exact (occupation_bound M hM k h4).2
 
-/-- [jucovic] Infinitely many sphere maps achieve p₆ = RHS (equality family). -/
+/-- [jucovic] Infinitely many realizable sphere maps achieve p₆ = RHS
+    (equality family). Proved from `equality_family` — no instance is
+    constructed here; the witnesses (and their `IsMap` tokens) come from
+    the axiom's existential. -/
 lemma Juc_EqualityConstruction : ∃ (f : ℕ → SimplyCon3ConnectedMap 0),
     Function.Injective f ∧
-    ∀ n : ℕ,
+    ∀ n : ℕ, IsMap (f n) ∧
       3 * ((f n).p_i 6 : ℤ) =
         12 - 2 * ((f n).p_i 4 : ℤ) - 3 * ((f n).p_i 5 : ℤ) +
         ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
           (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ) := by
   classical
-  let base : SimplyCon3ConnectedMap 0 := {
-    m         := 3
-    p_i       := fun k => if k = 3 then 4 else 0
-    v         := 4
-    e         := 6
-    total_occ := fun _ => 0 }
-  have fam := fun n => equality_family base n
-  choose p_fn v_fn e_fn h using fam
-  let f : ℕ → SimplyCon3ConnectedMap 0 := fun n => {
-    m         := n + 3
-    p_i       := p_fn n
-    v         := v_fn n
-    e         := e_fn n
-    total_occ := fun _ => 0 }
-  exact ⟨f,
-    fun a b hab => by
-      have hm : (f a).m = (f b).m := congr_arg SimplyCon3ConnectedMap.m hab
-      simp only [f] at hm; omega,
-    fun n => by
-      simp only [f]
-      obtain ⟨-, -, -, heq⟩ := h n
-      linarith [heq]⟩
+  choose f hIs hm hp6 using equality_family (g := 0)
+  refine ⟨f, fun a b hab => ?_, fun n => ⟨hIs n, ?_⟩⟩
+  · have hmm : (f a).m = (f b).m := congrArg SimplyCon3ConnectedMap.m hab
+    rw [hm a, hm b] at hmm
+    omega
+  · have h := hp6 n
+    linarith [h]
 
 -- §3.2  Arithmetic helpers (proved)
 
@@ -189,7 +239,8 @@ private lemma sum_ico_3_7_weighted {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 
 /-- Helper: Σ_{[3,m+1)} (6−k)·p_k = 3p₃ + 2p₄ + p₅ − Σ_{[7,m+1)} (k−6)·p_k.
     (FIXED: no sorry — uses Finset range splitting + p_range for the small-m case.) -/
-private lemma sum_split_and_rearrange {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+private lemma sum_split_and_rearrange {g : ℤ} (M : SimplyCon3ConnectedMap g)
+    (hM : IsMap M) :
     ∑ k ∈ (Finset.Ico 3 (M.m + 1) : Finset ℕ), ((6 : ℤ) - ↑k) * ↑(M.p_i k) =
       3 * (M.p_i 3 : ℤ) + 2 * (M.p_i 4 : ℤ) + (M.p_i 5 : ℤ) -
       ∑ k ∈ (Finset.Ico 7 (M.m + 1) : Finset ℕ), ((↑k : ℤ) - 6) * ↑(M.p_i k) := by
@@ -210,17 +261,17 @@ private lemma sum_split_and_rearrange {g : ℤ} (M : SimplyCon3ConnectedMap g) :
       apply Finset.sum_subset (Finset.Ico_subset_Ico_right (by omega : M.m + 1 ≤ 7))
       intro k hk hkm
       simp only [Finset.mem_Ico] at hk hkm
-      simp [p_range M k (by omega)]
+      simp [p_range M hM k (by omega)]
     rw [hext, sum_ico_3_7_weighted]
 
 /-- Helper: Σ_{[3,m+1)} (6−k)·p_k = 12·(1−g).
     Combines the three axioms (Euler + handshake + regularity). -/
-private lemma key_sum {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+private lemma key_sum {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     ∑ k ∈ Finset.Ico 3 (M.m + 1), ((6 : ℤ) - ↑k) * ↑(M.p_i k) = 12 * (1 - g) := by
-  have hreg  : (3 * M.v : ℤ) = 2 * M.e        := by exact_mod_cast regularity M
+  have hreg  : (3 * M.v : ℤ) = 2 * M.e        := by exact_mod_cast regularity M hM
   have hhand : (2 * M.e : ℤ) =
-      ∑ k ∈ Finset.Ico 3 (M.m + 1), (k : ℤ) * M.p_i k := by exact_mod_cast handshake M
-  have heuler := euler_formula M
+      ∑ k ∈ Finset.Ico 3 (M.m + 1), (k : ℤ) * M.p_i k := by exact_mod_cast handshake M hM
+  have heuler := euler_formula M hM
   have hrewrite : ∑ k ∈ Finset.Ico 3 (M.m + 1), ((6 : ℤ) - k) * M.p_i k =
       6 * ∑ k ∈ Finset.Ico 3 (M.m + 1), (M.p_i k : ℤ) -
       ∑ k ∈ Finset.Ico 3 (M.m + 1), (k : ℤ) * M.p_i k := by
@@ -234,50 +285,35 @@ private lemma key_sum {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 /-- [jucovic] Edge-count equation for the sphere:
     3p₃ = 12 − 2p₄ − p₅ + Σ_{k≥7}(k−6)·p_k.
     (FIXED: no sorry.) -/
-lemma Juc_EulerFormula (M : SimplyCon3ConnectedMap 0) :
+lemma Juc_EulerFormula (M : SimplyCon3ConnectedMap 0) (hM : IsMap M) :
     3 * (M.p_i 3 : ℤ) =
       12 - 2 * (M.p_i 4 : ℤ) - (M.p_i 5 : ℤ) +
       ∑ k ∈ Finset.Ico 7 (M.m + 1), ((k : ℤ) - 6) * (M.p_i k : ℤ) := by
-  have h1 := key_sum M           -- ∑(6−k)·p_k = 12
-  have h2 := sum_split_and_rearrange M  -- expand the sum
+  have h1 := key_sum M hM           -- ∑(6−k)·p_k = 12
+  have h2 := sum_split_and_rearrange M hM  -- expand the sum
   linarith
 
--- §3.4  Inequality part (sorry: needs quad-occupation cancellation argument)
-
-/-- [jucovic] Hexagon lower bound (sphere, g = 0):
-    3·p₆ ≥ 12 − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋ − 6)·p_k.
-    SORRY: the arithmetic step combining occupation_conservation,
-    Juc_HexMaxOccupation, and Juc_NonHexEdgeBound into the final inequality
-    requires the quad-adjacency occupation reduction, which needs face-adjacency
-    data the structure does not carry (Mathlib gap: no surface-graph
-    quad-adjacency theory). -/
-lemma Juc_InequalityPart (M : SimplyCon3ConnectedMap 0) (hm : M.m ≥ 6) :
-    3 * (M.p_i 6 : ℤ) ≥
-      12 - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
-      ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ) := by
-  sorry
-  -- Proof sketch (all constituents proved above):
-  --   (1) occ_eq : ∑_{k≥4} total_occ k = 3p₃       [occupation_conservation]
-  --   (2) p3_eq  : 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)·p_k
-  --                                                  [P6EdgeCountEquation below]
-  --   (3) hex_ub : total_occ(6) ≤ 3·p₆             [Juc_HexMaxOccupation]
-  --   (4) nhex_ub: Σ_{k≥5,k≠6} total_occ(k) ≤ Σ_{k≥5,k≠6} ⌊k/2⌋·p_k
-  --                                                  [Juc_NonHexEdgeBound]
-  --   Missing: total_occ(4) + nhex_occ_reduction ≤ 2p₄ + 2p₅ + Σ_{k≥7}⌊k/2⌋·p_k
-  --   The identity (k−6) − ⌊k/2⌋ = ⌊(k+1)/2⌋ − 6 closes the arithmetic.
+-- §3.4  Inequality part
+-- Juc_InequalityPart is now PROVED (2026-06-11, from quad_occ_cancellation)
+-- as the g = 0 instance of P6InequalityPart — see §4.3 below (file order:
+-- the general proof uses P6EdgeCountEquation, defined in §4.1).
 
 /-- [jucovic] Jučovič theorem (sphere, g = 0): full statement with inequality + existence.
-    SORRY: depends on Juc_InequalityPart. -/
-theorem JucovicTheorem (M : SimplyCon3ConnectedMap 0)
+    SORRY (accepted, paper statement): the inequality conjunct has no m ≥ 6
+    hypothesis; the m < 6 edge case needs the exceptional-map classification
+    (tetrahedron / 3-prism / Figure 1b) that the structure cannot express.
+    For m ≥ 6 it follows from Juc_InequalityPart (§4.3). -/
+theorem JucovicTheorem (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
     (h1 : ∑ k ∈ Finset.Ico 3 (M.m + 1), M.p_i k ≥ 7) :
     (3 * (M.p_i 6 : ℤ) ≥
       12 - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
       ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ)) ∧
     (∃ (f : ℕ → SimplyCon3ConnectedMap 0), Function.Injective f ∧
-      ∀ n, 3 * ((f n).p_i 6 : ℤ) =
-        12 - 2 * ((f n).p_i 4 : ℤ) - 3 * ((f n).p_i 5 : ℤ) +
-        ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
-          (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ)) := by
+      ∀ n, IsMap (f n) ∧
+        3 * ((f n).p_i 6 : ℤ) =
+          12 - 2 * ((f n).p_i 4 : ℤ) - 3 * ((f n).p_i 5 : ℤ) +
+          ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
+            (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ)) := by
   constructor
   · -- Inequality part: sorry (see Juc_InequalityPart)
     sorry
@@ -295,12 +331,12 @@ theorem JucovicTheorem (M : SimplyCon3ConnectedMap 0)
 /-- [p6] Generalised edge-count equation:
     3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)·p_k.
     (FIXED: no sorry — uses sum_split_and_rearrange + key_sum.) -/
-lemma P6EdgeCountEquation {g : ℤ} (M : SimplyCon3ConnectedMap g) :
+lemma P6EdgeCountEquation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M) :
     3 * (M.p_i 3 : ℤ) =
       12 * (1 - g) - 2 * (M.p_i 4 : ℤ) - (M.p_i 5 : ℤ) +
       ∑ k ∈ Finset.Ico 7 (M.m + 1), ((k : ℤ) - 6) * (M.p_i k : ℤ) := by
-  have h1 := key_sum M
-  have h2 := sum_split_and_rearrange M
+  have h1 := key_sum M hM
+  have h2 := sum_split_and_rearrange M hM
   linarith
 
 -- §4.2  Face-count helpers
@@ -308,26 +344,77 @@ lemma P6EdgeCountEquation {g : ℤ} (M : SimplyCon3ConnectedMap g) :
 -- use {g : ℤ} and cover arbitrary genus — no separate P6 aliases needed.
 -- The equality construction for general genus uses equality_family (§2, sorry).
 
--- §4.3  p₆ inequality — general genus (sorry: same blocker as §3.4)
+-- §4.3  p₆ inequality — general genus (PROVED 2026-06-11, no sorry)
 
 /-- [p6] General p₆ lower bound:
     3·p₆ ≥ 12(1−g) − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋−6)·p_k.
-    SORRY: same blocker as Juc_InequalityPart — quad occupation cancellation. -/
-lemma P6InequalityPart {g : ℤ} (M : SimplyCon3ConnectedMap g) (hm : M.m ≥ 6) :
+    PROVED from occupation_conservation + occupation_bound +
+    quad_occ_cancellation + the edge-count equation, following p6.pdf p.3-4:
+    hexagons must absorb the triangle-edge demand left over after all other
+    k-gons (with quadrangles cancelling) have occupied their maximum. -/
+lemma P6InequalityPart {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
     3 * (M.p_i 6 : ℤ) ≥
       12 * (1 - g) - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
       ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ) := by
-  sorry -- same blocker as Juc_InequalityPart; see proof sketch there
+  have h6mem : (6 : ℕ) ∈ Finset.Ico 4 (M.m + 1) := by
+    simp only [Finset.mem_Ico]; omega
+  -- (1) conservation, with k = 6 extracted:
+  --     total_occ 6 + Σ_{k∈[4,m]∖{6}} total_occ k = 3p₃
+  have hcons := occupation_conservation M hM hm
+  rw [← Finset.add_sum_erase _ _ h6mem] at hcons
+  -- (2) quadrangle cancellation: Σ_{k∈[4,m]∖{6}} total_occ k ≤ Σ_{k∈[5,m]∖{6}} ⌊k/2⌋p_k
+  have hquad := quad_occ_cancellation M hM hm
+  -- (3) hexagons absorb at most 3p₆
+  have hhex := Juc_HexMaxOccupation M hM hm
+  -- (4) edge-count equation: 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k
+  have hedge := P6EdgeCountEquation M hM
+  -- (5) split the cancellation RHS: [5,m]∖{6} = {5} ∪ [7,m]; ⌊5/2⌋ = 2
+  have hset : (Finset.Ico 5 (M.m + 1)).erase 6 = insert 5 (Finset.Ico 7 (M.m + 1)) := by
+    ext a
+    simp only [Finset.mem_erase, Finset.mem_Ico, Finset.mem_insert]
+    omega
+  have h5notin : (5 : ℕ) ∉ Finset.Ico 7 (M.m + 1) := by
+    simp [Finset.mem_Ico]
+  have hsplit : ∑ k ∈ (Finset.Ico 5 (M.m + 1)).erase 6, ((k : ℤ) / 2) * (M.p_i k : ℤ)
+      = 2 * (M.p_i 5 : ℤ)
+        + ∑ k ∈ Finset.Ico 7 (M.m + 1), ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
+    rw [hset, Finset.sum_insert h5notin]
+    norm_num
+  -- (6) coefficient identity per k ≥ 7: (k−6) − ⌊k/2⌋ = ⌊(k+1)/2⌋ − 6
+  have hco : ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ)
+      = ∑ k ∈ Finset.Ico 7 (M.m + 1), ((k : ℤ) - 6) * (M.p_i k : ℤ)
+        - ∑ k ∈ Finset.Ico 7 (M.m + 1), ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    have h7 : 7 ≤ k := (Finset.mem_Ico.mp hk).1
+    have hkid : ((k : ℤ) + 1) / 2 - 6 = ((k : ℤ) - 6) - (k : ℤ) / 2 := by omega
+    rw [hkid]; ring
+  -- chain: 3p₆ ≥ occ₆ = 3p₃ − Σ∖{6} ≥ 3p₃ − 2p₅ − Σ_{k≥7}⌊k/2⌋p_k = RHS
+  linarith [hcons, hquad, hhex, hedge, hsplit, hco]
+
+/-- [jucovic] Hexagon lower bound (sphere, g = 0):
+    3·p₆ ≥ 12 − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋ − 6)·p_k.
+    PROVED: the g = 0 instance of P6InequalityPart. -/
+lemma Juc_InequalityPart (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
+    (hm : M.m ≥ 6) :
+    3 * (M.p_i 6 : ℤ) ≥
+      12 - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
+      ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ) := by
+  have h := P6InequalityPart M hM hm
+  linarith
 
 /-- [p6] Main theorem — p₆ genus-g inequality (full statement).
-    SORRY: depends on P6InequalityPart. -/
-theorem P6GenusG (g : ℤ) (M : SimplyCon3ConnectedMap g)
+    SORRY (accepted, paper statement): same m < 6 edge case as JucovicTheorem
+    for the first conjunct; Set.Infinite assembly from equality_family for the
+    second. For m ≥ 6 the first conjunct follows from P6InequalityPart. -/
+theorem P6GenusG (g : ℤ) (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
     (h1 : ∑ i ∈ Finset.Ico 3 (M.m + 1), M.p_i i > 7) :
     (3 * (M.p_i 6 : ℤ) ≥
       12 * (1 - g) - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
       ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ)) ∧
     (∀ g' : ℤ, Set.Infinite
-      {m : SimplyCon3ConnectedMap g' |
+      {m : SimplyCon3ConnectedMap g' | IsMap m ∧
         3 * m.p_i 6 = 12 * (1 - g') - 2 * m.p_i 4 - 3 * m.p_i 5 +
         ∑ k ∈ Finset.Ico 7 (m.m + 1), (((k : ℤ) + 1) / 2 - 6) * (m.p_i k : ℤ)}) := by
   exact ⟨sorry, fun _ => sorry⟩

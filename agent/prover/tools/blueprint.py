@@ -32,34 +32,38 @@ re-derive them is FORBIDDEN. Instead, the node that needs them should call them 
 
 | Mathematical content | Inventory lemma to call |
 |---|---|
-| Euler formula: V − E + F = 2 − 2g | `euler_formula maps` |
-| Handshaking lemma: 2E = Σ k·p_k | `handshake maps` |
-| 3-regularity: 3V = 2E | `regularity maps` |
-| Dehn-Sommerville / edge-count eq: 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `P6EdgeCountEquation maps` |
-| Edge-count equation for sphere (g=0): 3p₃ = 12 − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `Juc_EulerFormula maps` |
-| Hexagon lower bound (general g): 3p₆ ≥ 12(1−g) − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋−6)p_k | `P6InequalityPart maps hm` |
-| Hexagon lower bound (sphere g=0): same bound | `Juc_InequalityPart maps hm` |
-| Jučovič theorem: lower bound ∧ equality family | `JucovicTheorem maps h1` |
+| Euler formula: V − E + F = 2 − 2g | `euler_formula maps hM` |
+| Handshaking lemma: 2E = Σ k·p_k | `handshake maps hM` |
+| 3-regularity: 3V = 2E | `regularity maps hM` |
+| Dehn-Sommerville / edge-count eq: 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `P6EdgeCountEquation maps hM` |
+| Edge-count equation for sphere (g=0): 3p₃ = 12 − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `Juc_EulerFormula maps hM` |
+| Hexagon lower bound (general g): 3p₆ ≥ 12(1−g) − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋−6)p_k | `P6InequalityPart maps hM hm` |
+| Hexagon lower bound (sphere g=0): same bound | `Juc_InequalityPart maps hM hm` |
+| Quadrangle net-zero occupation: Σ_{k∈[4,m]∖{6}} occ ≤ Σ_{k∈[5,m]∖{6}} ⌊k/2⌋p_k | `quad_occ_cancellation maps hM hm` |
+| Jučovič theorem: lower bound ∧ equality family | `JucovicTheorem maps hM h1` |
+
+(`hM : IsMap maps` is the realizability token — every theorem signature carries it
+ and every Inventory call requires it right after `maps`.)
 
 **Naming test**: If your node title contains any of these words — "Euler", "Handshak", "Dehn-Sommerville",
 "edge count equation", "regularity", "Hexagon lower bound" — STOP. That content is already in Inventory.
 Do NOT create the node. Instead, in the CALLING node's description, write:
-  "Uses `P6EdgeCountEquation maps` (or the relevant lemma) directly via linarith."
+  "Uses `P6EdgeCountEquation maps hM` (or the relevant lemma) directly via linarith."
 
-## Inventory lemma exact Lean signatures (for reference):
-- `P6EdgeCountEquation maps` : `3 * (maps.p_i 3 : ℤ) = 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ)`
-- `Juc_EulerFormula maps` : same for g=0 (M : SimplyCon3ConnectedMap 0)
-- `P6InequalityPart maps hm` : `3 * (maps.p_i 6 : ℤ) ≥ 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - 3 * (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ)`  where `hm : maps.m ≥ 6`
-- `euler_formula maps` : `(maps.v : ℤ) - maps.e + ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) = 2 - 2 * g`
-- `handshake maps` : `2 * maps.e = ∑ k ∈ Finset.Ico 3 (maps.m + 1), k * maps.p_i k`
-- `regularity maps` : `3 * maps.v = 2 * maps.e`
+## Inventory lemma exact Lean signatures (for reference; hM : IsMap maps):
+- `P6EdgeCountEquation maps hM` : `3 * (maps.p_i 3 : ℤ) = 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ)`
+- `Juc_EulerFormula maps hM` : same for g=0 (M : SimplyCon3ConnectedMap 0)
+- `P6InequalityPart maps hM hm` : `3 * (maps.p_i 6 : ℤ) ≥ 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - 3 * (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ)`  where `hm : maps.m ≥ 6`
+- `euler_formula maps hM` : `(maps.v : ℤ) - maps.e + ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) = 2 - 2 * g`
+- `handshake maps hM` : `2 * maps.e = ∑ k ∈ Finset.Ico 3 (maps.m + 1), k * maps.p_i k`
+- `regularity maps hM` : `3 * maps.v = 2 * maps.e`
 
 ## When a node's proof IS just Inventory + linarith:
 If a node's conclusion follows directly from one or two Inventory lemma calls + `linarith`,
 write this verbatim in the description field:
-  "Proved by: `have h := P6EdgeCountEquation maps; linarith`"
-  OR "Proved by: `have h := Juc_EulerFormula maps; linarith`"
-  OR "Proved by: `have h1 := P6EdgeCountEquation maps; have h2 := P6InequalityPart maps hm; linarith`"
+  "Proved by: `have h := P6EdgeCountEquation maps hM; linarith`"
+  OR "Proved by: `have h := Juc_EulerFormula maps hM; linarith`"
+  OR "Proved by: `have h1 := P6EdgeCountEquation maps hM; have h2 := P6InequalityPart maps hM hm; linarith`"
 The prover will use this as a fast first attempt before running the full proof search.
 
 For any node whose proof can directly call one of these lemmas, say so explicitly in the

@@ -15,7 +15,12 @@ from agent.prover.tools.quality_checker import QualityReport
 from agent.prover.tools.search import SavedEntry
 
 
-_AXIOM_RE = re.compile(r"^axiom\s", re.MULTILINE)
+# Catches indented and modifier-prefixed forms too (`  axiom`, `private axiom`,
+# `noncomputable axiom`) — Lean accepts leading whitespace/modifiers on commands.
+_AXIOM_RE = re.compile(
+    r"^\s*(?:private\s+|protected\s+|noncomputable\s+|unsafe\s+|partial\s+)*axiom\s",
+    re.MULTILINE,
+)
 # Matches `sorry` used as a tactic with trailing non-comment text on the same line.
 # e.g. `  sorry [SORRY] ...` is invalid Lean — the annotation must be a `--` comment.
 # Rules:
@@ -75,6 +80,7 @@ _BANNED_STRUCT_FIELDS = {
     "euler_formula", "handshake", "regularity",
     "kgon_occupation_bound", "quad_adj_constraint", "quad_occ_reduction",
     "p_range", "occupation_conservation", "occupation_bound", "equality_family",
+    "quad_occ_cancellation", "IsMap",
 }
 
 def _check_no_prop_fields_in_struct(lean_code: str, node_id: str) -> None:
@@ -310,7 +316,7 @@ class PolibManager:
                 f"Node '{node.node_id}': axiom declarations are not allowed in polib"
             )
         # Inline-sorry check removed: _verify_polib_builds() and PolibValidator
-        # (step 4.5) are the right place to catch build failures.  Pre-rejecting
+        # (step 5) are the right place to catch build failures.  Pre-rejecting
         # compiled code here causes false-positive PolibSaveErrors for patterns
         # like `sorry [SORRY: reason]` that Lean 4 actually accepts.
         _check_no_prop_fields_in_struct(lean_code, node.node_id)

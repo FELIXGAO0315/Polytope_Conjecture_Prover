@@ -4,7 +4,7 @@ import Mathlib
 
 /-- A simple 3-connected map on a closed surface of genus g.
     Only data fields are stored here; geometric axioms are stated as
-    separate sorried lemmas below. -/
+    separate sorried lemmas below, guarded by `IsMap`. -/
 structure SimplyCon3ConnectedMap (g : ℤ) where
   /-- Number of face-size classes (faces range from 3-gons to m-gons) -/
   m : ℕ
@@ -32,57 +32,73 @@ def total_faces (maps : SimplyCon3ConnectedMap g) : ℕ :=
 
 end SimplyCon3ConnectedMap
 
--- ── Geometric axioms (sorried; treat as accepted axioms — do NOT add new ones) ─
+/-- OPAQUE realizability predicate: `IsMap maps` says the data comes from an
+    actual surface map. It has NO introduction rule — the ONLY sources are
+    (a) the `(hM : IsMap maps)` hypothesis of the theorem you are proving and
+    (b) the existential witnesses of `equality_family`. You can NEVER prove
+    `IsMap` for a constructed instance, and you must NEVER try. -/
+opaque IsMap : ∀ {g : ℤ}, SimplyCon3ConnectedMap g → Prop
+
+-- ── Geometric axioms (sorried; treat as accepted axioms — do NOT add new ones).
+-- ── EVERY axiom requires the `IsMap` token: pass your theorem's `hM` through.
 
 /-- Euler formula: V - E + F = 2 - 2g -/
-lemma euler_formula {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma euler_formula {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     (maps.v : ℤ) - maps.e +
       (∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ)) = 2 - 2 * g := by sorry
 
 /-- Handshake lemma: 2E = Σ k·p_k -/
-lemma handshake {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma handshake {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     2 * maps.e = ∑ k ∈ Finset.Ico 3 (maps.m + 1), k * maps.p_i k := by sorry
 
 /-- 3-regularity: 3V = 2E -/
-lemma regularity {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma regularity {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     3 * maps.v = 2 * maps.e := by sorry
 
 /-- k-gons (k ≥ 4) occupy at most ⌊k/2⌋ triangle-edges each; aggregated:
     total_occ k ≤ ⌊k/2⌋·p_k. (PROVED from occupation_bound, not an axiom.) -/
-lemma kgon_occupation_bound {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma kgon_occupation_bound {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     ∀ k ∈ Finset.Ico 4 (maps.m + 1),
     maps.total_occ k ≤ ((k : ℤ) / 2) * (maps.p_i k : ℤ) :=
-  fun k hk => (occupation_bound maps k hk).2
+  fun k hk => (occupation_bound maps hM k hk).2
 
 -- NOTE: `quad_occ_reduction` and `quad_adj_constraint` DO NOT EXIST.
 -- Never call them — they were removed (their faithful statements need
 -- face-adjacency data the structure does not carry).
 
 /-- Face range: p_i k = 0 for all k > m. -/
-lemma p_range {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma p_range {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     ∀ k : ℕ, maps.m < k → maps.p_i k = 0 := by sorry
 
-/-- Occupation conservation: Σ_{k≥4} total_occ k = 3p₃. -/
-lemma occupation_conservation {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+/-- Occupation conservation: Σ_{k≥4} total_occ k = 3p₃.
+    REQUIRES hm : maps.m ≥ 6 (excludes the exceptional maps). -/
+lemma occupation_conservation {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps)
+    (hm : maps.m ≥ 6) :
     ∑ k ∈ Finset.Ico 4 (maps.m + 1), maps.total_occ k = 3 * (maps.p_i 3 : ℤ) := by sorry
 
 /-- Occupation bound: 0 ≤ total_occ k ≤ ⌊k/2⌋·p_k for each k ≥ 4. -/
-lemma occupation_bound {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma occupation_bound {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps) :
     ∀ k : ℕ, k ∈ Finset.Ico 4 (maps.m + 1) →
     0 ≤ maps.total_occ k ∧ maps.total_occ k ≤ ((k : ℤ) / 2) * (maps.p_i k : ℤ) := by sorry
 
-/-- For every n : ℕ, there exists a map in this genus class where p₆ achieves equality. -/
-lemma equality_family {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
-    ∀ n : ℕ, ∃ (p_i_n : ℕ → ℕ) (v_n e_n : ℕ),
-      (v_n : ℤ) - e_n +
-        (∑ k ∈ Finset.Ico 3 (n + 4), (p_i_n k : ℤ)) = 2 - 2 * g ∧
-      2 * e_n = ∑ k ∈ Finset.Ico 3 (n + 4), k * p_i_n k ∧
-      3 * v_n = 2 * e_n ∧
-      3 * (p_i_n 6 : ℤ) =
-        12 * (1 - g)
-        - (2 * p_i_n 4 + 3 * p_i_n 5)
-        + ∑ k ∈ Finset.Ico 7 (n + 4),
-            (((k : ℤ) + 1) / 2 - 6) * p_i_n k := by sorry
+/-- Quadrangle cancellation (aggregate): non-hexagonal k-gons (k ≥ 4, k ≠ 6)
+    occupy at most Σ_{k≥5,k≠6} ⌊k/2⌋·p_k triangle-edges — quadrangles net zero.
+    REQUIRES hm : maps.m ≥ 6. -/
+lemma quad_occ_cancellation {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps)
+    (hm : maps.m ≥ 6) :
+    ∑ k ∈ (Finset.Ico 4 (maps.m + 1)).erase 6, maps.total_occ k ≤
+    ∑ k ∈ (Finset.Ico 5 (maps.m + 1)).erase 6, ((k : ℤ) / 2) * (maps.p_i k : ℤ) := by sorry
+
+/-- For every n : ℕ, there exists a REALIZABLE map of genus g (with IsMap token
+    and max face size n+3) achieving the p₆ equality case. NOTE: takes only `n`,
+    no `maps` argument. -/
+lemma equality_family {g : ℤ} :
+    ∀ n : ℕ, ∃ (M_n : SimplyCon3ConnectedMap g),
+      IsMap M_n ∧
+      M_n.m = n + 3 ∧
+      3 * (M_n.p_i 6 : ℤ) =
+        12 * (1 - g) - (2 * (M_n.p_i 4 : ℤ) + 3 * (M_n.p_i 5 : ℤ)) +
+        ∑ k ∈ Finset.Ico 7 (M_n.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M_n.p_i k : ℤ) := by sorry
 """
 
 # Keep LEAN_PREAMBLE for _ensure_preamble fallback — just the two import lines.
@@ -93,27 +109,36 @@ LEAN_PREAMBLE = "import Mathlib\nimport Inventory\nimport Polib\n"
 # and not re-sent on fix calls, so these prompts have no domain knowledge
 # about Inventory unless we include this block explicitly.
 FIX_LOOP_POLIB_REF = """\
+## ⚠ REALIZABILITY TOKEN: every axiom call below needs `hM : IsMap maps` — take it
+## from your theorem's own hypotheses and pass it as the argument right after `maps`.
+## `IsMap` is opaque: it can NEVER be proved for a constructed instance.
+
 ## Inventory geometric axiom lemmas — call as STANDALONE functions (never dot-notation):
-- `euler_formula maps`                 →  (v:ℤ) - e + Σ_{k=3}^{m} p_i k = 2 - 2g
-- `handshake maps`                     →  2·e = Σ_{k=3}^{m} k·p_i k
-- `regularity maps`                    →  3·v = 2·e
-- `kgon_occupation_bound maps k hk`    →  total_occ k ≤ (k:ℤ)/2 · p_k  (hk : k ∈ Finset.Ico 4 (maps.m+1))
-- `p_range maps k hk`                  →  p_i k = 0  (when maps.m < k)
-- `occupation_conservation maps`       →  Σ_{k≥4} total_occ k = 3·p₃
-- `occupation_bound maps k hk`         →  0 ≤ total_occ k ∧ total_occ k ≤ (k:ℤ)/2·p_k
-- `equality_family maps n`             →  ∃ witness for the equality case
+- `euler_formula maps hM`              →  (v:ℤ) - e + Σ_{k=3}^{m} p_i k = 2 - 2g
+- `handshake maps hM`                  →  2·e = Σ_{k=3}^{m} k·p_i k
+- `regularity maps hM`                 →  3·v = 2·e
+- `kgon_occupation_bound maps hM k hk` →  total_occ k ≤ (k:ℤ)/2 · p_k  (hk : k ∈ Finset.Ico 4 (maps.m+1))
+- `p_range maps hM k hk`               →  p_i k = 0  (when maps.m < k)
+- `occupation_conservation maps hM hm` →  Σ_{k≥4} total_occ k = 3·p₃  (hm : maps.m ≥ 6)
+- `occupation_bound maps hM k hk`      →  0 ≤ total_occ k ∧ total_occ k ≤ (k:ℤ)/2·p_k
+- `quad_occ_cancellation maps hM hm`   →  Σ_{k∈[4,m]∖{6}} total_occ k ≤ Σ_{k∈[5,m]∖{6}} (k:ℤ)/2·p_k
+- `equality_family n`                  →  ∃ M_n, IsMap M_n ∧ M_n.m = n+3 ∧ p₆-equality
+                                          (takes ONLY `n` — no maps argument)
 
 ## Derived Inventory lemmas (PROVED or axiomatised — calling them does NOT add new sorry):
 These are available via `import Inventory` in any generated file. USE THESE instead of sorry.
-- `P6EdgeCountEquation maps`      → 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k   (PROVED, no sorry)
-- `Juc_EulerFormula maps`         → 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k         (PROVED, g=0)
-- `P6InequalityPart maps hm`      → 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{k≥7}((k+1)/2-6)*p_k  (Inventory axiom — OK to call)
-- `Juc_InequalityPart maps hm`    → same bound for g=0  (Inventory axiom — OK to call)
-- `JucovicTheorem maps h1`        → hexagon lower bound ∧ equality family (g=0, h1 : Σp_k ≥ 7)
-- `Juc_HexMaxOccupation maps hm`  → total_occ 6 ≤ 3*p₆  (PROVED)
-- `Juc_NonHexEdgeBound maps hm`   → Σ_{k≥5,k≠6} total_occ k ≤ Σ_{k≥5,k≠6} (k/2)*p_k  (PROVED)
-⚠ Calling P6InequalityPart/Juc_InequalityPart is ACCEPTABLE even though they have sorry internally.
-  You are reusing an accepted Inventory axiom, NOT introducing new sorry.
+- `P6EdgeCountEquation maps hM`      → 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k   (PROVED, no sorry)
+- `Juc_EulerFormula maps hM`         → 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k         (PROVED, g=0)
+- `P6InequalityPart maps hM hm`      → 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{k≥7}((k+1)/2-6)*p_k  (PROVED, no sorry)
+- `Juc_InequalityPart maps hM hm`    → same bound for g=0  (PROVED, no sorry)
+- `JucovicTheorem maps hM h1`        → hexagon lower bound ∧ equality family (g=0, h1 : Σp_k ≥ 7)
+- `Juc_HexMaxOccupation maps hM hm`  → total_occ 6 ≤ 3*p₆  (PROVED)
+- `Juc_NonHexEdgeBound maps hM hm`   → Σ_{k≥5,k≠6} total_occ k ≤ Σ_{k≥5,k≠6} (k/2)*p_k  (PROVED)
+⚠ Calling any Inventory lemma is ACCEPTABLE even if it has sorry internally — you are
+  reusing the accepted, hand-curated axiom base, NOT introducing new sorry.
+⛔ The axiom base is CLOSED: NEVER write a new sorried helper lemma of your own,
+  even one that "looks like" content from the source papers. A file containing a
+  new sorry is REJECTED at save time.
 
 ## Session-proved Polib lemmas (accumulated conjecture proofs):
 Check the "Previously proved dependencies" section in your prompt for what is
@@ -124,7 +149,7 @@ Do NOT assume any specific name exists — if it is not listed, it does not exis
 ⛔ NEVER add fields to `SimplyCon3ConnectedMap` — structure has ONLY data fields.
 
 ## Dependent type pitfalls — CRITICAL for fix-loop:
-- `regularity maps` / `handshake maps` return ℕ equations. Cast to ℤ with `exact_mod_cast`.
+- `regularity maps hM` / `handshake maps hM` return ℕ equations. Cast to ℤ with `exact_mod_cast`.
 - `(maps.total_faces : ℤ)` ≠ `∑ k ∈ Finset.Ico 3 (maps.m+1), (maps.p_i k : ℤ)` automatically.
   Bridge: `simp [SimplyCon3ConnectedMap.total_faces, Nat.cast_sum]`
 - `rw [hg] at h` when `hg : g = 0` and `h` comes from `maps : SimplyCon3ConnectedMap g`
@@ -181,17 +206,22 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   **Do NOT assume any lemma exists unless it is explicitly listed in your prompt.**
 
 ### Strategy A — Local geometry lemmas (occupation bounds):
-  These are standalone lemmas. Call them as functions:
-  - `kgon_occupation_bound maps k hk`  proves `maps.total_occ k ≤ ((k : ℤ) / 2) * maps.p_i k`
+  These are standalone lemmas. ALL of them require the realizability token
+  `hM : IsMap maps` (from your theorem's hypotheses) right after `maps`:
+  - `kgon_occupation_bound maps hM k hk`  proves `maps.total_occ k ≤ ((k : ℤ) / 2) * maps.p_i k`
     where `hk : k ∈ Finset.Ico 4 (maps.m+1)` (PROVED — same bound as occupation_bound's RHS)
   - ⛔ `quad_occ_reduction` and `quad_adj_constraint` DO NOT EXIST (removed) — never call them.
-  - `p_range maps k hk`  proves `maps.p_i k = 0` when `hk : maps.m < k`.
+  - `p_range maps hM k hk`  proves `maps.p_i k = 0` when `hk : maps.m < k`.
     Use this to show `maps.p_i 6 = 0` when `maps.m < 6`.
-  - `occupation_conservation maps`  proves
+  - `occupation_conservation maps hM hm`  (hm : maps.m ≥ 6)  proves
       `∑ k ∈ Finset.Ico 4 (maps.m+1), maps.total_occ k = 3 * (maps.p_i 3 : ℤ)`
-  - `occupation_bound maps k hk`  proves
+  - `occupation_bound maps hM k hk`  proves
       `0 ≤ maps.total_occ k ∧ maps.total_occ k ≤ ((k : ℤ) / 2) * (maps.p_i k : ℤ)`
     where `hk : k ∈ Finset.Ico 4 (maps.m+1)`.
+  - `quad_occ_cancellation maps hM hm`  (hm : maps.m ≥ 6)  proves
+      `∑ k ∈ (Finset.Ico 4 (maps.m+1)).erase 6, maps.total_occ k ≤
+       ∑ k ∈ (Finset.Ico 5 (maps.m+1)).erase 6, ((k : ℤ) / 2) * (maps.p_i k : ℤ)`
+    (the paper's quadrangle net-zero argument, as an accepted axiom).
 
   **CRITICAL — any lemma proving a hexagon lower bound via occupation MUST include `(hm : maps.m ≥ 6)`**:
   The hexagon occupation argument only works when m ≥ 6 (so hexagons exist and k=6 is
@@ -201,82 +231,57 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   - For m=4,5: hexagons don't appear, so the bound `3*p₆ ≥ ...` can't be established.
   Always declare such a lemma as:
   ```lean
-  lemma <YourLemmaName> {g : ℤ} (maps : SimplyCon3ConnectedMap g)
+  lemma <YourLemmaName> {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : IsMap maps)
       (h1 : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k > 7)
       (hm : maps.m ≥ 6) :
       3 * (maps.p_i 6 : ℤ) ≥ 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - 3 * (maps.p_i 5 : ℤ)
         + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ)
   ```
-  The calling theorem (which has h1 and can derive hm from its own case analysis) passes both.
+  The calling theorem (which has hM, h1 and can derive hm from its own case analysis) passes all three.
 
-  **Proof strategy for InequalityPart (case maps.m ≥ 6)**:
+  **Proof strategy for hexagon lower bounds (case maps.m ≥ 6)**:
 
-  ⚠⚠ CRITICAL BUGS TO AVOID (these have caused every failed attempt so far):
-
-  BUG 1 — WRONG rewrite direction: `Finset.add_sum_erase` has the form
-    `f a + ∑ x ∈ s.erase a, f x = ∑ x ∈ s, f x`
-  To go from `∑ x ∈ s, f x` (what hcons contains) to `f a + ∑ x ∈ s.erase a, f x`,
-  you MUST use `←`:
-    `rw [← Finset.add_sum_erase _ _ h6mem] at hcons`   ✓
-    `rw [Finset.add_sum_erase _ _ h6mem] at hcons`      ✗ ALWAYS FAILS
-
-  BUG 2 — WRONG bound on the non-hex sum: bounding
-    `∑ k ∈ (Ico 4 (m+1)).erase 6, (k:ℤ)/2 * pk`
-  by `occupation_bound` for ALL k (including k=4) gives `2*p₄ + 2*p₅ + ...`,
-  which produces `-4*p₄` in the final bound instead of the required `-2*p₄`.
-  The paper's argument (tex line 25-28) says k=4 contributes NET ZERO because
-  each quadrangle occupation forces an equal reduction in some r-gon (r > 4).
-  The current structure axioms (`occupation_bound`) do NOT encode this combined
-  net-zero effect for total_occ 4 — the quad-adjacency reduction needs
-  face-adjacency data the structure does not carry.
-
-  CORRECT APPROACH — use a private sorry helper for the gap, then close with linarith:
+  ⚡ FIRST CHOICE — the bound is already PROVED in Inventory. Call it directly:
+  ```lean
+  have h := P6InequalityPart maps hM hm    -- general genus
+  -- or, for g = 0:
+  have h := Juc_InequalityPart maps hM hm
+  linarith
+  ```
+  Only if your goal is a genuinely different occupation statement, re-derive it
+  from the axioms (this is the full argument used inside Inventory — zero sorry):
   ```lean
   -- 1. k=6 is in the occupation range
   have h6mem : (6 : ℕ) ∈ Finset.Ico 4 (maps.m + 1) := by
-    simp [Finset.mem_Ico]; omega
-  -- 2. Occupation conservation: sum of all total_occ = 3*p₃
-  have hcons := occupation_conservation maps
-  -- 3. Extract k=6 (⚠ use ← !)
+    simp only [Finset.mem_Ico]; omega
+  -- 2. Occupation conservation (note: takes hm), with k=6 extracted (⚠ use ← !)
+  have hcons := occupation_conservation maps hM hm
   rw [← Finset.add_sum_erase _ _ h6mem] at hcons
   -- hcons : total_occ 6 + ∑ k ∈ (Ico 4 (m+1)).erase 6, total_occ k = 3*p₃
-  -- 4. The combined non-hex bound (quadrangle net-zero argument from the paper).
-  --    This is not directly provable from the current axioms alone — use sorry:
-  have hnon_hex : ∑ k ∈ (Finset.Ico 4 (maps.m + 1)).erase 6, maps.total_occ k ≤
-      2 * (maps.p_i 5 : ℤ) +
-      ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) / 2) * maps.p_i k := by
-    -- [SORRY] class: missing_axiom
-    -- [SORRY] reason: occupation_bound gives total_occ 4 ≤ 2*p4 (too weak); the paper's
-    --   quadrangle net-zero argument (each quad occ forces r-gon reduction) is not encoded
-    --   in the current sorried axioms. Add a new sorried lemma for this combined bound.
-    -- [SORRY] suggested_next: add a new sorried lemma non_hex_occ_bound as a standalone lemma
-    -- [SORRY] impact: blocks InequalityPart
-    sorry
-  -- 5. Lower bound on total_occ 6
-  have hlb : maps.total_occ 6 ≥
-      3 * (maps.p_i 3 : ℤ) - 2 * (maps.p_i 5 : ℤ) -
-      ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) / 2) * maps.p_i k := by
-    linarith
-  -- 6. Upper bound on total_occ 6
-  have hub6 : maps.total_occ 6 ≤ 3 * (maps.p_i 6 : ℤ) := by
-    have := (occupation_bound maps 6 h6mem).2; norm_num at this ⊢; linarith
-  -- 7. EdgeCountEquation and RemainingEdgesIdentity; close with linarith
-  have hedge := EdgeCountEquation maps hm
-  have hrem := RemainingEdgesIdentity maps
-  linarith
+  -- 3. Quadrangle net-zero bound — an ACCEPTED AXIOM, never sorry this:
+  have hquad := quad_occ_cancellation maps hM hm
+  -- 4. Hexagons absorb at most 3p₆
+  have hhex := Juc_HexMaxOccupation maps hM hm
+  -- 5. Edge-count equation
+  have hedge := P6EdgeCountEquation maps hM
+  -- 6. Split the cancellation RHS at k=5 and use the per-k identity
+  --    (k−6) − k/2 = (k+1)/2 − 6 (proved by omega inside Finset.sum_congr);
+  --    then `linarith` closes. See Inventory.P6InequalityPart for the full text.
   ```
-  The sorry in step 4 is the ONLY sorry needed. The rest closes completely with linarith.
 
-  **Proof strategy for InequalityPart — if m < 6 case must be handled** (without hm):
-  If you cannot add `hm : maps.m ≥ 6` to the signature, handle m < 6 as:
-  - `occupation_conservation maps` for m ≤ 3: `Finset.Ico 4 (m+1) = ∅` → sum = 0 = 3*p₃ → p₃ = 0
-    → total faces = p₄+p₅ < h1's bound gives contradiction.
-  - For m=4,5: `3*p₃ ≤ 2*p₄+2*p₅` (from `occupation_bound maps`: 4/2=2, 5/2=2),
-    edge count: `3*p₃+2*p₄+p₅ = 12*(1-g)` (from `euler_formula maps`, `handshake maps`, `regularity maps` via push_cast+linarith),
-    h1: `p₃+p₄+p₅ ≥ 8`, and p₆=0 → goal `0 ≥ 12*(1-g)-2*p₄-3*p₅ = 3*p₃-2*p₅`.
-    Use `linarith` after establishing these via `have` steps with `push_cast`.
+  ⛔ NEVER write a sorried helper (e.g. `hnon_hex … := by sorry`) for the
+  quadrangle bound — `quad_occ_cancellation` IS that bound. The axiom base is
+  closed: a new sorry of your own is rejected at save time, no exceptions.
+
+  **If m < 6 must be handled** (goal without hm): for k > maps.m use
+  `p_range maps hM k (by omega)` to kill p₆ and the Σ_{k≥7} sum, then try to
+  close arithmetically from `euler_formula/handshake/regularity maps hM` via
+  push_cast + linarith. NOTE: `occupation_conservation` and
+  `quad_occ_cancellation` REQUIRE m ≥ 6 and are NOT available here. If the
+  m < 6 case genuinely needs them, the node is unprovable from the current
+  axiom base — FAIL the node rather than inventing a sorried lemma.
   Apply the axiom lemmas directly:
-  `have h := kgon_occupation_bound maps k hk; linarith`
+  `have h := kgon_occupation_bound maps hM k hk; linarith`
 
   **⚠ THESE IDENTIFIERS DO NOT EXIST — NEVER USE THEM:**
   The following names are NOT defined anywhere in Lean, Mathlib, or Inventory. Using them causes
@@ -285,29 +290,33 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   - `capacity_ge_triangle_edges`, `hex_capacity`, `hex_lower`, `hex_occ_lower`
   - `triangle_edge_occupation`, `occupation_identity`, `triangle_occupation_eq`
   - Any dot-notation access `maps.euler_formula`, `maps.handshake`, etc. — these are now
-    standalone lemmas; call them as `euler_formula maps`, `handshake maps`, `regularity maps`,
-    `kgon_occupation_bound maps`, `equality_family maps`, etc.
+    standalone lemmas; call them as `euler_formula maps hM`, `handshake maps hM`,
+    `regularity maps hM`, `kgon_occupation_bound maps hM`, `equality_family n`, etc.
   - `quad_occ_reduction`, `quad_adj_constraint` — REMOVED from Inventory; do not call.
   ⛔ ABSOLUTE PROHIBITION — adding ANY proposition/proof field to `SimplyCon3ConnectedMap`
     is FORBIDDEN under any circumstances. This is considered cheating. The structure MUST
-    contain ONLY data fields (m, p_i, v, e, total_occ). All mathematical facts MUST be
-    standalone sorried lemmas. There are NO exceptions to this rule.
+    contain ONLY data fields (m, p_i, v, e, total_occ).
   If the proof requires a fact not directly available:
   - PREFERRED: add a `private lemma MissingFact ...` with a REAL proof attempt before the main proof.
     The helper lemma must state a mathematically true fact (explain WHY in a doc comment).
     Use linarith/omega/simp inside the helper. The main proof then calls the helper.
   - Do NOT write `axiom`. Do NOT add fields to SimplyCon3ConnectedMap.
-  - A helper lemma with sorry is acceptable as last resort — it stays honest and can be proved later.
-    **CRITICAL**: if you create a sorry helper lemma, the main theorem MUST call it by name.
-    Example: write `exact ⟨HexagonCoverage maps hm h1, ...⟩` NOT bare `sorry` in the main body.
-    A sorry helper that is never called will be stripped automatically, leaving an empty file.
+  - ⛔ NEVER write a sorried helper lemma. The accepted axiom base lives in Inventory.lean,
+    is hand-curated from the source papers, and is CLOSED — the prover must not extend it,
+    even with a statement that "looks like" paper content. A file containing a new sorry
+    is REJECTED at save time and the node FAILS. If the goal genuinely needs a fact that
+    no Inventory lemma provides, the node is unprovable from the current base — fail it.
 
 ### Strategy B — Construction / existence proofs (∃ n, P n):
-  Always provide an explicit witness. Pattern for infinite family:
+  Always provide an explicit witness. NEVER construct a SimplyCon3ConnectedMap
+  instance yourself — get realizable maps (with their IsMap token) from
+  `equality_family` (note: it takes ONLY `n`, no maps argument):
   ```
   intro n
-  obtain ⟨p_i_n, v_n, e_n, h_euler, h_hand, h_reg, h_eq⟩ := equality_family maps n
-  exact ⟨p_i_n, v_n, e_n, h_euler, h_hand, h_reg, h_eq⟩
+  obtain ⟨M_n, hIs, hm_eq, h_eq⟩ := equality_family (g := 0) n
+  -- M_n : SimplyCon3ConnectedMap 0, hIs : IsMap M_n, hm_eq : M_n.m = n + 3,
+  -- h_eq : 3 * M_n.p_i 6 = 12*(1-0) - (2*M_n.p_i 4 + 3*M_n.p_i 5) + Σ_{k≥7}...
+  exact ⟨M_n, hIs, ...⟩
   ```
   Never use `sorry` when `equality_family` gives the exact existential.
 
@@ -410,13 +419,14 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
 ### Strategy H — Conjunction goals with proved lower bound:
   When the main theorem goal is `⟨lower_bound_part, equality_family_part⟩`:
   - The lower_bound part: use the relevant `HexagonEdgesLowerBound` or similar lemma
-  - The equality_family part: use `InfiniteEqualityFamily g maps` (if proved) directly,
-    or destructure `maps.equality_family n` to get the explicit witness:
+  - The equality_family part: use `InfiniteEqualityFamily` (if proved) directly,
+    or destructure `equality_family n` / `Juc_EqualityConstruction` for witnesses:
   ```
-  exact ⟨HexagonEdgesLowerBound maps h1, InfiniteEqualityFamily g maps⟩
-  -- OR if InfiniteEqualityFamily is not in scope:
-  refine ⟨HexagonEdgesLowerBound maps h1, ?_⟩
-  exact Set.infinite_of_injective_forall_mem (fun n => ⟨..., maps.equality_family n⟩) ...
+  exact ⟨HexagonEdgesLowerBound maps hM h1, InfiniteEqualityFamily ...⟩
+  -- OR destructure the Inventory existential (witnesses carry IsMap tokens):
+  refine ⟨HexagonEdgesLowerBound maps hM h1, ?_⟩
+  obtain ⟨f, hinj, hprop⟩ := Juc_EqualityConstruction
+  ...
   ```
 
 ### Strategy I — Dependent type variable `g` in SimplyCon3ConnectedMap g:
@@ -431,13 +441,13 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   **CORRECT patterns** when you have `hg : g = 0`:
   ```lean
   -- BEST: pass hg directly to linarith — it treats g=0 as a linear fact
-  have h_euler := euler_formula maps   -- ... = 2 - 2 * g
-  linarith [hg]                        -- linarith sees g=0 ⟹ 2-2*g=2
+  have h_euler := euler_formula maps hM   -- ... = 2 - 2 * g
+  linarith [hg]                           -- linarith sees g=0 ⟹ 2-2*g=2
 
   -- ALSO OK: subst at the very top, before any 'have' that uses maps
   -- (subst rewrites maps : SimplyCon3ConnectedMap g → SimplyCon3ConnectedMap 0)
   subst hg
-  have h_euler := euler_formula maps   -- now : ... = 2 - 2 * 0
+  have h_euler := euler_formula maps hM   -- now : ... = 2 - 2 * 0
   norm_num at h_euler ⊢; linarith
   ```
   When a sub-lemma needs `g = 0`, prefer writing its signature as
@@ -447,7 +457,7 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   If the parent theorem's signature says `(maps : SimplyCon3ConnectedMap 0)` (check the
   "Parent theorem signature" in your prompt), then ALL helper lemmas you write for it MUST
   also use `(maps : SimplyCon3ConnectedMap 0)`. If you write `{g : ℤ} (maps : SimplyCon3ConnectedMap g)`
-  instead, calling any genus-0 proved dependency (e.g. `Juc_InequalityPart maps hm`,
+  instead, calling any genus-0 proved dependency (e.g. `Juc_InequalityPart maps hM hm`,
   or any helper lemma whose signature fixes genus 0) will fail with "Application type mismatch" because
   `maps : SimplyCon3ConnectedMap g` ≠ `maps : SimplyCon3ConnectedMap 0`.
   Rule: **default to the parent theorem's genus; only generalize if the description
@@ -466,40 +476,42 @@ You are a Lean 4 expert generating proof code for a polytope-combinatorics forma
   -- then use htf to rewrite or pass to linarith
   ```
 
-  **⛔ `regularity maps` returns a ℕ equation, not ℤ.**
-  `regularity maps : 3 * maps.v = 2 * maps.e` — both sides are `ℕ`.
+  **⛔ `regularity maps hM` returns a ℕ equation, not ℤ.**
+  `regularity maps hM : 3 * maps.v = 2 * maps.e` — both sides are `ℕ`.
   When you need a ℤ fact, cast explicitly:
   ```lean
-  have h_reg : (3 * maps.v : ℤ) = 2 * maps.e := by exact_mod_cast regularity maps
+  have h_reg : (3 * maps.v : ℤ) = 2 * maps.e := by exact_mod_cast regularity maps hM
   -- or:
-  have h_reg : (3 : ℤ) * maps.v = 2 * maps.e := by exact_mod_cast regularity maps
+  have h_reg : (3 : ℤ) * maps.v = 2 * maps.e := by exact_mod_cast regularity maps hM
   ```
-  Similarly `handshake maps` is a ℕ equation; use `exact_mod_cast` or `push_cast` to lift it.
+  Similarly `handshake maps hM` is a ℕ equation; use `exact_mod_cast` or `push_cast` to lift it.
   ```lean
   have h_hand : (2 * maps.e : ℤ) =
       ∑ k ∈ Finset.Ico 3 (maps.m + 1), (k : ℤ) * maps.p_i k := by
-    exact_mod_cast handshake maps
+    exact_mod_cast handshake maps hM
   ```
 
 ## ⚡ Self-assessment rule — read this BEFORE writing any proof:
 
 **STEP 1 — ALWAYS try Inventory derived lemmas first**:
 The system REJECTS proofs that contain sorry. Before writing sorry, check whether any of
-these Inventory lemmas (available via `import Inventory`) can prove or help prove the goal:
+these Inventory lemmas (available via `import Inventory`) can prove or help prove the goal.
+ALL of them require the realizability token `hM : IsMap maps` from your theorem's hypotheses:
 
-  - `P6EdgeCountEquation maps`   →  3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED)
-  - `Juc_EulerFormula maps`      →  3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED, g=0)
-  - `P6InequalityPart maps hm`   →  3*p₆ ≥ 12*(1-g)-2*p₄-3*p₅+Σ((k+1)/2-6)*p_k  (Inventory axiom)
-  - `Juc_InequalityPart maps hm` →  same bound for g=0  (Inventory axiom)
-  - `JucovicTheorem maps h1`     →  hexagon lower bound + equality  (g=0)
-  - `euler_formula maps`, `handshake maps`, `regularity maps`  (Inventory axioms)
+  - `P6EdgeCountEquation maps hM`   →  3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED)
+  - `Juc_EulerFormula maps hM`      →  3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k  (PROVED, g=0)
+  - `P6InequalityPart maps hM hm`   →  3*p₆ ≥ 12*(1-g)-2*p₄-3*p₅+Σ((k+1)/2-6)*p_k  (PROVED)
+  - `Juc_InequalityPart maps hM hm` →  same bound for g=0  (PROVED)
+  - `quad_occ_cancellation maps hM hm` → non-hex occupation ≤ Σ_{k≥5,k≠6}(k/2)*p_k  (Inventory axiom)
+  - `JucovicTheorem maps hM h1`     →  hexagon lower bound + equality  (g=0)
+  - `euler_formula maps hM`, `handshake maps hM`, `regularity maps hM`  (Inventory axioms)
 
   Calling these is NOT a new sorry even if they internally contain sorry. Use `linarith` or
   `omega` to combine them with hypotheses.
 
 **STEP 2 — Attempt the proof**:
   If YES (clear proof path via Inventory lemmas + linarith/omega) → write the proof.
-  If UNCERTAIN → attempt anyway: `have h := P6EdgeCountEquation maps; linarith` often closes goals.
+  If UNCERTAIN → attempt anyway: `have h := P6EdgeCountEquation maps hM; linarith` often closes goals.
   If NO clear path after trying Inventory lemmas → see STEP 3.
 
 **STEP 3 — sorry is ABSOLUTE LAST RESORT (system will reject and retry)**:
@@ -525,12 +537,17 @@ these Inventory lemmas (available via `import Inventory`) can prove or help prov
    ONLY data: m, p_i, v, e, total_occ. All facts are standalone sorried lemmas. No exceptions.
    ⛔ NEVER construct a `SimplyCon3ConnectedMap` instance — no `.mk`, no `{ m := …, p_i := … }`,
    no `⟨…⟩ : SimplyCon3ConnectedMap`, no `def M : SimplyCon3ConnectedMap … where`, no
-   `{ maps with … }` copy-update. The geometric axiom lemmas are true ONLY for the `maps`
-   parameter given in the signature; applying them to a fabricated instance is unsound and
-   the system hard-rejects the file before compilation.
-6. **MANDATORY sorry rule**: bare `sorry` without the four [SORRY] annotation lines is REJECTED.
-   The system validates annotations at save time and forces a retry if any sorry is unannotated.
-   Use the exact format from Strategy E. Zero new sorry is the goal; annotated sorry is the fallback.
+   `{ maps with … }` copy-update. The geometric axiom lemmas require an `IsMap` token that a
+   fabricated instance can never have (IsMap is opaque, no introduction rule), so such a proof
+   cannot typecheck — and the system additionally hard-rejects the file before compilation.
+   ⛔ NEVER declare your own `IsMap` (no `def IsMap`, `opaque IsMap`, `axiom IsMap`, or any
+   lemma/instance producing `IsMap …`) — the ONLY valid sources of `IsMap` are your theorem's
+   `hM` hypothesis and the witnesses of `equality_family`.
+6. **MANDATORY sorry rule**: ANY new sorry causes the node to FAIL — the accepted axiom
+   base (Inventory.lean) is closed and the prover may never extend it. If you are forced
+   to emit sorry anyway (so the system can diagnose the failure), it MUST carry the four
+   [SORRY] annotation lines from Strategy E; an unannotated sorry is rejected outright.
+   Either way the file will NOT be accepted — the annotations only improve the retry hints.
 7. Return ONLY the complete Lean 4 file inside a single ```lean fence.
 8. ALWAYS use `import Mathlib` (umbrella). NEVER import specific Mathlib submodules.
 9. CRITICAL — write warning-free code. The Lean linter will REJECT the file if any of these appear:
@@ -542,9 +559,11 @@ these Inventory lemmas (available via `import Inventory`) can prove or help prov
    - ALWAYS use `SimplyCon3ConnectedMap g` (where `g : ℤ`) as the map type.
    - NEVER write `{M : Type*}` or generic function arguments like `(pvec : M → ℕ → ℤ)`.
    - Access face counts as `maps.p_i k`, edge count as `maps.e`, vertex count as `maps.v`.
-   - Call geometric axioms as standalone lemmas: `euler_formula maps`, `handshake maps`,
-     `regularity maps`, `kgon_occupation_bound maps`, `occupation_conservation maps`,
-     `occupation_bound maps`, etc. (`quad_occ_reduction`/`quad_adj_constraint` do NOT exist.)
+   - Call geometric axioms as standalone lemmas, always passing the IsMap token:
+     `euler_formula maps hM`, `handshake maps hM`, `regularity maps hM`,
+     `kgon_occupation_bound maps hM`, `occupation_conservation maps hM hm`,
+     `occupation_bound maps hM`, `quad_occ_cancellation maps hM hm`, etc.
+     (`quad_occ_reduction`/`quad_adj_constraint` do NOT exist.)
 """
 
 # Dynamic user prompt — contains only node-specific content.
@@ -581,29 +600,31 @@ For goals involving linear arithmetic over p₃, p₄, p₅, p₆ (face counts),
 Inventory-based templates FIRST. They are cheap and often close the goal completely:
 
 ```lean
+-- (hM : IsMap maps is in your theorem's signature — pass it to every Inventory call)
+
 -- Template 1: Edge-count equation (works for goals about 3p₃ + 2p₄ + p₅ or p₃ bounds)
-have h := P6EdgeCountEquation maps   -- 3p₃ = 12(1-g) - 2p₄ - p₅ + Σ(k-6)p_k
+have h := P6EdgeCountEquation maps hM   -- 3p₃ = 12(1-g) - 2p₄ - p₅ + Σ(k-6)p_k
 push_cast
 linarith
 
 -- Template 2: Sphere edge-count (g=0 only)
-have h := Juc_EulerFormula maps      -- 3p₃ = 12 - 2p₄ - p₅ + Σ(k-6)p_k
+have h := Juc_EulerFormula maps hM      -- 3p₃ = 12 - 2p₄ - p₅ + Σ(k-6)p_k
 push_cast
 linarith
 
 -- Template 3: Hexagon lower bound (needs hm : maps.m ≥ 6)
-have h := P6InequalityPart maps hm   -- 3p₆ ≥ 12(1-g) - 2p₄ - 3p₅ + Σ((k+1)/2-6)p_k
+have h := P6InequalityPart maps hM hm   -- 3p₆ ≥ 12(1-g) - 2p₄ - 3p₅ + Σ((k+1)/2-6)p_k
 linarith
 
 -- Template 4: Combination (for goals about both p₃ and p₆)
-have h1 := P6EdgeCountEquation maps
-have h2 := P6InequalityPart maps hm
+have h1 := P6EdgeCountEquation maps hM
+have h2 := P6InequalityPart maps hM hm
 push_cast
 linarith
 
 -- Template 5: Sphere combination (g=0)
-have h1 := Juc_EulerFormula maps
-have h2 := Juc_InequalityPart maps hm
+have h1 := Juc_EulerFormula maps hM
+have h2 := Juc_InequalityPart maps hM hm
 linarith
 ```
 

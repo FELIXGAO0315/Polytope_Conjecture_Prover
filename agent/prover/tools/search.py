@@ -667,12 +667,13 @@ LaTeX: {latex_fragment}
 {polib_signatures}
 ```
 
-## Shared axioms (standalone lemmas — call WITHOUT dot-notation):
-- `euler_formula maps` : `(v : ℤ) - e + ∑ k ∈ Ico 3 (m+1), p_i k = 2 - 2*g`
-- `handshake maps`    : `2 * e = ∑ k ∈ Ico 3 (m+1), k * p_i k`
-- `regularity maps`   : `3 * v = 2 * e`
-- `kgon_occupation_bound maps k hk` → `maps.total_occ k ≤ ((k:ℤ)/2) * maps.p_i k` (hk : k ∈ Ico 4 (m+1))
-- `equality_family maps n` → existence witness for the equality case
+## Shared axioms (standalone lemmas — call WITHOUT dot-notation; hM : IsMap maps
+## is the realizability token from the theorem's hypotheses, required by all):
+- `euler_formula maps hM` : `(v : ℤ) - e + ∑ k ∈ Ico 3 (m+1), p_i k = 2 - 2*g`
+- `handshake maps hM`    : `2 * e = ∑ k ∈ Ico 3 (m+1), k * p_i k`
+- `regularity maps hM`   : `3 * v = 2 * e`
+- `kgon_occupation_bound maps hM k hk` → `maps.total_occ k ≤ ((k:ℤ)/2) * maps.p_i k` (hk : k ∈ Ico 4 (m+1))
+- `equality_family n` → `∃ M_n, IsMap M_n ∧ M_n.m = n+3 ∧ p₆-equality` (takes ONLY n)
 (NOTE: `quad_occ_reduction` / `quad_adj_constraint` do NOT exist — never suggest them.)
 
 ## Instructions

@@ -52,7 +52,18 @@ Rules:
    `h_simple : IsSimple maps`, or any variant — none of these are defined.
    WRONG:  theorem Foo (maps : SimplyCon3ConnectedMap 0) (h_simple : IsSimple maps) ...
    WRONG:  theorem Foo (maps : SimplyCon3ConnectedMap 0) (h : maps.simple) ...
-   CORRECT: theorem Foo (maps : SimplyCon3ConnectedMap 0) (h_f2 : ...) ...
+   CORRECT: theorem Foo (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_f2 : ...) ...
+
+8b. CRITICAL — MANDATORY realizability token `(hM : IsMap maps)`:
+   Every signature MUST include `(hM : IsMap maps)` immediately after the
+   `(maps : SimplyCon3ConnectedMap 0)` binder. `IsMap` is the opaque
+   realizability predicate from Inventory.lean — every geometric axiom
+   (euler_formula, handshake, regularity, P6InequalityPart, …) requires it,
+   so a signature without `hM` is unprovable. It is boilerplate, NOT a
+   mathematical hypothesis: do NOT count it toward the hypothesis count in
+   rule 2, and do NOT confuse it with the banned `IsSimple` variants above.
+   CORRECT:  theorem Foo (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_f2 : ...) : ... := by
+   WRONG:    theorem Foo (maps : SimplyCon3ConnectedMap 0) (h_f2 : ...) : ... := by  -- missing hM
 
 9. CRITICAL — Fractional coefficients: if the inequality has fractional coefficients
    like 1/3, multiply BOTH SIDES by the denominator to stay in ℤ/ℕ arithmetic.
@@ -99,6 +110,11 @@ Check each of the following:
    `IsSimple`, `maps.simple`, `maps.is_simple`, `simple maps`, `h_simple`, `h_3connected`.
    These predicates are not defined in the proof library. The suggested signature must
    remove those hypotheses entirely.
+
+9. CRITICAL — Realizability token: flag as FAILED if the signature does NOT contain
+   `(hM : IsMap maps)` immediately after the `maps` binder. `IsMap` (defined in
+   Inventory.lean) is mandatory boilerplate — without it no geometric axiom can be
+   applied. It does NOT count as a mathematical hypothesis in check 1.
 
 Respond with ONLY valid JSON in this exact format:
 {{"passed": true/false, "issues": ["issue1", "issue2"], "suggested_signature": "theorem ..."}}

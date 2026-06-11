@@ -63,11 +63,11 @@ LaTeX        : {latex_fragment}
 ## Banned identifiers (Lean rejected these — never use them)
 {banned_ids}
 
-## Domain axioms available (call WITHOUT dot-notation)
-- `euler_formula maps`      : (v:ℤ) - e + Σ p_i k = 2 - 2*g
-- `handshake maps`          : 2*e = Σ k * p_i k
-- `regularity maps`         : 3*v = 2*e
-- `kgon_occupation_bound maps k hk` : total_occ k ≤ (k:ℤ)/2 * p_i k
+## Domain axioms available (call WITHOUT dot-notation; hM : IsMap maps required)
+- `euler_formula maps hM`      : (v:ℤ) - e + Σ p_i k = 2 - 2*g
+- `handshake maps hM`          : 2*e = Σ k * p_i k
+- `regularity maps hM`         : 3*v = 2*e
+- `kgon_occupation_bound maps hM k hk` : total_occ k ≤ (k:ℤ)/2 * p_i k
 
 ## Instructions
 Think step by step:
@@ -80,7 +80,7 @@ Then output 2-4 strategic hints, each on its own line, starting with "- ".
 Each hint must be actionable and specific to this node — not generic advice.
 Examples of good hints:
 - "Replace `linarith` with `omega` after casting all terms to ℤ via `push_cast`"
-- "Introduce `have h := handshake maps` first, then use `linarith [h, regularity maps]`"
+- "Introduce `have h := handshake maps hM` first, then use `linarith [h, regularity maps hM]`"
 - "Rewrite goal using `Finset.sum_Ico_consecutive` split at k=6 before applying `linarith`"
 
 Do NOT output prose before the hints. Output ONLY the bullet list.

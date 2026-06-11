@@ -2,14 +2,21 @@
 """
 agent/orchestrator.py — Main pipeline orchestrator.
 
-Given a conjecture name, runs two stages:
-  Stage 1: p-vector lattice walk (fast, no API)
-  Stage 2: LLM track (30 rounds) + RL track (600 episodes) in parallel
+Given a conjecture name, runs four stages:
+  Stage 1: p-vector lattice walk (fast, no API — samples the DS lattice)
+  Stage 2: boundary enumeration (no API — exhausts the lattice within bounds,
+           then tries to realize the most constructible candidates)
+  Stage 3: LLM track (default 15 rounds) + RL track (600 episodes) + Hopper,
+           all in parallel
+  Stage 4: Lean prover (gated by the Inventory-entailment pre-check, which
+           also runs the automatic plantri decision of any countermodels)
 
-If either track finds a CE that passes validation:
-  → output/conjecture_with_ce/{name}.json   (status=failed)
+If any stage finds a CE that passes validation:
+  → output/conjecture_with_ce/{Cx}/{Cx}.json          (status=failed)
+  → output/conjecture_with_ce/{Cx}/{Cx}_witness.png   (planar drawing of the
+    verified witness graph, rendered automatically)
 
-If neither finds one after both tracks exhaust:
+If no CE is found after stages 1-3 exhaust:
   → ProverAgent formalizes the conjecture
   → output/conjecture_without_ce/{name}.lean
 
@@ -213,14 +220,20 @@ class PVectorCEFinder:
         return result
 
     def _gap(self, p: dict[int, int]) -> float:
-        """Signed violation gap (positive → p_vec is a CE candidate)."""
+        """Signed violation gap (positive → p_vec is a CE candidate).
+
+        Sign is tied to the actual `violated` flag so the gradient is correct
+        for both >=- and <=-form conclusions and for negative RHS values.
+        (The old `RHS − p6` formula inverted the gradient for <=-form
+        conclusions and dropped the minus sign of negative RHS.)"""
         for hyp in self.conjecture.hypotheses:
             if not _eval_hypothesis(hyp, p):
                 return float('-inf')  # outside feasible region
         violated, detail = _eval_conclusion_violated(self.conjecture.conclusion, p)
-        m = re.search(r'p6=([\d.]+).*?RHS=([\d.]+)', detail)
+        m = re.search(r'p6=(-?[\d.]+).*?RHS=(-?[\d.]+)', detail)
         if m:
-            return float(m.group(2)) - float(m.group(1))
+            magnitude = abs(float(m.group(1)) - float(m.group(2)))
+            return magnitude if violated else -magnitude
         return 1.0 if violated else -1.0
 
     # ── main search ──────────────────────────────────────────────────────────
@@ -271,12 +284,33 @@ class PVectorCEFinder:
         return None
 
 
-def _set_torch_threads(n: int) -> None:
-    """Limit PyTorch intra-op and inter-op thread pools for this process."""
+_threadpool_limiter = None   # keep the threadpoolctl limiter alive for the process
+
+
+def _set_compute_threads(n: int) -> None:
+    """Limit torch's pools to n and pin BLAS to 1 thread for this process.
+
+    BLAS must be 1, not n: the Hopper/RL hot loops use tiny matrices where
+    MKL's dynamic mode already runs sequentially — explicitly granting MKL n
+    threads ACTIVATES its pool, and the workers' post-call spin-waiting was
+    measured to burn 5+ cores for zero wall-time gain (200-step Hopper probe:
+    2.1→5.1 cores at identical speed).
+    """
+    global _threadpool_limiter
+    n = max(1, n)
     try:
         import torch
-        torch.set_num_threads(max(1, n))
+        torch.set_num_threads(n)
         torch.set_num_interop_threads(max(1, n // 2))
+    except Exception:
+        pass
+    # for libraries or subprocesses initialised after this point
+    for var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS",
+                "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+        os.environ[var] = "1"
+    try:
+        from threadpoolctl import threadpool_limits
+        _threadpool_limiter = threadpool_limits(limits=1, user_api="blas")
     except Exception:
         pass
 
@@ -292,7 +326,7 @@ def _rl_finder_process(
 ) -> None:
     """Run RL CE finder in a separate process, push validated CE to result_queue."""
     if num_threads > 0:
-        _set_torch_threads(num_threads)
+        _set_compute_threads(num_threads)
 
     tag = "[validation check ce from rl]"
     if not _RL_AVAILABLE:
@@ -317,7 +351,7 @@ def _rl_finder_process(
     if not ces:
         return
 
-    print(f"{tag} {len(ces)} CE candidate(s) found, running 4 checks")
+    print(f"{tag} {len(ces)} CE candidate(s) found, running 5 checks")
 
     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
     checker = PVectorCheckAgent(client=None) if conjecture else None
@@ -335,6 +369,7 @@ def _rl_finder_process(
 
         detail = f"gap={raw.get('gap', 0):.4f}, margin={raw.get('margin', 0):.4f}"
 
+        w_edges = None
         if checker and conjecture:
             report = checker.run_silent(p_vec, conjecture, rl_verified=True)
             for r in report.results:
@@ -343,6 +378,7 @@ def _rl_finder_process(
             if not report.all_passed:
                 print(f"{tag} CE #{idx + 1}/{len(ces)}: not valid — proceed to next")
                 continue
+            w_edges = report.witness_edges
 
         other_candidates = [
             {k + 3: int(v)
@@ -357,6 +393,7 @@ def _rl_finder_process(
             "violation_detail": detail,
             "other_candidates_not_checked": other_candidates,
             "found_at": raw.get("found_at", datetime.now(timezone.utc).isoformat()),
+            "witness_edges": w_edges,
         }
         if conjecture:
             try:
@@ -378,7 +415,7 @@ def _hopper_finder_process(
 ) -> None:
     """Run Hopper CE finder in a separate process, push validated CE to result_queue."""
     if num_threads > 0:
-        _set_torch_threads(num_threads)
+        _set_compute_threads(num_threads)
 
     tag = "[validation check ce from hopper]"
     if not _HOPPER_AVAILABLE:
@@ -406,7 +443,7 @@ def _hopper_finder_process(
     checker = PVectorCheckAgent(client=None)
     report = checker.run_silent(p_vec, conjecture)
 
-    print(f"{tag} CE candidate from Hopper, running 4 checks")
+    print(f"{tag} CE candidate from Hopper, running 5 checks")
     for r in report.results:
         mark = "√" if r.passed else "✗"
         print(f"{tag} {mark} {r.label}: {r.detail}")
@@ -422,6 +459,7 @@ def _hopper_finder_process(
         "violation_detail": detail,
         "other_candidates_not_checked": [],
         "found_at": result.get("found_at", datetime.now(timezone.utc).isoformat()),
+        "witness_edges": report.witness_edges,
     }
     try:
         out_path = _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
@@ -439,12 +477,32 @@ def _hopper_finder_process(
 def _write_ce_json(
     conjecture: ParsedConjecture, ce_info: dict, out_dir: Path
 ) -> Path:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{conjecture.short_id}.json"
+    """Write the CE artifact folder: out_dir/<Cx>/<Cx>.json plus, when a
+    witness graph is available, an automatic <Cx>_witness.png rendering."""
+    ce_dir = out_dir / conjecture.short_id
+    ce_dir.mkdir(parents=True, exist_ok=True)
+    out_path = ce_dir / f"{conjecture.short_id}.json"
 
     p_vec = ce_info.get("p_vector", {})
     props = p_vec_props(p_vec) if p_vec else {}
     kmax = max(p_vec.keys(), default=6)
+
+    counterexample = {
+        "p_vector": [p_vec.get(k, 0) for k in range(3, kmax + 1)],
+        **{f"p{k}": p_vec.get(k, 0) for k in range(3, kmax + 1)},
+        "f2": props.get("f2", 0),
+        "num_vertices": props.get("num_vertices", 0),
+        "num_edges": props.get("num_edges", 0),
+    }
+    # persist the verified witness graph — makes the CE independently
+    # re-checkable forever (render it with tools/draw_ce_witness.py)
+    witness_edges = ce_info.get("witness_edges")
+    if witness_edges:
+        counterexample["witness_graph"] = {
+            "format": "edge_list",
+            "num_vertices": 1 + max(max(e) for e in witness_edges),
+            "edges": [list(e) for e in witness_edges],
+        }
 
     payload = {
         "conjecture_id": conjecture.conjecture_id,
@@ -452,13 +510,7 @@ def _write_ce_json(
         "hypotheses": conjecture.hypotheses,
         "conclusion": conjecture.conclusion,
         "status": "failed",
-        "counterexample": {
-            "p_vector": [p_vec.get(k, 0) for k in range(3, kmax + 1)],
-            **{f"p{k}": p_vec.get(k, 0) for k in range(3, kmax + 1)},
-            "f2": props.get("f2", 0),
-            "num_vertices": props.get("num_vertices", 0),
-            "num_edges": props.get("num_edges", 0),
-        },
+        "counterexample": counterexample,
         "found_by": ce_info.get("found_by", "unknown"),
         "found_at_round": ce_info.get("found_at_round", -1),
         "violation_detail": ce_info.get("violation_detail", ""),
@@ -466,6 +518,14 @@ def _write_ce_json(
         "other_candidates_not_checked": ce_info.get("other_candidates_not_checked", []),
     }
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    if witness_edges:
+        try:
+            from tools.draw_ce_witness import render_witness
+            png = render_witness(out_path)
+            print(f"[Output] CE witness rendering → {png}")
+        except Exception as exc:
+            print(f"[Output] warning: witness rendering failed ({exc}) — "
+                  f"JSON written without PNG")
     return out_path
 
 
@@ -620,32 +680,35 @@ class Orchestrator:
             p_vec = pvec_result["p_vector"]
             rnd = pvec_result['found_at_round']
             _, detail = _eval_conclusion_violated(conjecture.conclusion, p_vec)
-            p6_val = p_vec.get(6, 0)
-            print(f"Counterexample found at round {rnd}: "
-                  f"{p_vec} — p6={p6_val:.1f} < {detail.split('<')[1].strip()}")
+            print(f"Counterexample found at round {rnd}: {p_vec} — {detail}")
             report = PVectorCheckAgent(client=self.client).run(p_vec, conjecture)
             if report.all_passed:
                 pvec_result["violation_detail"] = detail
+                pvec_result["witness_edges"] = report.witness_edges
                 print(f"Counterexample validated at round {rnd}")
                 return pvec_result
-        print("Random walk exhausted, falling back to LLM + RL + Hopper...")
+        print("[Stage 1] Random walk exhausted — no realizable CE. "
+              "Proceeding to Stage 2 (exhaustive boundary enumeration)...")
 
-        # ── Stage 1.5: systematic boundary enumeration (no API) ──────────────
+        # ── Stage 2: systematic boundary enumeration (no API) ──────────────
         enum_ce = self._run_enumeration_stage(conjecture)
         if enum_ce:
             return enum_ce
 
-        # ── Stage 2: LLM + RL + Hopper in parallel ────────────────────────────
-        print(f"[Stage 2] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}  |  Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}")
+        # ── Stage 3: LLM + RL + Hopper in parallel ────────────────────────────
+        print(f"[Stage 3] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}  |  Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}")
 
         # Unified stop signal and result queue shared across all three processes.
         stop_event = _mp.Event()
         result_queue: _mp.Queue = _mp.Queue()
 
-        # Give RL 2/3 of cores, Hopper 1/3 (LLM is I/O-bound, takes nothing)
-        _cpu_total = _mp.cpu_count() or 4
-        _rl_threads = max(1, _cpu_total * 2 // 3)
-        _hopper_threads = max(1, _cpu_total // 3)
+        # One torch thread each. Measured (seeded, identical 40-episode RL
+        # run): the PPO/MLP tensors are so small that torch threading is pure
+        # spin overhead — torch=1: 155s wall/1.0 cores, torch=4: 165s/4.0,
+        # torch=10: 194s/9.8. More threads made RL 25% SLOWER while burning
+        # ~10 cores, starving the sibling finder and the LLM tier-4 checks.
+        _rl_threads = max(1, int(os.environ.get("RL_TORCH_THREADS", "1")))
+        _hopper_threads = max(1, int(os.environ.get("HOPPER_TORCH_THREADS", "1")))
 
         # RL track (separate process — CPU-heavy, avoids GIL + PyTorch thread contention)
         rl_proc: _mp.Process | None = None
@@ -698,13 +761,18 @@ class Orchestrator:
         if hopper_proc and hopper_proc.is_alive():
             hopper_proc.join()
 
-        try:
-            ce_info = result_queue.get_nowait()
-        except Exception:
-            ce_info = None
+        # Prefer the in-process LLM result directly: mp.Queue.put() returns
+        # before the feeder thread flushes to the pipe, so get_nowait() can
+        # miss even our own item (validated CE silently dropped).
+        ce_info = llm_result
+        if ce_info is None:
+            try:
+                ce_info = result_queue.get(timeout=3)
+            except Exception:
+                ce_info = None
 
         if not ce_info:
-            print(f"[Stage 2] No CE found.")
+            print(f"[Stage 3] No CE found.")
             return None
 
         return ce_info
@@ -777,7 +845,7 @@ class Orchestrator:
             print(f"[Orchestrator] Warning: lake build Polib exited {result.returncode}")
 
     def _run_enumeration_stage(self, conjecture: ParsedConjecture) -> Optional[dict]:
-        """Stage 1.5 — exhaustive sweep of small arithmetic CE candidates.
+        """Stage 2 — exhaustive sweep of small arithmetic CE candidates.
 
         Complements the random walk (which samples) with a complete enumeration
         of every DS-valid violating p-vector within bounds, then tries to
@@ -788,10 +856,10 @@ class Orchestrator:
         try:
             candidates = enumerate_ce_candidates(conjecture)
         except Exception as exc:
-            print(f"[Stage 1.5] enumerator error: {exc} — skipping")
+            print(f"[Stage 2] enumerator error: {exc} — skipping")
             return None
         if not candidates:
-            print("[Stage 1.5] No arithmetic CE candidate exists within bounds — "
+            print("[Stage 2] No arithmetic CE candidate exists within bounds — "
                   "conjecture is arithmetically tight in this region.")
             return None
 
@@ -800,32 +868,81 @@ class Orchestrator:
         max_try = int(os.environ.get("CE_ENUM_REALIZE_MAX", "40"))
         per_timeout = float(os.environ.get("CE_ENUM_REALIZE_TIMEOUT", "90"))
         n_try = min(max_try, len(candidates))
-        print(f"[Stage 1.5] {len(candidates)} arithmetic CE candidate(s) within bounds; "
+        print(f"[Stage 2] {len(candidates)} arithmetic CE candidate(s) within bounds; "
               f"trying to realize the {n_try} most constructible ({per_timeout:.0f}s each)...")
-        checker = PVectorCheckAgent(client=self.client)
-        for i, cand in enumerate(candidates[:n_try], 1):
-            report = checker.run_silent(cand.p_vec, conjecture, constructor_timeout=per_timeout)
-            if report.all_passed:
-                _, detail = _eval_conclusion_violated(conjecture.conclusion, cand.p_vec)
-                print(f"[Stage 1.5] CE realized: {cand.p_vec}")
-                report.print()
-                return {
-                    "p_vector": cand.p_vec,
-                    "found_by": "boundary_enumeration",
-                    "found_at_round": i,
-                    "violation_detail": detail,
+        pool = max(1, int(os.environ.get("CE_ENUM_REALIZE_PARALLEL", "4")))
+        _t_batch = time.time()
+
+        def _success(cand, report, round_i: int) -> dict:
+            _, detail = _eval_conclusion_violated(conjecture.conclusion, cand.p_vec)
+            print(f"[Stage 2] CE realized: {cand.p_vec}")
+            report.print()
+            return {
+                "p_vector": cand.p_vec,
+                "found_by": "boundary_enumeration",
+                "found_at_round": round_i,
+                "violation_detail": detail,
+                "witness_edges": report.witness_edges,
+            }
+
+        def _progress(done: int) -> None:
+            if done % 10 == 0 or done == n_try:
+                print(f"[Stage 2] [{done}/{n_try}] none realized so far "
+                      f"({time.time() - _t_batch:.0f}s elapsed)", flush=True)
+
+        if pool == 1:
+            checker = PVectorCheckAgent(client=self.client)
+            for i, cand in enumerate(candidates[:n_try], 1):
+                report = checker.run_silent(
+                    cand.p_vec, conjecture, constructor_timeout=per_timeout)
+                if report.all_passed:
+                    return _success(cand, report, i)
+                _progress(i)
+        else:
+            from concurrent.futures import ProcessPoolExecutor, as_completed
+            from agent.orchestrator.tools.check_pvector import (
+                check_pvector_worker, kill_pool_pgroups, worker_setpgrp,
+            )
+            plantri_jobs = max(1, (_mp.cpu_count() or 4) // pool)
+            # spawn, not fork: batch mode runs this from one of 7 worker
+            # threads, and forking a threaded process can deadlock children.
+            ex = ProcessPoolExecutor(
+                max_workers=pool, mp_context=_mp.get_context("spawn"),
+                initializer=worker_setpgrp)
+            try:
+                futs = {
+                    ex.submit(check_pvector_worker, cand.p_vec, conjecture,
+                              per_timeout, plantri_jobs): (i, cand)
+                    for i, cand in enumerate(candidates[:n_try], 1)
                 }
-        print(f"[Stage 1.5] None of the {n_try} tried candidate(s) could be realized — "
-              f"falling through to Stage 2.")
+                done = 0
+                for fut in as_completed(futs):
+                    i, cand = futs[fut]
+                    done += 1
+                    try:
+                        report = fut.result()
+                    except Exception as exc:
+                        print(f"[Stage 2] worker error on {cand.p_vec}: {exc}")
+                        continue
+                    if report.all_passed:
+                        return _success(cand, report, i)
+                    _progress(done)
+            finally:
+                # On early CE success, in-flight candidates are useless work —
+                # end them immediately instead of holding the interpreter exit.
+                kill_pool_pgroups(ex)   # before shutdown: it nulls _processes
+                ex.shutdown(wait=False, cancel_futures=True)
+        print(f"[Stage 2] None of the {n_try} tried candidate(s) could be realized — "
+              f"falling through to Stage 3.")
         return None
 
     def _entailment_precheck(self, conjecture: ParsedConjecture) -> bool:
-        """Return True if Stage 3 should run.
+        """Return True if Stage 4 should run.
 
         A countermodel is a p-vector that satisfies the per-map arithmetic
         content of every Inventory.lean axiom yet violates the conjecture's
         conclusion. If one exists, no honest Lean proof of the conjecture can
-        be derived from the current Inventory, so Stage 3 is skipped with an
+        be derived from the current Inventory, so Stage 4 is skipped with an
         explicit verdict instead of burning prover rounds on an impossible
         task. Override with FORCE_PROVER=true.
         """
@@ -850,18 +967,251 @@ class Orchestrator:
         for cm in countermodels[:3]:
             print(f"    {cm.p_vec}  (f2={cm.f2})")
         print("  Consequence: no honest Lean proof exists from the current Inventory.")
+
+        # ── Automatic exhaustive decision of the countermodels via plantri ────
+        # Resolves the FALSE-vs-TRUE dichotomy wherever the budget allows:
+        #   realizable     → verified CE (proof by construction) → JSON written
+        #   non-realizable → proof by exhaustion that no such map exists
+        ce_info = self._decide_countermodels_with_plantri(conjecture, countermodels)
+        if ce_info is not None:
+            out_path = _write_ce_json(conjecture, ce_info, self._ce_dir)
+            print(f"[Output] CE JSON → {out_path}")
+            print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 4.")
+            return False
+
         print("  Either:")
-        print("    1. the conjecture is FALSE — the above are unrealized CE candidates")
-        print("       (Stage 1.5/2 could not realize them; a stronger constructor or")
-        print("        dual enumeration could decide them), or")
+        print("    1. the conjecture is FALSE — some undecided candidate above is a real")
+        print("       CE (raise CE_PLANTRI_TIMEOUT / CE_PLANTRI_MAX to decide more), or")
         print("    2. the conjecture is TRUE — then Inventory needs new geometric")
-        print("       content (a real theorem excluding these p-vectors); more LLM")
-        print("       retries cannot help.")
+        print("       content (hand-curated from a paper source; the prover must never")
+        print("       invent it); more LLM retries cannot help.")
         if os.environ.get("FORCE_PROVER", "").lower() == "true":
-            print("  FORCE_PROVER=true — running Stage 3 anyway.")
+            print("  FORCE_PROVER=true — running Stage 4 anyway.")
             return True
-        print("  Skipping Stage 3. (set FORCE_PROVER=true to override)")
+        print("  Skipping Stage 4. (set FORCE_PROVER=true to override)")
         return False
+
+    def _decide_countermodels_with_plantri(
+        self, conjecture: ParsedConjecture, countermodels: list
+    ) -> Optional[dict]:
+        """Exhaustively decide countermodel realizability with plantri
+        (reuses tools/plantri/decide_ce_plantri.decide — a decision procedure,
+        not a heuristic). Returns CE info for the first realizable candidate,
+        else None.
+
+        Phases (all integer-numbered):
+          1. CACHE TRIAGE — persistent verdict cache (output/realizability_
+             cache.json), ADVISORY ONLY: non-realizable entries (proofs by
+             exhaustion) skip work; the file can be deleted at any time;
+          2. HINT RE-VERIFICATION — cached "realizable" entries are mere
+             hints and are ALWAYS re-decided by a fresh plantri run before a
+             CE is emitted, so a stale or tampered cache can never bypass the
+             verification gate;
+          3. QUICK triage — ALL remaining candidates in parallel with a short
+             timeout (most small search spaces decide in seconds);
+          4. DEEP — surviving (timed-out) candidates, cheapest first, with
+             the full budget.
+        The first validated realizable candidate sets a stop_event that kills
+        every sibling plantri process immediately.
+
+        Env knobs:
+          CE_PLANTRI_QUICK_TIMEOUT  quick-phase seconds/candidate (default 30)
+          CE_PLANTRI_TIMEOUT        deep-phase seconds/candidate (default 1800)
+          CE_PLANTRI_PARALLEL       quick-phase concurrent candidates (default 8)
+          CE_PLANTRI_PARALLEL_DEEP  deep-phase concurrent candidates (default 2)
+          CE_PLANTRI_MAX            max deep-phase candidates (default 40; 0 disables stage)
+        """
+        try:
+            from tools.plantri.decide_ce_plantri import decide, PLANTRI_AD
+        except Exception as exc:
+            print(f"[Plantri decision] unavailable ({exc}) — skipping automatic decision")
+            return None
+        if not PLANTRI_AD.exists():
+            print(f"[Plantri decision] binary missing at {PLANTRI_AD} — skipping")
+            return None
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        cpu = _mp.cpu_count() or 8
+        quick_t = float(os.environ.get("CE_PLANTRI_QUICK_TIMEOUT", "30"))
+        deep_t = float(os.environ.get("CE_PLANTRI_TIMEOUT", "1800"))
+        par_quick = max(1, int(os.environ.get("CE_PLANTRI_PARALLEL", "8")))
+        par_deep = max(1, int(os.environ.get("CE_PLANTRI_PARALLEL_DEEP", "2")))
+        max_deep = int(os.environ.get("CE_PLANTRI_MAX", "40"))
+        if max_deep <= 0:
+            print("[Plantri decision] disabled (CE_PLANTRI_MAX=0)")
+            return None
+
+        # ── persistent verdict cache ───────────────────────────────────────────
+        cache_path = _PROJECT_ROOT / "output" / "realizability_cache.json"
+        try:
+            cache: dict = json.loads(cache_path.read_text()) if cache_path.exists() else {}
+        except Exception:
+            cache = {}
+        cache_lock = threading.Lock()
+
+        def _ckey(pv: dict[int, int]) -> str:
+            return ",".join(f"{k}:{v}" for k, v in sorted(pv.items()))
+
+        def _cache_put(pv: dict[int, int], verdict: str, count: int, t_used: float) -> None:
+            with cache_lock:
+                entry = cache.get(_ckey(pv), {})
+                if entry.get("verdict") in ("realizable", "non_realizable"):
+                    return  # final verdicts never change
+                cache[_ckey(pv)] = {
+                    "verdict": verdict, "count": count,
+                    "timeout_used": round(max(t_used, entry.get("timeout_used", 0.0)), 1),
+                }
+                try:
+                    cache_path.parent.mkdir(parents=True, exist_ok=True)
+                    tmp = cache_path.with_suffix(".json.tmp")
+                    tmp.write_text(json.dumps(cache, indent=1, sort_keys=True))
+                    tmp.replace(cache_path)   # atomic — readers never see a partial file
+                except Exception:
+                    pass
+
+        def _make_ce(c, count: int, round_i: int) -> Optional[dict]:
+            violated, detail = _eval_conclusion_violated(conjecture.conclusion, c.p_vec)
+            if not violated:
+                print(f"    WARNING: {c.p_vec} realizable but conclusion not violated — "
+                      f"enumerator inconsistency; ignoring")
+                return None
+            # re-derive an explicit witness graph for the CE JSON (the decide
+            # script only returns a count); the realizable verdict is cached,
+            # so the constructor's plantri early-exit finds it in seconds
+            witness_edges = None
+            try:
+                import networkx as _nx
+                from agent.orchestrator.tools.polytope_constructor import PolytopeConstructor
+                G, _m = PolytopeConstructor().build(c.p_vec, timeout=120.0)
+                if G is not None:
+                    Gi = _nx.convert_node_labels_to_integers(G)
+                    witness_edges = sorted(tuple(sorted(e)) for e in Gi.edges())
+            except Exception:
+                pass
+            return {
+                "p_vector": c.p_vec,
+                "found_by": "plantri_exhaustive_decision",
+                "found_at_round": round_i,
+                "violation_detail": f"{detail} | plantri count={count} (exhaustive)",
+                "witness_edges": witness_edges,
+            }
+
+        # cheapest first: few low-degree (3/4) dual vertices explode the search least
+        cands = sorted(countermodels,
+                       key=lambda c: (c.p_vec.get(3, 0) + c.p_vec.get(4, 0), c.f2))
+
+        # ── phase 1: cache triage ──────────────────────────────────────────────
+        # Cached non-realizable verdicts (proofs by exhaustion) are skipped.
+        # Cached "realizable" entries are HINTS ONLY: a CE is never emitted
+        # from the cache — the candidate is re-decided by a fresh plantri run
+        # in this process, so the verification gate cannot be bypassed by a
+        # corrupted/stale cache file.
+        n_non, n_hint_undecided, n_budget_exhausted = 0, 0, 0
+        quick_list, deep_only, realizable_hints = [], [], []
+        for c in cands:
+            entry = cache.get(_ckey(c.p_vec))
+            if entry is None:
+                quick_list.append(c)
+            elif entry["verdict"] == "realizable":
+                realizable_hints.append(c)
+            elif entry["verdict"] == "non_realizable":
+                n_non += 1
+            elif entry.get("timeout_used", 0.0) >= deep_t:
+                n_budget_exhausted += 1   # full deep budget already spent — skip
+            elif entry.get("timeout_used", 0.0) >= quick_t:
+                deep_only.append(c)   # quick phase already proven insufficient
+            else:
+                quick_list.append(c)
+        if len(quick_list) + len(deep_only) + len(realizable_hints) < len(cands):
+            print(f"[Plantri decision] cache: {n_non} known non-realizable, "
+                  f"{len(deep_only)} known to need deep phase")
+
+        # ── phase 2: re-verify realizable hints first, full width, full budget ─
+        for c in realizable_hints:
+            print(f"[Plantri decision] cache hint REALIZABLE for {c.p_vec} — "
+                  f"re-verifying with a fresh plantri run", flush=True)
+            verdict, count, secs = decide(c.p_vec, cpu, deep_t)
+            print(f"    {verdict.upper()} (count={count}) in {secs:.0f}s")
+            if verdict == "realizable":
+                ce = _make_ce(c, count, 0)
+                if ce:
+                    return ce
+                n_hint_undecided += 1
+            elif verdict == "non_realizable":
+                print(f"    WARNING: stale/corrupt cache entry for {c.p_vec} "
+                      f"(claimed realizable, exhaustion says no) — correcting")
+                with cache_lock:
+                    cache.pop(_ckey(c.p_vec), None)
+                _cache_put(c.p_vec, "non_realizable", count, secs)
+                n_non += 1
+            else:
+                n_hint_undecided += 1
+
+        stop_event = threading.Event()
+
+        def _run_phase(items: list, timeout: float, par: int, label: str):
+            """Decide `items` concurrently. Returns (ce_info|None, survivors)."""
+            nonlocal n_non
+            if not items:
+                return None, []
+            jobs_each = max(1, cpu // par)
+            print(f"[Plantri decision/{label}] {len(items)} candidate(s), "
+                  f"{par} in parallel × {jobs_each} plantri jobs, {timeout:.0f}s each",
+                  flush=True)
+            survivors, found = [], None
+            with ThreadPoolExecutor(max_workers=par) as ex:
+                futs = {ex.submit(decide, c.p_vec, jobs_each, timeout, stop_event): c
+                        for c in items}
+                for i, fut in enumerate(as_completed(futs), 1):
+                    c = futs[fut]
+                    try:
+                        verdict, count, secs = fut.result()
+                    except Exception as exc:
+                        print(f"  [{label}] {c.p_vec} → worker error: {exc}")
+                        survivors.append(c)
+                        continue
+                    print(f"  [{label} {i}/{len(items)}] {c.p_vec} (f2={c.f2}) → "
+                          f"{verdict.upper()} (count={count}) in {secs:.0f}s", flush=True)
+                    if verdict == "realizable":
+                        _cache_put(c.p_vec, "realizable", count, secs)
+                        ce = _make_ce(c, count, i)
+                        if ce and found is None:
+                            found = ce
+                            stop_event.set()   # kill all sibling plantri runs
+                    elif verdict == "non_realizable":
+                        _cache_put(c.p_vec, "non_realizable", count, secs)
+                        n_non += 1
+                    elif verdict == "timeout":
+                        _cache_put(c.p_vec, "timeout", -1, timeout)
+                        survivors.append(c)
+                    else:  # stopped / error — undecided, not cached
+                        survivors.append(c)
+            return found, survivors
+
+        # ── phase 3: quick triage over everything ──────────────────────────────
+        ce, survivors = _run_phase(quick_list, quick_t, par_quick, "quick")
+        if ce:
+            return ce
+
+        # ── phase 4: deep decision on the hard ones, cheapest first ───────────
+        deep_list = sorted(survivors + deep_only,
+                           key=lambda c: (c.p_vec.get(3, 0) + c.p_vec.get(4, 0), c.f2))
+        n_skipped = max(0, len(deep_list) - max_deep)
+        ce, survivors = _run_phase(deep_list[:max_deep], deep_t, par_deep, "deep")
+        if ce:
+            return ce
+
+        n_undecided = len(survivors) + n_skipped + n_hint_undecided + n_budget_exhausted
+        if n_non == len(cands):
+            print("[Plantri decision] ALL countermodels NON-REALIZABLE (proof by exhaustion).")
+            print("  The conjecture survives within bounds, but remains unprovable from the")
+            print("  current Inventory — it needs new, hand-curated geometric content.")
+        else:
+            print(f"[Plantri decision] no CE realized: {n_non}/{len(cands)} non-realizable, "
+                  f"{n_undecided} undecided (timeout/skipped). Verdicts cached in "
+                  f"{cache_path.name}; raise CE_PLANTRI_TIMEOUT/CE_PLANTRI_MAX to decide more.")
+        return None
 
     def _run_prover(self, conjecture: ParsedConjecture) -> None:
         from agent.prover.agent import ProverAgent
@@ -874,7 +1224,7 @@ class Orchestrator:
         agent = ProverAgent(self.config)
         agent._proof_subdir = "conjecture_without_ce"
 
-        print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
+        print(f"\n[Stage 4] ProverAgent starting for {conjecture.conjecture_id} …")
         try:
             result = agent.prove_conjecture(conjecture)
         except Exception as exc:
@@ -883,7 +1233,7 @@ class Orchestrator:
 
         if result.nodes_failed:
             print(f"  Failed nodes: {result.nodes_failed}")
-        print(f"\n[Stage 3] Done. Result: {result.status}")
+        print(f"\n[Stage 4] Done. Result: {result.status}")
 
     def _load_all_conjectures(self, json_path: str | None = None) -> list[ParsedConjecture]:
         """Load every conjecture from a JSON file or directory of individual *.json files.

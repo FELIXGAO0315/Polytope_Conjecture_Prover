@@ -8,8 +8,8 @@ enumerates ALL such triangulations (isomorph-free, exhaustive), so:
     count > 0  →  candidate is REALIZABLE  → verified counterexample exists
     count = 0  →  candidate is NON-REALIZABLE (proof by exhaustion)
 
-This is a decision procedure, not a heuristic. Results are written to
-output/plantri_verdicts_{conjecture}.json as they arrive.
+This is a decision procedure, not a heuristic. Verdicts are printed as they
+arrive.
 
 Usage:
     python tools/plantri/decide_ce_plantri.py [--name auto_..._2] [--f2-max 24]
@@ -22,7 +22,6 @@ Each candidate is split into --jobs parallel plantri parts (res/mod).
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
 import time
@@ -39,22 +38,46 @@ def spec_for(p_vec: dict[int, int]) -> str:
     return "".join(f"F{k}_{v}^{v}" for k, v in sorted(p_vec.items()))
 
 
-def decide(p_vec: dict[int, int], jobs: int, timeout: float) -> tuple[str, int, float]:
-    """Return (verdict, count, seconds). verdict ∈ realizable|non_realizable|timeout|error."""
+def _kill_all(procs) -> None:
+    for p in procs:
+        try:
+            p.kill()
+            p.wait(timeout=5)
+        except Exception:
+            pass
+
+
+def decide(
+    p_vec: dict[int, int], jobs: int, timeout: float, stop_event=None
+) -> tuple[str, int, float]:
+    """Return (verdict, count, seconds).
+    verdict ∈ realizable|non_realizable|timeout|stopped|error.
+    `stop_event` (threading.Event, optional) aborts the decision early —
+    set by the orchestrator to kill sibling decisions once a CE is found."""
     n = sum(p_vec.values())
     switch = "-" + spec_for(p_vec)
-    procs = []
     t0 = time.time()
-    for r in range(jobs):
-        procs.append(subprocess.Popen(
-            [str(PLANTRI_AD), switch, str(n), f"{r}/{jobs}", "-u"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
-        ))
-    total = 0
+    procs = []
     try:
+        # spawn inside the try block: a failure mid-spawn (e.g. ENOMEM) must
+        # still kill the processes already started
+        for r in range(jobs):
+            procs.append(subprocess.Popen(
+                [str(PLANTRI_AD), switch, str(n), f"{r}/{jobs}", "-u"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+            ))
+        # poll loop so we can honor both the timeout and the stop_event
+        while any(p.poll() is None for p in procs):
+            if stop_event is not None and stop_event.is_set():
+                _kill_all(procs)
+                return "stopped", -1, time.time() - t0
+            if time.time() - t0 > timeout:
+                _kill_all(procs)
+                return "timeout", -1, time.time() - t0
+            time.sleep(0.25)
+        total = 0
         for p in procs:
-            remaining = max(1.0, timeout - (time.time() - t0))
-            _, err = p.communicate(timeout=remaining)
+            _, err = p.communicate()
             for line in err.splitlines():
                 if "triangulations generated" in line:
                     total += int(line.split()[0])
@@ -62,13 +85,8 @@ def decide(p_vec: dict[int, int], jobs: int, timeout: float) -> tuple[str, int, 
             else:
                 if p.returncode != 0:
                     raise RuntimeError(err.strip()[:200])
-    except subprocess.TimeoutExpired:
-        for p in procs:
-            p.kill()
-        return "timeout", -1, time.time() - t0
     except Exception as exc:
-        for p in procs:
-            p.kill()
+        _kill_all(procs)
         print(f"    error: {exc}")
         return "error", -1, time.time() - t0
     verdict = "realizable" if total > 0 else "non_realizable"
@@ -98,25 +116,12 @@ def main() -> None:
     print(f"{len(cands)} candidates with f2 <= {args.f2_max} "
           f"(jobs={args.jobs}, timeout {args.timeout_per:.0f}s each)")
 
-    out_path = _PROJECT_ROOT / "output" / f"plantri_verdicts_{conj.short_id}.json"
     results: list[dict] = []
-    if out_path.exists():
-        results = json.loads(out_path.read_text())
-    done = {json.dumps(r["p_vec"], sort_keys=True) for r in results}
-
     for i, c in enumerate(cands, 1):
-        key = json.dumps({str(k): v for k, v in sorted(c.p_vec.items())}, sort_keys=True)
-        if key in done:
-            continue
         print(f"[{i}/{len(cands)}] {c.p_vec} (f2={c.f2}) ...", flush=True)
         verdict, count, secs = decide(c.p_vec, args.jobs, args.timeout_per)
         print(f"    {verdict.upper()} (count={count}) in {secs:.0f}s")
-        results.append({
-            "p_vec": {str(k): v for k, v in sorted(c.p_vec.items())},
-            "f2": c.f2, "verdict": verdict, "count": count, "seconds": round(secs, 1),
-        })
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(results, indent=2))
+        results.append({"verdict": verdict})
         if verdict == "realizable":
             print("\n*** REALIZABLE CANDIDATE FOUND — the conjecture is REFUTED. ***")
             print("*** Re-run with plantri output enabled to extract the witness graph. ***")
@@ -125,7 +130,7 @@ def main() -> None:
     n_non = sum(1 for r in results if r["verdict"] == "non_realizable")
     n_to = sum(1 for r in results if r["verdict"] == "timeout")
     print(f"\nSummary: {len(results)} decided/attempted — "
-          f"{n_non} non-realizable, {n_to} timeout → {out_path}")
+          f"{n_non} non-realizable, {n_to} timeout")
 
 
 if __name__ == "__main__":

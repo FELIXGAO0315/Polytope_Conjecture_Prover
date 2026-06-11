@@ -89,6 +89,65 @@ def _count_lean_tactics(proof_body: str) -> int:
     return len(_TACTIC_RE.findall(proof_body))
 
 
+def _hyp_required_numerals(hyp: str) -> list[str]:
+    """Numeric constants that a hypothesis REQUIRES to appear in the Lean
+    signature. Mirrors the pvec_eval hypothesis grammar. Unknown formats
+    return [] (they are covered by the LLM semantic check instead)."""
+    flat = re.sub(r"[()]", "", hyp).strip()
+    ns = flat.replace(" ", "")
+    if flat == "is_simple" or flat.startswith("\\text"):
+        return []
+    m = re.fullmatch(r"f_2(?:>=|<=)_(\d+)", ns)
+    if m:
+        return [m.group(1)]
+    m = re.fullmatch(r"sum_pk_k>=7(?:>=|<=)(\d+)", ns)
+    if m:
+        return ["7", m.group(1)]
+    m = re.match(r"\\sum_\{k\s*(?:\\geq|\\ge|>=)\s*(\d+)\}\s*p_k\s*(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)
+    if m:
+        return [m.group(1), m.group(2)]
+    m = re.match(r"f_(?:\{2\}|2)\s*(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)
+    if m:
+        return [m.group(1)]
+    m = re.match(r"p_\{?(\d+)\}?\s*(?:\\geq|\\leq|>=|<=|=)\s*(\d+)", flat)
+    if m:
+        return [m.group(1), m.group(2)]
+    return []
+
+
+def _check_signature_constants(parsed: ParsedTheorem, goal: LockedGoal) -> tuple[bool, list[str]]:
+    """DETERMINISTIC fidelity check (no LLM): every numeric bound in the JSON
+    hypotheses must literally appear in the locked Lean signature, and the
+    conclusion's relation direction must be present. This catches the most
+    dangerous translation drift — wrong constants or flipped inequalities —
+    even if every LLM layer agrees on the same wrong reading."""
+    findings: list[str] = []
+    ok = True
+    sig = goal.lean_signature
+
+    for hyp in parsed.hypotheses:
+        for n in _hyp_required_numerals(hyp):
+            if not re.search(rf"(?<!\d){re.escape(n)}(?!\d)", sig):
+                ok = False
+                findings.append(
+                    f"Constant fidelity: FAIL — hypothesis {hyp!r} requires the "
+                    f"numeral {n} in the Lean signature, but it does not appear"
+                )
+    conc = parsed.conclusion or ""
+    if re.match(r"p_?\{?6\}?\s*(?:>=|\\geq)", conc.strip()) and not re.search(r"≥|>=", sig):
+        ok = False
+        findings.append("Constant fidelity: FAIL — formula conclusion is ≥-form but the "
+                        "signature contains no ≥")
+    if re.match(r"p_?\{?6\}?\s*(?:<=|\\leq)", conc.strip()) and not re.search(r"≤|<=", sig):
+        ok = False
+        findings.append("Constant fidelity: FAIL — formula conclusion is ≤-form but the "
+                        "signature contains no ≤")
+    if ok:
+        findings.append("Constant fidelity: PASS — all hypothesis bounds and the relation "
+                        "direction appear in the locked signature")
+    return ok, findings
+
+
 def _extract_proof_body(lean_code: str) -> str:
     """Extract everything after `:= by`."""
     idx = lean_code.find(":= by")
@@ -224,17 +283,38 @@ class QualityChecker:
             else:
                 findings.append(f"Declaration name: FAIL — '{theorem_name}' not declared in generated code")
 
-            # Check 2b: semantic faithfulness via Claude
+            # Check 2b: the locked signature must appear VERBATIM in the
+            # generated code (whitespace-normalized) — deterministic, no LLM.
+            # The name check alone (2a) would accept a same-named theorem with
+            # silently altered hypotheses (a weaker statement that still
+            # compiles). Any signature drift fails here.
+            sig_norm = re.sub(r"\s+", " ", goal.lean_signature).strip()
+            code_norm = re.sub(r"\s+", " ", lean_code)
+            sig_intact = sig_norm in code_norm
+            if sig_intact:
+                findings.append("Locked signature: PASS — appears verbatim in generated code")
+            else:
+                findings.append(
+                    "Locked signature: FAIL — the generated code does not contain the "
+                    "locked signature verbatim (hypotheses/conclusion may have been altered)"
+                )
+
+            # Check 2c: deterministic constant fidelity (formula → signature)
+            const_ok, const_findings = _check_signature_constants(parsed, goal)
+            findings.extend(const_findings)
+
+            # Check 2d: semantic faithfulness via Claude
             # The locked goal was translated from the JSON formula at goal-lock time.
             # We ask Claude to confirm that the Lean signature faithfully represents
-            # the original formula. This is the definitive JSON→Lean consistency check.
+            # the original formula. This is the LLM layer of the JSON→Lean
+            # consistency check (2b/2c are the deterministic layers).
             faithfulness_ok, no_hallucination, faithfulness_findings = self._semantic_faithfulness_check(
                 parsed, goal
             )
             findings.extend(faithfulness_findings)
 
-            # Combine name check into faithfulness
-            faithfulness_ok = faithfulness_ok and name_present
+            # Combine all deterministic checks into faithfulness
+            faithfulness_ok = faithfulness_ok and name_present and sig_intact and const_ok
 
             # Check 3: proof structure (soft warning)
             latex_steps = len(parsed.proof_steps)
@@ -286,13 +366,18 @@ class QualityChecker:
         """Use Claude to verify the Lean signature faithfully represents the formula.
 
         Returns (faithfulness_ok, no_hallucination, findings_list).
-        Falls back to passing if the client is unavailable (goal lock already validated).
+        FAIL-CLOSED: if the check cannot run (no client / call fails after a
+        retry), faithfulness is UNVERIFIED and the node FAILS. An unverified
+        statement must never be reported as a faithful formalization.
         """
         findings: list[str] = []
 
         if self._client is None:
-            findings.append("Semantic faithfulness: SKIP (no client — goal lock validation trusted)")
-            return True, True, findings
+            findings.append(
+                "Semantic faithfulness: FAIL (fail-closed) — no client available, "
+                "faithfulness UNVERIFIED"
+            )
+            return False, False, findings
 
         hypotheses_str = "\n".join(f"  - {h}" for h in parsed.hypotheses) or "  (none)"
         prompt = _FAITHFULNESS_PROMPT.format(
@@ -301,9 +386,22 @@ class QualityChecker:
             lean_signature=goal.lean_type_only,
         )
 
+        response = None
+        for _attempt in (1, 2):   # one retry on transient failure
+            try:
+                # Use the ClaudeSDKClient._call() which wraps the claude CLI.
+                response = self._client._call(prompt, timeout=45)
+                break
+            except Exception as exc:
+                _last_exc = exc
+        if response is None:
+            findings.append(
+                f"Semantic faithfulness: FAIL (fail-closed) — Claude call failed twice "
+                f"({_last_exc!s:.60}); faithfulness UNVERIFIED"
+            )
+            return False, False, findings
+
         try:
-            # Use the ClaudeSDKClient._call() which wraps the claude CLI.
-            response = self._client._call(prompt, timeout=45)
 
             conclusion_match = "CONCLUSION_MATCH: yes" in response
             hyp_covered = "HYPOTHESES_COVERED: yes" in response
@@ -341,9 +439,13 @@ class QualityChecker:
                 findings.append(f"Overall faithfulness: FAIL{' — ' + reason if reason else ''}")
 
         except Exception as exc:
-            # Claude call failed (timeout, network, etc.) — trust the goal lock validation
-            findings.append(f"Semantic faithfulness: SKIP (Claude call failed: {exc!s:.60}) — goal lock trusted")
-            faithfulness_ok = True
-            no_hallucination = True
+            # FAIL-CLOSED: even a response-parsing error means the verdict is
+            # unknown — an unverified statement must never pass as faithful.
+            findings.append(
+                f"Semantic faithfulness: FAIL (fail-closed) — response parsing "
+                f"error ({exc!s:.60}); faithfulness UNVERIFIED"
+            )
+            faithfulness_ok = False
+            no_hallucination = False
 
         return faithfulness_ok, no_hallucination, findings

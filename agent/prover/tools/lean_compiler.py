@@ -13,16 +13,30 @@ _ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07]*\x07')
 # ── Soundness guard: ban construction of SimplyCon3ConnectedMap instances ────
 # The structure is pure data; the geometric axioms (euler_formula, handshake, …)
 # are sorried statements that hold only for maps arising from real polytopes.
-# Instantiating the structure with arbitrary data and applying an axiom to it
-# yields false equations (e.g. v=0,e=0 ⟹ euler_formula gives 0 = 2 → False),
-# from which anything is provable. Such proofs compile but are mathematically
-# meaningless, so they are rejected before compilation on every code path.
+# Since the 2026-06-11 fix every axiom requires an `IsMap` token (opaque, no
+# introduction rule), so axiom-on-fabricated-data proofs no longer typecheck.
+# This regex gate is kept as defense in depth, and additionally bans declaring
+# a shadowing `IsMap` (the only way left to counterfeit the token).
 _STRUCT_CONSTRUCTION_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r"SimplyCon3ConnectedMap\.mk\b"), "explicit .mk constructor"),
     (re.compile(r":\s*SimplyCon3ConnectedMap\b[^:\n]*:=\s*[{⟨]"), "structure literal with type ascription"),
     (re.compile(r":\s*SimplyCon3ConnectedMap\b[^:=\n]*\bwhere\b"), "`where`-style instance definition"),
     (re.compile(r"⟨[^⟩]*⟩\s*:\s*SimplyCon3ConnectedMap\b"), "anonymous constructor ascribed to the structure type"),
     (re.compile(r"\{[^{}]*\bp_i\s*:=", re.S), "structure literal assigning the p_i field"),
+    (re.compile(r"\b(?:def|abbrev|opaque|axiom|instance|structure|inductive|class|notation|macro|alias)"
+                r"\s+[\w.]*IsMap\b"),
+     "declaration of a counterfeit IsMap predicate"),
+    # The accepted axiom base is CLOSED (Inventory.lean only) — generated code
+    # may never postulate anything, in any position or with any modifier.
+    (re.compile(r"^\s*(?:private\s+|protected\s+|noncomputable\s+|unsafe\s+|partial\s+)*axiom\b",
+                re.MULTILINE),
+     "axiom declaration (forbidden — the axiom base is closed)"),
+    (re.compile(r"#exit\b"),
+     "#exit directive (everything after it is silently unverified)"),
+    (re.compile(r"\bsorryAx\b"),
+     "direct use of sorryAx (sorry in disguise)"),
+    (re.compile(r"^\s*(?:·\s*)?(?:stop|admit)\b", re.MULTILINE),
+     "sorry-equivalent tactic (stop/admit)"),
 ]
 
 
@@ -130,7 +144,7 @@ _ERROR_RULES: list[tuple[str, list[str]]] = [
     ("C", [
         r"unknown identifier",
         r"unknown constant",
-        r"declaration uses sorry",
+        r"declaration uses '?sorry'?",
     ]),
     ("D", [
         r"failed to synthesize",
@@ -163,6 +177,12 @@ _WARNING_LINE_RE = re.compile(
 
 # Linter warnings that must be fixed (not just noted). Maps regex → human hint.
 _FIXABLE_WARNINGS: list[tuple[re.Pattern, str]] = [
+    # Robust sorry detector: catches sorry, sorryAx, `stop`, `admit` and any
+    # other construct that elaborates to sorryAx — Lean itself reports them
+    # all with this warning, so textual evasion is impossible.
+    (re.compile(r"declaration uses '?sorry'?", re.IGNORECASE),
+     "proof uses sorry (possibly via sorryAx/stop/admit) — new sorries are forbidden; "
+     "replace with a real proof or an Inventory lemma call"),
     (re.compile(r"unused variable", re.IGNORECASE),
      "unused variable — prefix parameter name with `_` e.g. `(_h : T)` instead of `(h : T)`"),
     (re.compile(r"tactic does nothing", re.IGNORECASE),

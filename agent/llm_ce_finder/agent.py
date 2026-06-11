@@ -9,9 +9,12 @@ Standalone: can be run independently or embedded in the orchestrator pipeline.
 from __future__ import annotations
 
 import json
+import multiprocessing as _mp
+import os
 import re
 import threading
 import time
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -78,11 +81,62 @@ class LLMCEFinder:
         self.stop_event = stop_event or threading.Event()
         self.check_agent = check_agent
         self.model = model or client.model
+        self._check_parallel = max(1, int(os.environ.get("LLM_CE_CHECK_PARALLEL", "5")))
+        self._pool: ProcessPoolExecutor | None = None
+
+    # ── parallel tier-4 checking ──────────────────────────────────────────────
+
+    def _check_batch(self, cands: list[dict], checker) -> list:
+        """Check candidates' realizability concurrently (one process each).
+
+        Tier 4 dominates a round's wall time (default 30s per candidate); a
+        serial loop over 5 candidates costs ~150s while RL/Hopper saturate the
+        CPU. One spawn worker per candidate cuts that to one timeout's worth.
+        """
+        if len(cands) <= 1 or self._check_parallel == 1:
+            return [checker.run_silent(c, self.conjecture) for c in cands]
+        from agent.orchestrator.tools.check_pvector import (
+            check_pvector_worker, worker_setpgrp,
+        )
+        if self._pool is None:
+            # spawn, not fork: the orchestrator runs LLM finders from worker
+            # threads, and forking a threaded process can deadlock children.
+            self._pool = ProcessPoolExecutor(
+                max_workers=self._check_parallel,
+                mp_context=_mp.get_context("spawn"),
+                initializer=worker_setpgrp,
+            )
+        n_par = min(len(cands), self._check_parallel)
+        plantri_jobs = max(1, (os.cpu_count() or 4) // n_par)
+        futs = [self._pool.submit(check_pvector_worker, c, self.conjecture,
+                                  30.0, plantri_jobs) for c in cands]
+        reports = []
+        for fut, cand in zip(futs, cands):
+            try:
+                reports.append(fut.result())
+            except Exception as exc:
+                print(f"[LLM ce finding] parallel check failed for {cand} "
+                      f"({exc}) — retrying serially")
+                reports.append(checker.run_silent(cand, self.conjecture))
+        return reports
 
     # ── main loop ─────────────────────────────────────────────────────────────
 
     def run(self) -> Optional[dict]:
         """Search for a CE. Returns CE info dict or None if exhausted."""
+        try:
+            return self._run_rounds()
+        finally:
+            if self._pool is not None:
+                # kill worker process groups (worker + plantri children) so a
+                # CE found elsewhere doesn't leave this pool holding the exit;
+                # must run before shutdown(), which nulls the process table
+                from agent.orchestrator.tools.check_pvector import kill_pool_pgroups
+                kill_pool_pgroups(self._pool)
+                self._pool.shutdown(wait=False, cancel_futures=True)
+                self._pool = None
+
+    def _run_rounds(self) -> Optional[dict]:
         from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
         checker = self.check_agent or PVectorCheckAgent(client=self.client)
 
@@ -109,11 +163,13 @@ class LLMCEFinder:
                 return None
 
             candidates = self._parse_candidates(text)
-            violations_this_round = 0
             skipped_dupes = 0
             best_passed_count = -1   # max checks passed by any violating candidate
             best_fail_tier = None    # 1-indexed tier that failed on the best candidate
 
+            # Instant arithmetic filtering first; the surviving violators go
+            # to the expensive tier-4 realizability checks as a parallel batch.
+            to_check: list[tuple[int, dict, str]] = []
             for idx, cand in enumerate(candidates):
                 # Hard dedup — LLM cannot repeat even if it ignores the prompt.
                 cand_key = frozenset(cand.items())
@@ -127,10 +183,12 @@ class LLMCEFinder:
                 if not ok:
                     failed.append({"p_vec": cand, "reason": detail})
                     continue
+                to_check.append((idx, cand, detail))
 
-                violations_this_round += 1
-                report = checker.run_silent(cand, self.conjecture)
+            violations_this_round = len(to_check)
+            reports = self._check_batch([c for _, c, _ in to_check], checker)
 
+            for (idx, cand, detail), report in zip(to_check, reports):
                 if report.all_passed:
                     print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: CE found — {cand} — {detail}")
                     report.print()
@@ -141,6 +199,7 @@ class LLMCEFinder:
                         "violation_detail": detail,
                         "other_candidates_not_checked": candidates[idx + 1:],
                         "found_at": datetime.now(timezone.utc).isoformat(),
+                        "witness_edges": report.witness_edges,
                     }
 
                 # Track the best check result for the round summary

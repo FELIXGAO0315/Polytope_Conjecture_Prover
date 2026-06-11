@@ -677,9 +677,10 @@ class FormalizerAgent:
                 f"The following names were rejected by Lean as unknown. They do NOT exist\n"
                 f"in Lean, Mathlib, or Inventory. Do NOT use any of them:\n"
                 f"  {banned_list}\n"
-                f"Instead use the geometric axiom lemmas (standalone, not structure fields):\n"
-                f"  euler_formula maps, handshake maps, regularity maps,\n"
-                f"  kgon_occupation_bound maps, occupation_bound maps, equality_family maps\n\n"
+                f"Instead use the geometric axiom lemmas (standalone, not structure fields;\n"
+                f"hM : IsMap maps comes from the theorem's hypotheses):\n"
+                f"  euler_formula maps hM, handshake maps hM, regularity maps hM,\n"
+                f"  kgon_occupation_bound maps hM, occupation_bound maps hM, equality_family n\n\n"
             )
         dep_sigs_block = self._format_dep_signatures_block(node.dependencies)
         prompt = (
@@ -754,22 +755,24 @@ class FormalizerAgent:
             + dep_sigs_block
             + local_refs
             + FIX_LOOP_POLIB_REF + "\n"
-            + f"## Key Inventory lemmas to use instead of sorry:\n"
-            f"- `P6EdgeCountEquation maps`   (proved): 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
+            + f"## Key Inventory lemmas to use instead of sorry (hM : IsMap maps required):\n"
+            f"- `P6EdgeCountEquation maps hM`   (proved): 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
             f"  → rearranges to: 3*p₃ + 2*p₄ + p₅ = 12*(1-g) + Σ_{{k≥7}}(k-6)*p_k\n"
-            f"  → call: `have h := P6EdgeCountEquation maps; linarith`\n"
-            f"- `Juc_EulerFormula maps`      (proved, g=0): 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
-            f"- `P6InequalityPart maps hm`   (Inventory axiom): 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{{k≥7}}((k+1)/2-6)*p_k\n"
+            f"  → call: `have h := P6EdgeCountEquation maps hM; linarith`\n"
+            f"- `Juc_EulerFormula maps hM`      (proved, g=0): 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{{k≥7}}(k-6)*p_k\n"
+            f"- `P6InequalityPart maps hM hm`   (PROVED): 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{{k≥7}}((k+1)/2-6)*p_k\n"
             f"  → hm : maps.m ≥ 6 is required; derive from hypotheses or add as hypothesis\n"
-            f"- `Juc_InequalityPart maps hm` (Inventory axiom, g=0): same bound\n"
-            f"- `euler_formula maps`, `handshake maps`, `regularity maps` (axioms)\n"
-            f"- `occupation_conservation maps`, `occupation_bound maps k hk` (axioms)\n\n"
+            f"- `Juc_InequalityPart maps hM hm` (PROVED, g=0): same bound\n"
+            f"- `euler_formula maps hM`, `handshake maps hM`, `regularity maps hM` (axioms)\n"
+            f"- `occupation_conservation maps hM hm`, `occupation_bound maps hM k hk`, "
+            f"`quad_occ_cancellation maps hM hm` (axioms; hm : maps.m ≥ 6)\n\n"
             f"## Strategy\n"
             f"1. For each sorry, identify what fact is needed.\n"
             f"2. Find an Inventory lemma that provides it (see list above).\n"
             f"3. Replace `sorry` with `have h := <Inventory lemma>; linarith` or `exact h`.\n"
-            f"4. Calling P6InequalityPart/Juc_InequalityPart is NOT a new sorry — "
-            f"they are accepted Inventory axioms.\n\n"
+            f"4. Calling Inventory lemmas is NOT a new sorry — they are the accepted axiom base.\n"
+            f"5. ⛔ NEVER fix a sorry by writing a NEW sorried helper — the axiom base is closed; "
+            f"such files are rejected.\n\n"
             f"## Available Mathlib Lemmas\n{hints_str}\n\n"
             f"## Instructions\n"
             f"- Replace EVERY sorry with a real proof or Inventory lemma call\n"
@@ -1207,21 +1210,21 @@ class FormalizerAgent:
     # Each entry is a tactic block injected after `:= by`.
     _INVENTORY_TEMPLATES: list[str] = [
         # Single lemma + linarith (most common pattern)
-        "  have h := P6EdgeCountEquation maps\n  push_cast\n  linarith",
-        "  have h := Juc_EulerFormula maps\n  push_cast\n  linarith",
-        "  have h := P6InequalityPart maps hm\n  linarith",
-        "  have h := Juc_InequalityPart maps hm\n  linarith",
+        "  have h := P6EdgeCountEquation maps hM\n  push_cast\n  linarith",
+        "  have h := Juc_EulerFormula maps hM\n  push_cast\n  linarith",
+        "  have h := P6InequalityPart maps hM hm\n  linarith",
+        "  have h := Juc_InequalityPart maps hM hm\n  linarith",
         # Combinations
-        "  have h1 := P6EdgeCountEquation maps\n  have h2 := P6InequalityPart maps hm\n  push_cast\n  linarith",
-        "  have h1 := Juc_EulerFormula maps\n  have h2 := Juc_InequalityPart maps hm\n  linarith",
+        "  have h1 := P6EdgeCountEquation maps hM\n  have h2 := P6InequalityPart maps hM hm\n  push_cast\n  linarith",
+        "  have h1 := Juc_EulerFormula maps hM\n  have h2 := Juc_InequalityPart maps hM hm\n  linarith",
         # Three axioms
-        "  have he := euler_formula maps\n  have hh := handshake maps\n  have hr := regularity maps\n  push_cast\n  linarith",
+        "  have he := euler_formula maps hM\n  have hh := handshake maps hM\n  have hr := regularity maps hM\n  push_cast\n  linarith",
         # JucovicTheorem direct
-        "  exact (JucovicTheorem maps h1).1",
+        "  exact (JucovicTheorem maps hM h1).1",
         # omega variant
-        "  have h := P6EdgeCountEquation maps\n  push_cast at *\n  omega",
+        "  have h := P6EdgeCountEquation maps hM\n  push_cast at *\n  omega",
         # edge count + euler
-        "  have h1 := P6EdgeCountEquation maps\n  have he := euler_formula maps\n  have hh := handshake maps\n  push_cast\n  linarith",
+        "  have h1 := P6EdgeCountEquation maps hM\n  have he := euler_formula maps hM\n  have hh := handshake maps hM\n  push_cast\n  linarith",
     ]
 
     def _inventory_template_probe(
@@ -1407,9 +1410,15 @@ class FormalizerAgent:
         return levels
 
     def _verify_polib_builds(self, node_id: str, verbose: bool) -> bool:
-        """Compile a minimal file importing Polib to check the package still builds cleanly."""
+        """Compile a minimal file importing Polib to check the package still builds cleanly.
+
+        Must actually `import Polib`: compile() goes through `lake build`, which
+        rebuilds the (just-modified) Polib.lean — a save that broke Polib fails
+        here and triggers rollback. (The previous version only imported
+        Inventory, so this gate was vacuous and broken saves persisted until
+        the end-of-run PolibValidator.)"""
         _result = self._compiler.compile(
-            "import Mathlib\nimport Inventory\n", f"_polib_verify_{node_id}"
+            "import Mathlib\nimport Inventory\nimport Polib\n", f"_polib_verify_{node_id}"
         )
         if not _result.success:
             err = (_result.errors[0].raw_message[:80] if _result.errors
@@ -1478,12 +1487,14 @@ class FormalizerAgent:
           "MUST declare `(hm : maps.m ≥ 6)` — without it the lemma is false "
           "(occupation_conservation forces p₃=0 for m≤3, and hexagons don't exist for m<6). "
           "Always add `(hm : maps.m ≥ 6)` to the lemma signature.",
-          "Use Finset.add_sum_erase to extract k=6 from occupation_conservation: "
-          "`rw [Finset.add_sum_erase _ _ h6mem] at hcons` where "
+          "FIRST: check whether `P6InequalityPart maps hM hm` / `Juc_InequalityPart maps hM hm` "
+          "(both PROVED in Inventory) already give the bound — `have h := ...; linarith`.",
+          "Use Finset.add_sum_erase to extract k=6 from `occupation_conservation maps hM hm`: "
+          "`rw [← Finset.add_sum_erase _ _ h6mem] at hcons` where "
           "`h6mem : (6:ℕ) ∈ Finset.Ico 4 (maps.m+1) := by simp [Finset.mem_Ico]; omega`",
-          "After extracting k=6: lower bound `total_occ 6 ≥ 3*p₃ - Σ_{k≠6}(k/2)*p_k` "
-          "from `linarith [hcons, Finset.sum_le_sum ...]`; upper bound `total_occ 6 ≤ 3*p₆` "
-          "from `(occupation_bound maps 6 h6mem).2` with `norm_num`; combine with `linarith`.",
+          "After extracting k=6: bound the non-hex sum with `quad_occ_cancellation maps hM hm` "
+          "(accepted axiom — do NOT sorry it); upper bound `total_occ 6 ≤ 3*p₆` "
+          "from `Juc_HexMaxOccupation maps hM hm`; combine with `linarith`.",
           "Membership of k in erased set: `Finset.mem_of_mem_erase hk` converts "
           "`hk : k ∈ (Ico 4 (m+1)).erase 6` to `k ∈ Ico 4 (m+1)` for `occupation_bound`.",
           "Final step: `linarith [EdgeCountEquation maps (by omega : maps.m ≥ 6), "
@@ -2785,7 +2796,7 @@ class FormalizerAgent:
 
         try:
             # ── Step 1: Parse ──────────────────────────────────────────
-            self._log(verbose, "[1/6] Parsing conjecture...")
+            self._log(verbose, "[1/8] Parsing conjecture...")
             if parsed is None:
                 parsed = self._parser.parse_with_llm(latex_source, self._sdk_fast, self._config.model_fast)
             self._log(verbose, f"      theorem: {parsed.name} ({len(parsed.proof_steps)} steps)")
@@ -2793,7 +2804,7 @@ class FormalizerAgent:
             self._flog._flush()
 
             # ── Step 2: Lock goal (cached) ─────────────────────────────
-            self._log(verbose, "[2/6] Extracting & locking goal...")
+            self._log(verbose, "[2/8] Extracting & locking goal...")
             goal_lock = self._load_cached_goal(parsed, verbose=verbose) or GoalLock.create(
                 parsed, self._extractor, self._validator, max_attempts=3
             )
@@ -2834,7 +2845,7 @@ class FormalizerAgent:
             self._log(verbose, f"      signature: {goal_lock.goal.lean_signature[:80]}...")
 
             # ── Step 3: Blueprint (cached) ─────────────────────────────
-            self._log(verbose, "[3/6] Decomposing blueprint...")
+            self._log(verbose, "[3/8] Decomposing blueprint...")
             _proved_lemmas = [
                 {
                     "node_id": e["node_id"],
@@ -2854,7 +2865,7 @@ class FormalizerAgent:
             self._log(verbose, f"      topo order: {blueprint.topo_order}")
 
             # ── Step 4: Per-node loop (parallel by dependency level) ───
-            self._log(verbose, "[4/6] Formalizing nodes...")
+            self._log(verbose, "[4/8] Formalizing nodes...")
             levels = self._compute_parallel_levels(blueprint)
             proven_node_ids: list[str] = []
             # Maps node_id → Lean import path for nodes saved to polib this session
@@ -2907,7 +2918,7 @@ class FormalizerAgent:
                             proven_node_ids.append(nid)
                             proven_dep_imports[nid] = "Polib"
 
-            # ── Step 4.5: Inline retry loop for failed nodes ───────────
+            # ── Step 5: Inline retry loop for failed nodes ─────────────
             # Instead of restarting the whole pipeline N times (which redoes
             # parse/goal/blueprint each time), we keep retrying just the failed
             # nodes here. Each retry feeds the cross-run failure memory + the
@@ -2921,7 +2932,7 @@ class FormalizerAgent:
 
             failed_now = _collect_failed()
             if failed_now:
-                self._log(verbose, "\n[retrying]")
+                self._log(verbose, "\n[5/8] Retrying failed nodes...")
                 MAX_RETRY_ITERS = 20
                 max_node_retries = self._config.max_node_retries
                 retry_counts: dict[str, int] = {}
@@ -3037,8 +3048,8 @@ class FormalizerAgent:
                 session_state_path=session_state_path,
             )
 
-        # ── Step 5: Quality check summary ─────────────────────────────
-        self._log(verbose, "[5/6] Checking formalization quality...")
+        # ── Step 6: Quality check summary ─────────────────────────────
+        self._log(verbose, "[6/8] Checking formalization quality...")
         with self._run_codes_lock:
             _qr_snapshot = dict(self._run_quality_reports)
             _skipped_snapshot = set(self._run_skipped_nodes)
@@ -3054,9 +3065,9 @@ class FormalizerAgent:
             for _finding in _qr.findings:
                 self._log(verbose, f"    • {_finding}")
 
-        # ── Step 5.5: Validate and repair Polib integrity ─────────────
+        # ── Step 7: Validate and repair Polib integrity ────────────────
         from agent.prover.tools.polib_validator import PolibValidator
-        self._log(verbose, "[5.5/6] Validating Polib...")
+        self._log(verbose, "[7/8] Validating Polib...")
         _val = PolibValidator(
             polib_lean=self._polib_mgr._polib_lean,
             workspace=Path(self._config.polib_path),
@@ -3064,14 +3075,14 @@ class FormalizerAgent:
         )
         _val_result = _val.validate_and_repair()
         # All node IDs removed from Polib (for any reason) must be downgraded
-        # in session state so Step 5 classifies them as failed, not proved/partial.
+        # in session state so Step 8 classifies them as failed, not proved/partial.
         for _nid in _val_result.all_removed:
             self._session.mark_pending(
                 _nid, 0,
                 "Polib validator removed broken section — re-run to re-prove",
             )
 
-        # ── Step 5: Collect results ────────────────────────────────────
+        # ── Step 8: Collect results + save ─────────────────────────────
         all_session_nodes = self._session.data.get("nodes", {})
         for node_id in blueprint.topo_order:
             node_data = all_session_nodes.get(node_id, {})
@@ -3094,7 +3105,7 @@ class FormalizerAgent:
                 parsed.name if parsed is not None else "(unknown)",
                 nodes_proved, nodes_partial, nodes_failed, sorry_total,
             )
-            self._log(verbose, f"[6/6] Formalization saved → {lean_out_path}")
+            self._log(verbose, f"[8/8] Formalization saved → {lean_out_path}")
 
         if nodes_failed and not (nodes_proved or nodes_partial):
             _status = "failed"

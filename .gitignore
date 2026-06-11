@@ -14,6 +14,18 @@
 store.json
 *.bak
 logs/
+nohup.out
+
+# Cross-process flock anchors & atomic-write scratch (empty/transient, auto-recreated)
+*.json.lock
+*.json.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code local (machine-specific) settings
+.claude/settings.local.json
 
 # Lean / Lake build artefacts
 .lake/

@@ -8,15 +8,16 @@ import Inventory
 
 -- === C2_DomainConstraintsFromMap (proved) ===
 -- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-05-31T08:22:06.580990+00:00
-lemma C2_DomainConstraintsFromMap {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
+lemma C2_DomainConstraintsFromMap {g : ℤ} (maps : SimplyCon3ConnectedMap g)
+  (hM : IsMap maps) :
   ((maps.v : ℤ) - maps.e + (maps.total_faces : ℤ) = 2 - 2 * g) ∧
   ((2 : ℤ) * maps.e = (3 : ℤ) * maps.v) ∧
   ((∑ k ∈ Finset.Ico 3 (maps.m + 1), ((6 : ℤ) - k) * (maps.p_i k : ℤ)) = 12 * (1 - g)) ∧
   ((maps.total_faces : ℤ) = ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ))
 := by
-  have h_euler := euler_formula maps
-  have h_hand := handshake maps
-  have h_reg := regularity maps
+  have h_euler := euler_formula maps hM
+  have h_hand := handshake maps hM
+  have h_reg := regularity maps hM
   have h_tf : (maps.total_faces : ℤ) = ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) := by
     simp [SimplyCon3ConnectedMap.total_faces, Nat.cast_sum]
   have h_reg_z : (3 : ℤ) * maps.v = 2 * maps.e := by exact_mod_cast h_reg
@@ -45,9 +46,10 @@ lemma C2_DomainConstraintsFromMap {g : ℤ} (maps : SimplyCon3ConnectedMap g) :
 
 -- === C2_LowerDegreeFacesBound (proved) ===
 -- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-05-31T08:31:08.340350+00:00
-theorem C2_LowerDegreeFacesBound (maps : SimplyCon3ConnectedMap 0) :
-    3 * (maps.p_i 3 : ℤ) + 2 * (maps.p_i 4 : ℤ) + (maps.p_i 5 : ℤ) ≥ 
+theorem C2_LowerDegreeFacesBound (maps : SimplyCon3ConnectedMap 0)
+    (hM : IsMap maps) :
+    3 * (maps.p_i 3 : ℤ) + 2 * (maps.p_i 4 : ℤ) + (maps.p_i 5 : ℤ) ≥
     12 + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (k - 6 : ℤ) * (maps.p_i k : ℤ) := by
-  have h := P6EdgeCountEquation maps
+  have h := P6EdgeCountEquation maps hM
   push_cast
   linarith

@@ -17,11 +17,12 @@ Strategies (tried in order of speed)
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import math
 import os
+import shutil
 import subprocess
-import tempfile
 import threading
 import time
 import heapq
@@ -89,36 +90,125 @@ def _pvec_of(G: nx.Graph) -> Optional[dict[int, int]]:
 _PC_PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _PLANTRI_BIN = Path(os.environ.get(
     "PLANTRI_AD", _PC_PROJECT_ROOT / "tools" / "plantri" / "plantri_ad"))
-_REALIZABILITY_CACHE = _PC_PROJECT_ROOT / "output" / "realizability_cache.json"
+# Exhaustive verdicts (realizable / nonrealizable) are permanent facts. They
+# are kept in memory AND persisted to output/realizability_cache.json, which
+# is shared with the orchestrator's plantri-decision stage — verdicts learned
+# in any stage or run are never recomputed.
+_realizability_cache: dict[tuple[tuple[int, int], ...], str] = {}
+# p-vector → largest budget (s) at which the FULL strategy stack already failed.
+# Not a verdict — only used to skip deterministic re-failures at <= that budget.
+_failure_cache: dict[tuple[tuple[int, int], ...], float] = {}
 _cache_lock = threading.Lock()
+_CACHE_FILE = _PC_PROJECT_ROOT / "output" / "realizability_cache.json"
+_disk_cache_loaded = False
 
 
-def _cache_key(p_vec: dict[int, int]) -> str:
-    return json.dumps({str(k): v for k, v in sorted(p_vec.items())})
+def _cache_key(p_vec: dict[int, int]) -> tuple[tuple[int, int], ...]:
+    return tuple(sorted(p_vec.items()))
+
+
+def _load_disk_cache_locked() -> None:
+    """Merge the shared disk cache into memory once. Caller holds _cache_lock."""
+    global _disk_cache_loaded
+    if _disk_cache_loaded:
+        return
+    _disk_cache_loaded = True
+    try:
+        if _CACHE_FILE.exists():
+            for key, entry in json.loads(_CACHE_FILE.read_text()).items():
+                v = entry.get("verdict")
+                if v not in ("realizable", "non_realizable", "construction_failed"):
+                    continue
+                pv_key = tuple(sorted(
+                    tuple(int(x) for x in kv.split(":")) for kv in key.split(",")))
+                if v == "construction_failed":
+                    _failure_cache.setdefault(
+                        pv_key, float(entry.get("timeout_used", 0.0)))
+                else:
+                    _realizability_cache.setdefault(
+                        pv_key, "nonrealizable" if v == "non_realizable" else "realizable")
+    except Exception:
+        pass
+
+
+def _disk_merge(key: str, make_entry) -> None:
+    """Cross-process-safe read-modify-write of one disk-cache entry.
+
+    `make_entry(existing)` returns the new entry dict, or None to keep the
+    existing one. An exclusive flock on a sidecar lockfile serialises parallel
+    Stage-2 workers; the tmp+replace keeps readers free of partial JSON.
+    """
+    try:
+        _CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(_CACHE_FILE.with_suffix(".json.lock"), "w") as lf:
+            fcntl.flock(lf, fcntl.LOCK_EX)
+            try:
+                try:
+                    disk = json.loads(_CACHE_FILE.read_text()) if _CACHE_FILE.exists() else {}
+                except Exception:
+                    disk = {}
+                new = make_entry(disk.get(key))
+                if new is not None:
+                    disk[key] = new
+                    tmp = _CACHE_FILE.with_suffix(".json.tmp")
+                    tmp.write_text(json.dumps(disk, indent=1, sort_keys=True))
+                    tmp.replace(_CACHE_FILE)
+            finally:
+                fcntl.flock(lf, fcntl.LOCK_UN)
+    except Exception:
+        pass
 
 
 def _cache_get(p_vec: dict[int, int]) -> Optional[str]:
     with _cache_lock:
-        try:
-            data = json.loads(_REALIZABILITY_CACHE.read_text())
-        except Exception:
-            return None
-        return data.get(_cache_key(p_vec))
+        _load_disk_cache_locked()
+        return _realizability_cache.get(_cache_key(p_vec))
 
 
 def _cache_put(p_vec: dict[int, int], verdict: str) -> None:
     # Only exhaustive verdicts are cached — never timeouts.
     with _cache_lock:
-        try:
-            data = json.loads(_REALIZABILITY_CACHE.read_text())
-        except Exception:
-            data = {}
-        data[_cache_key(p_vec)] = verdict
-        try:
-            _REALIZABILITY_CACHE.parent.mkdir(parents=True, exist_ok=True)
-            _REALIZABILITY_CACHE.write_text(json.dumps(data, indent=1))
-        except Exception:
-            pass
+        _load_disk_cache_locked()
+        _realizability_cache[_cache_key(p_vec)] = verdict
+    if verdict not in ("nonrealizable", "realizable"):
+        return
+    key = ",".join(f"{k}:{v}" for k, v in _cache_key(p_vec))
+
+    def _entry(existing):
+        if existing and existing.get("verdict") in ("realizable", "non_realizable"):
+            return None   # final verdicts never change
+        return {
+            "verdict": "non_realizable" if verdict == "nonrealizable" else "realizable",
+            "count": -1, "timeout_used": 0.0,
+        }
+
+    _disk_merge(key, _entry)
+
+
+def _failure_get(p_vec: dict[int, int]) -> Optional[float]:
+    with _cache_lock:
+        _load_disk_cache_locked()
+        return _failure_cache.get(_cache_key(p_vec))
+
+
+def _failure_put(p_vec: dict[int, int], budget: float) -> None:
+    with _cache_lock:
+        _load_disk_cache_locked()
+        k = _cache_key(p_vec)
+        if k in _realizability_cache:
+            return   # a definitive verdict exists — failure record is moot
+        _failure_cache[k] = max(budget, _failure_cache.get(k, 0.0))
+    key = ",".join(f"{a}:{b}" for a, b in _cache_key(p_vec))
+
+    def _entry(existing):
+        if existing and existing.get("verdict") in ("realizable", "non_realizable"):
+            return None
+        if existing and float(existing.get("timeout_used", 0.0)) >= budget:
+            return None
+        return {"verdict": "construction_failed", "count": 0,
+                "timeout_used": round(budget, 1)}
+
+    _disk_merge(key, _entry)
 
 
 def _plantri_spec(p_vec: dict[int, int]) -> str:
@@ -181,6 +271,13 @@ def _plantri_decide(
 ) -> tuple[Optional[nx.Graph], str]:
     """Exhaustively decide realizability of `target` with plantri.
 
+    Single phase with early exit: every split generates ASCII directly, so the
+    first output line from ANY split is already a witness — realizable is
+    decided in milliseconds instead of waiting for a full count. All splits
+    completing with zero output is a proof by exhaustion (nonrealizable);
+    that verdict is only trusted if every split exited cleanly AND printed
+    its "triangulations generated/written" summary.
+
     Returns (graph, "realizable") | (None, "nonrealizable") |
             (None, "timeout") | (None, "unavailable").
     """
@@ -189,7 +286,7 @@ def _plantri_decide(
     if not _PLANTRI_BIN.exists() or n < 4 or n > f2_max or max(target) > n - 1:
         return None, "unavailable"
     if jobs is None:
-        jobs = min(16, os.cpu_count() or 4)
+        jobs = int(os.environ.get("PLANTRI_JOBS", "0")) or min(16, os.cpu_count() or 4)
 
     cached = _cache_get(target)
     if cached == "nonrealizable":
@@ -198,57 +295,96 @@ def _plantri_decide(
     spec = _plantri_spec(target)
     deadline = time.monotonic() + timeout
 
-    # Phase 1: count in parallel splits
+    # stdbuf -oL forces line-buffered stdout: without it a rare witness (e.g. a
+    # p-vector with only 1-2 realizations) sits in plantri's 4-8KB block buffer
+    # until its split completes, defeating the early exit.
+    prefix = ["stdbuf", "-oL"] if shutil.which("stdbuf") else []
     procs = [subprocess.Popen(
-        [str(_PLANTRI_BIN), spec, str(n), f"{r}/{jobs}", "-u"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+        prefix + [str(_PLANTRI_BIN), spec, str(n), f"{r}/{jobs}", "-a"],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
     ) for r in range(jobs)]
-    counts: list[int] = []
-    try:
-        for p in procs:
-            remaining = max(0.5, deadline - time.monotonic())
-            _, err = p.communicate(timeout=remaining)
-            for ln in err.splitlines():
-                if "triangulations generated" in ln or "triangulations written" in ln:
-                    counts.append(int(ln.split()[0]))
-                    break
-            else:
-                raise RuntimeError("plantri output not recognised")
-    except (subprocess.TimeoutExpired, RuntimeError, Exception):
+
+    witness: list[str] = []
+    wlock = threading.Lock()
+
+    def _read_first(p):
+        try:
+            ln = p.stdout.readline()
+        except Exception:
+            return
+        if ln.strip():
+            with wlock:
+                if not witness:
+                    witness.append(ln)
+
+    readers = [threading.Thread(target=_read_first, args=(p,), daemon=True)
+               for p in procs]
+    for t in readers:
+        t.start()
+
+    timed_out = False
+    while True:
+        with wlock:
+            if witness:
+                break
+        if all(p.poll() is not None for p in procs):
+            break
+        if time.monotonic() >= deadline:
+            timed_out = True
+            break
+        time.sleep(0.05)
+
+    with wlock:
+        kill_now = bool(witness) or timed_out
+    if kill_now:
         for p in procs:
             try:
                 p.kill()
             except Exception:
                 pass
-        return None, "timeout"
+    for t in readers:
+        t.join(timeout=2.0)
 
-    if sum(counts) == 0:
-        _cache_put(target, "nonrealizable")
-        return None, "nonrealizable"
-
-    # Phase 2: regenerate only the first nonzero split with ASCII output
-    r_hit = next(i for i, c in enumerate(counts) if c > 0)
-    with tempfile.NamedTemporaryFile(mode="r", suffix=".txt", delete=False) as tf:
-        out_path = tf.name
-    try:
-        subprocess.run(
-            [str(_PLANTRI_BIN), spec, str(n), f"{r_hit}/{jobs}", "-a", out_path],
-            capture_output=True, text=True,
-            timeout=max(5.0, deadline - time.monotonic() + timeout),
-        )
-        with open(out_path) as fh:
-            line = fh.readline()
-    finally:
+    all_exited_clean = not kill_now   # every split ran to completion on its own
+    errs: list[str] = []
+    for p in procs:
+        err = ""
+        if all_exited_clean:
+            try:
+                err = p.stderr.read() or ""
+            except Exception:
+                err = ""
+        errs.append(err)
+        for stream in (p.stdout, p.stderr):
+            try:
+                stream.close()
+            except Exception:
+                pass
         try:
-            os.unlink(out_path)
-        except OSError:
+            p.wait(timeout=5)
+        except Exception:
             pass
-    if not line.strip():
+
+    with wlock:
+        line = witness[0] if witness else ""
+    if line:
+        G = _triangulation_dual(_parse_plantri_ascii(line))
+        if G is None:
+            return None, "timeout"
+        _cache_put(target, "realizable")
+        return G, "realizable"
+    if timed_out:
         return None, "timeout"
-    G = _triangulation_dual(_parse_plantri_ascii(line))
-    if G is None:
-        return None, "timeout"
-    return G, "realizable"
+
+    # Zero output from all splits — accept exhaustion only on clean summaries.
+    for p, err in zip(procs, errs):
+        if p.returncode != 0 or not any(
+            "triangulations generated" in ln or "triangulations written" in ln
+            for ln in err.splitlines()
+        ):
+            return None, "timeout"
+    _cache_put(target, "nonrealizable")
+    return None, "nonrealizable"
 
 
 # ── Dual-space perturbation search ────────────────────────────────────────────
@@ -436,7 +572,8 @@ def _build_known(p_vec: dict[int, int]) -> Optional[nx.Graph]:
             if name == "tetrahedron":
                 return nx.complete_graph(4)
             if name == "triangular_prism":
-                return nx.triangular_prism_graph()
+                # networkx has no triangular_prism_graph; CL_3 is the 3-prism
+                return nx.circular_ladder_graph(3)
             if name == "cube":
                 return nx.hypercube_graph(3)   # 3-cube = Q3
             if name == "dodecahedron":
@@ -450,9 +587,9 @@ def _build_prism(p_vec: dict[int, int]) -> Optional[nx.Graph]:
     """n-gonal prism: p4=n, p_n=2 for n ≥ 3."""
     nonzero = {k: v for k, v in p_vec.items() if v > 0}
     if set(nonzero.keys()) == {4, 3}:
-        # Triangular prism special case
+        # Triangular prism special case (CL_3 — networkx has no prism builder)
         if nonzero[4] == 3 and nonzero[3] == 2:
-            return nx.triangular_prism_graph()
+            return nx.circular_ladder_graph(3)
     if len(nonzero) != 2:
         return None
     sizes = list(nonzero.keys())
@@ -577,6 +714,18 @@ class PolytopeConstructor:
         if not _GC_OK:
             return None, "graphcalc_unavailable"
 
+        # Cached permanent verdict / cached full-stack failure.
+        # A "construction_failed" record means a previous run already exhausted
+        # every strategy below at >= this budget — rerunning at an equal or
+        # smaller budget is deterministic re-failure, so skip it. This never
+        # skips a definitive verdict path: nonrealizable is checked first, and
+        # a bigger budget than the recorded one still runs everything.
+        if _cache_get(nonzero) == "nonrealizable":
+            return None, "plantri_nonrealizable"
+        failed_at = _failure_get(nonzero)
+        if failed_at is not None and timeout <= failed_at:
+            return None, f"cached_construction_failure_at_{failed_at:.0f}s"
+
         # Strategy 3: plantri exhaustive decision (exact, both directions).
         # If it completes, the answer is definitive: a witness graph, or a
         # proof by exhaustion that the p-vector is NON-realizable (the verdict
@@ -605,6 +754,7 @@ class PolytopeConstructor:
             return G, "dual_perturbation_search"
 
         if not chop_reachable:
+            _failure_put(nonzero, timeout)
             return None, "construction_failed_within_timeout"
 
         # Strategy 4: A* from dodecahedron (best for barrel / fullerene families)
@@ -638,4 +788,5 @@ class PolytopeConstructor:
             if G is not None:
                 return G, f"astar_from_{kmax}gon_prism"
 
+        _failure_put(nonzero, timeout)
         return None, "construction_failed_within_timeout"

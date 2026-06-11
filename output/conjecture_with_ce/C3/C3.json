@@ -1,0 +1,171 @@
+{
+  "conjecture_id": "C3",
+  "conjecture_latex": "if (((is_simple)  and  (f_2>=_13))  and  (sum_pk_k>=7 >= 1)), then p6 >= (-2*sum_pk_after_p6 + 4)",
+  "hypotheses": [
+    "((is_simple)",
+    "(f_2>=_13))",
+    "(sum_pk_k>=7 >= 1)"
+  ],
+  "conclusion": "p6 >= (-2*sum_pk_after_p6 + 4)",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      0,
+      2,
+      9,
+      1,
+      1
+    ],
+    "p3": 0,
+    "p4": 2,
+    "p5": 9,
+    "p6": 1,
+    "p7": 1,
+    "f2": 13,
+    "num_vertices": 22,
+    "num_edges": 33,
+    "witness_graph": {
+      "format": "edge_list",
+      "num_vertices": 22,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          7
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          9
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          15
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          17
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          8,
+          20
+        ],
+        [
+          9,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          10,
+          20
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          12,
+          19
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          13,
+          21
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          16,
+          17
+        ],
+        [
+          16,
+          21
+        ],
+        [
+          17,
+          18
+        ],
+        [
+          18,
+          19
+        ],
+        [
+          18,
+          21
+        ],
+        [
+          19,
+          20
+        ]
+      ]
+    }
+  },
+  "found_by": "boundary_enumeration",
+  "found_at_round": 3,
+  "violation_detail": "p6=1.0 < RHS=2.0000 (violation)",
+  "found_at": "2026-06-11T11:16:20.882450+00:00",
+  "other_candidates_not_checked": []
+}
