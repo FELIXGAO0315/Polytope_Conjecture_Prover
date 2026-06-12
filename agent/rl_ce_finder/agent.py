@@ -60,9 +60,17 @@ def chop_y_insert_triangle(G, v):
     return G2, [a, b, c], neighbors
 
 
-def compute_graph_properties(G):
+def compute_graph_properties(G, assume_polytope: bool = False):
+    # assume_polytope skips the expensive planarity + 3-connectivity re-check
+    # (node_connectivity runs V max-flows). Sound because chop_y_insert_triangle
+    # is vertex truncation, which maps simple 3-polytopes to simple 3-polytopes:
+    # callers pass True only when the pre-chop graph was already verified.
+    is_cubic = all(d == 3 for _, d in G.degree())
     try:
-        is_polytope = gc.simple_polytope_graph(G) if G.number_of_nodes() >= 4 and all(d == 3 for _, d in G.degree()) else False
+        if assume_polytope and is_cubic and G.number_of_nodes() >= 4:
+            is_polytope = True
+        else:
+            is_polytope = gc.simple_polytope_graph(G) if G.number_of_nodes() >= 4 and is_cubic else False
         p_vec = gc.p_vector(G) if is_polytope else [G.number_of_nodes(), 0, 0, 0]
     except Exception:
         is_polytope = False
@@ -70,7 +78,7 @@ def compute_graph_properties(G):
     return {
         'num_vertices': G.number_of_nodes(),
         'num_edges': G.number_of_edges(),
-        'is_cubic': all(d == 3 for _, d in G.degree()),
+        'is_cubic': is_cubic,
         'is_polytope': is_polytope,
         'p_vector': p_vec,
         'p3': p_vec[0] if len(p_vec) > 0 else 0,
@@ -108,6 +116,10 @@ class AdaptiveNodeFeatureExtractor:
         self.gap_history = defaultdict(lambda: deque(maxlen=history_window))
         self.creation_step: Dict[int, int] = {}
         self.current_step = 0
+        # Optional O(1) ring-length source (env's incremental face structure).
+        # When set, ring lengths are the exact sizes of the node's three faces
+        # instead of BFS shortest-cycle approximations.
+        self.face_provider = None
 
     def reset(self):
         self.node_history.clear()
@@ -172,6 +184,10 @@ class AdaptiveNodeFeatureExtractor:
     def _three_prism_cycle_lengths(self, G: nx.Graph, node: int, neighbors: List[int]) -> Tuple[float, float, float]:
         if len(neighbors) < 3:
             return (0.0, 0.0, 0.0)
+        if self.face_provider is not None:
+            rings = self.face_provider(node, neighbors)
+            if rings is not None:
+                return rings
         lengths = []
         base_adj_list = set(G.neighbors(node))
         for i in range(3):
@@ -186,13 +202,31 @@ class AdaptiveNodeFeatureExtractor:
         return tuple(lengths[:3])
 
     def _shortest_path_avoiding(self, G: nx.Graph, src: int, dst: int, forbidden: int) -> Optional[List[int]]:
-        try:
-            H = G.copy()
-            if H.has_node(forbidden):
-                H.remove_node(forbidden)
-            return nx.shortest_path(H, src, dst)
-        except (nx.NetworkXNoPath, nx.NodeNotFound):
+        # BFS that skips `forbidden` in place — copying the graph per call
+        # dominated the whole RL step (measured 65s of a 147s profile).
+        if src == forbidden or dst == forbidden or src not in G or dst not in G:
             return None
+        if src == dst:
+            return [src]
+        adj = G.adj
+        visited = {src, forbidden}
+        parents = {src: None}
+        queue = deque([src])
+        while queue:
+            u = queue.popleft()
+            for w in adj[u]:
+                if w in visited:
+                    continue
+                parents[w] = u
+                if w == dst:
+                    path = [dst]
+                    while parents[path[-1]] is not None:
+                        path.append(parents[path[-1]])
+                    path.reverse()
+                    return path
+                visited.add(w)
+                queue.append(w)
+        return None
 
 
 class FiLMGraphLayer(nn.Module):
@@ -343,7 +377,116 @@ class AdaptiveCubicGraphEnv:
         self.props = compute_graph_properties(self.G)
         self._update_props()
         self.node_extractor.bootstrap_from_graph(self.G, step=0)
+        self._init_faces()
+        self.node_extractor.face_provider = (
+            self._ring_lengths_from_faces if self._faces_ok else None)
         return self._get_observation()
+
+    # ── incremental face structure ──────────────────────────────────────────
+    # chop_y_insert_triangle is vertex truncation: it adds one triangle face
+    # and grows each of the chopped vertex's three faces by one edge. Tracking
+    # faces incrementally makes p_vector and per-node ring lengths O(1) per
+    # step, replacing planarity checks + face retracing on the whole graph.
+
+    def _init_faces(self) -> None:
+        self._faces_ok = False
+        if not self.props.get('is_polytope'):
+            return
+        try:
+            ok, emb = nx.check_planarity(self.G)
+            if not ok:
+                return
+            visited: set = set()
+            self._face_vertices: Dict[int, set] = {}
+            self._face_sizes: Dict[int, int] = {}
+            self._vertex_faces: Dict[int, set] = {n: set() for n in self.G.nodes()}
+            self._p_counts: Dict[int, int] = {}
+            fid = 0
+            for u in self.G.nodes():
+                for v in self.G.neighbors(u):
+                    if (u, v) in visited:
+                        continue
+                    face = emb.traverse_face(u, v, mark_half_edges=visited)
+                    self._face_vertices[fid] = set(face)
+                    self._face_sizes[fid] = len(face)
+                    for n in face:
+                        self._vertex_faces[n].add(fid)
+                    self._p_counts[len(face)] = self._p_counts.get(len(face), 0) + 1
+                    fid += 1
+            self._next_face_id = fid
+            self._faces_ok = True
+        except Exception:
+            self._faces_ok = False
+
+    def _update_faces_after_chop(self, v: int, new_nodes: List[int], neighbors: List[int]) -> None:
+        if not self._faces_ok:
+            return
+        try:
+            attach = dict(zip(neighbors, new_nodes))
+            v_faces = self._vertex_faces.pop(v)
+            if len(v_faces) != 3:
+                raise ValueError("vertex not in exactly 3 faces")
+            for f in v_faces:
+                verts = self._face_vertices[f]
+                verts.discard(v)
+                present = [n for n in neighbors if n in verts]
+                if len(present) != 2:
+                    raise ValueError("face does not span exactly 2 neighbors")
+                for n in present:
+                    x = attach[n]
+                    verts.add(x)
+                    self._vertex_faces.setdefault(x, set()).add(f)
+                old = self._face_sizes[f]
+                self._face_sizes[f] = old + 1
+                self._p_counts[old] -= 1
+                self._p_counts[old + 1] = self._p_counts.get(old + 1, 0) + 1
+            t = self._next_face_id
+            self._next_face_id += 1
+            self._face_vertices[t] = set(new_nodes)
+            self._face_sizes[t] = 3
+            for x in new_nodes:
+                self._vertex_faces.setdefault(x, set()).add(t)
+            self._p_counts[3] = self._p_counts.get(3, 0) + 1
+        except Exception:
+            # Structure corrupt — disable and let step() fall back to a full
+            # recompute; never silently produce a wrong p-vector.
+            self._faces_ok = False
+            self.node_extractor.face_provider = None
+
+    def _props_from_faces(self) -> dict:
+        pc = self._p_counts
+        max_k = max(k for k, c in pc.items() if c > 0)
+        p_vec = [pc.get(k, 0) for k in range(3, max_k + 1)]
+        return {
+            'num_vertices': self.G.number_of_nodes(),
+            'num_edges': self.G.number_of_edges(),
+            'is_cubic': True,
+            'is_polytope': True,
+            'p_vector': p_vec,
+            'p3': p_vec[0] if len(p_vec) > 0 else 0,
+            'p4': p_vec[1] if len(p_vec) > 1 else 0,
+            'p5': p_vec[2] if len(p_vec) > 2 else 0,
+            'p6': p_vec[3] if len(p_vec) > 3 else 0,
+            'sum_pk_after_p6': sum(p_vec[4:]) if len(p_vec) > 4 else 0,
+        }
+
+    def _ring_lengths_from_faces(self, node: int, neighbors: List[int]):
+        if not self._faces_ok:
+            return None
+        vf = self._vertex_faces.get(node)
+        if not vf or len(vf) != 3:
+            return None
+        out = []
+        for i in range(3):
+            u, w = neighbors[i], neighbors[(i + 1) % 3]
+            size = 0.0
+            for f in vf:
+                fv = self._face_vertices[f]
+                if u in fv and w in fv:
+                    size = float(self._face_sizes[f])
+                    break
+            out.append(size)
+        return tuple(out)
 
     def _update_props(self):
         rhs = evaluate_rhs(self.formula, self.props)
@@ -402,7 +545,12 @@ class AdaptiveCubicGraphEnv:
             try:
                 self.G, new_nodes, neighbors = chop_y_insert_triangle(self.G, target)
                 touched = list(new_nodes) + neighbors
-                self.props = compute_graph_properties(self.G)
+                self._update_faces_after_chop(target, new_nodes, neighbors)
+                if self._faces_ok:
+                    self.props = self._props_from_faces()
+                else:
+                    self.props = compute_graph_properties(
+                        self.G, assume_polytope=bool(old_props.get('is_polytope')))
                 self._update_props()
                 gap_delta = float(self.props.get('gap', 0)) - float(old_props.get('gap', 0))
                 self.node_extractor.record_operation(touched, step=self.step_count, gap_delta=gap_delta)
@@ -433,7 +581,6 @@ class AdaptiveCubicGraphEnv:
             'satisfies_condition': self.satisfies_condition,
             'satisfies_conjecture': self.satisfies_conjecture,
             'is_counterexample': self.is_counterexample,
-            'graph': nx.node_link_data(self.G, edges="links"),
             'operations': self.operation_history,
             'stopped': (action_idx == len(nodes)),
             'step': self.step_count,
@@ -557,6 +704,52 @@ class PPOAgent:
         self.buffer['log_probs'].append(log_prob)
         self.buffer['dones'].append(done)
 
+    def _batched_logits(self, obs_list):
+        """Padded batch forward — same math as the single-sample network
+        forward (verified to ~1e-5), but one bmm pass instead of B passes.
+        Row b's valid logits are [node 0..N_b-1, stop at column N_b]; all
+        other columns are -1e10 so they vanish under softmax."""
+        net = self.network
+        B = len(obs_list)
+        sizes = [int(o['num_actions']) - 1 for o in obs_list]
+        N = max(sizes)
+        feat_dim = obs_list[0]['node_features'].shape[1]
+        x = torch.zeros(B, N, feat_dim)
+        adj = torch.zeros(B, N, N)
+        mask = torch.zeros(B, N)
+        for b, o in enumerate(obs_list):
+            n = sizes[b]
+            x[b, :n] = o['node_features']
+            adj[b, :n, :n] = o['adj_matrix']
+            mask[b, :n] = 1.0
+        glob = torch.stack([o['global_features'] for o in obs_list])
+        coeff = torch.stack([o['coefficients'] for o in obs_list])
+        x, adj, mask = x.to(device), adj.to(device), mask.to(device)
+        cond = torch.cat([glob, coeff], dim=-1).to(device)
+
+        h = F.relu(net.input_linear(x))
+        for layer, film in zip(net.layers, net.film_generator):
+            gamma_beta = film(cond)
+            gamma, beta = gamma_beta.chunk(2, dim=-1)
+            gamma = torch.sigmoid(gamma).unsqueeze(1)
+            beta = beta.unsqueeze(1)
+            support = layer.linear(h)
+            norm = adj / adj.sum(dim=-1, keepdim=True).clamp(min=1)
+            agg = torch.bmm(norm, support)
+            h = F.relu(layer.norm(agg * gamma + beta + support))
+
+        node_logits = net.node_head(h).squeeze(-1)                      # (B, N)
+        denom = mask.sum(dim=1, keepdim=True).clamp(min=1)
+        graph_repr = (h * mask.unsqueeze(-1)).sum(dim=1) / denom
+        stop_logit = net.stop_head(torch.cat([graph_repr, cond], dim=-1)).squeeze(-1)  # (B,)
+
+        out = node_logits.new_full((B, N + 1), -1e10)
+        out[:, :N] = torch.where(mask.bool(), node_logits,
+                                 node_logits.new_full(node_logits.shape, -1e10))
+        idx = torch.tensor(sizes, device=out.device, dtype=torch.long).unsqueeze(1)
+        out = out.scatter(1, idx, stop_logit.unsqueeze(1))
+        return out
+
     def update(self):
         if len(self.buffer['rewards']) < self.update_steps:
             return
@@ -581,30 +774,25 @@ class PPOAgent:
         for _ in range(self.k_epochs):
             indices = torch.randperm(self.update_steps)
             for start in range(0, self.update_steps, self.batch_size):
-                batch_idx = indices[start:start + self.batch_size]
-                batch_loss = 0.0
-                for idx in batch_idx:
-                    ob = obs_batch[idx]
-                    logits = self.network(
-                        ob['node_features'].to(device),
-                        ob['adj_matrix'].to(device),
-                        ob['global_features'].to(device),
-                        ob['coefficients'].to(device),
-                    )
-                    num_actions = ob['num_actions']
-                    if logits.shape[0] != num_actions:
-                        logits = torch.cat([logits, logits.new_zeros(num_actions - logits.shape[0])], dim=0)[:num_actions]
-                    masked_logits = logits.clone()
-                    masked_logits[ob['valid_mask'].to(device) == 0] = -1e10
-                    probs = F.softmax(masked_logits, dim=-1)
-                    dist = Categorical(probs)
-                    new_log_prob = dist.log_prob(actions[idx])
-                    ratio = torch.exp(new_log_prob - old_log_probs[idx])
-                    surr1 = ratio * advantages[idx]
-                    surr2 = torch.clamp(ratio, 1 - self.eps_clip, 1 + self.eps_clip) * advantages[idx]
+                batch_idx = indices[start:start + self.batch_size].tolist()
+                # Minibatch membership stays random (identical gradients to the
+                # per-sample loop); grouping by size inside it only limits how
+                # far small graphs get padded toward the largest one.
+                batch_idx.sort(key=lambda i: obs_batch[i]['num_actions'])
+                loss_terms = []
+                for gs in range(0, len(batch_idx), 16):
+                    grp = batch_idx[gs:gs + 16]
+                    grp_t = torch.tensor(grp, dtype=torch.long, device=device)
+                    logits = self._batched_logits([obs_batch[i] for i in grp])
+                    dist = Categorical(logits=logits)
+                    new_log_probs = dist.log_prob(actions[grp_t])
+                    ratio = torch.exp(new_log_probs - old_log_probs[grp_t])
+                    adv = advantages[grp_t]
+                    surr1 = ratio * adv
+                    surr2 = torch.clamp(ratio, 1 - self.eps_clip, 1 + self.eps_clip) * adv
                     entropy = dist.entropy()
-                    loss = -torch.min(surr1, surr2) - self.entropy_coef * entropy
-                    batch_loss += loss
+                    loss_terms.append((-torch.min(surr1, surr2) - self.entropy_coef * entropy).sum())
+                batch_loss = torch.stack(loss_terms).sum()
                 self.optimizer.zero_grad()
                 batch_loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.network.parameters(), 0.5)
@@ -1764,7 +1952,9 @@ if __name__ == "__main__":
             if args.no_end_on_caps:
                 cmd += ["--no-end-on-caps"]
             print(f"[parallel] Launching iris-sort={iris_sort_val} ...")
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            from agent.procutil import set_pdeathsig
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    text=True, preexec_fn=set_pdeathsig)
             out_lines = []
             for line in proc.stdout:
                 out_lines.append(line)

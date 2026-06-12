@@ -21,6 +21,18 @@ from typing import Optional
 from agent.llm_ce_finder.prompts.llm_ce_finder import LLM_CE_SYSTEM, LLM_CE_ROUND_PROMPT
 from agent.orchestrator.tools.pvec_eval import is_counterexample
 
+_LLM_CE_TIMEOUT = int(os.environ.get("LLM_CE_TIMEOUT", "180"))
+# Early-stop futility threshold: consecutive candidates that pass tiers 1-3
+# (arithmetically valid violations) but fail Tier-4 construction. When the
+# wall is realization rather than generation, more LLM rounds cannot help —
+# the orchestrator's Stage-2 re-entry (fresh seeds, doubled budget) is the
+# designated fallback. A Tier-4 success (witness built) resets the counter.
+_LLM_CE_TIER4_FUTILE = int(os.environ.get("LLM_CE_TIER4_FUTILE", "12"))
+# Circuit breaker: consecutive failed CLI calls (exit != 0 / timeout) before
+# the LLM track declares itself dead for this conjecture. A dead CLI (auth,
+# usage limit, session conflicts) otherwise burns every remaining round.
+_LLM_CE_CALL_BREAKER = int(os.environ.get("LLM_CE_CALL_BREAKER", "3"))
+
 
 # ── JSON extraction ───────────────────────────────────────────────────────────
 
@@ -105,6 +117,7 @@ class LLMCEFinder:
                 max_workers=self._check_parallel,
                 mp_context=_mp.get_context("spawn"),
                 initializer=worker_setpgrp,
+                initargs=(os.getpid(),),
             )
         n_par = min(len(cands), self._check_parallel)
         plantri_jobs = max(1, (os.cpu_count() or 4) // n_par)
@@ -140,28 +153,62 @@ class LLMCEFinder:
         from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
         checker = self.check_agent or PVectorCheckAgent(client=self.client)
 
+        # Preflight: a dead CLI (usage limit, auth, network) makes every round
+        # burn its full timeout before the call breaker fires (3 × 360s). One
+        # tiny call decides within a minute whether the track is worth running.
+        preflight_timeout = int(os.environ.get("LLM_CE_PREFLIGHT_TIMEOUT", "60"))
+        try:
+            self.client._call("Reply with the single word OK.",
+                              model=self.model, timeout=preflight_timeout,
+                              stop_event=self.stop_event, max_attempts=1)
+        except Exception as exc:
+            print(f"[LLM ce finding] disabled — CLI preflight failed ({exc}); "
+                  f"RL/Hopper/constructor tracks continue")
+            return None
+
         failed: list[dict] = []
         all_tried: list[dict] = []
         tried_keys: set[frozenset] = set()
+        tier4_deaths = 0  # consecutive tier-4-only failures (futility signal)
+        consec_call_errors = 0  # consecutive CLI call failures (breaker)
+
+        # Progress is summarised once every 3 rounds (window aggregation)
+        window_new = 0
+        window_dupes = 0
+        window_violations = 0
+        window_best_passed = -1
+        window_best_tier: int | None = None
 
         for rnd in range(1, self.num_rounds + 1):
             if self.stop_event.is_set():
-                print("[LLM ce finding] Stopped and waiting ce candidate to be checked")
+                print("[LLM ce finding] stopped — CE search settled by another track")
                 return None
 
             try:
                 prompt = self._build_prompt(rnd, failed, all_tried)
                 full_prompt = f"[System]\n{LLM_CE_SYSTEM}\n\n[User]\n{prompt}"
-                text = self.client._call(full_prompt, model=self.model, timeout=300,
-                                         stop_event=self.stop_event)
+                # Single attempt per round (failures just move to the next
+                # round). The prompt demands silent verification + a ≤3-sentence
+                # reasoning field, so a round is normally ~80s; the 180s default
+                # is headroom for API latency spikes, not the expected cost.
+                text = self.client._call(full_prompt, model=self.model,
+                                         timeout=_LLM_CE_TIMEOUT,
+                                         stop_event=self.stop_event, max_attempts=1)
             except Exception as exc:
+                consec_call_errors += 1
                 print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: skipping ({exc})")
+                if consec_call_errors >= _LLM_CE_CALL_BREAKER:
+                    print(f"[LLM ce finding] {consec_call_errors} consecutive CLI "
+                          f"failures — LLM track disabled for this conjecture "
+                          f"(RL/Hopper continue; Stage 2 re-entry still runs)")
+                    return None
                 continue
 
             if self.stop_event.is_set():
-                print("[LLM ce finding] Stopped and waiting ce candidate to be checked")
+                print("[LLM ce finding] stopped — CE search settled by another track")
                 return None
 
+            consec_call_errors = 0
             candidates = self._parse_candidates(text)
             skipped_dupes = 0
             best_passed_count = -1   # max checks passed by any violating candidate
@@ -211,27 +258,53 @@ class LLMCEFinder:
                         None,
                     )
 
+                # Futility tracking: tiers 1-3 passed but the constructor
+                # built nothing → the wall is realization, not generation.
+                realiz = report.results[3] if len(report.results) > 3 else None
+                if realiz is not None and all(r.passed for r in report.results[:3]):
+                    if realiz.passed:
+                        tier4_deaths = 0
+                    elif realiz.critical:
+                        tier4_deaths += 1
+
                 failed.append({
                     "p_vec": cand,
                     "reason": f"realizability unproven: {report.failure_summary()}",
                 })
 
-            dupe_note = f", {skipped_dupes} dupe(s) skipped" if skipped_dupes else ""
-            new_count = len(candidates) - skipped_dupes
-            if violations_this_round > 0:
-                if best_fail_tier is not None and best_passed_count > 0:
-                    check_note = (
-                        f"tier1-{best_fail_tier - 1} passed, tier {best_fail_tier} didn't"
-                        if best_fail_tier > 1
-                        else f"tier {best_fail_tier} didn't pass"
-                    )
+            if tier4_deaths >= _LLM_CE_TIER4_FUTILE:
+                print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: early stop — "
+                      f"{tier4_deaths} consecutive candidate(s) passed tiers 1-3 but "
+                      f"failed Tier-4 construction; realization (not generation) is "
+                      f"the bottleneck — deferring to Stage 2 re-entry")
+                return None
+
+            window_new += len(candidates) - skipped_dupes
+            window_dupes += skipped_dupes
+            window_violations += violations_this_round
+            if best_passed_count > window_best_passed:
+                window_best_passed = best_passed_count
+                window_best_tier = best_fail_tier
+
+            if rnd % 3 == 0 or rnd == self.num_rounds:
+                dupe_note = f", {window_dupes} dupe(s) skipped" if window_dupes else ""
+                if window_violations > 0:
+                    if window_best_tier is not None and window_best_passed > 0:
+                        check_note = (
+                            f"tier1-{window_best_tier - 1} passed, tier {window_best_tier} didn't"
+                            if window_best_tier > 1
+                            else f"tier {window_best_tier} didn't pass"
+                        )
+                    else:
+                        check_note = "0 of 4 checks passed"
+                    print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: "
+                          f"{window_new} candidate(s), 0 valid, {check_note}{dupe_note} — next round")
                 else:
-                    check_note = "0 of 4 checks passed"
-                print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: "
-                      f"{new_count} candidate(s), 0 valid, {check_note}{dupe_note} — next round")
-            else:
-                print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: "
-                      f"{new_count} candidate(s), 0 valid{dupe_note} — next round")
+                    print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: "
+                          f"{window_new} candidate(s), 0 valid{dupe_note} — next round")
+                window_new = window_dupes = window_violations = 0
+                window_best_passed = -1
+                window_best_tier = None
 
             failed = failed[-10:]
             all_tried = all_tried[-50:]

@@ -15,6 +15,15 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+from agent.procutil import set_pdeathsig
+
+
+def _cli_child_setup() -> None:
+    # Own session for killpg-based timeout/stop teardown + parent-death signal
+    # so an orchestrator killed mid-call cannot leave the CLI running.
+    os.setsid()
+    set_pdeathsig()
+
 # Global semaphore: limit concurrent `claude` CLI subprocesses across ALL threads.
 # Running too many simultaneously causes session-file conflicts → "claude CLI exited 1".
 # 4 concurrent calls gives meaningful parallelism without overloading the CLI.
@@ -124,13 +133,14 @@ class ClaudeSDKClient:
 
     def _call(self, prompt: str, model: str | None = None, timeout: int | None = None,
               fast_model: str | None = None, system: str | None = None,
-              stop_event: threading.Event | None = None) -> str:
+              stop_event: threading.Event | None = None, max_attempts: int = 3) -> str:
         """Call the claude CLI binary.
 
         timeout defaults to the CLAUDE_TIMEOUT env var (default 240s).
         Pass timeout explicitly to override per-call.
         fast_model: if provided, used for attempt 0 only; attempts 1+ use the main model.
         stop_event: if set, kills the subprocess immediately so the call can return fast.
+        max_attempts: retry budget; exploratory callers can pass 1 to fail fast.
         """
         if timeout is None:
             timeout = int(os.environ.get("CLAUDE_TIMEOUT", "150"))
@@ -151,7 +161,8 @@ class ClaudeSDKClient:
 
         last_exc: Exception | None = None
         stdout, stderr = "", ""
-        for attempt in range(3):
+        max_attempts = max(1, max_attempts)
+        for attempt in range(max_attempts):
             # Abort immediately if stop_event was already set before we start
             if stop_event is not None and stop_event.is_set():
                 raise RuntimeError("call aborted: stop_event set")
@@ -180,7 +191,7 @@ class ClaudeSDKClient:
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         text=True,
-                        preexec_fn=os.setsid,
+                        preexec_fn=_cli_child_setup,
                     )
 
                     # Watchdog: if stop_event fires, kill the subprocess immediately.
@@ -219,7 +230,7 @@ class ClaudeSDKClient:
                     except subprocess.TimeoutExpired:
                         pass
                     last_exc = RuntimeError(f"claude CLI timed out after {attempt_timeout}s")
-                    if attempt < 2:
+                    if attempt < max_attempts - 1:
                         time.sleep(10 * (attempt + 1) + random.uniform(0, 5))
                         continue
                     raise last_exc
@@ -229,11 +240,13 @@ class ClaudeSDKClient:
                     raise RuntimeError("call aborted: stop_event set")
 
                 # Retry on non-zero exit code (transient errors: rate limit, OOM, etc.)
+                # Error details often arrive as JSON on stdout, not stderr.
                 if proc.returncode != 0:
                     last_exc = RuntimeError(
-                        f"claude CLI exited {proc.returncode}:\n{stderr[:500]}"
+                        f"claude CLI exited {proc.returncode}:\n"
+                        f"{(stderr.strip() or stdout.strip())[:500]}"
                     )
-                    if attempt < 2:
+                    if attempt < max_attempts - 1:
                         time.sleep(10 * (attempt + 1) + random.uniform(0, 5))
                         continue
                     raise last_exc
@@ -241,7 +254,8 @@ class ClaudeSDKClient:
 
         if proc.returncode != 0:
             raise RuntimeError(
-                f"claude CLI exited {proc.returncode}:\n{stderr[:500]}"
+                f"claude CLI exited {proc.returncode}:\n"
+                f"{(stderr.strip() or stdout.strip())[:500]}"
             )
 
         try:

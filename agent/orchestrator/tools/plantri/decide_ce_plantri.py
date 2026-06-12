@@ -12,7 +12,7 @@ This is a decision procedure, not a heuristic. Verdicts are printed as they
 arrive.
 
 Usage:
-    python tools/plantri/decide_ce_plantri.py [--name auto_..._2] [--f2-max 24]
+    python agent/orchestrator/tools/plantri/decide_ce_plantri.py [--name auto_..._2] [--f2-max 24]
         [--timeout-per 3600] [--jobs 16]
 
 Candidates are processed cheapest-first (fewest low-degree dual vertices).
@@ -27,15 +27,36 @@ import sys
 import time
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+_PROJECT_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+from agent.procutil import set_pdeathsig  # noqa: E402
+
 PLANTRI_AD = Path(__file__).resolve().parent / "plantri_ad"
+PLANTRI_MF = Path(__file__).resolve().parent / "plantri_mf"
 
 
 def spec_for(p_vec: dict[int, int]) -> str:
     """plantri_ad -F switch string: exact count for every degree in support."""
     return "".join(f"F{k}_{v}^{v}" for k, v in sorted(p_vec.items()))
+
+
+def cmd_for(p_vec: dict[int, int]) -> list[str]:
+    """Generator command prefix (binary + degree-spec switches) for p_vec.
+
+    Dual vertex degrees only grow during plantri generation, so a p-vector
+    whose support is all >= 5 is exactly the min-degree-5 triangulation class:
+    stock plantri's dedicated -m5 generator walks a tree orders of magnitude
+    smaller than the pruned min-deg-3 tree plantri_ad must use (measured
+    ~1000x on f2=27 single-face-heavy candidates). plantri_mf adds a pure
+    leaf filter (count_multiset.c plugin, no tree modification), so its
+    exhaustiveness equals unmodified plantri. Candidates with degree-3/4
+    support fall back to plantri_ad's pruned generator.
+    """
+    if min(p_vec) >= 5 and PLANTRI_MF.exists():
+        spec = ",".join(f"{k}_{v}" for k, v in sorted(p_vec.items()))
+        return [str(PLANTRI_MF), "-m5", f"-D{spec}"]
+    return [str(PLANTRI_AD), "-" + spec_for(p_vec)]
 
 
 def _kill_all(procs) -> None:
@@ -55,7 +76,7 @@ def decide(
     `stop_event` (threading.Event, optional) aborts the decision early —
     set by the orchestrator to kill sibling decisions once a CE is found."""
     n = sum(p_vec.values())
-    switch = "-" + spec_for(p_vec)
+    cmd = cmd_for(p_vec)
     t0 = time.time()
     procs = []
     try:
@@ -63,8 +84,9 @@ def decide(
         # still kill the processes already started
         for r in range(jobs):
             procs.append(subprocess.Popen(
-                [str(PLANTRI_AD), switch, str(n), f"{r}/{jobs}", "-u"],
+                [*cmd, str(n), f"{r}/{jobs}", "-u"],
                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+                preexec_fn=set_pdeathsig,
             ))
         # poll loop so we can honor both the timeout and the stop_event
         while any(p.poll() is None for p in procs):

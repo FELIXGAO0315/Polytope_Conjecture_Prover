@@ -2,13 +2,15 @@
 """
 agent/orchestrator.py — Main pipeline orchestrator.
 
-Given a conjecture name, runs four stages:
+Given a conjecture name, runs three stages:
   Stage 1: p-vector lattice walk (fast, no API — samples the DS lattice)
-  Stage 2: boundary enumeration (no API — exhausts the lattice within bounds,
-           then tries to realize the most constructible candidates)
-  Stage 3: LLM track (default 15 rounds) + RL track (600 episodes) + Hopper,
-           all in parallel
-  Stage 4: Lean prover (gated by the Inventory-entailment pre-check, which
+  Stage 2: unified CE search, led by PlantriCEFinder (agent/plantri_ce_finder):
+           its exhaustive screen runs first (no API — analytic constructions,
+           then plantri exhaustion; verdicts are final and cached), then four
+           parallel tracks on whatever the screen left undecided: LLM (default
+           15 rounds) + RL (600 episodes) + Hopper + the finder's constructor
+           double check (one stochastic build attempt per survivor)
+  Stage 3: Lean prover (gated by the Inventory-entailment pre-check, which
            also runs the automatic plantri decision of any countermodels)
 
 If any stage finds a CE that passes validation:
@@ -16,7 +18,7 @@ If any stage finds a CE that passes validation:
   → output/conjecture_with_ce/{Cx}/{Cx}_witness.png   (planar drawing of the
     verified witness graph, rendered automatically)
 
-If no CE is found after stages 1-3 exhaust:
+If no CE is found after stages 1-2 exhaust:
   → ProverAgent formalizes the conjecture
   → output/conjecture_without_ce/{name}.lean
 
@@ -43,6 +45,7 @@ from typing import Optional
 
 from agent.config import Config
 from agent.claude_sdk import ClaudeSDKClient
+from agent.procutil import set_pdeathsig
 from agent.conjectures import load_conjectures, ConjectureSpec
 from agent.orchestrator.tools.conjecture_parser import ConjectureParser, ParsedConjecture
 from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
@@ -59,6 +62,7 @@ from agent.orchestrator.tools.pvec_eval import (
     is_counterexample,
 )
 from agent.llm_ce_finder.agent import LLMCEFinder
+from agent.plantri_ce_finder.agent import PlantriCEFinder
 
 try:
     from agent.rl_ce_finder.agent import train_on_conjecture as _agents_train_on_conjecture
@@ -325,6 +329,7 @@ def _rl_finder_process(
     num_threads: int = 0,
 ) -> None:
     """Run RL CE finder in a separate process, push validated CE to result_queue."""
+    set_pdeathsig()  # daemon=True only covers clean parent exits; this covers SIGKILL/crash too
     if num_threads > 0:
         _set_compute_threads(num_threads)
 
@@ -414,6 +419,7 @@ def _hopper_finder_process(
     num_threads: int = 0,
 ) -> None:
     """Run Hopper CE finder in a separate process, push validated CE to result_queue."""
+    set_pdeathsig()
     if num_threads > 0:
         _set_compute_threads(num_threads)
 
@@ -495,7 +501,7 @@ def _write_ce_json(
         "num_edges": props.get("num_edges", 0),
     }
     # persist the verified witness graph — makes the CE independently
-    # re-checkable forever (render it with tools/draw_ce_witness.py)
+    # re-checkable forever (render it with agent/orchestrator/tools/draw_ce_witness.py)
     witness_edges = ce_info.get("witness_edges")
     if witness_edges:
         counterexample["witness_graph"] = {
@@ -520,7 +526,7 @@ def _write_ce_json(
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
     if witness_edges:
         try:
-            from tools.draw_ce_witness import render_witness
+            from agent.orchestrator.tools.draw_ce_witness import render_witness
             png = render_witness(out_path)
             print(f"[Output] CE witness rendering → {png}")
         except Exception as exc:
@@ -664,7 +670,8 @@ class Orchestrator:
         llm_rounds: int,
         label: str = "",
     ) -> Optional[dict]:
-        """Run parallel LLM + RL CE search. Returns validated CE info or None."""
+        """Stage 1 walk, then Stage 2 (exhaustive screen → four parallel
+        tracks). Returns validated CE info or None."""
         tag = f"[{conjecture.conjecture_id}{':' + label if label else ''}]"
 
         formula_str = conjecture_to_formula_string(conjecture)
@@ -688,17 +695,21 @@ class Orchestrator:
                 print(f"Counterexample validated at round {rnd}")
                 return pvec_result
         print("[Stage 1] Random walk exhausted — no realizable CE. "
-              "Proceeding to Stage 2 (exhaustive boundary enumeration)...")
+              "Proceeding to Stage 2 (unified CE search)...")
 
-        # ── Stage 2: systematic boundary enumeration (no API) ──────────────
-        enum_ce = self._run_enumeration_stage(conjecture)
+        # ── Stage 2: plantri exhaustive screen (no API, decisive) ─────────────
+        plantri_finder = PlantriCEFinder(conjecture, client=self.client)
+        enum_ce, survivors = plantri_finder.screen()
         if enum_ce:
             return enum_ce
 
-        # ── Stage 3: LLM + RL + Hopper in parallel ────────────────────────────
-        print(f"[Stage 3] RL episodes: {rl_episodes}  |  LLM rounds: {llm_rounds}  |  Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}")
+        # ── Stage 2: LLM + RL + Hopper + constructor tracks in parallel ───────
+        print(f"[Stage 2] Launching parallel CE searches — RL: {rl_episodes} "
+              f"episodes  |  LLM: {llm_rounds} rounds  |  "
+              f"Hopper: {'on' if _HOPPER_AVAILABLE else 'off'}  |  "
+              f"plantri: {len(survivors)} undecided candidate(s)")
 
-        # Unified stop signal and result queue shared across all three processes.
+        # Unified stop signal and result queue shared across all four tracks.
         stop_event = _mp.Event()
         result_queue: _mp.Queue = _mp.Queue()
 
@@ -740,6 +751,29 @@ class Orchestrator:
         else:
             print(f"[Hopper ce finding] disabled: {_HOPPER_IMPORT_ERR}")
 
+        # Constructor track (thread — its work runs in a spawn process pool).
+        # One double-check sweep over every screen survivor; once it has
+        # covered them all, the CE search is settled either way, so it stops
+        # the remaining tracks.
+        ctor_thread: threading.Thread | None = None
+        if survivors:
+            def _ctor_main() -> None:
+                ce = plantri_finder.double_check(survivors, stop_event=stop_event)
+                if ce:
+                    result_queue.put(ce)
+                    stop_event.set()
+                elif plantri_finder.completed:
+                    # Full double check with no CE — every undecided candidate
+                    # got its attempt; further sampling is pointless.
+                    stop_event.set()
+
+            ctor_thread = threading.Thread(
+                target=_ctor_main,
+                daemon=True,
+                name=f"Constructor-{conjecture.conjecture_id}-{label}",
+            )
+            ctor_thread.start()
+
         # LLM track (main thread — I/O bound, no CPU contention)
         check_agent = PVectorCheckAgent(client=self.client)
         llm_result = LLMCEFinder(
@@ -761,6 +795,11 @@ class Orchestrator:
         if hopper_proc and hopper_proc.is_alive():
             hopper_proc.join()
 
+        # Wait for the constructor's double check to finish — its verdict
+        # settles the conjecture even after the samplers are exhausted.
+        if ctor_thread is not None:
+            ctor_thread.join()
+
         # Prefer the in-process LLM result directly: mp.Queue.put() returns
         # before the feeder thread flushes to the pipe, so get_nowait() can
         # miss even our own item (validated CE silently dropped).
@@ -772,7 +811,7 @@ class Orchestrator:
                 ce_info = None
 
         if not ce_info:
-            print(f"[Stage 3] No CE found.")
+            print(f"[Stage 2] No CE found.")
             return None
 
         return ce_info
@@ -838,111 +877,20 @@ class Orchestrator:
             cwd=polib_path,
             capture_output=False,
             timeout=600,
+            preexec_fn=set_pdeathsig,
         )
         if result.returncode == 0:
             print("[Orchestrator] Polib cache ready.")
         else:
             print(f"[Orchestrator] Warning: lake build Polib exited {result.returncode}")
 
-    def _run_enumeration_stage(self, conjecture: ParsedConjecture) -> Optional[dict]:
-        """Stage 2 — exhaustive sweep of small arithmetic CE candidates.
-
-        Complements the random walk (which samples) with a complete enumeration
-        of every DS-valid violating p-vector within bounds, then tries to
-        realize the most constructible ones via the 4-check validator.
-        """
-        from agent.orchestrator.tools.ce_enumerator import enumerate_ce_candidates
-
-        try:
-            candidates = enumerate_ce_candidates(conjecture)
-        except Exception as exc:
-            print(f"[Stage 2] enumerator error: {exc} — skipping")
-            return None
-        if not candidates:
-            print("[Stage 2] No arithmetic CE candidate exists within bounds — "
-                  "conjecture is arithmetically tight in this region.")
-            return None
-
-        # 90s default gives the plantri exhaustive tier (inside the constructor)
-        # enough budget to fully decide f2≈22 candidates on a multicore box.
-        max_try = int(os.environ.get("CE_ENUM_REALIZE_MAX", "40"))
-        per_timeout = float(os.environ.get("CE_ENUM_REALIZE_TIMEOUT", "90"))
-        n_try = min(max_try, len(candidates))
-        print(f"[Stage 2] {len(candidates)} arithmetic CE candidate(s) within bounds; "
-              f"trying to realize the {n_try} most constructible ({per_timeout:.0f}s each)...")
-        pool = max(1, int(os.environ.get("CE_ENUM_REALIZE_PARALLEL", "4")))
-        _t_batch = time.time()
-
-        def _success(cand, report, round_i: int) -> dict:
-            _, detail = _eval_conclusion_violated(conjecture.conclusion, cand.p_vec)
-            print(f"[Stage 2] CE realized: {cand.p_vec}")
-            report.print()
-            return {
-                "p_vector": cand.p_vec,
-                "found_by": "boundary_enumeration",
-                "found_at_round": round_i,
-                "violation_detail": detail,
-                "witness_edges": report.witness_edges,
-            }
-
-        def _progress(done: int) -> None:
-            if done % 10 == 0 or done == n_try:
-                print(f"[Stage 2] [{done}/{n_try}] none realized so far "
-                      f"({time.time() - _t_batch:.0f}s elapsed)", flush=True)
-
-        if pool == 1:
-            checker = PVectorCheckAgent(client=self.client)
-            for i, cand in enumerate(candidates[:n_try], 1):
-                report = checker.run_silent(
-                    cand.p_vec, conjecture, constructor_timeout=per_timeout)
-                if report.all_passed:
-                    return _success(cand, report, i)
-                _progress(i)
-        else:
-            from concurrent.futures import ProcessPoolExecutor, as_completed
-            from agent.orchestrator.tools.check_pvector import (
-                check_pvector_worker, kill_pool_pgroups, worker_setpgrp,
-            )
-            plantri_jobs = max(1, (_mp.cpu_count() or 4) // pool)
-            # spawn, not fork: batch mode runs this from one of 7 worker
-            # threads, and forking a threaded process can deadlock children.
-            ex = ProcessPoolExecutor(
-                max_workers=pool, mp_context=_mp.get_context("spawn"),
-                initializer=worker_setpgrp)
-            try:
-                futs = {
-                    ex.submit(check_pvector_worker, cand.p_vec, conjecture,
-                              per_timeout, plantri_jobs): (i, cand)
-                    for i, cand in enumerate(candidates[:n_try], 1)
-                }
-                done = 0
-                for fut in as_completed(futs):
-                    i, cand = futs[fut]
-                    done += 1
-                    try:
-                        report = fut.result()
-                    except Exception as exc:
-                        print(f"[Stage 2] worker error on {cand.p_vec}: {exc}")
-                        continue
-                    if report.all_passed:
-                        return _success(cand, report, i)
-                    _progress(done)
-            finally:
-                # On early CE success, in-flight candidates are useless work —
-                # end them immediately instead of holding the interpreter exit.
-                kill_pool_pgroups(ex)   # before shutdown: it nulls _processes
-                ex.shutdown(wait=False, cancel_futures=True)
-        print(f"[Stage 2] None of the {n_try} tried candidate(s) could be realized — "
-              f"falling through to Stage 3.")
-        return None
-
     def _entailment_precheck(self, conjecture: ParsedConjecture) -> bool:
-        """Return True if Stage 4 should run.
+        """Return True if Stage 3 (prover) should run.
 
         A countermodel is a p-vector that satisfies the per-map arithmetic
         content of every Inventory.lean axiom yet violates the conjecture's
         conclusion. If one exists, no honest Lean proof of the conjecture can
-        be derived from the current Inventory, so Stage 4 is skipped with an
+        be derived from the current Inventory, so Stage 3 is skipped with an
         explicit verdict instead of burning prover rounds on an impossible
         task. Override with FORCE_PROVER=true.
         """
@@ -976,7 +924,7 @@ class Orchestrator:
         if ce_info is not None:
             out_path = _write_ce_json(conjecture, ce_info, self._ce_dir)
             print(f"[Output] CE JSON → {out_path}")
-            print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 4.")
+            print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 3.")
             return False
 
         print("  Either:")
@@ -986,16 +934,16 @@ class Orchestrator:
         print("       content (hand-curated from a paper source; the prover must never")
         print("       invent it); more LLM retries cannot help.")
         if os.environ.get("FORCE_PROVER", "").lower() == "true":
-            print("  FORCE_PROVER=true — running Stage 4 anyway.")
+            print("  FORCE_PROVER=true — running Stage 3 anyway.")
             return True
-        print("  Skipping Stage 4. (set FORCE_PROVER=true to override)")
+        print("  Skipping Stage 3. (set FORCE_PROVER=true to override)")
         return False
 
     def _decide_countermodels_with_plantri(
         self, conjecture: ParsedConjecture, countermodels: list
     ) -> Optional[dict]:
         """Exhaustively decide countermodel realizability with plantri
-        (reuses tools/plantri/decide_ce_plantri.decide — a decision procedure,
+        (reuses agent/orchestrator/tools/plantri/decide_ce_plantri.decide — a decision procedure,
         not a heuristic). Returns CE info for the first realizable candidate,
         else None.
 
@@ -1022,7 +970,7 @@ class Orchestrator:
           CE_PLANTRI_MAX            max deep-phase candidates (default 40; 0 disables stage)
         """
         try:
-            from tools.plantri.decide_ce_plantri import decide, PLANTRI_AD
+            from agent.orchestrator.tools.plantri.decide_ce_plantri import decide, PLANTRI_AD
         except Exception as exc:
             print(f"[Plantri decision] unavailable ({exc}) — skipping automatic decision")
             return None
@@ -1101,20 +1049,42 @@ class Orchestrator:
         cands = sorted(countermodels,
                        key=lambda c: (c.p_vec.get(3, 0) + c.p_vec.get(4, 0), c.f2))
 
+        # ── exhaustive-reach filter ────────────────────────────────────────────
+        # decide() has NO early exit — a verdict requires a COMPLETED plantri
+        # enumeration, so a candidate beyond exhaustive reach is a guaranteed
+        # timeout at any budget this stage spends (the C14 f2-cliff lesson).
+        # Caps mirror the Stage-2 screen, +2 f2 margin because deep_t is ~20x
+        # the screen budget (C2 data: roughly one f2 step per ~10x budget).
+        f2cap_m5 = int(os.environ.get("PLANTRI_F2_MAX_M5", "36")) + 2
+        f2cap_ad = int(os.environ.get("PLANTRI_F2_MAX", "26")) + 2
+
+        def _within_reach(pv: dict[int, int]) -> bool:
+            nz = {k: v for k, v in pv.items() if v > 0}
+            if not nz:
+                return False
+            n = sum(nz.values())
+            cap = f2cap_m5 if min(nz) >= 5 else f2cap_ad
+            return 4 <= n <= cap and max(nz) <= n - 1
+
         # ── phase 1: cache triage ──────────────────────────────────────────────
         # Cached non-realizable verdicts (proofs by exhaustion) are skipped.
         # Cached "realizable" entries are HINTS ONLY: a CE is never emitted
         # from the cache — the candidate is re-decided by a fresh plantri run
         # in this process, so the verification gate cannot be bypassed by a
         # corrupted/stale cache file.
-        n_non, n_hint_undecided, n_budget_exhausted = 0, 0, 0
+        n_non, n_hint_undecided, n_budget_exhausted, n_unreachable = 0, 0, 0, 0
         quick_list, deep_only, realizable_hints = [], [], []
         for c in cands:
             entry = cache.get(_ckey(c.p_vec))
+            if entry is not None and entry["verdict"] == "realizable":
+                # high-value hint — re-verify even if beyond the reach caps
+                realizable_hints.append(c)
+                continue
+            if not _within_reach(c.p_vec):
+                n_unreachable += 1
+                continue
             if entry is None:
                 quick_list.append(c)
-            elif entry["verdict"] == "realizable":
-                realizable_hints.append(c)
             elif entry["verdict"] == "non_realizable":
                 n_non += 1
             elif entry.get("timeout_used", 0.0) >= deep_t:
@@ -1123,9 +1093,13 @@ class Orchestrator:
                 deep_only.append(c)   # quick phase already proven insufficient
             else:
                 quick_list.append(c)
-        if len(quick_list) + len(deep_only) + len(realizable_hints) < len(cands):
-            print(f"[Plantri decision] cache: {n_non} known non-realizable, "
-                  f"{len(deep_only)} known to need deep phase")
+        print(f"[Plantri decision] cache triage of {len(cands)} countermodel(s): "
+              f"{len(quick_list)} fresh → quick, "
+              f"{len(deep_only)} with >=quick budget spent → straight to deep, "
+              f"{n_non} known non-realizable (skipped), "
+              f"{n_budget_exhausted} deep-budget exhausted (skipped), "
+              f"{n_unreachable} beyond exhaustive reach (skipped), "
+              f"{len(realizable_hints)} realizable hint(s) to re-verify", flush=True)
 
         # ── phase 2: re-verify realizable hints first, full width, full budget ─
         for c in realizable_hints:
@@ -1150,47 +1124,105 @@ class Orchestrator:
 
         stop_event = threading.Event()
 
-        def _run_phase(items: list, timeout: float, par: int, label: str):
-            """Decide `items` concurrently. Returns (ce_info|None, survivors)."""
+        def _run_phase(items: list, timeout: float, par: int, label: str,
+                       verbose_each: bool):
+            """Decide `items` concurrently. Returns (ce_info|None, survivors).
+
+            verbose_each=False prints only ~3 aggregate milestone lines plus
+            any REALIZABLE/error immediately (big quick batches would flood
+            the log at one line per candidate); True prints every verdict
+            (deep phase: one line every few minutes at most).
+            """
             nonlocal n_non
             if not items:
                 return None, []
+            total = len(items)
             jobs_each = max(1, cpu // par)
-            print(f"[Plantri decision/{label}] {len(items)} candidate(s), "
+            print(f"[Plantri decision/{label}] {total} candidate(s), "
                   f"{par} in parallel × {jobs_each} plantri jobs, {timeout:.0f}s each",
                   flush=True)
+            milestones = {(total * k + 2) // 3 for k in (1, 2, 3)}
+            ph_non, ph_timeout, ph_realized = 0, 0, 0
+            t0 = time.time()
             survivors, found = [], None
+
+            # Heartbeat: long-timeout phases can be silent for up to `timeout`
+            # seconds between completions — print what is in flight every 5 min
+            # so a quiet log is distinguishable from a hung one.
+            inflight: dict[str, float] = {}
+            ifl_lock = threading.Lock()
+            n_done = 0
+            hb_stop = threading.Event()
+
+            def _decide_tracked(pv, jobs, t, ev):
+                k = str(pv)
+                with ifl_lock:
+                    inflight[k] = time.time()
+                try:
+                    return decide(pv, jobs, t, ev)
+                finally:
+                    with ifl_lock:
+                        inflight.pop(k, None)
+
+            def _heartbeat():
+                while not hb_stop.wait(300):
+                    with ifl_lock:
+                        now = time.time()
+                        running = [f"{k} ({now - st:.0f}s)"
+                                   for k, st in sorted(inflight.items())]
+                    if running:
+                        print(f"  [{label} heartbeat] {n_done}/{total} done | "
+                              f"running: {', '.join(running)}", flush=True)
+
+            hb_thread = None
+            if timeout > 300:
+                hb_thread = threading.Thread(target=_heartbeat, daemon=True)
+                hb_thread.start()
+
             with ThreadPoolExecutor(max_workers=par) as ex:
-                futs = {ex.submit(decide, c.p_vec, jobs_each, timeout, stop_event): c
+                futs = {ex.submit(_decide_tracked, c.p_vec, jobs_each, timeout,
+                                  stop_event): c
                         for c in items}
                 for i, fut in enumerate(as_completed(futs), 1):
                     c = futs[fut]
+                    n_done = i
                     try:
                         verdict, count, secs = fut.result()
                     except Exception as exc:
-                        print(f"  [{label}] {c.p_vec} → worker error: {exc}")
+                        print(f"  [{label}] {c.p_vec} → worker error: {exc}", flush=True)
                         survivors.append(c)
                         continue
-                    print(f"  [{label} {i}/{len(items)}] {c.p_vec} (f2={c.f2}) → "
-                          f"{verdict.upper()} (count={count}) in {secs:.0f}s", flush=True)
+                    if verbose_each or verdict == "realizable":
+                        print(f"  [{label} {i}/{total}] {c.p_vec} (f2={c.f2}) → "
+                              f"{verdict.upper()} (count={count}) in {secs:.0f}s",
+                              flush=True)
                     if verdict == "realizable":
+                        ph_realized += 1
                         _cache_put(c.p_vec, "realizable", count, secs)
                         ce = _make_ce(c, count, i)
                         if ce and found is None:
                             found = ce
                             stop_event.set()   # kill all sibling plantri runs
                     elif verdict == "non_realizable":
+                        ph_non += 1
                         _cache_put(c.p_vec, "non_realizable", count, secs)
                         n_non += 1
                     elif verdict == "timeout":
+                        ph_timeout += 1
                         _cache_put(c.p_vec, "timeout", -1, timeout)
                         survivors.append(c)
                     else:  # stopped / error — undecided, not cached
                         survivors.append(c)
+                    if not verbose_each and i in milestones:
+                        print(f"  [{label} {i}/{total}] {ph_realized} realized, "
+                              f"{ph_non} non-realizable, {ph_timeout} timeout "
+                              f"({time.time() - t0:.0f}s elapsed)", flush=True)
+            hb_stop.set()
             return found, survivors
 
         # ── phase 3: quick triage over everything ──────────────────────────────
-        ce, survivors = _run_phase(quick_list, quick_t, par_quick, "quick")
+        ce, survivors = _run_phase(quick_list, quick_t, par_quick, "quick",
+                                   verbose_each=False)
         if ce:
             return ce
 
@@ -1198,33 +1230,39 @@ class Orchestrator:
         deep_list = sorted(survivors + deep_only,
                            key=lambda c: (c.p_vec.get(3, 0) + c.p_vec.get(4, 0), c.f2))
         n_skipped = max(0, len(deep_list) - max_deep)
-        ce, survivors = _run_phase(deep_list[:max_deep], deep_t, par_deep, "deep")
+        ce, survivors = _run_phase(deep_list[:max_deep], deep_t, par_deep, "deep",
+                                   verbose_each=True)
         if ce:
             return ce
 
-        n_undecided = len(survivors) + n_skipped + n_hint_undecided + n_budget_exhausted
+        n_undecided = (len(survivors) + n_skipped + n_hint_undecided
+                       + n_budget_exhausted + n_unreachable)
         if n_non == len(cands):
             print("[Plantri decision] ALL countermodels NON-REALIZABLE (proof by exhaustion).")
             print("  The conjecture survives within bounds, but remains unprovable from the")
             print("  current Inventory — it needs new, hand-curated geometric content.")
         else:
+            reach_note = (f" — {n_unreachable} beyond exhaustive reach, raise "
+                          f"PLANTRI_F2_MAX/_M5 to attempt" if n_unreachable else "")
             print(f"[Plantri decision] no CE realized: {n_non}/{len(cands)} non-realizable, "
-                  f"{n_undecided} undecided (timeout/skipped). Verdicts cached in "
+                  f"{n_undecided} undecided (timeout/skipped{reach_note}). Verdicts cached in "
                   f"{cache_path.name}; raise CE_PLANTRI_TIMEOUT/CE_PLANTRI_MAX to decide more.")
         return None
 
-    def _run_prover(self, conjecture: ParsedConjecture) -> None:
+    def _run_prover(self, conjecture: ParsedConjecture) -> str:
+        """Run Stage 3 (prover). Returns 'proved', 'failed' or 'skipped_entailment'.
+        (zero-sorry policy: a 'partial' prover result is NOT proved)."""
         from agent.prover.agent import ProverAgent
 
         if not self._entailment_precheck(conjecture):
-            return
+            return "skipped_entailment"
 
         self._ensure_polib_built()
 
         agent = ProverAgent(self.config)
         agent._proof_subdir = "conjecture_without_ce"
 
-        print(f"\n[Stage 4] ProverAgent starting for {conjecture.conjecture_id} …")
+        print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
         try:
             result = agent.prove_conjecture(conjecture)
         except Exception as exc:
@@ -1233,7 +1271,8 @@ class Orchestrator:
 
         if result.nodes_failed:
             print(f"  Failed nodes: {result.nodes_failed}")
-        print(f"\n[Stage 4] Done. Result: {result.status}")
+        print(f"\n[Stage 3] Done. Result: {result.status}")
+        return "proved" if result.status == "success" else "failed"
 
     def _load_all_conjectures(self, json_path: str | None = None) -> list[ParsedConjecture]:
         """Load every conjecture from a JSON file or directory of individual *.json files.

@@ -652,11 +652,19 @@ class PVectorCheckAgent:
         return report
 
 
-def worker_setpgrp() -> None:
+def worker_setpgrp(parent_pid: int | None = None) -> None:
     """Pool-worker initializer: own process group, so that an early pool
     teardown can killpg() the worker TOGETHER with its plantri subprocesses
-    (killing just the worker would orphan running plantri enumerations)."""
+    (killing just the worker would orphan running plantri enumerations).
+
+    Also registers PR_SET_PDEATHSIG: if the orchestrator dies WITHOUT running
+    its finally blocks (Ctrl-C while the pool lives in a daemon thread, crash,
+    SIGKILL), the kernel kills the worker — otherwise it would survive forever
+    blocked on the pool's call queue, since sibling workers hold the queue
+    pipe open and EOF never arrives."""
     os.setpgrp()
+    from agent.procutil import set_pdeathsig
+    set_pdeathsig(expected_ppid=parent_pid)
 
 
 def kill_pool_pgroups(ex) -> None:
@@ -682,12 +690,19 @@ def check_pvector_worker(
     conjecture,
     constructor_timeout: float = 30.0,
     plantri_jobs: int = 0,
+    seed: int | None = None,
 ) -> CheckReport:
     """Process-pool entry point (module-level so it pickles; this module's
     imports are light enough for spawn workers). `plantri_jobs` caps each
     worker's internal plantri parallelism so that
-    pool_size x plantri_jobs ~= available cores."""
+    pool_size x plantri_jobs ~= available cores. `seed` makes the stochastic
+    constructor tiers reproducible and lets retry rounds draw different
+    trajectories instead of repeating a lost draw."""
     if plantri_jobs > 0:
         os.environ["PLANTRI_JOBS"] = str(plantri_jobs)
+    if seed is not None:
+        os.environ["CE_CONSTRUCT_SEED"] = str(seed)
+        import random
+        random.seed(seed)
     return PVectorCheckAgent().run_silent(
         p_vec, conjecture, constructor_timeout=constructor_timeout)

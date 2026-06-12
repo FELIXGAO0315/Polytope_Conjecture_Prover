@@ -522,19 +522,42 @@ def load_conjecture_dataset(dest: Optional[str] = None) -> Tuple[List[Conjecture
     return unsolved_specs, solved_specs
 
 
-def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = None) -> None:
-    """Insert new conjectures into dataset, de-duping by normalized formula.
+def _load_raw_dataset(dest: Optional[str] = None) -> Dict[str, List[dict]]:
+    """Load conjectures.json preserving every per-entry field (status, …)."""
+    path = _dataset_path(dest)
+    if not os.path.isfile(path):
+        return {"unsolved": [], "solved": []}
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+    except Exception:
+        return {"unsolved": [], "solved": []}
+    return {
+        "unsolved": [e for e in data.get("unsolved", []) if isinstance(e, dict)],
+        "solved": [e for e in data.get("solved", []) if isinstance(e, dict)],
+    }
 
-    - If a formula already exists in solved, ignore the new one.
-    - If a formula already exists in unsolved, ignore the new one.
-    - Otherwise append to unsolved. If name clashes, generate a unique name.
-    """
+
+def _write_raw_dataset(data: Dict[str, List[dict]], dest: Optional[str] = None) -> str:
+    path = _dataset_path(dest)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump({"unsolved": data.get("unsolved", []),
+                   "solved": data.get("solved", [])}, f, indent=2)
+    os.replace(tmp, path)
+    return path
+
+
+def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = None) -> List[str]:
+    """Insert new conjectures, de-duping by normalized formula against BOTH
+    lists. New entries land in unsolved with status='new'; existing entries
+    and all their fields are preserved verbatim. Returns inserted names."""
     specs = list(specs)
     if not specs:
-        return
+        return []
 
-    unsolved, solved = load_conjecture_dataset(dest)
-    unsolved_by_name = {spec.name: spec for spec in unsolved}
+    data = _load_raw_dataset(dest)
 
     def _norm(formula: str) -> str:
         try:
@@ -542,45 +565,85 @@ def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = No
         except Exception:
             return (formula or "").strip()
 
-    unsolved_formulas = {_norm(s.formula) for s in unsolved}
-    solved_formulas = {_norm(s.formula) for s in solved}
+    all_entries = data["unsolved"] + data["solved"]
+    existing_formulas = {_norm(e.get("formula", "")) for e in all_entries}
+    used_names = {e.get("name") for e in all_entries}
 
-    def _unique_name(base: str) -> str:
-        name = base or "auto"
-        if name not in unsolved_by_name:
-            return name
-        suffix = 1
-        while f"{name}_{suffix}" in unsolved_by_name:
-            suffix += 1
-        return f"{name}_{suffix}"
-
+    inserted: List[str] = []
+    now = int(time.time())
     for spec in specs:
         f_norm = _norm(spec.formula)
-        if f_norm in solved_formulas or f_norm in unsolved_formulas:
+        if f_norm in existing_formulas:
             continue
-        name = spec.name
-        if name in unsolved_by_name and _norm(unsolved_by_name[name].formula) != f_norm:
-            name = _unique_name(name)
-        spec = ConjectureSpec(name=name, formula=spec.formula)
-        unsolved_by_name[name] = spec
-        unsolved_formulas.add(f_norm)
+        name = spec.name or "auto"
+        if name in used_names:
+            suffix = 1
+            while f"{name}_{suffix}" in used_names:
+                suffix += 1
+            name = f"{name}_{suffix}"
+        data["unsolved"].append({
+            "name": name,
+            "formula": canonicalize_formula(spec.formula),
+            "status": "new",
+            "created_at": now,
+        })
+        used_names.add(name)
+        existing_formulas.add(f_norm)
+        inserted.append(name)
 
-    unsolved_list = sorted(unsolved_by_name.values(), key=lambda s: s.name)
-    write_conjectures_dataset(unsolved_list, solved, dest)
+    if inserted:
+        _write_raw_dataset(data, dest)
+    return inserted
+
+
+def set_conjecture_status(
+    name: str,
+    status: str,
+    dest: Optional[str] = None,
+    detail: Optional[Dict[str, Any]] = None,
+) -> bool:
+    """Update a conjecture's status in conjectures.json.
+
+    status ∈ {'new', 'refuted', 'proven', 'prover_failed'}. 'refuted' entries
+    move to the legacy 'solved' list (solved == falsified for older
+    consumers); other statuses update in place. Returns False if not found.
+    """
+    data = _load_raw_dataset(dest)
+    entry, src = None, None
+    for key in ("unsolved", "solved"):
+        for e in data[key]:
+            if e.get("name") == name:
+                entry, src = e, key
+                break
+        if entry is not None:
+            break
+    if entry is None:
+        return False
+    entry["status"] = status
+    entry["status_at"] = int(time.time())
+    if detail:
+        entry["status_detail"] = detail
+    if status == "refuted" and src == "unsolved":
+        data["unsolved"].remove(entry)
+        data["solved"].append(entry)
+    _write_raw_dataset(data, dest)
+    return True
+
+
+def get_conjectures_by_status(status: str, dest: Optional[str] = None) -> List[ConjectureSpec]:
+    """Return specs whose entry carries exactly this status (both lists)."""
+    data = _load_raw_dataset(dest)
+    out: List[ConjectureSpec] = []
+    for e in data["unsolved"] + data["solved"]:
+        if e.get("status") == status and e.get("name") and e.get("formula"):
+            out.append(ConjectureSpec(name=e["name"],
+                                      formula=canonicalize_formula(e["formula"])))
+    return out
 
 
 def mark_conjecture_as_solved(name: str, dest: Optional[str] = None) -> None:
+    """Legacy API: a solved conjecture is a falsified one — now also records
+    status='refuted' and preserves all entry fields."""
     if not name:
         return
-    unsolved, solved = load_conjecture_dataset(dest)
-    unsolved_map = {spec.name: spec for spec in unsolved}
-    solved_map = {spec.name: spec for spec in solved}
-    spec = unsolved_map.pop(name, None)
-    if spec is None:
-        spec = solved_map.get(name)
-    if spec is None:
-        return
-    solved_map[name] = spec
-    unsolved_list = sorted(unsolved_map.values(), key=lambda s: s.name)
-    solved_list = sorted(solved_map.values(), key=lambda s: s.name)
-    write_conjectures_dataset(unsolved_list, solved_list, dest)
+    set_conjecture_status(name, "refuted", dest)

@@ -53,3 +53,10 @@ theorem C2_LowerDegreeFacesBound (maps : SimplyCon3ConnectedMap 0)
   have h := P6EdgeCountEquation maps hM
   push_cast
   linarith
+
+-- === C1 (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-06-11T16:56:26.106160+00:00
+theorem C1 (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) : maps.p_i 6 ≥ 0 := by
+  have h := P6EdgeCountEquation maps hM
+  push_cast at *
+  omega

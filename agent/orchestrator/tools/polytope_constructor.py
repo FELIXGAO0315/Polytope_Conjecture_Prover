@@ -31,6 +31,8 @@ from pathlib import Path
 from typing import Optional
 
 import networkx as nx
+
+from agent.procutil import set_pdeathsig
 warnings.filterwarnings("ignore", message=".*hashes produced.*", module="networkx")
 
 try:
@@ -89,15 +91,23 @@ def _pvec_of(G: nx.Graph) -> Optional[dict[int, int]]:
 
 _PC_PROJECT_ROOT = Path(__file__).resolve().parents[3]
 _PLANTRI_BIN = Path(os.environ.get(
-    "PLANTRI_AD", _PC_PROJECT_ROOT / "tools" / "plantri" / "plantri_ad"))
+    "PLANTRI_AD", Path(__file__).resolve().parent / "plantri" / "plantri_ad"))
+_PLANTRI_MF = Path(os.environ.get(
+    "PLANTRI_MF", Path(__file__).resolve().parent / "plantri" / "plantri_mf"))
 # Exhaustive verdicts (realizable / nonrealizable) are permanent facts. They
 # are kept in memory AND persisted to output/realizability_cache.json, which
 # is shared with the orchestrator's plantri-decision stage — verdicts learned
 # in any stage or run are never recomputed.
 _realizability_cache: dict[tuple[tuple[int, int], ...], str] = {}
-# p-vector → largest budget (s) at which the FULL strategy stack already failed.
-# Not a verdict — only used to skip deterministic re-failures at <= that budget.
-_failure_cache: dict[tuple[tuple[int, int], ...], float] = {}
+# p-vector → (largest budget (s) at which the FULL strategy stack failed,
+# number of full-stack failures). Not a verdict: the dual-perturbation and A*
+# tiers are stochastic, so one failure proves nothing — a candidate is only
+# skipped after _FAIL_SKIP_CAP failed attempts at >= budget. The orchestrator
+# salts CE_CONSTRUCT_SEED with this attempt count, so every attempt is a
+# genuinely new draw — the cap is the number of lottery tickets a candidate
+# gets at a given budget before being parked (raise it to re-park).
+_failure_cache: dict[tuple[tuple[int, int], ...], tuple[float, int]] = {}
+_FAIL_SKIP_CAP = max(1, int(os.environ.get("CE_CONSTRUCT_FAIL_CAP", "6")))
 _cache_lock = threading.Lock()
 _CACHE_FILE = _PC_PROJECT_ROOT / "output" / "realizability_cache.json"
 _disk_cache_loaded = False
@@ -123,7 +133,8 @@ def _load_disk_cache_locked() -> None:
                     tuple(int(x) for x in kv.split(":")) for kv in key.split(",")))
                 if v == "construction_failed":
                     _failure_cache.setdefault(
-                        pv_key, float(entry.get("timeout_used", 0.0)))
+                        pv_key, (float(entry.get("timeout_used", 0.0)),
+                                 int(entry.get("attempts", 1))))
                 else:
                     _realizability_cache.setdefault(
                         pv_key, "nonrealizable" if v == "non_realizable" else "realizable")
@@ -185,7 +196,8 @@ def _cache_put(p_vec: dict[int, int], verdict: str) -> None:
     _disk_merge(key, _entry)
 
 
-def _failure_get(p_vec: dict[int, int]) -> Optional[float]:
+def _failure_get(p_vec: dict[int, int]) -> Optional[tuple[float, int]]:
+    """(max budget at which the full stack failed, number of failures), or None."""
     with _cache_lock:
         _load_disk_cache_locked()
         return _failure_cache.get(_cache_key(p_vec))
@@ -197,22 +209,41 @@ def _failure_put(p_vec: dict[int, int], budget: float) -> None:
         k = _cache_key(p_vec)
         if k in _realizability_cache:
             return   # a definitive verdict exists — failure record is moot
-        _failure_cache[k] = max(budget, _failure_cache.get(k, 0.0))
+        prev_b, prev_n = _failure_cache.get(k, (0.0, 0))
+        _failure_cache[k] = (max(budget, prev_b), prev_n + 1)
     key = ",".join(f"{a}:{b}" for a, b in _cache_key(p_vec))
 
     def _entry(existing):
         if existing and existing.get("verdict") in ("realizable", "non_realizable"):
             return None
-        if existing and float(existing.get("timeout_used", 0.0)) >= budget:
-            return None
+        old_b = float(existing.get("timeout_used", 0.0)) if existing else 0.0
+        old_n = int(existing.get("attempts", 1)) if existing else 0
         return {"verdict": "construction_failed", "count": 0,
-                "timeout_used": round(budget, 1)}
+                "timeout_used": round(max(budget, old_b), 1),
+                "attempts": old_n + 1}
 
     _disk_merge(key, _entry)
 
 
 def _plantri_spec(p_vec: dict[int, int]) -> str:
     return "-" + "".join(f"F{k}_{v}^{v}" for k, v in sorted(p_vec.items()))
+
+
+def _plantri_cmd(p_vec: dict[int, int]) -> Optional[list[str]]:
+    """Generator command prefix (binary + degree-spec switches), or None.
+
+    Support all >= 5 → stock plantri's dedicated -m5 generator with a pure
+    leaf filter (plantri_mf / count_multiset.c): identical exhaustive
+    guarantees, search tree orders of magnitude smaller than the pruned
+    min-deg-3 tree plantri_ad uses (~1000x measured on f2=27). Otherwise
+    plantri_ad's allowed_deg pruned generator.
+    """
+    if min(p_vec) >= 5 and _PLANTRI_MF.exists():
+        spec = ",".join(f"{k}_{v}" for k, v in sorted(p_vec.items()))
+        return [str(_PLANTRI_MF), "-m5", f"-D{spec}"]
+    if _PLANTRI_BIN.exists():
+        return [str(_PLANTRI_BIN), _plantri_spec(p_vec)]
+    return None
 
 
 def _parse_plantri_ascii(line: str) -> dict[int, list[int]]:
@@ -282,8 +313,14 @@ def _plantri_decide(
             (None, "timeout") | (None, "unavailable").
     """
     n = sum(target.values())
-    f2_max = int(os.environ.get("PLANTRI_F2_MAX", "26"))
-    if not _PLANTRI_BIN.exists() or n < 4 or n > f2_max or max(target) > n - 1:
+    cmd = _plantri_cmd(target)
+    # The -m5 generator is ~3 orders of magnitude faster, so it affords a
+    # much larger size cap than the pruned min-deg-3 generator.
+    if cmd is not None and "-m5" in cmd:
+        f2_max = int(os.environ.get("PLANTRI_F2_MAX_M5", "36"))
+    else:
+        f2_max = int(os.environ.get("PLANTRI_F2_MAX", "26"))
+    if cmd is None or n < 4 or n > f2_max or max(target) > n - 1:
         return None, "unavailable"
     if jobs is None:
         jobs = int(os.environ.get("PLANTRI_JOBS", "0")) or min(16, os.cpu_count() or 4)
@@ -292,7 +329,6 @@ def _plantri_decide(
     if cached == "nonrealizable":
         return None, "nonrealizable"
 
-    spec = _plantri_spec(target)
     deadline = time.monotonic() + timeout
 
     # stdbuf -oL forces line-buffered stdout: without it a rare witness (e.g. a
@@ -300,8 +336,9 @@ def _plantri_decide(
     # until its split completes, defeating the early exit.
     prefix = ["stdbuf", "-oL"] if shutil.which("stdbuf") else []
     procs = [subprocess.Popen(
-        prefix + [str(_PLANTRI_BIN), spec, str(n), f"{r}/{jobs}", "-a"],
+        prefix + [*cmd, str(n), f"{r}/{jobs}", "-a"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        preexec_fn=set_pdeathsig,
     ) for r in range(jobs)]
 
     witness: list[str] = []
@@ -387,6 +424,164 @@ def _plantri_decide(
     return None, "nonrealizable"
 
 
+def plantri_screen_batch(
+    targets: list[dict[int, int]],
+    timeout: float,
+    jobs: int | None = None,
+    stop_on_first: bool = False,
+) -> dict[tuple[tuple[int, int], ...], tuple[str, Optional[nx.Graph]]]:
+    """Exhaustively decide MANY same-f2 min-deg-5 p-vectors in ONE sweep.
+
+    The multi-target leaf filter in plantri_mf makes the sweep cost nearly
+    independent of the number of targets — the generation tree dominates and
+    is shared (measured: 16 targets at f2=27 cost the same 0.9s as 1).
+    -Z caps stdout at one witness per target per split, so a popular
+    multiset cannot flood the pipe.
+
+    Returns {cache_key: (verdict, graph_or_None)} with verdict one of
+    "realizable" | "nonrealizable" | "timeout" | "unavailable".
+    Exhaustive verdicts are written to the shared disk cache. Targets that
+    are not min-deg-5 / exceed the -m5 size cap come back "unavailable".
+    With stop_on_first=True the sweep is killed at the first witness
+    (remaining undecided targets report "timeout").
+    """
+    out: dict[tuple[tuple[int, int], ...], tuple[str, Optional[nx.Graph]]] = {}
+    pending: dict[tuple[tuple[int, int], ...], dict[int, int]] = {}
+    n_ref: Optional[int] = None
+    f2_max = int(os.environ.get("PLANTRI_F2_MAX_M5", "36"))
+
+    for pv in targets:
+        nonzero = {k: v for k, v in pv.items() if v > 0}
+        key = _cache_key(nonzero)
+        if key in out or key in pending:
+            continue
+        n = sum(nonzero.values())
+        if (not nonzero or min(nonzero) < 5 or not _PLANTRI_MF.exists()
+                or n < 4 or n > f2_max or max(nonzero) > n - 1):
+            out[key] = ("unavailable", None)
+            continue
+        if n_ref is None:
+            n_ref = n
+        elif n != n_ref:
+            raise ValueError("plantri_screen_batch: all targets must share f2")
+        cached = _cache_get(nonzero)
+        if cached in ("nonrealizable", "realizable"):
+            # realizable cache hits carry no graph; a single-target re-decide
+            # recovers the witness in milliseconds if the caller needs it.
+            out[key] = (cached, None)
+        else:
+            pending[key] = nonzero
+    if not pending:
+        return out
+
+    if jobs is None:
+        jobs = int(os.environ.get("PLANTRI_JOBS", "0")) or min(16, os.cpu_count() or 4)
+    dspecs = ["-D" + ",".join(f"{k}_{v}" for k, v in key) for key in pending]
+    prefix = ["stdbuf", "-oL"] if shutil.which("stdbuf") else []
+    procs = [subprocess.Popen(
+        prefix + [str(_PLANTRI_MF), "-m5", *dspecs, "-Z",
+                  str(n_ref), f"{r}/{jobs}", "-a"],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        preexec_fn=set_pdeathsig,
+    ) for r in range(jobs)]
+
+    witnesses: dict[tuple[tuple[int, int], ...], str] = {}
+    wlock = threading.Lock()
+
+    def _reader(p):
+        try:
+            for ln in p.stdout:
+                ln = ln.strip()
+                if not ln:
+                    continue
+                try:
+                    rot = _parse_plantri_ascii(ln)
+                except Exception:
+                    continue
+                hist: dict[int, int] = {}
+                for nbrs in rot.values():
+                    hist[len(nbrs)] = hist.get(len(nbrs), 0) + 1
+                key = tuple(sorted(hist.items()))
+                with wlock:
+                    if key in pending and key not in witnesses:
+                        witnesses[key] = ln
+        except Exception:
+            pass
+
+    readers = [threading.Thread(target=_reader, args=(p,), daemon=True)
+               for p in procs]
+    for t in readers:
+        t.start()
+
+    deadline = time.monotonic() + timeout
+    timed_out = early_exit = False
+    while True:
+        with wlock:
+            n_found = len(witnesses)
+        if n_found and (stop_on_first or n_found == len(pending)):
+            early_exit = True
+            break
+        if all(p.poll() is not None for p in procs):
+            break
+        if time.monotonic() >= deadline:
+            timed_out = True
+            break
+        time.sleep(0.05)
+
+    killed = early_exit or timed_out
+    if killed:
+        for p in procs:
+            try:
+                p.kill()
+            except Exception:
+                pass
+    for t in readers:
+        t.join(timeout=2.0)
+
+    errs: list[str] = []
+    for p in procs:
+        err = ""
+        if not killed:
+            try:
+                err = p.stderr.read() or ""
+            except Exception:
+                err = ""
+        errs.append(err)
+        for stream in (p.stdout, p.stderr):
+            try:
+                stream.close()
+            except Exception:
+                pass
+        try:
+            p.wait(timeout=5)
+        except Exception:
+            pass
+
+    # Proof by exhaustion only if every split finished on its own AND printed
+    # its summary — identical trust rules to the single-target path.
+    clean = (not killed) and all(
+        p.returncode == 0 and any(
+            "triangulations generated" in ln or "triangulations written" in ln
+            for ln in err.splitlines())
+        for p, err in zip(procs, errs))
+
+    for key, nonzero in pending.items():
+        line = witnesses.get(key)
+        if line:
+            G = _triangulation_dual(_parse_plantri_ascii(line))
+            if G is not None and _pvec_of(G) == nonzero:
+                _cache_put(nonzero, "realizable")
+                out[key] = ("realizable", G)
+            else:
+                out[key] = ("timeout", None)
+        elif clean:
+            _cache_put(nonzero, "nonrealizable")
+            out[key] = ("nonrealizable", None)
+        else:
+            out[key] = ("timeout", None)
+    return out
+
+
 # ── Dual-space perturbation search ────────────────────────────────────────────
 
 def _primal_graph_from_dual_hull(hull) -> nx.Graph:
@@ -416,7 +611,10 @@ def _dual_perturbation_search(target: dict[int, int], timeout: float) -> Optiona
     f2 = sum(target.values())
     if f2 < 4:
         return None
-    rng = _np.random.default_rng()
+    # CE_CONSTRUCT_SEED makes retry rounds draw provably different (and
+    # reproducible) trajectories; unset → fresh entropy as before.
+    _seed_env = os.environ.get("CE_CONSTRUCT_SEED")
+    rng = _np.random.default_rng(int(_seed_env) if _seed_env else None)
     deadline = time.monotonic() + timeout
 
     def _hull_hist(pts):
@@ -714,17 +912,18 @@ class PolytopeConstructor:
         if not _GC_OK:
             return None, "graphcalc_unavailable"
 
-        # Cached permanent verdict / cached full-stack failure.
-        # A "construction_failed" record means a previous run already exhausted
-        # every strategy below at >= this budget — rerunning at an equal or
-        # smaller budget is deterministic re-failure, so skip it. This never
-        # skips a definitive verdict path: nonrealizable is checked first, and
-        # a bigger budget than the recorded one still runs everything.
+        # Cached permanent verdict / cached full-stack failures.
+        # "nonrealizable" is a proof by plantri exhaustion — always final.
+        # "construction_failed" is NOT: the dual-perturbation and A* tiers
+        # below are stochastic, so a failed attempt only means that one draw
+        # lost. A candidate is skipped only after _FAIL_SKIP_CAP failures at
+        # >= this budget; a bigger budget than recorded always runs everything.
         if _cache_get(nonzero) == "nonrealizable":
             return None, "plantri_nonrealizable"
-        failed_at = _failure_get(nonzero)
-        if failed_at is not None and timeout <= failed_at:
-            return None, f"cached_construction_failure_at_{failed_at:.0f}s"
+        failed = _failure_get(nonzero)
+        if failed is not None and timeout <= failed[0] and failed[1] >= _FAIL_SKIP_CAP:
+            return None, (f"cached_construction_failure_"
+                          f"{failed[1]}x_at_{failed[0]:.0f}s")
 
         # Strategy 3: plantri exhaustive decision (exact, both directions).
         # If it completes, the answer is definitive: a witness graph, or a

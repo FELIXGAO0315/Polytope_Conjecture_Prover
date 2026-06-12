@@ -264,12 +264,14 @@ class LeanCompiler:
         temp_file.write_text(lean_code, encoding="utf-8")
         start = time.monotonic()
         try:
+            from agent.procutil import set_pdeathsig
             result = subprocess.run(
                 [self._lake_binary, "build", f"Polib._Temp.{safe_name}"],
                 cwd=self._workspace,
                 capture_output=True,
                 text=True,
                 timeout=self._timeout,
+                preexec_fn=set_pdeathsig,
             )
         except subprocess.TimeoutExpired:
             elapsed = time.monotonic() - start

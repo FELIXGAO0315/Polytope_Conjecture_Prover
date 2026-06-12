@@ -18,6 +18,16 @@ matplotlib==3.10.6            # Reward-curve plots saved to output/
 networkx==3.5                 # Graph construction and manipulation
 graphcalc==1.3.1              # Checks simple 3-polytope / Dehn-Sommerville / Euler
 
+# Conjecture generator (agent/conjecture_generator)
+txgraffiti==0.4.1             # Graffiti3 automated conjecture discovery
+pandas==2.3.3                 # Discovery table assembly (agent/conjecture_generator/data/)
+
+# Hopper CE finder (agent/hopper_ce_finder/agent.py) + dual-space constructor
+scipy==1.16.3                 # linprog (hop feasibility LP) + ConvexHull (dual hulls)
+
+# Orchestrator CPU hygiene (agent/orchestrator/orchestrator.py)
+threadpoolctl==3.5.0          # pins BLAS/MKL pools to 1 thread in finder processes
+
 # Prover search (agent/prover/tools/search.py)
 scikit-learn==1.7.2           # TF-IDF vectorizer + cosine similarity for Mathlib search
 numpy==2.3.5                  # Numerical arrays (TF-IDF matrix, p-vector arithmetic)
@@ -33,9 +43,7 @@ setuptools==80.9.0
 typing_extensions==4.15.0    # shared with anthropic
 
 # scikit-learn transitive
-scipy==1.16.3
 joblib==1.5.2
-threadpoolctl==3.5.0
 
 # matplotlib transitive
 # (numpy already listed above; pillow / kiwisolver pulled in automatically)

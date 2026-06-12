@@ -10,7 +10,7 @@ Also provides the Inventory-entailment pre-check: a candidate that additionally
 satisfies the per-map arithmetic content of every Inventory axiom (occupation
 feasibility, the Jučovič inequality, …) is a *countermodel* — its existence
 proves the conjecture's conclusion is not derivable from Inventory.lean, so
-Stage 4 formalization cannot honestly succeed until either a CE is realized or
+Stage 3 formalization cannot honestly succeed until either a CE is realized or
 Inventory gains new (real) mathematical content.
 
 Env-tunable bounds:

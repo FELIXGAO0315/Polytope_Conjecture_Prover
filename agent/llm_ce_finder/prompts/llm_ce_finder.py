@@ -63,7 +63,7 @@ Conclusion — must be VIOLATED (the inequality must FAIL):
 
 {prev_block}\
 ━━━ YOUR TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-For each candidate you propose, verify in order:
+For each candidate you propose, verify SILENTLY (do NOT write the arithmetic out):
 
   Step 1 — Compute DS:    Σ_k (6-k)·p_k  must equal exactly 12.
   Step 2 — Check f2:      Σ p_k must satisfy any f2 hypothesis (e.g. f2 ≥ 13).
@@ -76,9 +76,11 @@ counts to stay in the realizable range. Vary your approach each round — if
 previous candidates failed realizability, try different k values (p7 vs p8 vs p9)
 or different distributions of small faces.
 
-Respond ONLY with valid JSON (no prose outside the JSON block):
+Respond ONLY with valid JSON (no prose outside the JSON block). Keep the
+"reasoning" field to AT MOST 3 short sentences describing your strategy —
+no derivations, no step-by-step arithmetic, no per-candidate checks:
 {{
-  "reasoning": "Step-by-step arithmetic for your best candidate",
+  "reasoning": "2-3 sentences: which family/strategy and why it violates",
   "candidates": [
     {{"p3": 0, "p4": 0, "p5": 0, "p6": 0, "p7": 0}},
     ...

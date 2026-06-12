@@ -1,0 +1,30 @@
+{
+  "conjecture_id": "C22",
+  "conjecture_latex": "if ((is_simple)  and  (f_2>=_33)), then p6 >= (-11*sum_pk_after_p6 + 22)",
+  "hypotheses": [
+    "(is_simple)",
+    "(f_2>=_33)"
+  ],
+  "conclusion": "p6 >= (-11*sum_pk_after_p6 + 22)",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      0,
+      0,
+      12,
+      21
+    ],
+    "p3": 0,
+    "p4": 0,
+    "p5": 12,
+    "p6": 21,
+    "f2": 33,
+    "num_vertices": 62,
+    "num_edges": 93
+  },
+  "found_by": "boundary_enumeration",
+  "found_at_round": 1,
+  "violation_detail": "p6=21.0 < RHS=22.0000 (violation)",
+  "found_at": "2026-06-12T04:55:17.095146+00:00",
+  "other_candidates_not_checked": []
+}

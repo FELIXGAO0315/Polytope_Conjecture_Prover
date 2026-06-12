@@ -535,12 +535,14 @@ class PolibValidator:
         """
         start = time.monotonic()
         try:
+            from agent.procutil import set_pdeathsig
             proc = subprocess.run(
                 ["lake", "build", "Polib"],
                 cwd=self._workspace,
                 capture_output=True,
                 text=True,
                 timeout=self._timeout,
+                preexec_fn=set_pdeathsig,
             )
         except subprocess.TimeoutExpired:
             elapsed = time.monotonic() - start

@@ -2,8 +2,8 @@
 """Render the witness graph stored in a CE JSON as a planar drawing.
 
 Usage:
-    python tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json
-    python tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json -o /tmp/c5.png
+    python agent/orchestrator/tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json
+    python agent/orchestrator/tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json -o /tmp/c5.png
 
 The witness is drawn with its planar embedding, so every interior region of
 the picture is an actual face of the polytope (the outer region is the
