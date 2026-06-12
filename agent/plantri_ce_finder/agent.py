@@ -21,9 +21,10 @@ tag, in two roles:
       the cached attempt count, so the next program run draws fresh
       trajectories instead of replaying old ones.
 
-When the double check has covered every survivor, the CE search for this
-conjecture is settled either way (CE found, or nothing realized), so the
-orchestrator stops all remaining tracks.
+A completed double check settles every IN-BOUNDS candidate, but it does not
+stop the sibling tracks: LLM/RL/Hopper can propose p-vectors outside the
+enumeration bounds, so they run out their own budgets before the orchestrator
+concludes "no CE". Only a found CE aborts everyone.
 
 Standalone: can be run independently or embedded in the orchestrator pipeline.
 """
@@ -66,9 +67,8 @@ class PlantriCEFinder:
 
     screen()        decides every candidate within exhaustive reach (final
                     verdicts, cached) and returns the undecided survivors.
-    double_check()  gives each survivor one construction attempt; sets
-                    `completed` after a full sweep with no CE so the caller
-                    can treat the search as settled and stop other tracks.
+    double_check()  gives each survivor one construction attempt; returns a
+                    CE dict on success, None after a full sweep without one.
     """
 
     def __init__(
@@ -80,7 +80,6 @@ class PlantriCEFinder:
         self.conjecture = conjecture
         self.client = client
         self.stop_event = stop_event or threading.Event()
-        self.completed = False    # True only after a full double check, no CE
 
     # ── role 1: exhaustive screen (plantri proper — decisive, no API) ─────────
 
@@ -256,7 +255,7 @@ class PlantriCEFinder:
 
     def double_check(self, survivors: list, stop_event=None) -> Optional[dict]:
         """Give every screen survivor one construction attempt.
-        Returns CE info dict or None; sets `completed` after a full sweep."""
+        Returns CE info dict, or None after a full sweep without one."""
         tag = f"{TAG} constructor:"
         stop = stop_event or self.stop_event
         if int(os.environ.get("CE_ENUM_REALIZE_MAX", "40")) == 0:
@@ -334,7 +333,6 @@ class PlantriCEFinder:
             print(f"{TAG} double check over — all {n_surv} candidate(s) "
                   f"attempted, no CE found "
                   f"({time.time() - t_start:.0f}s, results cached).")
-            self.completed = True
             return None
         finally:
             # On early CE success (ours or another track's), in-flight workers

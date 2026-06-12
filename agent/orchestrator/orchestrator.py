@@ -752,19 +752,17 @@ class Orchestrator:
             print(f"[Hopper ce finding] disabled: {_HOPPER_IMPORT_ERR}")
 
         # Constructor track (thread — its work runs in a spawn process pool).
-        # One double-check sweep over every screen survivor; once it has
-        # covered them all, the CE search is settled either way, so it stops
-        # the remaining tracks.
+        # One double-check sweep over every screen survivor. Only a FOUND CE
+        # stops the other tracks: a completed sweep with no CE settles the
+        # 149 in-bounds candidates, but LLM/RL/Hopper can propose p-vectors
+        # outside the enumeration bounds, so they finish their own budgets
+        # before "No CE" is concluded.
         ctor_thread: threading.Thread | None = None
         if survivors:
             def _ctor_main() -> None:
                 ce = plantri_finder.double_check(survivors, stop_event=stop_event)
                 if ce:
                     result_queue.put(ce)
-                    stop_event.set()
-                elif plantri_finder.completed:
-                    # Full double check with no CE — every undecided candidate
-                    # got its attempt; further sampling is pointless.
                     stop_event.set()
 
             ctor_thread = threading.Thread(

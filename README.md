@@ -21,7 +21,7 @@ python -m run project
 **Stage 2 reorganized around plantri — `PlantriCEFinder`**
 
 - The exhaustive screen and the constructor track now live in one dedicated agent, **`agent/plantri_ce_finder/`** (replaces `agent/constructor_ce_finder/`; the screen moved out of the orchestrator). Rationale: plantri is the main force — within its reach its verdicts are final in *both* directions; the constructor is the one-sided fallback for candidates beyond exhaustive reach. One log tag covers both roles — `[plantri ce finding] plantri:` (screen) and `[plantri ce finding] constructor:` (double check). The "Phase A / Phase B" naming is gone.
-- **The constructor is now a single double check, not an endless retry loop**: every screen survivor gets exactly one construction attempt, with the seed salted by the attempt count recorded in `output/realizability_cache.json` — so the *next program run* automatically draws fresh trajectories; the retry lives across runs, not inside one. When the sweep completes — CE or not — the whole CE search stops: the survivors are the complete in-bounds candidate set, so further sampling is pointless. Progress prints at 1/3 and 2/3 of the survivor list plus a final `double check over` line.
+- **The constructor is now a single double check, not an endless retry loop**: every screen survivor gets exactly one construction attempt, with the seed salted by the attempt count recorded in `output/realizability_cache.json` — so the *next program run* automatically draws fresh trajectories; the retry lives across runs, not inside one. A completed sweep settles every in-bounds candidate, but only a *found CE* stops the other tracks — LLM/RL/Hopper can propose p-vectors outside the enumeration bounds, so "No CE" is concluded only after all four tracks exhaust their own budgets. Progress prints at 1/3 and 2/3 of the survivor list plus a final `double check over` line.
 
 **LLM track actually produces candidates now — extended-thinking root cause found**
 
@@ -413,7 +413,7 @@ leave the region's bounds).
 
 ### Parallel Tracks — LLM + RL + Hopper + Constructor Double Check
 
-Four tracks run in **true parallel** — each track is isolated from the others: the RL and Hopper tracks run as separate OS processes (`multiprocessing.Process`) so they have independent CPU cores and no GIL or PyTorch thread-pool contention; the constructor double check is a thread whose work runs in a spawn process pool. All four share a single `multiprocessing.Event` stop signal: the first track to produce a validated CE sets the event and causes the others to exit promptly. The double check also sets it when its sweep completes with *no* CE — at that point every in-bounds candidate is settled, so the whole CE search ends.
+Four tracks run in **true parallel** — each track is isolated from the others: the RL and Hopper tracks run as separate OS processes (`multiprocessing.Process`) so they have independent CPU cores and no GIL or PyTorch thread-pool contention; the constructor double check is a thread whose work runs in a spawn process pool. All four share a single `multiprocessing.Event` stop signal: the first track to produce a validated CE sets the event and causes the others to exit promptly. That is the *only* early-stop — a double check that completes with no CE settles the in-bounds candidates but lets the samplers (which can leave the bounds) run out their own budgets before "No CE" is concluded.
 
 Each finder process is pinned to **1 torch thread and 1 BLAS thread**
 (`RL_TORCH_THREADS` / `HOPPER_TORCH_THREADS`, default 1). This is a measured
@@ -566,9 +566,10 @@ draws provably fresh trajectories; the retry lives across runs, not inside
 one.
 
 Termination: it aborts instantly when any track finds a CE (stop signal).
-When its own sweep completes, the CE search is **settled either way** — the
-survivors are the complete in-bounds candidate set — so the orchestrator
-stops all remaining tracks. Per-worker plantri splits are capped so that the
+When its own sweep completes with no CE, the in-bounds candidates are
+settled, but the sampler tracks keep running — they can propose p-vectors
+outside the enumeration bounds, so "No CE" requires all four tracks to
+exhaust their budgets. Per-worker plantri splits are capped so that the
 constructor pool and the LLM track's tier-4 check pool together fit the
 machine (`cores / (CE_ENUM_REALIZE_PARALLEL + LLM_CE_CHECK_PARALLEL)`).
 
