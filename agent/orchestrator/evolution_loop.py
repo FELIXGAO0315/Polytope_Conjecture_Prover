@@ -42,7 +42,6 @@ from agent.conjecture_generator.tools.hints import add_failure_hint, add_success
 from agent.orchestrator.orchestrator import (
     Orchestrator,
     _resolve_lean_output,
-    _write_ce_json,
 )
 from agent.orchestrator.tools.conjecture_parser import ParsedConjecture
 
@@ -131,9 +130,6 @@ class EvolutionLoop:
             ce_info = None
 
         if ce_info:
-            if ce_info.get("found_by") != "rl_agent":
-                out_path = _write_ce_json(c, ce_info, self.orch._ce_dir)
-                print(f"[Output] CE JSON → {out_path}", flush=True)
             return self._record_refuted(spec, ce_info.get("p_vector"),
                                         ce_info.get("violation_detail", ""))
 

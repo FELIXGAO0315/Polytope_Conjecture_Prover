@@ -284,7 +284,7 @@ class HopperCEFinder:
                 # ── Check for CE ──────────────────────────────────────────────
                 ok, detail = is_counterexample(c_pvec, self.conjecture)
                 if ok:
-                    print(f"{_TAG} Step {step}/{self.num_steps}: CE found — {c_pvec} — {detail}")
+                    print(f"\n{_TAG} Step {step}/{self.num_steps}: CE found❗ — {c_pvec} — {detail}\n")
                     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
                     checker = self.check_agent or PVectorCheckAgent(client=None)
                     # Extract the explicit primal witness graph from the dual
@@ -300,13 +300,18 @@ class HopperCEFinder:
                         c_pvec, self.conjecture, witness_graph=witness,
                     )
                     if report.all_passed:
+                        print(f"{_TAG} 5 checks passed, CE is valid √")
                         return {
                             "p_vector": c_pvec,
-                            "found_by": "hopper_agent",
+                            "found_by": "hopper ce finder",
                             "found_at_round": step,
                             "violation_detail": detail,
                             "other_candidates_not_checked": [],
                             "found_at": datetime.now(timezone.utc).isoformat(),
+                            # carries the verified witness to the orchestrator's
+                            # outer re-check — otherwise exotic CEs die there at
+                            # the Tier-4 constructor despite the live witness
+                            "witness_edges": report.witness_edges,
                         }
                     print(f"{_TAG} Step {step}/{self.num_steps}: candidate failed checks — continuing")
 

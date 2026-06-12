@@ -361,10 +361,12 @@ def _rl_finder_process(
     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
     checker = PVectorCheckAgent(client=None) if conjecture else None
 
+    # NOTE: no stop_event bail-out here — the RL agent sets stop_event itself
+    # the moment it finds a CE (to halt the other tracks), so the event being
+    # set does NOT mean another track settled the search. Bailing out here
+    # silently skipped validation of RL's own candidates (lost the C24 CE
+    # twice on 2026-06-12).
     for idx, raw in enumerate(ces):
-        if stop_event.is_set():
-            return
-
         p_vec_list = raw.get("p_vector", [])
         p_vec: dict[int, int] = {
             k + 3: int(v)
@@ -374,15 +376,30 @@ def _rl_finder_process(
 
         detail = f"gap={raw.get('gap', 0):.4f}, margin={raw.get('margin', 0):.4f}"
 
+        # Pass the RL env's live graph through the checker's witness path
+        # (independently re-verified there by graphcalc + networkx). Without
+        # it, exotic candidates die at the Tier-4 constructor even though RL
+        # holds a live witness — that lost the C24 CE on 2026-06-12.
+        witness = None
+        graph_data = raw.get("graph")
+        if graph_data:
+            try:
+                import networkx as _nx
+                witness = _nx.node_link_graph(graph_data, edges="links")
+            except Exception as exc:
+                print(f"{tag} warning: witness graph deserialization failed: {exc}")
+
         w_edges = None
         if checker and conjecture:
-            report = checker.run_silent(p_vec, conjecture, rl_verified=True)
+            report = checker.run_silent(p_vec, conjecture, rl_verified=True,
+                                        witness_graph=witness)
             for r in report.results:
                 mark = "√" if r.passed else "✗"
                 print(f"{tag} {mark} {r.label}: {r.detail}")
             if not report.all_passed:
                 print(f"{tag} CE #{idx + 1}/{len(ces)}: not valid — proceed to next")
                 continue
+            print(f"{tag} 5 checks passed, CE is valid √")
             w_edges = report.witness_edges
 
         other_candidates = [
@@ -393,7 +410,7 @@ def _rl_finder_process(
         ]
         ce_record = {
             "p_vector": p_vec,
-            "found_by": "rl_agent",
+            "found_by": "rl ce finder",
             "found_at_round": raw.get("episode", 0),
             "violation_detail": detail,
             "other_candidates_not_checked": other_candidates,
@@ -402,8 +419,8 @@ def _rl_finder_process(
         }
         if conjecture:
             try:
-                out_path = _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
-                print(f"{tag} The ce candidate is valid, saved CE JSON → {out_path}")
+                _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
+                ce_record["json_written"] = True
             except Exception as exc:
                 print(f"{tag} warning: could not write CE JSON: {exc}")
         result_queue.put(ce_record)
@@ -428,6 +445,7 @@ def _hopper_finder_process(
         print(f"{tag} disabled: {_HOPPER_IMPORT_ERR}")
         return
 
+    print("[Hopper ce finding] Start working ...")
     try:
         hopper = _HopperCEFinder(
             conjecture=conjecture,
@@ -445,9 +463,20 @@ def _hopper_finder_process(
     p_vec = result.get("p_vector", {})
     detail = result.get("violation_detail", "")
 
+    # rebuild Hopper's verified witness so the re-check doesn't depend on the
+    # Tier-4 constructor rediscovering an exotic polytope from scratch
+    witness = None
+    w_edges_in = result.get("witness_edges")
+    if w_edges_in:
+        try:
+            import networkx as _nx
+            witness = _nx.Graph(w_edges_in)
+        except Exception as exc:
+            print(f"{tag} warning: witness graph reconstruction failed: {exc}")
+
     from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
     checker = PVectorCheckAgent(client=None)
-    report = checker.run_silent(p_vec, conjecture)
+    report = checker.run_silent(p_vec, conjecture, witness_graph=witness)
 
     print(f"{tag} CE candidate from Hopper, running 5 checks")
     for r in report.results:
@@ -458,9 +487,10 @@ def _hopper_finder_process(
         print(f"{tag} CE not valid — Hopper exhausted")
         return
 
+    print(f"{tag} 5 checks passed, CE is valid √")
     ce_record = {
         "p_vector": p_vec,
-        "found_by": "hopper_agent",
+        "found_by": "hopper ce finder",
         "found_at_round": result.get("found_at_round", 0),
         "violation_detail": detail,
         "other_candidates_not_checked": [],
@@ -468,8 +498,8 @@ def _hopper_finder_process(
         "witness_edges": report.witness_edges,
     }
     try:
-        out_path = _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
-        print(f"{tag} CE valid, saved CE JSON → {out_path}")
+        _write_ce_json(conjecture, ce_record, _PROJECT_ROOT / "output" / "conjecture_with_ce")
+        ce_record["json_written"] = True
     except Exception as exc:
         print(f"{tag} warning: could not write CE JSON: {exc}")
     result_queue.put(ce_record)
@@ -527,11 +557,13 @@ def _write_ce_json(
     if witness_edges:
         try:
             from agent.orchestrator.tools.draw_ce_witness import render_witness
-            png = render_witness(out_path)
-            print(f"[Output] CE witness rendering → {png}")
+            render_witness(out_path)
+            print(f"[Output] json and graph were saved → {conjecture.short_id}")
         except Exception as exc:
-            print(f"[Output] warning: witness rendering failed ({exc}) — "
-                  f"JSON written without PNG")
+            print(f"[Output] json saved → {conjecture.short_id} "
+                  f"(witness rendering failed: {exc})")
+    else:
+        print(f"[Output] json saved → {conjecture.short_id} (no witness graph)")
     return out_path
 
 
@@ -588,11 +620,7 @@ class Orchestrator:
         print(_sep)
 
         ce_info = self._run_ce_search(conjecture, rl_episodes, llm_rounds)
-        if ce_info:
-            if ce_info.get("found_by") != "rl_agent":
-                out_path = _write_ce_json(conjecture, ce_info, self._ce_dir)
-                print(f"[Output] CE JSON → {out_path}")
-        else:
+        if not ce_info:
             self._run_prover(conjecture)
 
     def run_batch(
@@ -735,7 +763,7 @@ class Orchestrator:
             rl_proc.start()
         else:
             reason = _RL_IMPORT_ERR if not _RL_AVAILABLE else "formula conversion failed"
-            print(f"[rl ce finding] disabled: {reason}")
+            print(f"[RL ce finding] disabled: {reason}")
 
         # Hopper track (separate process — CPU-heavy, avoids GIL + PyTorch thread contention)
         hopper_proc: _mp.Process | None = None
@@ -771,6 +799,9 @@ class Orchestrator:
                 name=f"Constructor-{conjecture.conjecture_id}-{label}",
             )
             ctor_thread.start()
+        else:
+            print("[Plantri ce finding] no undecided candidate within bounds — "
+                  "constructor idle this run (RL/Hopper/LLM search beyond the box)")
 
         # LLM track (main thread — I/O bound, no CPU contention)
         check_agent = PVectorCheckAgent(client=self.client)
@@ -812,6 +843,17 @@ class Orchestrator:
             print(f"[Stage 2] No CE found.")
             return None
 
+        # single write point: RL/Hopper processes write in-process and set the
+        # flag; everyone else (LLM, plantri, …) is written here, BEFORE the
+        # Stage-2 closer so the log order is always [Output] → [Stage 2]
+        if not ce_info.get("json_written"):
+            try:
+                _write_ce_json(conjecture, ce_info, self._ce_dir)
+                ce_info["json_written"] = True
+            except Exception as exc:
+                print(f"[Output] warning: could not write CE JSON: {exc}")
+        print(f"[Stage 2] CE found by {ce_info.get('found_by', 'unknown')} "
+              f"— p_vector={ce_info.get('p_vector')} — search settled.")
         return ce_info
 
     # ── Batch worker ───────────────────────────────────────────────────────────
@@ -851,11 +893,7 @@ class Orchestrator:
             with state_lock:
                 claimed.discard(cid)
                 completed.add(cid)
-                if ce_info:
-                    if ce_info.get("found_by") != "rl_agent":
-                        out_path = _write_ce_json(c, ce_info, self._ce_dir)
-                        print(f"[Output] CE JSON → {out_path}")
-                else:
+                if not ce_info:
                     no_ce.add(cid)
 
         print(f"{tag} finished")
@@ -920,8 +958,7 @@ class Orchestrator:
         #   non-realizable → proof by exhaustion that no such map exists
         ce_info = self._decide_countermodels_with_plantri(conjecture, countermodels)
         if ce_info is not None:
-            out_path = _write_ce_json(conjecture, ce_info, self._ce_dir)
-            print(f"[Output] CE JSON → {out_path}")
+            _write_ce_json(conjecture, ce_info, self._ce_dir)
             print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 3.")
             return False
 
@@ -1037,7 +1074,7 @@ class Orchestrator:
                 pass
             return {
                 "p_vector": c.p_vec,
-                "found_by": "plantri_exhaustive_decision",
+                "found_by": "plantri ce finder",
                 "found_at_round": round_i,
                 "violation_detail": f"{detail} | plantri count={count} (exhaustive)",
                 "witness_edges": witness_edges,

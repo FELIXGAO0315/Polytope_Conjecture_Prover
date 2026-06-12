@@ -935,7 +935,7 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
     parser = AdvancedConjectureParser()
     conj_formula = parser.parse_formula_with_coefficients(formula)
 
-    print(f"[rl ce finding] Episode 1/{num_episodes}")
+    print(f"[RL ce finding] Start working ...")
 
     env = AdaptiveCubicGraphEnv(
         conj_formula,
@@ -1045,7 +1045,7 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
             if len(counterexamples) == 1:
                 ce_found_time = time.time() - start_time
 
-            _ce_out_dir = Path(__file__).resolve().parents[1] / "output" / "conjecture_with_ce"
+            _ce_out_dir = Path(__file__).resolve().parents[2] / "output" / "conjecture_with_ce"
             _ce_out_dir.mkdir(parents=True, exist_ok=True)
             _ce_out_file = _ce_out_dir / f"{name or 'formula'}.json"
             _ce_record = {
@@ -1062,6 +1062,10 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
                         "vertices": c["properties"].get("num_vertices"),
                         "episode": c["episode"],
                         "margin": c["margin"],
+                        "found_at": c.get("found_at"),
+                        # witness graph (node-link format) — without it a CE
+                        # that fails downstream re-construction is lost forever
+                        "graph": c.get("graph"),
                     }
                     for c in counterexamples
                 ],
@@ -1069,7 +1073,7 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
             with open(_ce_out_file, "w") as _f:
                 json.dump(_ce_record, _f, indent=2)
 
-            print(f"[rl ce finding] Episode {episode} ce found! p_vector={env.props['p_vector']}")
+            print(f"\n[RL ce finding] Episode {episode}: CE found❗ — p_vector={env.props['p_vector']}\n")
             if stop_event is not None and not stop_event.is_set():
                 stop_event.set()
             break
@@ -1084,13 +1088,13 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
             r_avg = np.mean(episode_rewards[-100:])
             len_avg = np.mean(ep_lens[-100:])
             max_gap = max(gaps[-100:]) if gaps else -100
-            print(f"[rl ce finding] Episode {episode} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f}")
+            print(f"[RL ce finding] Episode {episode} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f}")
 
     if not counterexamples and (stop_event is None or not stop_event.is_set()):
         r_avg = np.mean(episode_rewards[-100:]) if episode_rewards else 0.0
         len_avg = np.mean(ep_lens[-100:]) if ep_lens else 0.0
         max_gap = max(gaps[-100:]) if gaps else -100
-        print(f"[rl ce finding] Episode {num_episodes} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f} no ce found")
+        print(f"[RL ce finding] Episode {num_episodes} | R:{r_avg:6.2f} | Len:{len_avg:5.1f} | Stop0:{stop0_count/max(1,len(ep_lens)):5.2%} | CE:{ce_count/max(1,len(ep_lens)):5.2%} | Gap:{max_gap:7.3f} no ce found")
 
     total_time = time.time() - start_time
 

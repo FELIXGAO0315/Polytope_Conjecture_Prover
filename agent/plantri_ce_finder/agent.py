@@ -45,7 +45,7 @@ from agent.orchestrator.tools.check_pvector import (
 from agent.orchestrator.tools.polytope_constructor import _cache_key, _failure_get
 from agent.orchestrator.tools.pvec_eval import _eval_conclusion_violated
 
-TAG = "[plantri ce finding]"
+TAG = "[Plantri ce finding]"
 
 
 def _nz(cand) -> dict[int, int]:
@@ -103,6 +103,7 @@ class PlantriCEFinder:
             _pvec_of, _disk_merge,
         )
 
+        print(f"{TAG} Start working ...")
         tag = f"{TAG} plantri:"
         conjecture = self.conjecture
 
@@ -121,11 +122,12 @@ class PlantriCEFinder:
 
         def _ce_record(cand, report, method: str, round_i: int) -> dict:
             _, detail = _eval_conclusion_violated(conjecture.conclusion, cand.p_vec)
-            print(f"{tag} CE realized ({method}): {cand.p_vec}")
+            print(f"\n{tag} CE found❗ ({method}): {cand.p_vec}\n")
             report.print()
+            print(f"{tag} 5 checks passed, CE is valid √")
             return {
                 "p_vector": cand.p_vec,
-                "found_by": "boundary_enumeration",
+                "found_by": "plantri ce finder",
                 "found_at_round": round_i,
                 "violation_detail": detail,
                 "witness_edges": report.witness_edges,
@@ -314,11 +316,12 @@ class PlantriCEFinder:
                     if report.all_passed:
                         _, detail = _eval_conclusion_violated(
                             self.conjecture.conclusion, cand.p_vec)
-                        print(f"{tag} CE found ({done}/{n_surv}): {cand.p_vec}")
+                        print(f"\n{tag} CE found❗ ({done}/{n_surv}): {cand.p_vec}\n")
                         report.print()
+                        print(f"{tag} 5 checks passed, CE is valid √")
                         return {
                             "p_vector": cand.p_vec,
-                            "found_by": "constructor_finder",
+                            "found_by": "plantri ce finder",
                             "found_at_round": done,
                             "violation_detail": detail,
                             "found_at": datetime.now(timezone.utc).isoformat(),

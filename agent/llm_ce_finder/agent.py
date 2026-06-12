@@ -155,6 +155,7 @@ class LLMCEFinder:
                 self._pool = None
 
     def _run_rounds(self) -> Optional[dict]:
+        print("[LLM ce finding] Start working ...")
         from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
         checker = self.check_agent or PVectorCheckAgent(client=self.client)
 
@@ -244,11 +245,12 @@ class LLMCEFinder:
 
             for (idx, cand, detail), report in zip(to_check, reports):
                 if report.all_passed:
-                    print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: CE found — {cand} — {detail}")
+                    print(f"\n[LLM ce finding] Round {rnd}/{self.num_rounds}: CE found❗ — {cand} — {detail}\n")
                     report.print()
+                    print(f"[LLM ce finding] 5 checks passed, CE is valid √")
                     return {
                         "p_vector": cand,
-                        "found_by": "llm_finder",
+                        "found_by": "llm ce finder",
                         "found_at_round": rnd,
                         "violation_detail": detail,
                         "other_candidates_not_checked": candidates[idx + 1:],
