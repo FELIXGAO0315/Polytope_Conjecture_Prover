@@ -133,7 +133,8 @@ class ClaudeSDKClient:
 
     def _call(self, prompt: str, model: str | None = None, timeout: int | None = None,
               fast_model: str | None = None, system: str | None = None,
-              stop_event: threading.Event | None = None, max_attempts: int = 3) -> str:
+              stop_event: threading.Event | None = None, max_attempts: int = 3,
+              effort: str | None = None) -> str:
         """Call the claude CLI binary.
 
         timeout defaults to the CLAUDE_TIMEOUT env var (default 240s).
@@ -141,6 +142,9 @@ class ClaudeSDKClient:
         fast_model: if provided, used for attempt 0 only; attempts 1+ use the main model.
         stop_event: if set, kills the subprocess immediately so the call can return fast.
         max_attempts: retry budget; exploratory callers can pass 1 to fail fast.
+        effort: passed as --effort. Controls extended-thinking depth on 4.6+
+        models. Measured on a CE round prompt: default/inherited xhigh thought
+        for >240 s (every round timed out); --effort low answered in 9 s.
         """
         if timeout is None:
             timeout = int(os.environ.get("CLAUDE_TIMEOUT", "150"))
@@ -177,8 +181,15 @@ class ClaudeSDKClient:
             # Attempt 0 uses fast_model (haiku) when provided; later attempts escalate to main model.
             effective_model = (fast_model if fast_model and attempt == 0 else None) or model or self.model
             attempt_cmd = [self._bin, "-p", trimmed, "--output-format", "json", "--model", effective_model, "--tools", ""]
+            if effort:
+                attempt_cmd += ["--effort", effort]
             if system:
                 attempt_cmd += ["--system-prompt", system]
+            # When the pipeline itself is launched from a Claude Code session,
+            # the child inherits that session's CLAUDE_EFFORT (e.g. xhigh) and
+            # the nested CLI thinks for minutes on math-heavy prompts. Effort
+            # must come from the explicit flag above, never the environment.
+            child_env = {k: v for k, v in os.environ.items() if k != "CLAUDE_EFFORT"}
             # Acquire global semaphore before launching subprocess.
             # Prevents session-file races when many threads call the claude CLI in parallel.
             with _CLAUDE_CLI_SEM:
@@ -192,6 +203,7 @@ class ClaudeSDKClient:
                         stderr=subprocess.PIPE,
                         text=True,
                         preexec_fn=_cli_child_setup,
+                        env=child_env,
                     )
 
                     # Watchdog: if stop_event fires, kill the subprocess immediately.

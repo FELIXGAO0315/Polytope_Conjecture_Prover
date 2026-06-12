@@ -23,9 +23,10 @@ python -m run project
 - The exhaustive screen and the constructor track now live in one dedicated agent, **`agent/plantri_ce_finder/`** (replaces `agent/constructor_ce_finder/`; the screen moved out of the orchestrator). Rationale: plantri is the main force — within its reach its verdicts are final in *both* directions; the constructor is the one-sided fallback for candidates beyond exhaustive reach. One log tag covers both roles — `[plantri ce finding] plantri:` (screen) and `[plantri ce finding] constructor:` (double check). The "Phase A / Phase B" naming is gone.
 - **The constructor is now a single double check, not an endless retry loop**: every screen survivor gets exactly one construction attempt, with the seed salted by the attempt count recorded in `output/realizability_cache.json` — so the *next program run* automatically draws fresh trajectories; the retry lives across runs, not inside one. When the sweep completes — CE or not — the whole CE search stops: the survivors are the complete in-bounds candidate set, so further sampling is pointless. Progress prints at 1/3 and 2/3 of the survivor list plus a final `double check over` line.
 
-**LLM track fails fast when the CLI is dead**
+**LLM track actually produces candidates now — extended-thinking root cause found**
 
-- A 60 s **preflight** call (`LLM_CE_PREFLIGHT_TIMEOUT`) runs before round 1: if the claude CLI hangs (usage-limit exhaustion, auth, network), the track disables itself in ≤1 minute instead of burning three full round timeouts on the circuit breaker. Per-round timeout dropped 360 s → 180 s (`LLM_CE_TIMEOUT`; a healthy round is ~80 s). RL / Hopper / constructor are unaffected either way.
+- Every CE round used to time out (360 s and 180 s alike), so the circuit breaker killed the track before it ever emitted a candidate. Root cause: the nested `claude -p` call ran with **extended thinking** — the CLI's adaptive default on 4.6+ models, amplified to `xhigh` when the pipeline is launched from a Claude Code session (the child inherits `CLAUDE_EFFORT`) — and the math-heavy round prompt made the model think for 4+ minutes before writing any JSON (measured: >240 s, zero output). Fix: CE rounds pass `--effort low` explicitly (`LLM_CE_EFFORT`) and `CLAUDE_EFFORT` is stripped from the subprocess environment. Measured after: **a full round answers in ~8 s with 5 parsed candidates**. Low effort is deliberate — candidates are verified locally (tiers 1–3 instant, tier 4 is the real gate), so breadth beats depth.
+- A 60 s **preflight** call (`LLM_CE_PREFLIGHT_TIMEOUT`) runs before round 1: if the claude CLI is dead (usage-limit exhaustion, auth, network), the track disables itself in ≤1 minute instead of burning three full round timeouts on the circuit breaker. Per-round timeout dropped 360 s → 180 s (`LLM_CE_TIMEOUT`). RL / Hopper / constructor are unaffected either way.
 
 **Orphan processes are structurally impossible now**
 
@@ -429,6 +430,7 @@ freed cores go to plantri enumeration and the LLM track's parallel checks.
 ### LLM Track (main thread)
 
 - A 60 s **preflight** call (`LLM_CE_PREFLIGHT_TIMEOUT`) runs before round 1: if the claude CLI is dead (usage limit, auth, network) the track disables itself in ≤1 minute instead of burning three round timeouts; per-round timeout is 180 s (`LLM_CE_TIMEOUT`)
+- Rounds run at `--effort low` (`LLM_CE_EFFORT`): extended thinking on the math-heavy round prompt made rounds take >240 s (every round timed out); low effort answers in ~8 s, and candidate quality is enforced locally by the validator anyway
 - Up to **15–30 rounds**, each asking Claude for 3–5 candidate p-vectors
 - Each round's prompt includes: the conjecture statement, all previously tried candidates (up to 50), and the last 5 failures with reasons
 - Candidates are hard-deduplicated across rounds via frozenset keys; the LLM cannot repeat a vector
@@ -1123,8 +1125,9 @@ PLANTRI_JOBS=0                        # res/mod splits per decision (0 = auto: c
 RL_TORCH_THREADS=1                    # RL torch threads (1 is the measured optimum)
 HOPPER_TORCH_THREADS=1                # Hopper torch threads (1 is the measured optimum)
 LLM_CE_CHECK_PARALLEL=5               # LLM round tier-4 checks run concurrently (1 = serial)
-LLM_CE_TIMEOUT=180                    # per-round claude CLI timeout (s); healthy rounds are ~80 s
+LLM_CE_TIMEOUT=180                    # per-round claude CLI timeout (s); a round at low effort is ~8 s
 LLM_CE_PREFLIGHT_TIMEOUT=60           # CLI health check before round 1 (dead CLI → LLM track disabled)
+LLM_CE_EFFORT=low                     # extended-thinking effort for CE rounds (low/medium/high)
 ```
 
 ---

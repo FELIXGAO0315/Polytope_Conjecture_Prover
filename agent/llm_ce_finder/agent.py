@@ -32,6 +32,11 @@ _LLM_CE_TIER4_FUTILE = int(os.environ.get("LLM_CE_TIER4_FUTILE", "12"))
 # the LLM track declares itself dead for this conjecture. A dead CLI (auth,
 # usage limit, session conflicts) otherwise burns every remaining round.
 _LLM_CE_CALL_BREAKER = int(os.environ.get("LLM_CE_CALL_BREAKER", "3"))
+# Extended-thinking effort for CE rounds. "low" is deliberate: candidates are
+# cheap to verify locally (tiers 1-3 instant, tier 4 is the real gate), so
+# breadth beats depth. Measured: default/inherited effort thought for >240s
+# per round (every round timed out at 180s); low answers in ~9s.
+_LLM_CE_EFFORT = os.environ.get("LLM_CE_EFFORT", "low")
 
 
 # ── JSON extraction ───────────────────────────────────────────────────────────
@@ -160,7 +165,8 @@ class LLMCEFinder:
         try:
             self.client._call("Reply with the single word OK.",
                               model=self.model, timeout=preflight_timeout,
-                              stop_event=self.stop_event, max_attempts=1)
+                              stop_event=self.stop_event, max_attempts=1,
+                              effort=_LLM_CE_EFFORT)
         except Exception as exc:
             print(f"[LLM ce finding] disabled — CLI preflight failed ({exc}); "
                   f"RL/Hopper/constructor tracks continue")
@@ -193,7 +199,8 @@ class LLMCEFinder:
                 # is headroom for API latency spikes, not the expected cost.
                 text = self.client._call(full_prompt, model=self.model,
                                          timeout=_LLM_CE_TIMEOUT,
-                                         stop_event=self.stop_event, max_attempts=1)
+                                         stop_event=self.stop_event, max_attempts=1,
+                                         effort=_LLM_CE_EFFORT)
             except Exception as exc:
                 consec_call_errors += 1
                 print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: skipping ({exc})")
