@@ -107,54 +107,11 @@ LEAN_PREAMBLE = "import Mathlib\nimport Inventory\nimport Polib\n"
 # Injected into every fix-loop prompt (targeted_fix / targeted_fix_strict /
 # targeted_fix_decompose).  The generation system prompt is cached by the API
 # and not re-sent on fix calls, so these prompts have no domain knowledge
-# about Inventory unless we include this block explicitly.
-FIX_LOOP_POLIB_REF = """\
-## ⚠ REALIZABILITY TOKEN: every axiom call below needs `hM : IsMap maps` — take it
-## from your theorem's own hypotheses and pass it as the argument right after `maps`.
-## `IsMap` is opaque: it can NEVER be proved for a constructed instance.
+# about Inventory unless we include this block explicitly.  Rendered from
+# the single-source-of-truth catalogue in agent/prover/prompts/inventory.py.
+from agent.prover.prompts.inventory import render_fix_loop_polib_ref as _render_fix_loop_polib_ref
 
-## Inventory geometric axiom lemmas — call as STANDALONE functions (never dot-notation):
-- `euler_formula maps hM`              →  (v:ℤ) - e + Σ_{k=3}^{m} p_i k = 2 - 2g
-- `handshake maps hM`                  →  2·e = Σ_{k=3}^{m} k·p_i k
-- `regularity maps hM`                 →  3·v = 2·e
-- `kgon_occupation_bound maps hM k hk` →  total_occ k ≤ (k:ℤ)/2 · p_k  (hk : k ∈ Finset.Ico 4 (maps.m+1))
-- `p_range maps hM k hk`               →  p_i k = 0  (when maps.m < k)
-- `occupation_conservation maps hM hm` →  Σ_{k≥4} total_occ k = 3·p₃  (hm : maps.m ≥ 6)
-- `occupation_bound maps hM k hk`      →  0 ≤ total_occ k ∧ total_occ k ≤ (k:ℤ)/2·p_k
-- `quad_occ_cancellation maps hM hm`   →  Σ_{k∈[4,m]∖{6}} total_occ k ≤ Σ_{k∈[5,m]∖{6}} (k:ℤ)/2·p_k
-- `equality_family n`                  →  ∃ M_n, IsMap M_n ∧ M_n.m = n+3 ∧ p₆-equality
-                                          (takes ONLY `n` — no maps argument)
-
-## Derived Inventory lemmas (PROVED or axiomatised — calling them does NOT add new sorry):
-These are available via `import Inventory` in any generated file. USE THESE instead of sorry.
-- `P6EdgeCountEquation maps hM`      → 3*p₃ = 12*(1-g) - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k   (PROVED, no sorry)
-- `Juc_EulerFormula maps hM`         → 3*p₃ = 12 - 2*p₄ - p₅ + Σ_{k≥7}(k-6)*p_k         (PROVED, g=0)
-- `P6InequalityPart maps hM hm`      → 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{k≥7}((k+1)/2-6)*p_k  (PROVED, no sorry)
-- `Juc_InequalityPart maps hM hm`    → same bound for g=0  (PROVED, no sorry)
-- `JucovicTheorem maps hM h1`        → hexagon lower bound ∧ equality family (g=0, h1 : Σp_k ≥ 7)
-- `Juc_HexMaxOccupation maps hM hm`  → total_occ 6 ≤ 3*p₆  (PROVED)
-- `Juc_NonHexEdgeBound maps hM hm`   → Σ_{k≥5,k≠6} total_occ k ≤ Σ_{k≥5,k≠6} (k/2)*p_k  (PROVED)
-⚠ Calling any Inventory lemma is ACCEPTABLE even if it has sorry internally — you are
-  reusing the accepted, hand-curated axiom base, NOT introducing new sorry.
-⛔ The axiom base is CLOSED: NEVER write a new sorried helper lemma of your own,
-  even one that "looks like" content from the source papers. A file containing a
-  new sorry is REJECTED at save time.
-
-## Session-proved Polib lemmas (accumulated conjecture proofs):
-Check the "Previously proved dependencies" section in your prompt for what is
-currently available via `import Polib`. Only use a lemma name if it is EXPLICITLY listed there.
-Do NOT assume any specific name exists — if it is not listed, it does not exist yet.
-
-⛔ NEVER use `maps.euler_formula`, `maps.handshake`, etc. — dot-notation does NOT work.
-⛔ NEVER add fields to `SimplyCon3ConnectedMap` — structure has ONLY data fields.
-
-## Dependent type pitfalls — CRITICAL for fix-loop:
-- `regularity maps hM` / `handshake maps hM` return ℕ equations. Cast to ℤ with `exact_mod_cast`.
-- `(maps.total_faces : ℤ)` ≠ `∑ k ∈ Finset.Ico 3 (maps.m+1), (maps.p_i k : ℤ)` automatically.
-  Bridge: `simp [SimplyCon3ConnectedMap.total_faces, Nat.cast_sum]`
-- `rw [hg] at h` when `hg : g = 0` and `h` comes from `maps : SimplyCon3ConnectedMap g`
-  ALWAYS fails ("motive is not type correct"). Use `linarith [hg]` instead.
-"""
+FIX_LOOP_POLIB_REF = _render_fix_loop_polib_ref()
 
 # Static system prompt — sent via --system-prompt so Anthropic can cache it.
 # Contains everything that never changes between nodes: shared type, API reference,

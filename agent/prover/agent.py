@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -27,6 +28,7 @@ from agent.prover.prompts.lean_generation import (
     _GOAL_INSTR_INTERMEDIATE,
     _GOAL_INSTR_MAIN,
 )
+from agent.prover.polib_store import PolibStore
 from agent.prover.tools.blueprint import Blueprint, BlueprintDecomposer, BlueprintNode
 from agent.prover.tools.formalization_logger import FormalizationLogger
 from agent.prover.tools.goal_lock import GoalExtractor, GoalLock, GoalValidator, LockedGoal
@@ -136,32 +138,6 @@ class StagnationDetector:
 class FormalizerAgent:
     _proof_subdir: str = "complete_proof"  # overrideable by subclasses
 
-    # Class-level Polib locks: one lock per Polib.lean path, shared across all instances.
-    # Guards the entire save→verify→remove sequence atomically so no two threads can
-    # interleave their Polib writes (which would cause false TOCTOU "broken" detections).
-    _polib_locks: dict[str, threading.Lock] = {}
-    _polib_locks_meta: threading.Lock = threading.Lock()
-
-    # Class-level in-memory cache for Polib.lean content.
-    # Shared across all agent instances for the same path so parallel workers benefit.
-    # Invalidated inside _polib_lock after every write, so readers always get fresh data.
-    _polib_content_cache: dict[str, str] = {}
-    _polib_content_cache_lock: threading.Lock = threading.Lock()
-
-    @classmethod
-    def _get_polib_content(cls, polib_lean: "Path") -> str:
-        """Return Polib.lean content from the in-memory cache, reading disk only on miss."""
-        key = str(polib_lean.resolve())
-        with cls._polib_content_cache_lock:
-            cached = cls._polib_content_cache.get(key)
-            if cached is not None:
-                return cached
-            if not polib_lean.exists():
-                return ""  # don't cache missing file — it may be created shortly
-            content = polib_lean.read_text(encoding="utf-8")
-            cls._polib_content_cache[key] = content
-            return content
-
     def _format_dep_signatures_block(self, dep_ids: list[str]) -> str:
         """Return a prompt block with exact signatures of proved deps, so fix-loop
         LLM cannot hallucinate argument counts. Empty string if none found.
@@ -192,7 +168,7 @@ class FormalizerAgent:
         (param count, hypothesis names, types) instead of guessing.
         """
         try:
-            content = self._get_polib_content(self._polib_lean_path)
+            content = self._polib_store.read()
         except Exception:
             return ""
         if not content:
@@ -230,21 +206,6 @@ class FormalizerAgent:
             sig = sig[:1200] + " …"
         return sig
 
-    @classmethod
-    def _invalidate_polib_content(cls, polib_lean: "Path") -> None:
-        """Evict cached Polib.lean content. Call inside _polib_lock after any write."""
-        key = str(polib_lean.resolve())
-        with cls._polib_content_cache_lock:
-            cls._polib_content_cache.pop(key, None)
-
-    @classmethod
-    def _get_polib_lock(cls, polib_lean_path: "Path") -> threading.Lock:
-        key = str(polib_lean_path.resolve())
-        with cls._polib_locks_meta:
-            if key not in cls._polib_locks:
-                cls._polib_locks[key] = threading.Lock()
-            return cls._polib_locks[key]
-
     def __init__(self, config: Config):
         self._config = config
 
@@ -260,7 +221,14 @@ class FormalizerAgent:
         self._parser = LatexParser()
         self._extractor = GoalExtractor(self._sdk_fast, config.model_fast)
         self._validator = GoalValidator(self._sdk_fast, config.model_fast)
-        self._decomposer = BlueprintDecomposer(self._sdk_fast, config.model_fast)
+        # Planner uses model_main (Sonnet): blueprint decomposition is the
+        # highest-leverage decision in the pipeline — a bad blueprint kills
+        # all downstream LLM calls. Haiku has been observed (2026-06-28/29)
+        # to repeatedly invent the same arithmetically-false intermediate
+        # lemma `p_6 + 5·∑_{k≥7} p_k ≥ 10` for C104. Per-call cost is ~5x
+        # higher than Haiku but planner is called once per conjecture so the
+        # absolute impact is small. See D-2 in the C104 post-mortem.
+        self._decomposer = BlueprintDecomposer(self._sdk, config.model_main)
         self._polib_search = PolibSearch(self._store)
         self._mathlib_search = MathlibSearch()
         self._hint_generator = CombinedHintGenerator(
@@ -296,6 +264,7 @@ class FormalizerAgent:
         except ImportError:
             self._loogle_validator = None
         self._polib_mgr = PolibManager(polib_path, self._polib_search, self._dep_graph)
+        self._polib_store = PolibStore(self._polib_mgr)
         self._session = SessionState(self._store)
         # Resolve the actual Polib.lean file (polib_path may be a directory).
         _polib_file = polib_path if polib_path.is_file() else polib_path / "Polib.lean"
@@ -323,11 +292,6 @@ class FormalizerAgent:
 
         # Locks protecting shared file-write state
         self._save_lock = threading.Lock()   # dep_graph + session saves
-        # Class-level lock: shared across ALL agent instances for the same Polib.lean.
-        # Covers save→verify→remove atomically to prevent TOCTOU races in parallel mode.
-        self._polib_lock = self._get_polib_lock(
-            Path(config.polib_path) / "Polib.lean"
-        )
         self._output_lock = threading.Lock() # output file writes
 
         # Per-run code collection: blueprint node_id → final Lean code
@@ -384,7 +348,7 @@ class FormalizerAgent:
 
         if not existing.startswith(header):
             polib_lean.write_text(header + proved_part, encoding="utf-8")
-            FormalizerAgent._invalidate_polib_content(polib_lean)
+            PolibStore.invalidate_path(polib_lean)
 
     def _write_output(self, lean_code: str, module_name: str, success: bool) -> None:
         pass
@@ -523,6 +487,24 @@ class FormalizerAgent:
         if node.is_main_target:
             goal_context = _GOAL_CONTEXT_MAIN.format(lean_signature=goal.lean_signature)
             goal_instruction = _GOAL_INSTR_MAIN
+        elif node.lean_signature:
+            # Sub-lemma with a locked Lean signature supplied by the planner.
+            # Treat it like main target: show the signature as authoritative and
+            # require the LLM to prove it exactly. Eliminates signature drift
+            # across retry rounds and across nested sub-lemma decompositions.
+            goal_context = (
+                f"Locked sub-lemma signature (IMMUTABLE — you MUST prove this "
+                f"exactly as written):\n{node.lean_signature}\n\n"
+                f"This sub-lemma supports the parent theorem `{theorem_name}` "
+                f"whose signature is:\n  {goal.lean_signature}\n"
+                f"⚠ GENUS RULE: keep `SimplyCon3ConnectedMap 0` consistent with "
+                f"the parent; do NOT default to generic `{{g : ℤ}}`."
+            )
+            goal_instruction = _GOAL_INSTR_INTERMEDIATE.format(
+                node_id=node.node_id,
+                node_type=node.node_type,
+                theorem_name=theorem_name,
+            )
         else:
             goal_context = _GOAL_CONTEXT_INTERMEDIATE.format(
                 theorem_name=theorem_name,
@@ -584,6 +566,15 @@ class FormalizerAgent:
 
         dep_imports_str = ("\n".join(dep_import_lines) + "\n") if dep_import_lines else ""
         dep_details_str = "\n".join(dep_detail_lines) if dep_detail_lines else "  (none)"
+
+        # Change 3: Polib compendium — append signatures of OTHER proved
+        # lemmas (not in direct deps) so Sonnet can laterally reuse them
+        # without re-deriving. Critical when planner under-specifies deps
+        # (e.g. C104_CaseLargeSum could call C104_HandshakingConstraint even
+        # if planner didn't link them in the blueprint).
+        compendium = self._build_polib_compendium(proven_deps, max_extra=30)
+        if compendium:
+            dep_details_str = dep_details_str + "\n\n" + compendium
 
         # GitHub reference snippets (structural reference only)
         github_snippets_text = ""
@@ -647,6 +638,20 @@ class FormalizerAgent:
             local_references=self._local_refs_block(node),
             prior_context=prior_context,
         )
+
+        # Change 2b: sandwich prompt — prepend a tight summary so Sonnet
+        # sees the SPECIFIC task + most-relevant hints + most-recent
+        # error FIRST (primacy bias). The existing prior_context section
+        # near the end provides recency. Together: critical info is
+        # double-exposed, dramatically reducing the time Sonnet spends
+        # searching the full prompt during extended thinking.
+        prompt = self._build_sandwich_summary(
+            node=node,
+            goal=goal,
+            hints=hints,
+            existing_code=existing_code,
+            cross_run_errors=cross_run_errors,
+        ) + prompt
         raw = self._sdk._call(prompt, fast_model=self._config.model_fast,
                               system=LEAN_GENERATION_SYSTEM_PROMPT)
         code = self._normalize_lean(self._strip_markdown(raw))
@@ -763,6 +768,8 @@ class FormalizerAgent:
             f"- `P6InequalityPart maps hM hm`   (PROVED): 3*p₆ ≥ 12*(1-g) - 2*p₄ - 3*p₅ + Σ_{{k≥7}}((k+1)/2-6)*p_k\n"
             f"  → hm : maps.m ≥ 6 is required; derive from hypotheses or add as hypothesis\n"
             f"- `Juc_InequalityPart maps hM hm` (PROVED, g=0): same bound\n"
+            f"- `Barnette_P6Bound maps hM hm hsum` (g=0): 2*p₆ ≥ 4 + p₃ - p₅ - 2*Σ_{{k≥7}} p_k; "
+            f"requires hsum : Σ_{{k≥7}} p_k ≥ 3\n"
             f"- `euler_formula maps hM`, `handshake maps hM`, `regularity maps hM` (axioms)\n"
             f"- `occupation_conservation maps hM hm`, `occupation_bound maps hM k hk`, "
             f"`quad_occ_cancellation maps hM hm` (axioms; hm : maps.m ≥ 6)\n\n"
@@ -780,7 +787,16 @@ class FormalizerAgent:
             f"- Do NOT change the theorem statement or its type signature\n"
             f"- Return ONLY the complete Lean 4 file inside a ```lean fence."
         )
-        raw = self._sdk._call(prompt, timeout=180)
+        # Haiku-first escalation (mirrors _generate_lean). Sonnet calls on the
+        # large fix prompts consistently exceed 300s on slow networks, burning
+        # 18 min wallclock per node across 3 attempts. Haiku handles ~70% of
+        # mechanical fixes (tactic swaps, push_cast insertion, hypothesis
+        # renaming) in 30-60s; Sonnet gets the harder ones on escalation.
+        raw = self._sdk._call(
+            prompt,
+            fast_model=self._config.model_fast,
+            timeout=int(os.environ.get("PROVER_FIX_TIMEOUT", "240")),
+        )
         fixed = self._normalize_lean(self._strip_markdown(raw))
         fixed = self._ensure_preamble(fixed)
         return fixed if fixed.strip() else lean_code
@@ -833,7 +849,23 @@ class FormalizerAgent:
             f"- Do NOT write sorry — the system rejects sorry and will ask you to fix it.\n"
             f"- Return ONLY the complete corrected Lean 4 file inside a ```lean fence."
         )
-        raw = self._sdk._call(prompt, timeout=150)
+        # STRICT branch: ONE Sonnet attempt only, no retry escalation, exception
+        # swallowed. Runs in parallel with _targeted_fix (Haiku-first); first
+        # compile-OK wins. Rationale: Haiku reliably handles mechanical tactic
+        # swaps but cycles (omega ↔ linarith) when the real fix requires
+        # intermediate `have h := <Inventory>; linarith` reasoning. Sonnet gives
+        # those harder fixes a real shot — but we cap it at ONE attempt because
+        # the parallel `.result()` join would otherwise drag round wallclock to
+        # the worst-case 3-retry Sonnet timeout (1080s = 18 min). On timeout the
+        # branch falls back to lean_code so the Haiku branch is the floor.
+        try:
+            raw = self._sdk._call(
+                prompt,
+                timeout=int(os.environ.get("PROVER_FIX_TIMEOUT", "240")),
+                max_attempts=1,
+            )
+        except Exception:
+            return lean_code  # Sonnet failed; let Haiku branch carry the round
         fixed = self._normalize_lean(self._strip_markdown(raw))
         fixed = self._ensure_preamble(fixed)
         return fixed if fixed.strip() else lean_code
@@ -884,7 +916,12 @@ class FormalizerAgent:
             f"- ALWAYS use `import Mathlib` (umbrella), never specific submodule paths\n"
             f"- Return ONLY the complete Lean 4 file inside a ```lean fence."
         )
-        raw = self._sdk._call(prompt, timeout=150)
+        # Haiku-first escalation — see _targeted_fix above for rationale.
+        raw = self._sdk._call(
+            prompt,
+            fast_model=self._config.model_fast,
+            timeout=int(os.environ.get("PROVER_FIX_TIMEOUT", "240")),
+        )
         fixed = self._normalize_lean(self._strip_markdown(raw))
         fixed = self._ensure_preamble(fixed)
         return fixed if fixed.strip() else lean_code
@@ -1155,6 +1192,185 @@ class FormalizerAgent:
         "ring",
     ]
 
+    # ─── Mechanical error-fix templates ─────────────────────────────────────
+    # Maps an error-pattern keyword found in `raw_message` to an ordered list
+    # of replacement tactics. Applied surgically at the error's reported line
+    # (LeanError.line) — see _try_mechanical_error_fix.
+    #
+    # Design rule: cover ONLY tactic-class errors where a one-tactic swap is
+    # the obvious fix. Do NOT include strategy-level fixes (those go to LLM).
+    _MECH_ERROR_REPLACEMENTS: list[tuple[str, str, list[str]]] = [
+        # (error-pattern, tactic-to-replace, ordered alternatives)
+        ("`simp` made no progress", "simp",
+         ["omega", "decide", "trivial", "linarith", "ring",
+          "push_cast at *; linarith", "push_cast at *; omega",
+          "first | omega | linarith | decide"]),
+        ("simp made no progress", "simp",
+         ["omega", "decide", "trivial", "linarith", "ring",
+          "push_cast at *; linarith", "push_cast at *; omega"]),
+        ("linarith failed", "linarith",
+         ["omega", "nlinarith", "push_cast at *; linarith",
+          "push_cast at *; omega", "polyrith"]),
+        ("`linarith` failed", "linarith",
+         ["omega", "nlinarith", "push_cast at *; linarith",
+          "push_cast at *; omega"]),
+        ("omega could not", "omega",
+         ["push_cast at *; omega", "push_cast at *; linarith",
+          "nlinarith", "decide"]),
+        ("`omega` could not", "omega",
+         ["push_cast at *; omega", "push_cast at *; linarith", "nlinarith"]),
+        ("ring failed", "ring",
+         ["ring_nf", "field_simp; ring", "push_cast; ring", "linear_combination"]),
+    ]
+
+    @staticmethod
+    def _substitute_tactic_at_line(
+        lean_code: str, line_num: int, tactic_pattern: str, replacement: str,
+    ) -> str | None:
+        """Surgical replacement: find `tactic_pattern` (with optional `[..]`
+        args or `only [..]`) on line `line_num` (1-indexed) and swap it for
+        `replacement`. Returns the new code or None if pattern doesn't hit.
+
+        Preserves indentation and any preceding `by` / `· ` / `;` syntax.
+        Only touches ONE occurrence on the target line — avoids breaking other
+        uses of the same tactic elsewhere in the file.
+        """
+        lines = lean_code.splitlines(keepends=True)
+        if not (1 <= line_num <= len(lines)):
+            return None
+        target = lines[line_num - 1]
+        # Pattern: word boundary + tactic name + optional `only` + optional `[args]`
+        pattern = (
+            rf"\b{re.escape(tactic_pattern)}\b"
+            r"(\s+only)?"
+            r"(\s*\[[^\]]*\])?"
+        )
+        new_target, n_sub = re.subn(pattern, replacement, target, count=1)
+        if n_sub == 0 or new_target == target:
+            return None
+        lines[line_num - 1] = new_target
+        return "".join(lines)
+
+    def _fuzzy_polib_names(self, bad_name: str, k: int = 3) -> list[str]:
+        """Return up to `k` polib entry names most similar to `bad_name` by
+        SequenceMatcher ratio. Used when an `Unknown identifier` error names a
+        symbol that doesn't exist but a close one does (typical pattern: planner
+        named a dep `XInstance` but Polib has `X`).
+        """
+        try:
+            from difflib import get_close_matches
+            pool = [e.node_id for e in getattr(self._polib_search, "_entries", [])]
+            # Include theorem_name too — they can differ from node_id
+            pool += [e.theorem_name for e in getattr(self._polib_search, "_entries", [])
+                     if getattr(e, "theorem_name", None)]
+            pool = list(dict.fromkeys(p for p in pool if p))  # dedupe, keep order
+            return get_close_matches(bad_name, pool, n=k, cutoff=0.6)
+        except Exception:
+            return []
+
+    def _try_mechanical_error_fix(
+        self,
+        lean_code: str,
+        errors: list,
+        node_id: str,
+        verbose: bool = True,
+    ) -> str | None:
+        """Try template-based substitutions for common Lean compile errors.
+
+        Runs BEFORE the parallel LLM fix to save 60-240s on what should be a
+        one-tactic substitution (`simp` → `omega`, `linarith` → `omega`, …) or
+        a fuzzy identifier rename. Returns fixed code if any candidate
+        compiles, else None.
+
+        Candidates are tried with bounded parallelism (≤3 concurrent compiles).
+        Each compile uses a unique node_id suffix so Lake's cache doesn't
+        collide. Stops at first successful (sorry-free) compile.
+        """
+        if not errors:
+            return None
+
+        candidates: list[tuple[str, str]] = []  # (label, fixed_code)
+
+        # Iterate over ALL errors (not just errors[0]) — Lean often reports
+        # the most informative error second/third, with a generic
+        # "unsolved goals" wrapping it. Try patterns against each in order.
+        for err in errors:
+            err_msg = err.raw_message
+            err_line = getattr(err, "line", 0) or 0
+            if err_line < 1:
+                continue
+
+            # Tactic-swap patterns
+            for keyword, target_tactic, alternatives in self._MECH_ERROR_REPLACEMENTS:
+                if keyword in err_msg:
+                    for tac in alternatives:
+                        fixed = self._substitute_tactic_at_line(
+                            lean_code, err_line, target_tactic, tac
+                        )
+                        if fixed:
+                            candidates.append((f"{target_tactic}→{tac}", fixed))
+                    break  # one pattern matched this error — try next error
+
+            # Identifier fuzzy substitution (covers cases where alias propagation
+            # in PolibSearch wasn't enough — e.g. LLM hallucinated a new name).
+            if "Unknown identifier" in err_msg:
+                m = re.search(r"Unknown identifier `(\w+)`", err_msg)
+                if m:
+                    bad_name = m.group(1)
+                    for new_name in self._fuzzy_polib_names(bad_name):
+                        fixed = re.sub(
+                            rf"\b{re.escape(bad_name)}\b", new_name, lean_code
+                        )
+                        if fixed and fixed != lean_code:
+                            candidates.append((f"name:{bad_name}→{new_name}", fixed))
+
+        # Dedupe by (label, code) — same substitution might be proposed from
+        # multiple error messages pointing at the same line.
+        _seen: set[tuple[str, str]] = set()
+        _dedup: list[tuple[str, str]] = []
+        for lbl, c in candidates:
+            key = (lbl, c[:200])  # use code prefix to avoid hashing large strings
+            if key not in _seen:
+                _seen.add(key)
+                _dedup.append((lbl, c))
+        candidates = _dedup
+
+        if not candidates:
+            return None
+
+        # Bounded parallel compile — stop at first success.
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        max_workers = min(3, len(candidates))
+        with ThreadPoolExecutor(max_workers=max_workers) as ex:
+            futs = {
+                ex.submit(self._compiler.compile, code,
+                          f"{node_id}_mech_{i}"): (label, code)
+                for i, (label, code) in enumerate(candidates)
+            }
+            for fut in as_completed(futs):
+                label, code = futs[fut]
+                try:
+                    res = fut.result()
+                except Exception:
+                    continue
+                if res.success and not self._has_sorry(code):
+                    self._log(verbose,
+                        f"  [mech-fix] {node_id}: applied `{label}`, compiled")
+                    # Cancel any in-flight compiles (best-effort).
+                    for f in futs:
+                        if not f.done():
+                            f.cancel()
+                    return code
+        # Visibility: mech-fix tried candidates but none compiled. Useful
+        # signal that the error is NOT a trivial tactic swap and the LLM
+        # will need to actually reason about it.
+        labels = ", ".join(lbl for lbl, _ in candidates[:5])
+        self._log(verbose,
+            f"  [mech-fix] {node_id}: tried {len(candidates)} candidate(s) "
+            f"({labels}{'…' if len(candidates) > 5 else ''}), none compiled — "
+            f"falling through to LLM")
+        return None
+
     def _try_mechanical_tactics(
         self,
         lean_code: str,
@@ -1333,7 +1549,14 @@ class FormalizerAgent:
         # Including it caused blueprint churn (different strategy each run → worse results).
         from agent.prover.prompts.lean_generation import SHARED_MODULE_CONTENT
         struct_hash = hashlib.sha256(SHARED_MODULE_CONTENT.encode()).hexdigest()[:8]
-        return f"{latex_key}:{struct_hash}"
+        # Include planner prompt hash so any prompt tuning auto-invalidates old
+        # blueprints. Prevents the "stale-cache poisoning" failure mode where a
+        # newly fixed planner prompt keeps serving the broken old decomposition
+        # (root cause of the C104 latex_fragment coefficient-swap incident).
+        prompt_hash = hashlib.sha256(
+            DISCOVERY_BLUEPRINT_PROMPT.encode()
+        ).hexdigest()[:8]
+        return f"{latex_key}:{struct_hash}:{prompt_hash}"
 
     def _load_cached_goal(self, parsed: ParsedTheorem, verbose: bool = True) -> GoalLock | None:
         key = self._goal_cache_key(parsed)
@@ -1455,14 +1678,12 @@ class FormalizerAgent:
             return None
         try:
             _sr_report = self._quality.check(parsed, goal_lock.goal, _sorried, is_main_target=node.is_main_target)
-            with self._polib_lock:
-                self._polib_mgr.save(node, _sorried, _sr_report, category, parsed)
+            with self._polib_store.transaction() as store:
+                store.save(node, _sorried, _sr_report, category, parsed)
                 if not self._verify_polib_builds(node_id, verbose):
-                    self._polib_mgr.remove(node_id)
+                    store.remove(node_id)
                     self._log(verbose, f"  [sorry-save-err] {node_id}: sorry'd version also broke Polib")
-                    self._invalidate_polib_content(self._polib_mgr._polib_lean)
                     return None
-                self._invalidate_polib_content(self._polib_mgr._polib_lean)
             self._session.mark_partial(node_id, self._config.max_rounds_per_node, f"sorry-fallback: {reason}")
             with self._run_codes_lock:
                 self._run_codes[node_id] = _sorried
@@ -1549,10 +1770,260 @@ class FormalizerAgent:
             return new_extra + hints
         return hints
 
+    @staticmethod
+    def _face_count_tokens(name: str) -> set[str]:
+        """Extract face-count references like P3, P4, P5, P6 from a node_id.
+
+        Used as a fuzzy-match discriminator: if planner's `C104_P6HigherFacesBound`
+        TF-IDF-matches `C104_P3LowerBound` (because the planner's description
+        literally mentions the proved lemma name), the cosine score is high
+        but they're SEMANTICALLY DIFFERENT — one bounds p_6, the other bounds
+        p_3. Comparing the {P3, P4, ...} token sets catches this:
+        `{P6} ∩ {P3} = ∅` → reject the false alias.
+        Returns empty set for structural names like "Equality" or "Combine"
+        (no face-count tokens) — those cases skip this check.
+        """
+        tokens: set[str] = set()
+        # Split on underscores AND on CamelCase boundaries to find chunks
+        # that BEGIN with PN (a face-count prefix). Examples:
+        #   "C104_P6HigherFacesBound" → ['C104', 'P6HigherFacesBound']
+        #     → 'P6HigherFacesBound' starts with 'P6' → add 'P6'
+        #   "P6EdgeCountEquation"     → ['P6EdgeCountEquation']
+        #     → starts with 'P6' → add 'P6'
+        #   "Juc_P6InequalityPart"    → ['Juc', 'P6InequalityPart']
+        for piece in name.split("_"):
+            m = re.match(r"P(\d{1,2})(?=[A-Z]|$)", piece)
+            if m and 3 <= int(m.group(1)) <= 12:
+                tokens.add(f"P{m.group(1)}")
+        return tokens
+
+    @staticmethod
+    def _tokenize_for_hint_ranking(text: str) -> set[str]:
+        """Split a Lean-y identifier-rich string into lowercase tokens for
+        overlap-based similarity. Handles CamelCase, snake_case, and dotted
+        Mathlib names: `Finset.sum_Ico_consecutive` →
+        {finset, sum, ico, consecutive}.
+        """
+        # Split on dots, underscores, then CamelCase boundaries
+        chunks: list[str] = []
+        for piece in re.split(r"[.\s_]+", text):
+            if not piece:
+                continue
+            # Split CamelCase: "FinsetSum" → ["Finset", "Sum"]
+            chunks.extend(re.findall(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|\d+", piece))
+        return {c.lower() for c in chunks if len(c) > 1}
+
+    def _rank_and_trim_hints(
+        self,
+        hints: list[str],
+        node: BlueprintNode,
+        goal_signature: str = "",
+        max_keep: int = 8,
+    ) -> list[str]:
+        """Rank `hints` by token overlap with the node's goal/description, keep top-K.
+
+        Why: hint generator returns up to 16 candidates from Loogle; many are
+        only weakly relevant. Sonnet has to filter signal from noise during
+        thinking, which fragments the response across many assistant turns
+        (root cause of the C104 `max_turns` hits). Cutting to top-8 by
+        token-overlap similarity cuts prompt noise ~50% and reduces thinking
+        fragmentation. Hints with no overlap STILL get a base score so we
+        don't completely drop e.g. structural `linarith`/`omega` mentions.
+
+        Token similarity is computed against (node.description + latex_fragment
+        + goal_signature), tokenised by CamelCase + snake_case + dot splits.
+        Pattern hints injected by _inject_pattern_hints already sit at the top
+        of the list and get a stability bonus so they don't get evicted.
+        """
+        if len(hints) <= max_keep:
+            return hints
+
+        # Build the reference token bag from goal + node info
+        ref_text = " ".join(filter(None, [
+            node.description or "",
+            getattr(node, "latex_fragment", "") or "",
+            goal_signature or "",
+        ]))
+        ref_tokens = self._tokenize_for_hint_ranking(ref_text)
+        if not ref_tokens:
+            return hints[:max_keep]  # graceful degradation: just truncate
+
+        scored: list[tuple[float, int, str]] = []  # (score, original_idx, hint)
+        for idx, h in enumerate(hints):
+            tokens = self._tokenize_for_hint_ranking(h)
+            if not tokens:
+                overlap = 0.0
+            else:
+                overlap = len(tokens & ref_tokens) / max(1, len(tokens | ref_tokens))
+            # Stability bonus for earlier hints (preserves pattern-hint ordering)
+            stability = max(0.0, 0.05 * (1.0 - idx / max(1, len(hints))))
+            scored.append((overlap + stability, idx, h))
+
+        # Pick top max_keep by score; keep original order for ties → stable
+        scored.sort(key=lambda x: (-x[0], x[1]))
+        kept = [h for _, _, h in scored[:max_keep]]
+        # Log how many we dropped for visibility
+        dropped = len(hints) - len(kept)
+        if dropped > 0:
+            try:
+                self._log(True,
+                    f"  [hint-rank] {node.node_id}: kept {len(kept)}/"
+                    f"{len(hints)} hints (dropped {dropped} low-overlap)")
+            except Exception:
+                pass
+        return kept
+
+    def _regen_hints_from_bad_name(
+        self,
+        bad_name: str,
+        current_hints: list[str],
+        verbose: bool = True,
+    ) -> list[str]:
+        """When LLM hallucinates a Mathlib name (e.g. `Finset.sum_Ico_succ`),
+        query Loogle with the bad name's tokens to find REAL candidates.
+
+        Returns at most 5 new (not already in current_hints) hints.
+
+        Why: without this, the LLM might re-hallucinate the same name (or
+        another close-but-wrong name) on the next round. By injecting real
+        Mathlib results, we channel the fix into actually existing lemmas.
+
+        This is information injection (provides knowledge), NOT strategy
+        injection (doesn't say HOW to use the lemmas).
+        """
+        # Tokenize the bad name into searchable parts:
+        # "Finset.sum_Ico_succ" → ["Finset", "sum", "Ico", "succ"]
+        tokens = self._tokenize_for_hint_ranking(bad_name)
+        if not tokens:
+            return []
+        # Drop common-noise tokens
+        tokens = {t for t in tokens if t not in {"the", "a", "an", "of", "in"}}
+        if not tokens:
+            return []
+        # Build a Loogle keyword query (space-joined tokens)
+        query = " ".join(sorted(tokens))
+        try:
+            # Reuse the hint generator's Loogle helper if available
+            hg = getattr(self, "_hint_generator", None)
+            if hg is None:
+                return []
+            # _query_keyword exists on CombinedHintGenerator — use it directly
+            qf = getattr(hg, "_query_keyword", None)
+            if not callable(qf):
+                return []
+            results = qf(query) or []
+        except Exception:
+            return []
+        # Filter: not already in hints, and not the bad name itself
+        existing = set(current_hints or [])
+        new = [
+            r for r in results
+            if r and r not in existing and r != bad_name
+        ][:5]
+        if new and verbose:
+            try:
+                self._log(True,
+                    f"  [error-regen] queried Loogle for `{bad_name}` tokens "
+                    f"({query}), got {len(new)} real candidate(s)")
+            except Exception:
+                pass
+        return new
+
+    def _build_polib_compendium(
+        self,
+        proven_deps: list[str],
+        max_extra: int = 30,
+    ) -> str:
+        """Return a block listing ALL session-proved Polib lemmas' signatures
+        (no bodies), MINUS the ones already shown as direct deps.
+
+        Why: planner declares only DIRECT dependencies. Sonnet might find a
+        non-direct already-proved lemma useful (e.g. C104_CaseLargeSum could
+        leverage C104_HandshakingConstraint even though planner didn't link
+        them). Showing all proved signatures lets the LLM laterally reuse
+        without re-deriving — especially important when the same conjecture
+        has been partially proved in a previous run.
+
+        Returns "" if no Polib entries beyond direct deps.
+        """
+        all_entries = getattr(self._polib_search, "_entries", []) or []
+        direct_dep_set = set(proven_deps or [])
+        # Filter: proved status, not already in direct deps, has a real signature
+        extras: list[tuple[str, str]] = []
+        for entry in all_entries:
+            nid = getattr(entry, "node_id", None)
+            if not nid or nid in direct_dep_set:
+                continue
+            if getattr(entry, "status", None) != "proved":
+                continue
+            lean_name = getattr(entry, "theorem_name", None) or nid
+            sig = self._extract_polib_signature(lean_name)
+            if sig and len(sig) < 600:  # exclude monster signatures
+                extras.append((lean_name, sig.strip()))
+        if not extras:
+            return ""
+        # Cap to max_extra most recent (rough proxy for "most relevant in current
+        # session"). If Polib has 100+ entries this prevents prompt bloat.
+        extras = extras[-max_extra:]
+        lines: list[str] = [
+            "## Other proved Polib lemmas available (lateral reuse — call by name; do NOT redeclare):",
+            "(Compendium: all session-proved lemmas. Use any that matches a step you need.)",
+        ]
+        for name, sig in extras:
+            sig_one = " ".join(sig.split())[:280]
+            lines.append(f"- `{name}` : `{sig_one}`")
+        return "\n".join(lines) + "\n"
+
+    @staticmethod
+    def _build_sandwich_summary(
+        node: BlueprintNode,
+        goal: "LockedGoal",
+        hints: list[str],
+        existing_code: str | None = None,
+        cross_run_errors: list[dict] | None = None,
+    ) -> str:
+        """Tight `[TL;DR]` block prepended to the lean-generation prompt.
+
+        Why: Sonnet 4.6 with extended thinking will scan the full prompt
+        before responding. For a 30KB prompt this fragments the response
+        into many assistant turns (each "now I'll think about X" can become
+        a separate AssistantMessage → counted as a turn). Putting the
+        critical info upfront primes thinking onto the right pieces FAST,
+        reducing turn fragmentation. Keep this block compact (≤ 25 lines).
+        """
+        lines: list[str] = ["[TL;DR — critical task summary, read this first]\n"]
+        # 1. Goal — most important
+        lines.append(f"GOAL: prove `{node.node_id}` (type: {node.node_type})")
+        if node.latex_fragment:
+            lines.append(f"CLAIM: {node.latex_fragment[:200]}")
+        # 2. The exact Lean signature it needs to satisfy
+        sig = (goal.lean_signature or "").strip().splitlines()
+        if sig:
+            sig_text = " ".join(sig)[:240]
+            lines.append(f"SIGNATURE: {sig_text}")
+        # 3. Top 5 most relevant hints (already pre-ranked)
+        if hints:
+            lines.append("TOP HINTS (most relevant first):")
+            for h in hints[:5]:
+                lines.append(f"  • {h}")
+        # 4. If retry: most-recent failure to avoid repeating
+        if cross_run_errors:
+            last_err = cross_run_errors[-1].get("error", "")[:160]
+            if last_err:
+                lines.append(f"LAST FAILURE (do NOT repeat): {last_err}")
+        # 5. If retry-partial: existing code's first/last lines for orientation
+        if existing_code:
+            code_lines = existing_code.strip().splitlines()
+            if len(code_lines) >= 2:
+                lines.append(
+                    f"PRIOR CODE: {code_lines[0][:80]} ... {code_lines[-1][:80]}"
+                )
+        lines.append("\n[End TL;DR — full context follows]\n\n")
+        return "\n".join(lines)
+
     def _load_polib_code(self, node_id: str, category: str = "") -> str | None:
         """Extract a node's lean code from Polib.lean (proved entries) or output/Output/ (partial)."""
-        polib_lean = Path(self._config.polib_path) / "Polib.lean"
-        content = self._get_polib_content(polib_lean)
+        content = self._polib_store.read()
         if content:
             for status_label in ("proved", "partial"):
                 marker = f"-- === {node_id} ({status_label})"
@@ -1637,7 +2108,14 @@ class FormalizerAgent:
             f"}}\n\n"
             f"Respond ONLY with valid JSON. No prose outside the JSON."
         )
-        raw = self._sdk._call(prompt, timeout=150)
+        # Haiku-first escalation — decompose-decision is short structured JSON,
+        # Haiku handles it reliably and saves Sonnet wallclock for the actual
+        # sub-lemma proofs.
+        raw = self._sdk._call(
+            prompt,
+            fast_model=self._config.model_fast,
+            timeout=int(os.environ.get("PROVER_FIX_TIMEOUT", "240")),
+        )
         # Extract JSON from response
         raw = raw.strip()
         m = re.search(r"\{.*\}", raw, re.DOTALL)
@@ -1667,6 +2145,15 @@ class FormalizerAgent:
         desc = sub.get("description", "")
         hint_extra = sub.get("proof_hint", "")
 
+        # Pass `stmt` as lean_signature so _generate_lean uses the locked-goal
+        # path (L2.B). `stmt` already contains the full Lean declaration header
+        # from the dynamic-decompose schema, e.g.
+        # `private lemma X (maps : ...) : ... := by sorry`. Strip the trailing
+        # `sorry` (and any trailing whitespace) so the signature matches the
+        # convention used by goal_lock (ends at `:= by`).
+        sub_sig: str | None = None
+        if stmt and stmt.strip():
+            sub_sig = re.sub(r"\bsorry\b\s*$", "", stmt.strip()).rstrip() or None
         sub_node = BlueprintNode(
             node_id=name,
             node_type="lemma",
@@ -1674,6 +2161,7 @@ class FormalizerAgent:
             latex_fragment=parent_node.latex_fragment,
             dependencies=[],
             is_main_target=False,
+            lean_signature=sub_sig,
         )
         sub_hints = ([hint_extra] if hint_extra else []) + hints
 
@@ -1775,8 +2263,14 @@ class FormalizerAgent:
             f"- Return ONLY the complete Lean 4 file inside a ```lean fence."
         )
         # Assembly prompts are large (multiple sub-lemmas); use a longer timeout.
+        # Haiku-first escalation — assembly is mostly stitching proved sub-lemma
+        # bodies, often within Haiku's reach.
         try:
-            raw = self._sdk._call(prompt, timeout=180)
+            raw = self._sdk._call(
+                prompt,
+                fast_model=self._config.model_fast,
+                timeout=int(os.environ.get("PROVER_FIX_TIMEOUT", "240")),
+            )
         except Exception as exc:
             self._log(verbose, f"  [assemble-timeout] {node.node_id}: assembly call failed ({exc}), returning failure")
             return "", False
@@ -1927,14 +2421,31 @@ class FormalizerAgent:
                         f"  [already-declared] {node_id}: name conflict, failing node")
                     return lean_code, False, result.errors
                 # Track unknown/invalid identifiers for the banned list
+                # Pattern handles both `Foo` and dotted names `Foo.bar_baz`.
                 for pat in (
-                    r"Unknown identifier `(\w+)`",
-                    r"Invalid field `(\w+)`",
+                    r"Unknown identifier `([\w.]+)`",
+                    r"Unknown constant `([\w.]+)`",  # Mathlib name hallucination
+                    r"Invalid field `([\w.]+)`",
                 ):
                     m = re.search(pat, err.raw_message)
                     if m:
                         banned_ids.add(m.group(1))
                         _this_round_unknown = True
+                        # Change 4: error-conditioned hint regen for Mathlib
+                        # name hallucinations. When LLM invents
+                        # `Finset.sum_Ico_succ` (doesn't exist), query Loogle
+                        # with the bad name's tokens and inject real candidates
+                        # into next-round hints. Saves a round of Sonnet just
+                        # to "find the real name".
+                        if "Unknown constant" in err.raw_message or "." in m.group(1):
+                            new_hints = self._regen_hints_from_bad_name(
+                                m.group(1), active_hints, verbose
+                            )
+                            if new_hints:
+                                # Prepend so they appear first in next round
+                                active_hints = new_hints + [
+                                    h for h in active_hints if h not in new_hints
+                                ]
             if _retry_after_strip:
                 continue  # restart the round with the stripped code (don't count as a new round)
             if _this_round_unknown:
@@ -2014,6 +2525,19 @@ class FormalizerAgent:
             phase = self._escalation_phase(effective_round)
 
             if phase in (0, 1):
+                # ── Mechanical error-fix first (cheap, no LLM) ─────────────
+                # Pattern-based substitutions for common tactic errors (`simp`
+                # made no progress, linarith failed, …) and fuzzy name fixes
+                # for Unknown identifier. Saves a 60-240s Sonnet call when
+                # the fix is just `simp → omega` or similar.
+                _mech_fixed = self._try_mechanical_error_fix(
+                    lean_code, result.errors, node_id, verbose
+                )
+                if _mech_fixed is not None and _mech_fixed.strip() != lean_code.strip():
+                    lean_code = _mech_fixed
+                    current_strategy = "mechanical_error_fix"
+                    continue  # next round; will recompile and proceed
+
                 # Run targeted_fix and targeted_fix_strict in parallel; compile both.
                 if phase == 1 and not _phase1_refreshed:
                     fresh = self._hint_generator.generate(node)
@@ -2106,9 +2630,23 @@ class FormalizerAgent:
             if not code:
                 # Exact name not in Polib.lean; recover via fuzzy polib search
                 fallback = self._polib_search.search(node, parsed)
+                # Same face-count discriminator as the main fuzzy-match site
+                # to prevent silent type-mismatch from P6-bound aliased to P3-bound.
+                if fallback and fallback.node_id != node_id:
+                    n_tok = self._face_count_tokens(node_id)
+                    e_tok = self._face_count_tokens(fallback.node_id)
+                    if n_tok and e_tok and not (n_tok & e_tok):
+                        self._log(verbose,
+                            f"  [alias-reject] {node_id} → {fallback.node_id} "
+                            f"(face-count mismatch: {sorted(n_tok)} vs {sorted(e_tok)})")
+                        fallback = None
                 if fallback and fallback.status == "proved":
                     code = self._load_polib_code(fallback.node_id)
                     if code:
+                        # Same alias propagation as the main fuzzy-match site
+                        # below — register so downstream prompts see real name.
+                        if fallback.node_id != node_id:
+                            self._polib_search.register_alias(node_id, fallback.node_id)
                         self._log(verbose, f"  [skip-recover] {node_id} code recovered via {fallback.node_id}")
             if code:
                 _skip_report = self._quality.check(parsed, goal_lock.goal, code, is_main_target=node.is_main_target)
@@ -2159,7 +2697,37 @@ class FormalizerAgent:
 
         # Polib search: accept proved (sorry-free) or partial hits
         existing = self._polib_search.find_by_node_id(node_id) or self._polib_search.search(node, parsed)
+        # Discriminator: fuzzy TF-IDF can be fooled when planner's description
+        # literally mentions another already-proved lemma name (e.g. "Combine
+        # the proved lemma C104_P3LowerBound (...) with ..."). The resulting
+        # match silently aliases a p_6-bound node to a p_3-bound lemma, and
+        # downstream cascade-fails on type mismatch. To prevent: when fuzzy
+        # match would create an alias (names differ), require that the
+        # SUBJECT face-count tokens in both node_ids agree.
+        if existing and existing.node_id != node_id:
+            node_face_tokens = self._face_count_tokens(node_id)
+            entry_face_tokens = self._face_count_tokens(existing.node_id)
+            # Reject the alias if both sides have face-count tokens AND they
+            # don't share any (e.g. {P6} vs {P3}). If one side has no tokens
+            # (e.g. a structural helper), allow the match.
+            if (node_face_tokens and entry_face_tokens
+                    and not (node_face_tokens & entry_face_tokens)):
+                self._log(verbose,
+                    f"  [alias-reject] {node_id} → {existing.node_id} "
+                    f"(face-count mismatch: {sorted(node_face_tokens)} vs "
+                    f"{sorted(entry_face_tokens)})")
+                existing = None  # fall through to fresh proof generation
         if existing:
+            # If fuzzy search resolved to a DIFFERENT name than the planner used,
+            # register an alias so downstream dep-resolution (agent.py:554) can
+            # surface the real Lean identifier in generation prompts. Without
+            # this, the LLM is told the dep name is `node_id` (planner's name)
+            # but Polib.lean has the lemma under `existing.node_id` → Unknown
+            # identifier error at compile time.
+            if existing.node_id != node_id:
+                self._polib_search.register_alias(node_id, existing.node_id)
+                self._log(verbose,
+                    f"  [alias] {node_id} → {existing.node_id} (fuzzy match)")
             code = self._load_polib_code(existing.node_id)
             if existing.status == "proved" and code and not self._has_sorry(code):
                 self._log(verbose, f"  [found] {node_id} in polib (proved)")
@@ -2185,32 +2753,32 @@ class FormalizerAgent:
         if self._flog:
             self._flog.start_node(node_id, node.node_type, node.description)
 
-        # Fire reasoning_hint speculatively in a background thread so it overlaps
-        # with the CombinedHintGenerator.  If >= 3 hints come back we discard
-        # the result; otherwise it is already done (or nearly) when needed.
-        goal_sig = goal_lock.goal.lean_signature if goal_lock and goal_lock.goal else ""
-        _reason_ex = ThreadPoolExecutor(max_workers=1)
-        fut_reasoning = _reason_ex.submit(self._reasoning_hint_generator.generate, node, goal_sig)
-
         # CombinedHintGenerator: one Haiku call + all Loogle queries in parallel.
         # All returned names come directly from Loogle so no post-validation needed.
+        # Sized to cover the common case (≥3 hints back). We previously fired the
+        # reasoning-hint generator speculatively in a background thread to overlap
+        # latency — but ≥80% of runs landed in the `len(hints) ≥ 3` branch and
+        # discarded the result, while the orphan thread kept running for ~3 minutes
+        # and printed misleading `[claude_sdk escalate]` lines. Switched to
+        # demand-driven: only invoke reasoning-hint when CombinedHintGenerator
+        # actually came back sparse.
+        goal_sig = goal_lock.goal.lean_signature if goal_lock and goal_lock.goal else ""
         hints = self._hint_generator.generate(node)
-
         self._log(verbose, f"  [hints] {node_id}: {len(hints)} (combined, verified)")
 
-        # Use the speculatively computed proof sketch when hints are still sparse.
         if len(hints) < 3:
             self._log(verbose,
                 f"  [reasoning-hint] {node_id}: only {len(hints)} hint(s), "
-                f"using pre-computed LLM proof sketch")
-            sketch_hints = fut_reasoning.result()
-            _reason_ex.shutdown(wait=False)
+                f"invoking LLM proof sketch synchronously")
+            try:
+                sketch_hints = self._reasoning_hint_generator.generate(node, goal_sig)
+            except Exception as exc:
+                self._log(verbose,
+                    f"  [reasoning-hint] {node_id}: sketch generation failed ({exc})")
+                sketch_hints = []
             if sketch_hints:
                 hints = hints + sketch_hints
                 self._log(verbose, f"  [reasoning-hint] {node_id}: proof sketch added")
-        else:
-            fut_reasoning.cancel()
-            _reason_ex.shutdown(wait=False)
 
         # For partial nodes: ask the LLM whether current hints are sufficient to
         # complete the proof.  Skip and reuse the existing sorry-code if not.
@@ -2236,6 +2804,14 @@ class FormalizerAgent:
             f"  [{mode}] {node_id} — {len(hints)} hints (validated)")
 
         hints = self._inject_pattern_hints(node, hints)
+        # Change 2a: rank hints by goal-similarity, keep top 8. Reduces
+        # prompt noise → fewer assistant turns consumed by Sonnet's
+        # filtering thinking. See _rank_and_trim_hints docstring.
+        hints = self._rank_and_trim_hints(
+            hints, node,
+            goal_signature=(goal_lock.goal.lean_signature if goal_lock and goal_lock.goal else ""),
+            max_keep=8,
+        )
 
         # For retry-partial: if the node already has a section in Polib.lean,
         # remove it before the compile attempt.  Without this, the temp file
@@ -2244,13 +2820,12 @@ class FormalizerAgent:
         # Save a backup so we can restore if the retry completely fails (keeps
         # the node as partial for downstream dependency resolution).
         _partial_backup: str | None = None
-        if existing_code is not None and self._polib_mgr._polib_lean.exists():
-            _pc = self._get_polib_content(self._polib_mgr._polib_lean)
+        if existing_code is not None and self._polib_store.lean_path.exists():
+            _pc = self._polib_store.read()
             if f"\n-- === {node_id} " in _pc:
                 _partial_backup = existing_code
-                with self._polib_lock:
-                    self._polib_mgr.remove(node_id)
-                    self._invalidate_polib_content(self._polib_mgr._polib_lean)
+                with self._polib_store.transaction() as store:
+                    store.remove(node_id)
                 self._log(verbose,
                     f"  [pre-remove] {node_id}: removed old partial from Polib before retry")
 
@@ -2339,7 +2914,7 @@ class FormalizerAgent:
         # existing code), skip the duplicate save — re-saving would cause a
         # "has already been declared" build failure and roll back to [fail].
         if sorry_free and compile_ok:
-            _pc_now = self._get_polib_content(self._polib_mgr._polib_lean)
+            _pc_now = self._polib_store.read()
             if f"\n-- === {node_id} " in _pc_now:
                 self._log(verbose, f"  [already-in-polib] {node_id}: skipping duplicate save")
                 self._session.mark_done(node_id, "proved")
@@ -2351,16 +2926,14 @@ class FormalizerAgent:
 
         if sorry_free:
             try:
-                with self._polib_lock:
-                    entry = self._polib_mgr.save(node, lean_code, report, category, parsed)
-                    # Verify inside the lock: no other thread can modify Polib between
-                    # save and verify, so a build failure is unambiguously caused by
-                    # this entry and not by a concurrent write.
+                with self._polib_store.transaction() as store:
+                    entry = store.save(node, lean_code, report, category, parsed)
+                    # Verify inside the transaction: no other thread can modify Polib
+                    # between save and verify, so a build failure is unambiguously
+                    # caused by this entry and not by a concurrent write.
                     if not self._verify_polib_builds(node_id, verbose):
-                        self._polib_mgr.remove(node_id)
-                        self._invalidate_polib_content(self._polib_mgr._polib_lean)
+                        store.remove(node_id)
                         raise PolibSaveError(f"Node '{node_id}': entry broke Polib.lean build, rolled back")
-                    self._invalidate_polib_content(self._polib_mgr._polib_lean)
                 with self._save_lock:
                     self._dep_graph.record_edges(entry.node_id, lean_code, parsed)
                     self._dep_graph.save()
@@ -2440,7 +3013,7 @@ class FormalizerAgent:
             current_node: str | None = None
             current_section: list[str] = []
             in_header = True
-            for line in self._get_polib_content(polib_lean).splitlines():
+            for line in self._polib_store.read().splitlines():
                 if in_header:
                     if line.startswith("-- === BEGIN PROVED CONTENT ==="):
                         in_header = False
@@ -3134,6 +3707,7 @@ from agent.prover.tools.blueprint import (
     _topological_sort,
     _validate_blueprint_nodes,
 )
+from agent.prover.tools.blueprint_validator import BlueprintValidator
 from agent.orchestrator.tools.conjecture_parser import ConjectureParser, ParsedConjecture
 
 if TYPE_CHECKING:
@@ -3227,6 +3801,53 @@ def _rank_lemmas_for_discovery(
     return ranked[:top_k], ranked[top_k:]
 
 
+def _build_conjecture_json(parsed: "ParsedTheorem", lean_signature: str) -> str:
+    """Render a structured JSON view of the conjecture for the planner prompt.
+
+    Sources, in priority order:
+      1. `lean_signature` — authoritative, parser-validated.
+      2. `coefficients` — extracted by AdvancedConjectureParser; lets the LLM
+         cross-check arithmetic without re-deriving from raw text.
+      3. `raw_formula` — verbatim DSL string, for context only.
+
+    Why this exists: the prior prompt fed `Hypotheses: …\nConclusion: …` as
+    free-form text alongside the lean_signature. When the two views disagreed
+    in shape (e.g. lean said `Σ + 2*p₆ ≥ 4`, conclusion said
+    `p_6 ≥ -0.5*sum + 2`), the planner sometimes synthesised a `latex_fragment`
+    with swapped coefficients (`p_6 + 2·Σ ≥ 4`) and proceeded to decompose a
+    mathematically false sub-lemma. Funnelling everything through one JSON
+    block with an explicit "trust lean_signature" instruction removes that
+    ambiguity.
+    """
+    payload: dict = {
+        "lean_signature": lean_signature,
+        "hypotheses": list(parsed.hypotheses),
+        "conclusion_raw": parsed.conclusion,
+    }
+    try:
+        from agent.conjectures import AdvancedConjectureParser
+        formula = (
+            f"if ({' and '.join(parsed.hypotheses)}), then {parsed.conclusion}"
+        )
+        cf = AdvancedConjectureParser().parse_formula_with_coefficients(formula)
+        rhs_const = float(cf.coefficients.get("const", 0.0))
+        rhs_terms = {
+            k: float(v) for k, v in cf.coefficients.items() if k != "const"
+        }
+        payload["raw_formula"] = cf.raw_formula
+        payload["conclusion"] = {
+            "lhs": "p_6",
+            "relation": cf.relation,
+            "rhs_constant": rhs_const,
+            "rhs_coefficients": rhs_terms,
+        }
+    except Exception:
+        # Non-IRIS conjecture or unparseable RHS — drop the structured block;
+        # lean_signature + raw conclusion are still present in payload.
+        pass
+    return json.dumps(payload, indent=2, ensure_ascii=False)
+
+
 # ---------------------------------------------------------------------------
 # Discovery-mode blueprint prompt
 # ---------------------------------------------------------------------------
@@ -3240,10 +3861,18 @@ it from first principles using Lean 4 / Mathlib tactics and the Inventory lemmas
 listed below.
 
 Conjecture name: {theorem_name}
-Lean signature:  {lean_signature}
-Hypotheses:
-{hypotheses}
-Conclusion: {conclusion}
+
+## Conjecture statement (structured JSON — AUTHORITATIVE)
+The block below is the canonical machine-parsed form of the conjecture.
+**Trust `lean_signature` over every other representation.** The `raw_formula`
+and `conclusion.coefficients` are provided as redundant cross-checks; if you
+ever derive an algebraic claim, verify it against `lean_signature` by direct
+substitution. NEVER swap, scale, or "simplify" the coefficients — copy them
+exactly into any `latex_fragment` you emit.
+
+```json
+{conjecture_json}
+```
 
 ## Domain context (simple 3-polytopes / maps on surfaces)
 - Euler's formula for the sphere: v - e + f = 2
@@ -3284,6 +3913,18 @@ in the `description` field.
 - Exactly ONE node must have "is_main_target": true.
 - "latex_fragment": write a brief mathematical description of what this node
   states (no verbatim proof exists — summarise the sub-goal instead).
+- "lean_signature": for EVERY non-main node, write the COMPLETE Lean 4
+  declaration header up to (and including) the `:= by` or `:=` token, e.g.
+    `private lemma C104_LargeSumCase (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_sum : ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k ≥ 4) : maps.p_i 6 ≥ 0 := by`
+  • MUST use the SAME genus as the parent theorem (`SimplyCon3ConnectedMap 0`,
+    not `{{g : ℤ}}`).
+  • MUST reuse the parent's hypothesis variable names (`maps`, `hM`, `h_p4`,
+    `h_p5`, `h_f2`, …) so the main proof can apply it directly.
+  • The lean_signature must be CONSISTENT with the latex_fragment — if you
+    write `latex_fragment = "p_6 ≥ 0"` then lean_signature must conclude
+    `: maps.p_i 6 ≥ 0` (not `≤`, not different RHS).
+  • For the main-target node, leave "lean_signature" as null/omit — the
+    locked goal signature is supplied by the system.
 
 ## CRITICAL — Node naming
 All nodes live in a shared Inventory namespace. You MUST prefix every new node
@@ -3317,6 +3958,7 @@ Respond with ONLY valid JSON — no prose, no markdown fences.
       "node_type": "def" | "lemma" | "theorem",
       "description": "One sentence: what this node proves or defines.",
       "latex_fragment": "Brief mathematical description of the sub-goal.",
+      "lean_signature": "private lemma CamelCaseUniqueId (maps : SimplyCon3ConnectedMap 0) ... : ... := by",
       "dependencies": ["only_direct_deps_here"],
       "is_main_target": false
     }}
@@ -3326,11 +3968,37 @@ Respond with ONLY valid JSON — no prose, no markdown fences.
 
 
 class ConjectureDecomposer(BlueprintDecomposer):
-    """BlueprintDecomposer variant that uses the discovery-mode prompt."""
+    """BlueprintDecomposer variant that uses the discovery-mode prompt.
 
-    def __init__(self, client, model: str, polib_lean: Path | None = None) -> None:
+    Wraps the LLM call in a 3-attempt retry-with-correction loop guarded by
+    `BlueprintValidator`: when an intermediate node's `latex_fragment` is
+    refuted by a realizable plantri-pool polytope satisfying the conjecture's
+    hypotheses, the concrete counter-example is fed back to the planner and
+    it is asked to re-decompose. Catches the false-sub-lemma class of bugs
+    (e.g. C104_P6HigherFacesBound: p_6 + 5·Σ ≥ 10 was refuted by the
+    truncated tetrahedron) BEFORE downstream proof attempts waste budget.
+    """
+
+    # Default plantri pool used by the post-decompose sanity check.
+    # If the path doesn't exist (running tests without harvest output), the
+    # validator silently no-ops — pure safety net, never blocks pipeline.
+    _DEFAULT_PLANTRI_POOL = (
+        Path(__file__).resolve().parents[2]
+        / "output" / "conjecture_generator" / "plantri_pool.json"
+    )
+
+    def __init__(
+        self,
+        client,
+        model: str,
+        polib_lean: Path | None = None,
+        plantri_pool_path: Path | None = None,
+    ) -> None:
         super().__init__(client, model)
         self._polib_lean = polib_lean
+        self._validator = BlueprintValidator(
+            plantri_pool_path or self._DEFAULT_PLANTRI_POOL
+        )
 
     def decompose(
         self,
@@ -3374,22 +4042,79 @@ class ConjectureDecomposer(BlueprintDecomposer):
         else:
             avail = "  (none yet)"
 
+        conjecture_json = _build_conjecture_json(
+            parsed, locked_goal.lean_signature,
+        )
         user_content = DISCOVERY_BLUEPRINT_PROMPT.format(
             theorem_name=parsed.name,
-            lean_signature=locked_goal.lean_signature,
-            hypotheses="\n".join(f"  - {h}" for h in parsed.hypotheses),
-            conclusion=parsed.conclusion,
+            conjecture_json=conjecture_json,
             available_lemmas=avail,
         )
-        response = self._client.messages.create(
-            model=self._model,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": user_content}],
-        )
-        text = response.content[0].text.strip()
-        nodes = _parse_blueprint_json(text)
+
         polib_ids = {e["node_id"] for e in (proved_lemmas or [])}
-        _validate_blueprint_nodes(nodes, known_polib_ids=polib_ids)
+        messages: list[dict] = [{"role": "user", "content": user_content}]
+        last_exc: Exception | None = None
+        nodes: list[BlueprintNode] | None = None
+        text = ""
+
+        for attempt in range(3):
+            print(f"      [planner attempt {attempt + 1}/3] sending prompt "
+                  f"({len(messages)} messages in history)", flush=True)
+            response = self._client.messages.create(
+                model=self._model,
+                max_tokens=2048,
+                messages=messages,
+            )
+            text = response.content[0].text.strip()
+            try:
+                nodes = _parse_blueprint_json(text)
+                _validate_blueprint_nodes(nodes, known_polib_ids=polib_ids)
+                # Plantri-pool sanity check: refute blueprints whose
+                # intermediate claims are violated by realizable polytopes
+                # satisfying the conjecture's hypotheses. False intermediates
+                # are caught here BEFORE downstream LLM calls burn budget on
+                # proving an unprovable sub-lemma.
+                refutation = self._validator.check(nodes, parsed.hypotheses)
+                if refutation is not None:
+                    raise BlueprintError(refutation.message())
+                print(f"      [planner attempt {attempt + 1}/3] ACCEPTED — "
+                      f"{len(nodes)} nodes, no refutation", flush=True)
+                break
+            except BlueprintError as exc:
+                last_exc = exc
+                err_msg = str(exc)
+                # Log the rejection so the operator can see what L2.A caught
+                # without having to add ad-hoc print statements.
+                err_class = "REFUTED" if "REFUTED" in err_msg else (
+                    "INVALID_JSON" if "JSON" in err_msg else "SCHEMA"
+                )
+                print(f"      [planner attempt {attempt + 1}/3] REJECTED "
+                      f"({err_class}): {err_msg[:200]}", flush=True)
+                if "REFUTED" in err_msg:
+                    correction = (
+                        err_msg + "\n\n"
+                        "Re-emit the blueprint with a corrected decomposition. "
+                        "The refuted intermediate is mathematically false and "
+                        "must be replaced — do not keep it. Output ONLY the "
+                        "JSON object."
+                    )
+                else:
+                    correction = (
+                        "Your response was not valid JSON matching the "
+                        "required schema. Respond with ONLY the JSON object — "
+                        "no prose, no markdown, no comments. Start your "
+                        "response with '{' and end with '}'."
+                    )
+                messages = messages + [
+                    {"role": "assistant", "content": text},
+                    {"role": "user", "content": correction},
+                ]
+        else:
+            print(f"      [planner] all 3 attempts failed — last error: "
+                  f"{str(last_exc)[:200]}", flush=True)
+            raise last_exc  # type: ignore[misc]
+
+        assert nodes is not None  # for type checker
         topo_order = _topological_sort(nodes)
         blueprint_data = json.dumps([n.to_dict() for n in nodes], sort_keys=True)
         blueprint_hash = hashlib.sha256(blueprint_data.encode()).hexdigest()
