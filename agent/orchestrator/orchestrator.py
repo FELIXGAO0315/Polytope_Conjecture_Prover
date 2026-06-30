@@ -590,6 +590,10 @@ class Orchestrator:
         self.client = ClaudeSDKClient(model=self.config.model_main)
         self._ce_dir = _PROJECT_ROOT / "output" / "conjecture_with_ce"
         self._no_ce_dir = _PROJECT_ROOT / "output" / "conjecture_without_ce"
+        # Lazily loaded plantri pool (~25k verified-realizable p-vectors)
+        # used by Stage 0 (plantri sub-phase) replay. Cached so batch runs
+        # don't re-parse the 25k-entry JSON for every conjecture.
+        self._plantri_pool_cache: Optional[list[dict]] = None
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -676,6 +680,15 @@ class Orchestrator:
         for t in workers:
             t.join()
 
+        # ── Witness pool re-sweep ──────────────────────────────────────────────
+        # During pass 1 the pool grew with every CE persisted along the way,
+        # so a witness found late may refute a conjecture that failed early.
+        # Cheap (≤1 s/conjecture, same 5-check gate via graphcalc).
+        if no_ce:
+            undecided_now = [c for c in conjectures if c.conjecture_id in no_ce]
+            newly_refuted = self._witness_pool_resweep(undecided_now, tag="[Batch]")
+            no_ce.difference_update(newly_refuted)
+
         # ── ProverAgent for conjectures without CE ─────────────────────────────
         remaining = [c for c in conjectures if c.conjecture_id in no_ce]
         print(f"\n[Batch] CE search done. "
@@ -691,6 +704,201 @@ class Orchestrator:
 
     # ── CE search (shared by single + batch modes) ─────────────────────────────
 
+    def _witness_pool_resweep(
+        self, undecided: list[ParsedConjecture], tag: str = "[Batch]",
+    ) -> set[str]:
+        """Re-run Stage 0 (witness pool replay) ONLY on `undecided` conjectures.
+
+        Useful after a batch / multi-conjecture run: by the end of pass 1 the
+        pool has grown with every CE persisted along the way, so a witness
+        found late may now refute a conjecture that failed early. Each pass is
+        ≤1 s per conjecture (graphcalc-verified, same gate), so this is much
+        cheaper than re-running Stage 1/2/3.
+
+        Returns the set of conjecture_ids that got a CE this sweep.
+        """
+        if not undecided:
+            return set()
+        ids = sorted(c.conjecture_id for c in undecided)
+        print(f"\n{tag} witness pool re-sweep over {len(undecided)} undecided "
+              f"conjecture(s): {ids}")
+        newly_refuted: set[str] = set()
+        for c in undecided:
+            ce = self._replay_witness_pool(c)
+            if ce is not None:
+                newly_refuted.add(c.conjecture_id)
+        if newly_refuted:
+            print(f"{tag} witness pool re-sweep: {len(newly_refuted)} new CE(s) "
+                  f"— {sorted(newly_refuted)}")
+        else:
+            print(f"{tag} witness pool re-sweep: no new CE — pool saturated for "
+                  f"this undecided set.")
+        return newly_refuted
+
+    def _replay_witness_pool(self, conjecture: ParsedConjecture) -> Optional[dict]:
+        """Stage 0 — replay every verified sibling witness against this
+        conjecture. Cheap: each replay short-circuits at the witness-graph
+        branch of `_check_realizability` (graphcalc verifies the graph + an
+        exact p-vector match) before Tier 4 reconstruction runs. First witness
+        whose 5-check report passes is returned as a CE; otherwise None and
+        the regular Stage 1 walk follows.
+        """
+        if not self._ce_dir.exists():
+            return None
+        own_dir = conjecture.short_id
+        # `*/*.json` matches the canonical {Cx}/{Cx}.json layout written by
+        # _write_ce_json — top-level strays from older bugs are ignored.
+        pool = sorted(self._ce_dir.glob("*/*.json"))
+        pool = [p for p in pool if p.parent.name != own_dir]
+        if not pool:
+            return None
+        print(f"[Stage 0] Witness pool replay — re-checking {len(pool)} "
+              f"sibling witness(es) ...")
+        import networkx as _nx
+        checker = PVectorCheckAgent(client=self.client)
+        for jf in pool:
+            try:
+                data = json.loads(jf.read_text())
+            except Exception:
+                continue
+            ce = data.get("counterexample") or {}
+            wg = ce.get("witness_graph") or {}
+            edges = wg.get("edges") or []
+            if not edges:
+                continue
+            p_vec = {int(k[1:]): v for k, v in ce.items()
+                     if k.startswith("p") and k[1:].isdigit()
+                     and isinstance(v, int) and v > 0}
+            if not p_vec:
+                continue
+            try:
+                G = _nx.Graph((int(u), int(v)) for u, v in edges)
+            except Exception:
+                continue
+            # Tight constructor_timeout: a matching witness short-circuits in
+            # milliseconds; a mismatched (corrupted) one would otherwise burn
+            # the default 30s budget per replay.
+            report = checker.run_silent(
+                p_vec, conjecture, constructor_timeout=2.0, witness_graph=G,
+            )
+            if not report.all_passed:
+                continue
+            src = jf.parent.name
+            _, detail = _eval_conclusion_violated(conjecture.conclusion, p_vec)
+            print(f"[Stage 0] HIT — sibling witness from {src} refutes "
+                  f"{conjecture.short_id}: {detail}")
+            report.print()
+            ce_record = {
+                "p_vector": p_vec,
+                "found_by": f"witness_pool_replay (from {src})",
+                "found_at_round": 0,
+                "violation_detail": detail,
+                "other_candidates_not_checked": [],
+                "found_at": datetime.now(timezone.utc).isoformat(),
+                "witness_edges": report.witness_edges,
+            }
+            try:
+                _write_ce_json(conjecture, ce_record, self._ce_dir)
+                ce_record["json_written"] = True
+            except Exception as exc:
+                print(f"[Stage 0] warning: could not write CE JSON: {exc}")
+            return ce_record
+        print(f"[Stage 0] No sibling witness refutes {conjecture.short_id} "
+              f"— proceeding to plantri pool replay.")
+        return None
+
+    def _get_plantri_pool(self) -> list[dict]:
+        """Lazy-load the plantri-harvested pool. Returns [] if missing
+        (silent — user can generate it with
+         `python -m agent.conjecture_generator.tools.plantri_harvest`)."""
+        if self._plantri_pool_cache is None:
+            try:
+                from agent.conjecture_generator.tools.plantri_harvest import (
+                    load_plantri_pool,
+                )
+                self._plantri_pool_cache = load_plantri_pool()
+            except Exception:
+                self._plantri_pool_cache = []
+        return self._plantri_pool_cache
+
+    def _replay_plantri_pool(self, conjecture: ParsedConjecture) -> Optional[dict]:
+        """Stage 0 (plantri sub-phase) — scan the plantri-harvested pool
+        (~25k verified-realizable p-vectors with f_2 ≤ 28) against this
+        conjecture's hypotheses + conclusion. Every pool entry is plantri-
+        proven realizable, so a hit only needs the witness graph
+        reconstructed (via plantri_decide, ~1-10 s for these small sizes)
+        before passing the standard 5-check gate.
+
+        The dict-only filter is microseconds per entry; total cost is
+        ~50-200 ms per conjecture for the scan, plus 1-10 s per hypothesis-
+        matching survivor (typically 0).
+
+        Returns CE info on first validated hit, or None if pool empty / no
+        match / verification fails.
+        """
+        pool = self._get_plantri_pool()
+        if not pool:
+            return None
+
+        print(f"[Stage 0] Plantri pool replay — scanning {len(pool)} "
+              f"verified-realizable p-vector(s) ...")
+
+        hits: list[dict[int, int]] = []
+        for entry in pool:
+            try:
+                p_vec = {int(k): v for k, v in entry["p_vec"].items()}
+            except Exception:
+                continue
+            if not all(_eval_hypothesis(h, p_vec) for h in conjecture.hypotheses):
+                continue
+            violated, _ = _eval_conclusion_violated(conjecture.conclusion, p_vec)
+            if not violated:
+                continue
+            hits.append(p_vec)
+
+        if not hits:
+            print(f"[Stage 0] No pool p-vector satisfies hypotheses + "
+                  f"violates conclusion — proceeding to Stage 1.")
+            return None
+
+        print(f"[Stage 0] {len(hits)} pool p-vector(s) match — "
+              f"verifying with plantri-rebuilt witness(es) ...")
+
+        from agent.orchestrator.tools.polytope_constructor import _plantri_decide
+        checker = PVectorCheckAgent(client=self.client)
+        for p_vec in hits:
+            G, verdict = _plantri_decide(p_vec, timeout=15.0)
+            if verdict != "realizable" or G is None:
+                continue  # pool entry should always rebuild; skip if it doesn't
+            report = checker.run_silent(
+                p_vec, conjecture, constructor_timeout=2.0, witness_graph=G,
+            )
+            if not report.all_passed:
+                continue
+            _, detail = _eval_conclusion_violated(conjecture.conclusion, p_vec)
+            print(f"[Stage 0] HIT — plantri pool p-vector refutes "
+                  f"{conjecture.short_id}: {detail}")
+            report.print()
+            ce_record = {
+                "p_vector": p_vec,
+                "found_by": "plantri_pool_replay",
+                "found_at_round": 0,
+                "violation_detail": detail,
+                "other_candidates_not_checked": [],
+                "found_at": datetime.now(timezone.utc).isoformat(),
+                "witness_edges": report.witness_edges,
+            }
+            try:
+                _write_ce_json(conjecture, ce_record, self._ce_dir)
+                ce_record["json_written"] = True
+            except Exception as exc:
+                print(f"[Stage 0] warning: could not write CE JSON: {exc}")
+            return ce_record
+
+        print(f"[Stage 0] Pool hits all failed witness verification — "
+              f"proceeding to Stage 1.")
+        return None
+
     def _run_ce_search(
         self,
         conjecture: ParsedConjecture,
@@ -703,6 +911,28 @@ class Orchestrator:
         tag = f"[{conjecture.conjecture_id}{':' + label if label else ''}]"
 
         formula_str = conjecture_to_formula_string(conjecture)
+
+        # ── Stage 0: cross-conjecture witness pool replay ─────────────────────
+        # Every previously-verified CE persisted under output/conjecture_with_ce/
+        # carries a `witness_graph` edge list. Replay them all against the
+        # current conjecture's hypotheses+conclusion (own folder excluded);
+        # PVectorCheckAgent's full 5-check gate re-verifies each graph via
+        # graphcalc with no shortcut, so a stale/tampered file cannot bypass
+        # verification. Generic — the entire pool is reused, not a hand-curated
+        # hint for any one conjecture; respects no-cheating policy.
+        pool_ce = self._replay_witness_pool(conjecture)
+        if pool_ce:
+            return pool_ce
+
+        # ── Stage 0 (plantri sub-phase): plantri-harvested pool replay ────────
+        # 25k verified-realizable p-vectors (f_2 ≤ 28). Microseconds per
+        # entry for the hypothesis + conclusion filter; plantri-rebuilt
+        # witness on hits (~1-10 s each). Silent skip if pool is missing
+        # (regenerate with `python -m
+        #  agent.conjecture_generator.tools.plantri_harvest`).
+        plantri_pool_ce = self._replay_plantri_pool(conjecture)
+        if plantri_pool_ce:
+            return plantri_pool_ce
 
         # ── Fast p-vector lattice walk (no API, no graph construction) ────────
         pvec_result = PVectorCEFinder(
@@ -721,14 +951,25 @@ class Orchestrator:
                 pvec_result["violation_detail"] = detail
                 pvec_result["witness_edges"] = report.witness_edges
                 print(f"Counterexample validated at round {rnd}")
+                try:
+                    _write_ce_json(conjecture, pvec_result, self._ce_dir)
+                    pvec_result["json_written"] = True
+                except Exception as exc:
+                    print(f"[Output] warning: could not write CE JSON: {exc}")
                 return pvec_result
-        print("[Stage 1] Random walk exhausted — no realizable CE. "
-              "Proceeding to Stage 2 (unified CE search)...")
+        print("[Stage 1] Random walk exhausted — no realizable CE.")
 
         # ── Stage 2: plantri exhaustive screen (no API, decisive) ─────────────
+        print("[Stage 2] Starting unified CE search — plantri exhaustive "
+              "screen first, then parallel tracks...")
         plantri_finder = PlantriCEFinder(conjecture, client=self.client)
         enum_ce, survivors = plantri_finder.screen()
         if enum_ce:
+            try:
+                _write_ce_json(conjecture, enum_ce, self._ce_dir)
+                enum_ce["json_written"] = True
+            except Exception as exc:
+                print(f"[Output] warning: could not write CE JSON: {exc}")
             return enum_ce
 
         # ── Stage 2: LLM + RL + Hopper + constructor tracks in parallel ───────
@@ -900,35 +1141,18 @@ class Orchestrator:
 
     # ── Private helpers ────────────────────────────────────────────────────────
 
-    def _ensure_polib_built(self) -> None:
-        """Pre-build Polib.lean so its .olean cache exists for all subsequent lake calls."""
-        import subprocess
-        polib_path = Path(self.config.polib_path)
-        olean = polib_path / ".lake" / "build" / "lib" / "lean" / "Polib.olean"
-        if olean.exists():
-            return
-        print("[Orchestrator] Building Polib cache (first-time setup) …")
-        result = subprocess.run(
-            [self.config.lake_binary, "build", "Polib"],
-            cwd=polib_path,
-            capture_output=False,
-            timeout=600,
-            preexec_fn=set_pdeathsig,
-        )
-        if result.returncode == 0:
-            print("[Orchestrator] Polib cache ready.")
-        else:
-            print(f"[Orchestrator] Warning: lake build Polib exited {result.returncode}")
-
     def _entailment_precheck(self, conjecture: ParsedConjecture) -> bool:
-        """Return True if Stage 3 (prover) should run.
+        """Diagnostic + last-chance CE finder before Stage 3.
 
-        A countermodel is a p-vector that satisfies the per-map arithmetic
-        content of every Inventory.lean axiom yet violates the conjecture's
-        conclusion. If one exists, no honest Lean proof of the conjecture can
-        be derived from the current Inventory, so Stage 3 is skipped with an
-        explicit verdict instead of burning prover rounds on an impossible
-        task. Override with FORCE_PROVER=true.
+        Inventory-countermodel ENUMERATION never gates the prover — that gate
+        was retired (see feedback_precheck_removed). What this still does:
+          • enumerate p-vectors that satisfy Inventory's per-map arithmetic
+            yet violate the conclusion, and print a diagnostic about them;
+          • run plantri exhaustive decision on those candidates — if any is
+            realized, that IS a verified CE → write it and skip Stage 3.
+        Anything else (no countermodels, or countermodels none realized)
+        proceeds to Stage 3 unconditionally; the prover may still derive the
+        conclusion from Mathlib first principles rather than Inventory alone.
         """
         from agent.orchestrator.tools.ce_enumerator import (
             enumerate_ce_candidates, inventory_countermodels,
@@ -945,34 +1169,27 @@ class Orchestrator:
                   "bounds; formalization is plausible.")
             return True
 
-        print(f"\n[Entailment pre-check] FAIL — conclusion is NOT entailed by Inventory.lean")
+        print(f"\n[Entailment pre-check] note — conclusion is NOT entailed by Inventory.lean alone")
         print(f"  {len(countermodels)} p-vector(s) within bounds satisfy every Inventory "
               f"axiom (arithmetic content) yet violate the conclusion, e.g.:")
         for cm in countermodels[:3]:
             print(f"    {cm.p_vec}  (f2={cm.f2})")
-        print("  Consequence: no honest Lean proof exists from the current Inventory.")
+        print("  Inventory alone is insufficient — the prover may still close the goal "
+              "from Mathlib first principles.")
 
-        # ── Automatic exhaustive decision of the countermodels via plantri ────
-        # Resolves the FALSE-vs-TRUE dichotomy wherever the budget allows:
-        #   realizable     → verified CE (proof by construction) → JSON written
-        #   non-realizable → proof by exhaustion that no such map exists
+        # ── Last-chance plantri decision of the countermodels ─────────────────
+        # Same realizability budget as Stage 2. If ANY of these candidates is
+        # realizable, that's a verified CE — Stage 3 is correctly skipped
+        # because the conjecture is refuted.
         ce_info = self._decide_countermodels_with_plantri(conjecture, countermodels)
         if ce_info is not None:
             _write_ce_json(conjecture, ce_info, self._ce_dir)
             print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 3.")
             return False
 
-        print("  Either:")
-        print("    1. the conjecture is FALSE — some undecided candidate above is a real")
-        print("       CE (raise CE_PLANTRI_TIMEOUT / CE_PLANTRI_MAX to decide more), or")
-        print("    2. the conjecture is TRUE — then Inventory needs new geometric")
-        print("       content (hand-curated from a paper source; the prover must never")
-        print("       invent it); more LLM retries cannot help.")
-        if os.environ.get("FORCE_PROVER", "").lower() == "true":
-            print("  FORCE_PROVER=true — running Stage 3 anyway.")
-            return True
-        print("  Skipping Stage 3. (set FORCE_PROVER=true to override)")
-        return False
+        print("  No CE realized from countermodels. Proceeding to Stage 3 — the prover "
+              "may still close the goal from Mathlib first principles.")
+        return True
 
     def _decide_countermodels_with_plantri(
         self, conjecture: ParsedConjecture, countermodels: list
@@ -1286,28 +1503,19 @@ class Orchestrator:
 
     def _run_prover(self, conjecture: ParsedConjecture) -> str:
         """Run Stage 3 (prover). Returns 'proved', 'failed' or 'skipped_entailment'.
-        (zero-sorry policy: a 'partial' prover result is NOT proved)."""
-        from agent.prover.agent import ProverAgent
+        (zero-sorry policy: a 'partial' prover result is NOT proved).
+
+        Entailment precheck stays here (it's a CE-finding step that may refute
+        the conjecture and skip the prover entirely).  Everything else is
+        delegated to ``agent.prover.runner.formalize_conjecture`` so the
+        ``python -m formalize`` CLI and Stage 3 share one prover entry point.
+        """
+        from agent.prover.runner import formalize_conjecture
 
         if not self._entailment_precheck(conjecture):
             return "skipped_entailment"
 
-        self._ensure_polib_built()
-
-        agent = ProverAgent(self.config)
-        agent._proof_subdir = "conjecture_without_ce"
-
-        print(f"\n[Stage 3] ProverAgent starting for {conjecture.conjecture_id} …")
-        try:
-            result = agent.prove_conjecture(conjecture)
-        except Exception as exc:
-            print(f"[Orchestrator] ProverAgent raised: {exc}")
-            raise
-
-        if result.nodes_failed:
-            print(f"  Failed nodes: {result.nodes_failed}")
-        print(f"\n[Stage 3] Done. Result: {result.status}")
-        return "proved" if result.status == "success" else "failed"
+        return formalize_conjecture(conjecture, self.config, tag="[Stage 3]")
 
     def _load_all_conjectures(self, json_path: str | None = None) -> list[ParsedConjecture]:
         """Load every conjecture from a JSON file or directory of individual *.json files.
