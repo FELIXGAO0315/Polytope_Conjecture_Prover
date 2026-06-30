@@ -992,13 +992,21 @@ class FormalizerAgent(NodeSolverMixin, ProofAssemblyMixin, StrategiesMixin):
 
     def formalize(
         self,
-        latex_source: str,
+        latex_source: str = "",
         category: str = "Polytope",
         verbose: bool = True,
         tex_path: str | None = None,
         parsed: "ParsedTheorem | None" = None,
     ) -> FormalizationResult:
-        """Thin delegate — orchestration lives in agent/prover/pipeline.py."""
+        """Thin delegate — orchestration lives in agent/prover/pipeline.py.
+
+        Primary path: pass ``parsed=<ParsedTheorem>`` (built from a JSON
+        conjecture via ``ParsedConjecture.to_parsed_theorem()``).  In this
+        case ``latex_source`` is unused and can be omitted.
+
+        Fallback path: pass a non-empty ``latex_source`` string only — the
+        LLM-backed LaTeX parser will produce a ``ParsedTheorem`` in stage 1.
+        """
         from agent.prover.pipeline import formalize as _pipeline_formalize
         return _pipeline_formalize(
             self, latex_source,
@@ -1078,9 +1086,13 @@ class ProverAgent(FormalizerAgent):
         category: str = "Polytope",
         verbose: bool = True,
     ) -> FormalizationResult:
-        """Prove a ParsedConjecture (extracted from the IRIS table).
+        """Prove a ParsedConjecture (extracted from conjectures.json).
 
         Output is written to output/conjecture_proof/{conjecture_id}.lean.
+
+        JSON path: ``conjecture.to_parsed_theorem()`` converts the JSON
+        spec directly to a ``ParsedTheorem`` (no LLM LaTeX parsing) and
+        the pipeline runs stages 2-8 on it.
         """
         # tex_path stem is used as the output filename; the file need not exist.
         tex_path = str(
@@ -1090,7 +1102,6 @@ class ProverAgent(FormalizerAgent):
         )
         parsed_theorem = conjecture.to_parsed_theorem()
         return self.formalize(
-            conjecture._synth_latex(),
             category=category,
             verbose=verbose,
             tex_path=tex_path,
@@ -1117,7 +1128,6 @@ class ProverAgent(FormalizerAgent):
     ) -> FormalizationResult:
         """Prove using an already-constructed ParsedTheorem (skips LLM parsing)."""
         return self.formalize(
-            parsed.latex_source,
             category=category,
             verbose=verbose,
             parsed=parsed,

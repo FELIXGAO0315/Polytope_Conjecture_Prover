@@ -48,24 +48,42 @@ if TYPE_CHECKING:
 
 
 # ---------------------------------------------------------------------------
-# Stage 1 - Parse
+# Stage 1 - Resolve theorem (from pre-parsed conjecture, or LaTeX fallback)
 # ---------------------------------------------------------------------------
 
-def _step1_parse(
+def _step1_resolve_theorem(
     agent: "FormalizerAgent",
     latex_source: str,
     parsed: "ParsedTheorem | None",
     verbose: bool,
 ) -> "ParsedTheorem":
-    """Parse the LaTeX source into a structured theorem.  If a pre-parsed
-    ``ParsedTheorem`` is supplied (e.g. by ProverAgent.prove_conjecture which
-    already parsed the conjecture), skip the LLM call and use it."""
-    agent._log(verbose, "[1/8] Parsing conjecture...")
-    if parsed is None:
+    """Resolve the theorem to formalize.
+
+    The primary path is **JSON-driven**: ``ProverAgent.prove_conjecture``
+    builds a ``ParsedTheorem`` directly from a ``ParsedConjecture`` (which
+    came from ``conjectures.json``) and passes it in via ``parsed=``.  No
+    LLM call is needed.
+
+    The LaTeX-parsing path (``parsed is None``) is a fallback for the rare
+    case where only a raw LaTeX string is available — it invokes the
+    LLM-backed LaTeX parser.  This path is **not** used by the current
+    ``python -m formalize`` / ``python -m run`` CLIs.
+    """
+    if parsed is not None:
+        agent._log(verbose,
+            f"[1/8] Using pre-parsed theorem from JSON: "
+            f"{parsed.name} ({len(parsed.proof_steps)} step(s))")
+    else:
+        if not latex_source:
+            raise ValueError(
+                "_step1_resolve_theorem: need either parsed= or non-empty latex_source"
+            )
+        agent._log(verbose, "[1/8] Parsing LaTeX source (fallback path, no pre-parsed theorem)...")
         parsed = agent._parser.parse_with_llm(
             latex_source, agent._sdk_fast, agent._config.model_fast,
         )
-    agent._log(verbose, f"      theorem: {parsed.name} ({len(parsed.proof_steps)} steps)")
+        agent._log(verbose,
+            f"      parsed: {parsed.name} ({len(parsed.proof_steps)} step(s))")
     agent._flog._data["theorem_name"] = parsed.name
     agent._flog._flush()
     return parsed
@@ -532,7 +550,7 @@ def _build_failed_result(
 
 def formalize(
     agent: "FormalizerAgent",
-    latex_source: str,
+    latex_source: str = "",
     category: str = "Polytope",
     verbose: bool = True,
     tex_path: str | None = None,
@@ -540,9 +558,15 @@ def formalize(
 ) -> "FormalizationResult":
     """Run the 8-stage prover pipeline on a single theorem.
 
-    Wraps stages 1-5 (which call out to Claude + lake) in a try/except so a
-    crash still returns a structured FormalizationResult instead of
-    propagating an exception to the orchestrator.  Stages 6-8 run
+    The primary entry passes ``parsed=`` (a pre-built ``ParsedTheorem``
+    coming from a JSON conjecture); ``latex_source`` is then unused and
+    can be omitted.  The legacy LaTeX-only path remains supported: if
+    ``parsed`` is None, ``latex_source`` MUST be a non-empty LaTeX string
+    and the LLM-backed LaTeX parser will run as stage 1.
+
+    Stages 1-5 (which call out to Claude + lake) are wrapped in a
+    try/except so a crash still returns a structured FormalizationResult
+    instead of propagating to the orchestrator.  Stages 6-8 run
     unconditionally on the success path and produce the final report.
     """
     polib_path = Path(agent._config.polib_path)
@@ -567,7 +591,7 @@ def formalize(
     agent._flog = FormalizationLogger(log_dir, run_id, theorem_name="(pending)")
 
     try:
-        parsed = _step1_parse(agent, latex_source, parsed, verbose)
+        parsed = _step1_resolve_theorem(agent, latex_source, parsed, verbose)
         goal_lock = _step2_lock_goal(agent, parsed, verbose)
         blueprint = _step3_blueprint(agent, parsed, goal_lock, verbose)
         proven_node_ids, proven_dep_imports = _step4_node_loop(
