@@ -5,6 +5,12 @@
 
 # ── Core project dependencies ─────────────────────────────────────────────────
 
+# Claude API client — used by every prover / conjecture-generator / CE-finder
+# LLM call (wrapped in agent/claude_sdk.py).  Routes through the installed
+# `claude` CLI's auth, so the npm install of @anthropic-ai/claude-code is
+# ALSO required (see "System / non-pip requirements" at the bottom of this file).
+claude-agent-sdk==0.2.103
+
 # Environment / configuration
 python-dotenv==1.1.0          # Loads .env into os.environ (agent/config.py)
 

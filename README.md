@@ -1,10 +1,10 @@
-# Polytope Conjecture Prover — Agent v3.1
+# Polytope Conjecture Prover — Agent v3.3
 
 A **closed-loop autonomous discovery system** for conjectures about simple convex 3-polytopes. One command runs the full cycle:
 
 1. **Generate** — `ConjectureGenerator` (Graffiti3 + an LLM co-proposer, both hint-aware) discovers new conjectures over a p-vector discovery table;
 2. **Refute** — every new conjecture is attacked by the CE pipeline: a lattice random walk, an exhaustive plantri screen (decisive: verdicts are proofs by construction or by exhaustion), and four parallel stochastic tracks (LLM + RL + Hopper + constructor double check); the screen and the double check are the two roles of `PlantriCEFinder`;
-3. **Prove** — survivors that pass the Inventory-entailment soundness gate go to the Lean 4 ProverAgent (zero-`sorry` policy, closed axiom base);
+3. **Prove** — survivors with no counterexample go to the Lean 4 ProverAgent (zero-`sorry` policy, closed axiom base);
 4. **Learn** — every outcome (refuted / proven / prover-failed) becomes a success/failure hint that steers the next generation.
 
 Every counterexample is backed by an **explicit verified witness polytope** (5 independent checks); every proof is a **compiling Lean 4 file** that uses only the hand-curated `Inventory.lean` axiom base.
@@ -13,6 +13,125 @@ Every counterexample is backed by an **explicit verified witness polytope** (5 i
 # one-click autonomous mode: generate → CE search → prove → feed back hints
 python -m run project
 ```
+
+---
+
+## What's New in v3.4
+
+**Prover module refactor + direct CLI entry**
+
+- **`agent/prover/agent.py` split 4257 → 1124 lines (-73%).** The monolithic
+  FormalizerAgent class is now composed via three mixins —
+  `StrategiesMixin` (4 `_targeted_fix_*` + mechanical fixers + Inventory
+  template probe), `NodeSolverMixin` (`_compile_loop` + `_process_node`
+  + sub-lemma decompose path), and `ProofAssemblyMixin`
+  (`_write_complete_proof_file`).  Pure-function utilities moved to
+  `lean_codegen.py`; module-level helpers to `_helpers.py`; the
+  discovery decomposer to `conjecture_decomposer.py`; Inventory lemma
+  metadata to `prompts/inventory.py` (single source of truth — every
+  prompt that quotes an Inventory signature renders from this one
+  catalogue).  Behaviour is unchanged; the cut just maps each prover
+  concern to one file so future bugs land on a specific module.
+- **`pipeline.py`** — the 8-stage flow is now 8 named step functions
+  (`_step1_resolve_theorem`, `_step2_lock_goal`, …,
+  `_step8_collect_and_save`) wrapped by a tiny `formalize()` orchestrator.
+  Each step is independently callable for debugging just one phase
+  without re-running earlier LLM calls.
+- **`PolibStore` transactions** — TOCTOU + cache-invalidation around
+  Polib.lean writes were scattered across 6 sites in agent.py with
+  per-write `_invalidate_polib_content` calls.  Collapsed into
+  `with self._polib_store.transaction() as store: store.save(...); if bad:
+  store.remove(...); raise` — cache invalidation happens automatically
+  on context exit, success path or rollback.
+- **JSON path made explicit** — `ProverAgent.prove_conjecture` was
+  passing a synthesized fake LaTeX string (`conjecture._synth_latex()`)
+  to `formalize()` even though the JSON-derived `ParsedTheorem` was
+  already supplied via `parsed=`.  The dead `latex_source` arg is now
+  removed; Step 1 honestly logs `"Using pre-parsed theorem from JSON: C104"`
+  on the canonical path and only falls back to `parse_with_llm()` when
+  no pre-parsed theorem is provided.
+
+**Direct prover CLI**
+
+```bash
+python -m formalize C104              # NEW — skip every CE-search stage
+python -m formalize C100-110          # range
+python -m formalize 104               # 'C' prefix optional
+```
+
+- New entry point at [`formalize.py`](formalize.py) (shim) + actual
+  implementation at [`agent/prover/formalize.py`](agent/prover/formalize.py).
+  Token grammar matches `python -m run` (range / batch / numeric).
+- Both `python -m run` and `python -m formalize` converge on
+  [`agent/prover/runner.py`](agent/prover/runner.py)`:formalize_conjecture()`
+  — single source of truth for "actually invoke the prover".
+  `Orchestrator._run_prover` is now a 15-line wrapper that calls into
+  the same function.
+- Use case: when you know a conjecture is provable (e.g. retrying a
+  known-good C104 after a prompt change) and don't want to spend
+  5-30 min on CE search.  Mode D is identical to having `python -m run`
+  skip Stages 0-2.
+
+---
+
+## What's New in v3.3
+
+**Stage 0 — cross-conjecture witness pool replay (new stage, decisive, microseconds–seconds)**
+
+- Every CE the pipeline has ever found is reused as a generic refuter for new conjectures. Before any expensive search, Stage 0 runs two sub-phases against every new conjecture:
+  - **(a) Sibling-witness replay** (`_replay_witness_pool`): every `output/conjecture_with_ce/C*/C*.json` carries a `witness_graph` edge list; we re-evaluate hypotheses + conclusion on its p-vector, and on hit re-verify the saved graph via the full 5-check `PVectorCheckAgent` (no shortcut — a stale or tampered file cannot bypass verification). Own folder excluded.
+  - **(b) plantri-harvested pool replay** (`_replay_plantri_pool`): ~24-25k verified-realizable p-vectors collected by `agent/conjecture_generator/tools/plantri_harvest.py` (f₂ ≤ 28). Filter is arithmetic-only (microseconds per entry); plantri rebuilds the witness graph on hits (~1-10 s each).
+- **Post-batch re-sweep** (`_witness_pool_resweep`): the pool grew during the run, so a CE found late may refute a conjecture that failed early. After every worker finishes, Stage 0 (a) re-runs over the still-undecided survivors. High ROI in practice — C23 / C28 / C37 were all caught by exactly this mechanism on 2026-06-28.
+- **Stages renumbered**: 0 = witness pool replay, 1 = random walk, 2 = unified CE search (plantri screen + 4 tracks), 3 = Lean prover. Stage 0 + Stage 1 are pure compute (no API), so they front-load every cheap refutation before any LLM/RL/Hopper budget is spent.
+
+**Batch mode — 7 parallel IRIS-sort workers**
+
+- `python -m run` (no args) used to iterate sequentially. It now launches **7 worker threads** that all consume the same conjecture pool, each in a different IRIS sort order — `T`, `R`, `L`, `TR`, `TL`, `RL`, `TRL`. A `threading.Lock`-protected `claimed`/`completed` set guarantees that no two workers touch the same conjecture, and the first worker to find a CE marks it done so the others skip. Conjectures without a CE feed into `ProverAgent` after the re-sweep.
+- **IRIS T / R / L scoring** lives in the generator (`agent/conjecture_generator/tools/iris_scoring.py`) and is written into each entry's `iris` field in `conjectures.json` at insertion time. T = touching points (rows where LHS = RHS), R = consistency residual, L = LP closeness. The 7 sort orders express different prioritization tradeoffs; running them in parallel is "free" because Stage 0 and the lattice walk are CPU-bound on different cores, not API-bound.
+
+**Conjecture generator — IRIS-feedback + plantri-pool ground truth**
+
+- **Plantri pool harvester** (`tools/plantri_harvest.py` → `output/conjecture_generator/plantri_pool.json`): replaces the old `local/` data engines. ~24k verified-realizable p-vectors stratified by f₂ ∈ {0, 20, 30, 40} buckets via `_stratify_augmentation`, each bucket gated by `(f_2 >= N)` so the LP rows stay informative; structural extremals kept first. The pool is the *only* gate now (`_consistent_with_verified` on the full augmented row_pvecs); `verify_on_polytopes` / `CLASSICAL_BATTERY` / `is_structurally_sound` / R1-R5 / `pool_saturation_stats` are all gone — their role is subsumed by plantri ground truth + the verified-p-vec sample injected into both prompts.
+- **IRIS-feedback prompt** (2026-06-18): LLM propose now sees the existing conjecture block sorted by IRIS-TRL descending, plus survivor hints (unsolved entries with ≥20 CE attempts). Degenerate TRL ≈ 0 is warned, not gated.
+- **LLM model refit**: propose = Haiku, effort=low, ≤90s. Review = Sonnet, effort=medium, ≤90s. Bypassed the previous `convex_hull` shortcut entirely.
+- **LP overfit drop** (`_drop_lp_overfit`): any coefficient with denominator > 6 is rejected — replaces the old `pool_saturation_stats` / `formula_signature` heuristics. Drop reason logged.
+- **Stratified hull by f₂** (`compute_pool_facets`): runs on the FULL pool (not a downsample), buckets by f₂, emits each facet with its own `f_2 >= _N` guard.
+
+**`claude-agent-sdk` migration**
+
+- `agent/claude_sdk.py` moved off raw `claude -p` subprocess invocations to the official `claude-agent-sdk` Python package (`ClaudeSDKClient` + `ClaudeAgentOptions`). The subprocess path was reverted once after a 403 incident; re-migrated 2026-06-27 with the LLM CE preflight wired end-to-end. **Do not revert without testing the preflight again** — bare subprocess hits 403 in batch mode here.
+- **Circuit breaker** trips on the first 403 / auth-fail and short-circuits every subsequent `_call` to microseconds, so a dead claude CLI can no longer burn the per-track timeout budget.
+
+**5-Check Validator — Check 3 negated-LHS parser**
+
+- Conclusions of the shape `-(p6) >= -EXPR` (semantically `p6 <= EXPR`, produced when the LLM/Graffiti negates both sides) silently fell through the conclusion-violated regex, so Check 3 returned "not violated" and verified counterexamples were dropped. This had killed CEs for **C55 / C59 / C61 / C64 / C65**. Two extra regex branches added to `pvec_eval.py` cover the negated-LHS form and its symmetric variant.
+
+**RL CE finder — validation bugs squashed + C23 / C24 refuted**
+
+- Two latent bugs in the RL track caused valid CEs to be silently discarded: the witness-drop path didn't propagate the verified graph to disk, and the `stop_event` guard around episode termination raced with the validator. Fixed 2026-06-12; C23 / C24 were both refuted as a direct consequence. C23 was further automated 2026-06-28 via the new Stage 0 witness pool replay.
+
+**`python -m run` infrastructure**
+
+- **Range syntax**: `python -m run C104-122` now expands to `C104 C105 … C122` automatically (works with any `[cC]?\d+-[cC]?\d+` form).
+- **Batch-mode status sync** (`_sync_batch`): the orchestrator persists CE files and Lean proofs to disk but never updated `conjectures.json` itself. `run.py` now reconciles every conjecture against on-disk artifacts after `run_batch()` returns, mapping `refuted` (CE file present) and `proven` (Lean proof present) back into `conjectures.json` and moving entries between `unsolved` and `solved` accordingly.
+- **Per-token sync** extended from refuted-only to all three terminal states.
+- **ID-mapping fix**: `ParsedConjecture.conjecture_id` is the short id (`C105`), but `conjectures.json` keys by `spec.name` (`auto_..._105`). The status syncer now uses the original spec name; calling `set_conjecture_status("C105", ...)` returned `False` silently and was why earlier batch runs left `status='new'` even after CE files landed.
+
+**Lean Inventory — Barnette's alternate p₆ bound (§4.4)**
+
+- New lemma `Barnette_P6Bound` (`polib/Inventory.lean §4.4`) — Barnette 1969 / Jučovič eq. (4), the second main p₆ lower bound for simple 3-polytopes on the sphere (g = 0):
+
+  $$2\,p_6 \;\geq\; 4 + p_3 - p_5 - 2\!\!\sum_{k \geq 7} p_k$$
+
+  under the side condition $\sum_{k \geq 7} p_k \geq 3$. Stated in integer-clear form (`2·p_6 ≥ …`) to avoid rational arithmetic; `hm ≥ 6` matches the rest of Inventory and is implied by `hsum`.
+- **Complementary to `Juc_InequalityPart` / `P6InequalityPart`**: Jučovič's bound is tight when low-degree faces (`p_4`, `p_5`) are small but loose when $\sum_{k \geq 7} p_k$ is small and dominated by `k = 7, 8`; Barnette's bound is tight in the latter regime. Together they pin `p_6` from below in every Euler-feasible configuration on the sphere.
+- **Accepted sorry, same pattern as §2**: Barnette's proof builds the critical-face adjacency graph $G$ (Theorem 1 proof, p.2 of `p6.tex`) and counts $\delta(F),\ \varphi(v)$ — adjacency data that `SimplyCon3ConnectedMap` does not carry. Marked SORRY (accepted, paper statement) in the same category as `euler_formula` / `handshake` / `Juc_InequalityPart`; the prover's zero-`sorry` policy still applies to every other file.
+
+---
+
+## What's New in v3.2
+
+(no release notes were written at v3.2 — the changes from that commit are folded into the v3.3 section above, in particular the RL validation fixes and the C23 / C24 refutation push.)
 
 ---
 
@@ -158,11 +277,19 @@ python -m run c43         # same
 # ── C. Batch: all conjectures in conjectures/conjectures.json ────────────────
 python -m run             # 7 parallel IRIS-sort workers
 
+# ── D. Direct prover — skip every CE-search stage, go straight to Lean ───────
+python -m formalize C104          # single
+python -m formalize C1 C2 C3      # batch (sequential)
+python -m formalize C100-110      # range (inclusive)
+python -m formalize 104           # 'C' prefix optional
+
 # Keep a log (stdout is already line-buffered):
 python -m run project 2>&1 | tee logs/evolution_$(date +%m%d_%H%M).log
 ```
 
 The short form `43` or `c43` resolves to any conjecture whose name ends with `_43` in `conjectures/conjectures.json`. Mode A stops at the first Lean-proved conjecture, after `--max-generations` (default 10), or after two consecutive generations that produce nothing new.
+
+Modes A/B/C run the full pipeline: Stage 0 (witness pool replay) → Stage 1 (random walk) → Stage 2 (plantri + RL + Hopper + LLM CE search) → Stage 3 (prover, only if no CE found). **Mode D skips Stages 0-2** and invokes the prover directly — useful when you already know the conjecture is provable (e.g. retrying a known-good C104 after a prompt change) and don't want to spend 5-30 min on CE search. Both `python -m run` and `python -m formalize` end up calling the same `agent/prover/runner.py:formalize_conjecture()`, so prover behaviour is identical between the two entry points.
 
 ---
 
@@ -226,12 +353,6 @@ conjectures/conjectures.json
                          │         (C<id>.json + C<id>_witness.png)
                          │ NO
                          ▼
-            [ Inventory-entailment pre-check ]
-                         │ countermodels exist?
-                         │ YES ──► explicit verdict, Stage 3 skipped
-                         │         (override: FORCE_PROVER=true)
-                         │ NO
-                         ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Stage 3 — Lean 4 Prover                                    │
 │  Blueprint decomposition + compile-fix loop                 │
@@ -253,10 +374,10 @@ conjectures/conjectures.json
 `python -m run project` runs `agent/orchestrator/evolution_loop.py`. One generation:
 
 1. **Generate** — `ConjectureGenerator` builds the discovery table, runs Graffiti3 (`--g3-mode fast|standard|deep`), optionally asks the LLM to propose `--llm-propose-n` extra formulas and to review the merged pool, rejects duplicates of anything already in the dataset, and registers survivors with `status='new'` in `conjectures/registry.json`.
-2. **Evaluate** — every `status='new'` conjecture runs the full pipeline (Stage 1 → 2; survivors → Stage 3 behind the entailment pre-check):
+2. **Evaluate** — every `status='new'` conjecture runs the full pipeline (Stage 0 → 1 → 2; survivors → Stage 3):
    - CE found → `status='refuted'` + failure hint (CE p-vector + violation recorded)
    - proved in Lean → `status='proven'` + success hint → **loop stops**
-   - prover failed / skipped by pre-check → `status='prover_failed'` + failure hint
+   - prover failed → `status='prover_failed'` + failure hint
 3. **Next generation** — the generator's prompts now contain this round's outcomes.
 
 **Stop conditions**: first proven conjecture, `--max-generations` exhausted (default 10), or two consecutive generations producing zero new conjectures.
@@ -264,7 +385,7 @@ conjectures/conjectures.json
 **Rules enforced** (soundness is non-negotiable):
 - Only `status='new'` entries are ever evaluated — conjectures with results never re-enter the loop.
 - Success hints come **only** from prover success. Surviving CE search is *not* success — a prover failure still records a failure hint.
-- Hints feed the generator only. CE finding, the 5-Check Validator, the entailment pre-check, and the prover gates run exactly as in single/batch mode.
+- Hints feed the generator only. CE finding, the 5-Check Validator, and the prover run exactly as in single/batch mode.
 
 **Flags** (`python -m run project [flags]`):
 
@@ -739,7 +860,7 @@ The folder name uses the **short ID** (`C5`) derived from the trailing number of
 
 ### No counterexample → `output/conjecture_without_ce/{id}.lean`
 
-If the CE search ends with nothing — the samplers exhaust their budgets and the constructor double check completes with no CE — the conjecture goes through the **Inventory-entailment pre-check** and then (if it passes) to **ProverAgent** (Stage 3). See the [Stage 3](#stage-3--lean-4-prover) section below for the pre-check, the full 8-step pipeline, quality checker, inline retry loop, and cross-run failure memory.
+If the CE search ends with nothing — the samplers exhaust their budgets and the constructor double check completes with no CE — the conjecture goes to **ProverAgent** (Stage 3) unconditionally. See the [Stage 3](#stage-3--lean-4-prover) section below for the full 8-step pipeline, quality checker, inline retry loop, and cross-run failure memory.
 
 > **Note on `sorry` placeholders:** Sub-goals that require planar graph geometry lemmas not yet present in Mathlib (Steinitz's theorem, Eberhard's theorem, face-counting for 3-polytopes) are left as `sorry`. The surrounding proof structure still type-checks and compiles.
 
@@ -747,30 +868,7 @@ If the CE search ends with nothing — the samplers exhaust their budgets and th
 
 ## Stage 3 — Lean 4 Prover
 
-When no counterexample is found, **ProverAgent** produces a Lean 4 formalization through a 8-step pipeline.
-
-### Inventory-Entailment Pre-Check (gate before Stage 3)
-
-Before any prover work, the orchestrator searches for **countermodels**: p-vectors that satisfy the per-map arithmetic content of every `Inventory.lean` axiom (Euler/handshake/regularity, occupation feasibility `3·p₃ ≤ Σ_{k≥4}⌊k/2⌋·p_k`, the Jučovič inequality when m ≥ 6) yet violate the conjecture's conclusion. If one exists, **no honest Lean proof can be derived from the current Inventory** — either the conjecture is false (the countermodels are unrealized CE candidates) or Inventory needs new geometric content. Stage 3 is skipped with an explicit verdict:
-
-```
-[Entailment pre-check] FAIL — conclusion is NOT entailed by Inventory.lean
-  374 p-vector(s) within bounds satisfy every Inventory axiom (arithmetic content) yet violate the conclusion, e.g.:
-    {5: 17, 6: 4, 11: 1}  (f2=22)
-  Consequence: no honest Lean proof exists from the current Inventory.
-  Skipping Stage 3. (set FORCE_PROVER=true to override)
-```
-
-On FAIL the orchestrator first runs an **automatic plantri decision** of the
-countermodels (4 phases: cache triage → hint re-verification → parallel QUICK
-sweep → parallel DEEP sweep). A realizable countermodel becomes a verified CE
-(JSON written, conjecture refuted); all-non-realizable is a proof by exhaustion
-that the conjecture survives within bounds but needs new Inventory content.
-Verdicts persist in `output/realizability_cache.json` (advisory only —
-"realizable" hints are always re-verified by a fresh plantri run). Budget env
-vars: `CE_PLANTRI_QUICK_TIMEOUT` (30 s), `CE_PLANTRI_TIMEOUT` (1800 s),
-`CE_PLANTRI_PARALLEL` (8), `CE_PLANTRI_PARALLEL_DEEP` (2), `CE_PLANTRI_MAX`
-(40; `0` disables the stage).
+When no counterexample is found, **ProverAgent** produces a Lean 4 formalization through a 8-step pipeline. The prover runs unconditionally on every survivor — the old Inventory-entailment precheck (which used to gate Stage 3 on the existence of arithmetic countermodels) was retired on 2026-06-15. Honest Lean proofs can still be derived from Mathlib first principles even when Inventory alone doesn't entail the conclusion, so gating on Inventory entailment was unnecessarily lossy.
 
 ### Soundness Guard
 
@@ -909,7 +1007,7 @@ Within each formalization round, fix attempts are numbered with a `fix #N` count
 | §1 — Data structure | — | `SimplyCon3ConnectedMap` structure (no sorry) |
 | §2 — Foundational lemmas | `Euler_inductive.tex`, `jucovic_theorem.tex`, `p6.tex` | Sorried axioms (Mathlib lacks surface-embedded graph API) |
 | §3 — Jučovič theorem (sphere) | `jucovic_theorem.tex` | Partial: identity + arithmetic proved; inequality sorry |
-| §4 — p₆ inequality (genus g) | `p6.tex` | Partial: edge-count equation proved; inequality sorry |
+| §4 — p₆ inequality (genus g) + Barnette bound | `p6.tex` | Partial: edge-count equation proved; Jučovič inequality + Barnette alternate bound (§4.4) sorry |
 | §5 — Euler's formula (inductive) | `Euler_inductive.tex` | Base case, tree case, inductive step all proved |
 
 ### §1 — Data Structure
@@ -972,6 +1070,13 @@ Derived in §2 (proved, **not** an axiom):
 - `P6InequalityPart` — $3p_6 \geq 12(1-g) - 2p_4 - 3p_5 + \sum_{k \geq 7}(\lfloor(k+1)/2\rfloor - 6)p_k$ (same blocker)
 - `P6GenusG` — full genus-g theorem
 
+#### §4.4 — Barnette's alternate p₆ bound (sphere, g = 0)
+
+- `Barnette_P6Bound` — $2p_6 \geq 4 + p_3 - p_5 - 2\sum_{k \geq 7} p_k$ under the side condition $\sum_{k \geq 7} p_k \geq 3$ (Barnette 1969 / Jučovič eq. (4), `p6.tex` Theorem 1).
+  - Stated in integer-clear form to avoid rational arithmetic; `hm ≥ 6` and `hsum` together imply `m ≥ 7`.
+  - *Blocker*: critical-face adjacency graph counts ($\delta(F),\ \varphi(v)$) — same adjacency-data gap as §2; SORRY accepted as a paper statement.
+  - *Why both*: Jučovič is tight when $p_4, p_5$ are small; Barnette is tight when $\sum_{k \geq 7} p_k$ is small and dominated by $k = 7, 8$. The pair pins $p_6$ from below across the full Euler-feasible region on the sphere.
+
 ### §5 — Euler's Formula (inductive constituents)
 
 All three proved without sorry:
@@ -1003,12 +1108,12 @@ Polytope_Conjecture_Prover/
 │   │   ├── data/                       # Discovery table assembly
 │   │   └── tools/                      # dataset / hints / render helpers
 │   ├── orchestrator/
-│   │   ├── orchestrator.py             # Top-level pipeline (stages 1–3 + pre-check)
+│   │   ├── orchestrator.py             # Top-level pipeline (stages 0–3)
 │   │   ├── evolution_loop.py           # Autonomous mode: generate → CE → prove → hints
 │   │   └── tools/
 │   │       ├── check_pvector.py        # 5-Check Validator (+ spawn-pool worker entry)
 │   │       ├── polytope_constructor.py # Witness graph builder (Tier 4, plantri early-exit, failure cache)
-│   │       ├── ce_enumerator.py        # Stage 2 enumeration + entailment pre-check
+│   │       ├── ce_enumerator.py        # Stage 2 enumeration
 │   │       ├── conjecture_parser.py    # Formula → ParsedConjecture
 │   │       ├── draw_ce_witness.py      # CE witness renderer (planar drawing; auto-called on CE)
 │   │       └── plantri/
@@ -1105,9 +1210,8 @@ MAX_NODE_RETRIES=4                    # per-node budget in the inline retry loop
 COMPILE_TIMEOUT_SECONDS=180           # lake build timeout (seconds)
 MAX_PARALLEL_NODES=6                  # parallel proof threads
 CLAUDE_TIMEOUT=150                    # claude CLI timeout (s); retries escalate +60 s each
-FORCE_PROVER=false                    # run Stage 3 even if the entailment pre-check fails
 
-# Stage 2 / entailment pre-check bounds
+# Stage 2 enumeration bounds
 CE_ENUM_F2_MAX=36                     # max total face count enumerated
 CE_ENUM_KMAX=20                       # max face size enumerated
 CE_ENUM_NLARGE_MAX=2                  # max number of faces with k >= 7
