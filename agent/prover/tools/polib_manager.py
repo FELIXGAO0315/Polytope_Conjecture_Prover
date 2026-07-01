@@ -10,7 +10,6 @@ from pathlib import Path
 
 from agent.exceptions import PolibSaveError
 from agent.prover.tools.blueprint import BlueprintNode
-from agent.prover.tools.latex_parser import ParsedTheorem
 from agent.prover.tools.quality_checker import QualityReport
 from agent.prover.tools.search import SavedEntry
 
@@ -29,50 +28,6 @@ _AXIOM_RE = re.compile(
 #   - Excludes lines that start with `--` via the anchor (a comment line starts with
 #     optional whitespace then `--`, so `^[ \t]*sorry` won't match it).
 _INLINE_SORRY_RE = re.compile(r"^[ \t]*\bsorry\b[ \t]+[^-\n]", re.MULTILINE)
-
-# Matches a sorry tactic line (not inside a comment).
-_SORRY_TACTIC_RE = re.compile(r"^[ \t]*sorry\b", re.MULTILINE)
-# Matches a structured [SORRY] class annotation.
-_SORRY_CLASS_RE  = re.compile(r"--\s*\[SORRY\]\s*class\s*:", re.IGNORECASE)
-
-VALID_SORRY_CLASSES = {
-    "mathlib_gap",           # needed Mathlib lemma does not exist
-    "structure_gap",         # requires new foundational lemma in Inventory.lean
-    "missing_theorem",       # depends on another conjecture's lemma not yet in Polib
-    "complex_combinatorics", # combinatorial argument beyond current proof attempt
-    "missing_figure_definition",  # external figure/diagram reference
-}
-
-
-def _check_sorry_annotations(lean_code: str, node_id: str) -> None:
-    """Raise PolibSaveError if any sorry tactic lacks a structured [SORRY] annotation.
-
-    Every `sorry` in conjecture proofs MUST have:
-      -- [SORRY] class: <one of VALID_SORRY_CLASSES>
-      -- [SORRY] reason: <one sentence>
-      -- [SORRY] suggested_next: <what is needed to close this>
-      -- [SORRY] impact: blocks <downstream node>
-    within 6 lines above the sorry line.
-    """
-    lines = lean_code.splitlines()
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("--"):
-            continue
-        if not re.match(r"^[ \t]*sorry\b", line):
-            continue
-        # Look back up to 6 lines for [SORRY] class annotation
-        context_start = max(0, i - 6)
-        context = "\n".join(lines[context_start:i])
-        if not _SORRY_CLASS_RE.search(context):
-            raise PolibSaveError(
-                f"Node '{node_id}': unannotated sorry at line {i + 1}. "
-                f"Every sorry MUST have structured annotations immediately above it:\n"
-                f"  -- [SORRY] class: <{'|'.join(sorted(VALID_SORRY_CLASSES))}>\n"
-                f"  -- [SORRY] reason: <one sentence explaining what is missing>\n"
-                f"  -- [SORRY] suggested_next: <specific lemma / approach needed>\n"
-                f"  -- [SORRY] impact: blocks <downstream node name>"
-            )
 
 # Known proposition field names that must NEVER appear inside SimplyCon3ConnectedMap.
 # The structure is allowed only data fields: m, p_i, v, e, total_occ.
@@ -240,50 +195,6 @@ class StoreManager:
             _atomic_write(self._path, json.dumps(self._data, indent=2))
 
 
-def _extract_sorry_summary(lean_code: str, node_id: str) -> list[str]:
-    """Return formatted comment lines summarising every [SORRY] block in lean_code.
-
-    Each sorry block looks like:
-      -- [SORRY] class: X
-      -- [SORRY] reason: Y
-      -- [SORRY] suggested_next: Z
-      -- [SORRY] impact: blocks W
-      sorry
-    Returns lines like:
-      --   [SORRY #1] class: X | reason: Y | suggested_next: Z | impact: W
-    ready to embed in a section header.
-    """
-    lines = lean_code.splitlines()
-    summary: list[str] = []
-    idx = 0
-    sorry_n = 0
-    while idx < len(lines):
-        line = lines[idx]
-        if not line.strip().startswith("--") and re.match(r"^[ \t]*sorry\b", line):
-            # Collect [SORRY] annotation lines immediately preceding this sorry
-            j = idx - 1
-            anno_lines: list[str] = []
-            while j >= 0 and re.match(r"^[ \t]*--\s*\[SORRY\]", lines[j]):
-                anno_lines.insert(0, lines[j].strip())
-                j -= 1
-            sorry_n += 1
-            fields: dict[str, str] = {}
-            for al in anno_lines:
-                m = re.match(r"--\s*\[SORRY\]\s*(\w+)\s*:\s*(.*)", al, re.IGNORECASE)
-                if m:
-                    fields[m.group(1).lower()] = m.group(2).strip()
-            parts = []
-            for key in ("class", "reason", "suggested_next", "impact"):
-                if key in fields:
-                    parts.append(f"{key}: {fields[key]}")
-            summary.append(f"-- [SORRY #{sorry_n}] " + " | ".join(parts) if parts
-                           else f"-- [SORRY #{sorry_n}] (unannotated — see line {idx + 1})")
-        idx += 1
-    if summary:
-        summary = ["-- ── Sorry details (" + node_id + ") ──"] + summary
-    return summary
-
-
 class PolibManager:
     """Appends proved/partial Lean content to a single Polib.lean file."""
 
@@ -305,7 +216,6 @@ class PolibManager:
         lean_code: str,
         report: QualityReport,
         category: str,
-        parsed: ParsedTheorem,
     ) -> SavedEntry:
         if "import Mathlib" not in lean_code:
             raise PolibSaveError(
@@ -321,22 +231,23 @@ class PolibManager:
         # like `sorry [SORRY: reason]` that Lean 4 actually accepts.
         _check_no_prop_fields_in_struct(lean_code, node.node_id)
 
-        # If sorry(s) present, every one must have a structured [SORRY] annotation.
-        # Unannotated bare `sorry` is rejected so the agent is forced to retry.
+        # Strict no-new-sorry policy: every saved node must be sorry-free.
+        # Partial entries are not allowed — sorry-tainted code is rejected
+        # outright so the upstream caller can decide to re-prove or fail.
         if report.sorry_count > 0:
-            _check_sorry_annotations(lean_code, node.node_id)
-
+            raise PolibSaveError(
+                f"Node '{node.node_id}': lean_code contains {report.sorry_count} "
+                f"sorry(s); no-new-sorry policy refuses to save partial entries"
+            )
         # Reject sorry-free nodes that failed the quality check: saving them as
         # "proved" would record a semantically wrong proof in Polib.
-        # For intermediate nodes the quality checker already uses is_main_target=False
-        # (only sorry-audit applies), so report.passed is reliable for both cases.
-        if report.sorry_count == 0 and not report.passed:
+        if not report.passed:
             raise PolibSaveError(
                 f"Node '{node.node_id}': quality check failed (score={report.score:.2f}, "
                 f"passed={report.passed}) — refusing to save as proved"
             )
 
-        status = "proved" if report.sorry_count == 0 else "partial"
+        status = "proved"
         now = _iso_now()
 
         # Strip import lines, struct definitions, and any Polib section-metadata
@@ -361,19 +272,12 @@ class PolibManager:
         )
         body = body.strip()
 
-        # Build sorry summary lines for partial entries (inserted into section header).
-        sorry_summary_lines: list[str] = []
-        if status == "partial":
-            sorry_summary_lines = _extract_sorry_summary(body, node.node_id)
-
         def _make_section(body_text: str) -> str:
             header = (
-                f"\n-- === {node.node_id} ({status}) ===\n"
-                f"-- quality_score: {report.score:.3f} | sorry_count: {report.sorry_count}"
+                f"\n-- === {node.node_id} (proved) ===\n"
+                f"-- quality_score: {report.score:.3f} | sorry_count: 0"
                 f" | saved_at: {now}\n"
             )
-            if sorry_summary_lines:
-                header += "\n".join(sorry_summary_lines) + "\n"
             return header + body_text + "\n"
 
         with self._lock:
@@ -394,7 +298,6 @@ class PolibManager:
             sorry_count=report.sorry_count,
             quality_score=report.score,
             saved_at=now,
-            latex_hash=parsed.latex_hash,
             mathlib_imports=mathlib_imports,
             polib_imports=polib_imports,
             description=node.description,
@@ -404,7 +307,7 @@ class PolibManager:
             self._search.register(entry)
 
         if self._graph is not None:
-            self._graph.record_node(entry, report, parsed)
+            self._graph.record_node(entry)
 
         return entry
 
@@ -429,9 +332,7 @@ class DepGraphManager:
     def data(self) -> dict:
         return self._store.get("dep_graph")
 
-    def record_node(
-        self, entry: SavedEntry, report: QualityReport, parsed: ParsedTheorem
-    ) -> None:
+    def record_node(self, entry: SavedEntry) -> None:
         dg = self._store.get("dep_graph")
         dg.setdefault("nodes", {})[entry.node_id] = {
             "id": entry.node_id,
@@ -442,23 +343,12 @@ class DepGraphManager:
             "lean_file": entry.lean_file_path,
             "quality_score": entry.quality_score,
             "sorry_count": entry.sorry_count,
-            "latex_hash": entry.latex_hash,
             "saved_at": entry.saved_at,
         }
         self._store.update("dep_graph", dg)
 
-    def record_edges(
-        self, from_id: str, lean_code: str, parsed: ParsedTheorem
-    ) -> None:
+    def record_edges(self, from_id: str, lean_code: str) -> None:
         rows: list[dict] = []
-
-        for step in parsed.proof_steps:
-            for ref in step.references:
-                rows.append({
-                    "from": from_id, "to": ref,
-                    "edge_type": "cited", "origin": "latex",
-                    "latex_line": step.latex_text[:80],
-                })
 
         apply_pattern = re.compile(r"\b(?:apply|exact|have\s+\w+\s*:=)\s+([\w.]+)")
         for m in apply_pattern.finditer(lean_code):
@@ -511,10 +401,6 @@ class SessionState:
         s = self._get()
         return s.get("nodes", {}).get(node_id, {}).get("status") == "proved"
 
-    def is_partial(self, node_id: str) -> bool:
-        s = self._get()
-        return s.get("nodes", {}).get(node_id, {}).get("status") == "partial"
-
     # Infrastructure failures carry no information about the proof approach —
     # injecting them as "previous failed attempts — do NOT repeat" only adds
     # noise to the generation prompt.
@@ -547,16 +433,6 @@ class SessionState:
     def get_cross_run_errors(self, node_id: str) -> list[dict]:
         """Return accumulated cross-run failure records for a node."""
         return self._get().get("nodes", {}).get(node_id, {}).get("cross_run_errors", [])
-
-    def mark_partial(self, node_id: str, rounds_used: int, reason: str = "") -> None:
-        """Mark a node as partial (compiled with sorrys). Distinct from pending
-        so that is_partial() correctly detects it on the next retry."""
-        self._store.update_nested("session", "nodes", node_id, {
-            "status": "partial",
-            "rounds_used": rounds_used,
-            "reason": reason,
-            "updated_at": _iso_now(),
-        })
 
     def mark_done(self, node_id: str, status: str) -> None:
         self._store.update_nested("session", "nodes", node_id, {

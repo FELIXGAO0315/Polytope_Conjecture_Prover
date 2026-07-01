@@ -34,9 +34,24 @@ _F2_THRESHOLD_RE = re.compile(r"f_2>=_(\d+)", re.IGNORECASE)
 _VAR_PATTERN = re.compile(r"\b(p_?[3456]|sum_pk_k>=7|sum_pk_after_p6)\b")
 _SAFE_VARS = ("p3", "p4", "p5", "p6", "sum_pk_after_p6")
 
+# Structural-predicate column names emitted by dataset.py — Graffiti3 picks
+# them up by name, but downstream evaluators (pvec_eval) want them in the
+# DSL forms `p_<k> = <n>` / `p_<k> <= <n>`. We translate at canonicalize
+# time so render, parser, hint store and pool-gate all see the same shape.
+_STRUCT_EQ_RE = re.compile(r"\bp(?:_)?([3-9])_eq_(\d+)\b")
+_STRUCT_LE_RE = re.compile(r"\bp(?:_)?([3-9])_le_(\d+)\b")
+_STRUCT_GE_RE = re.compile(r"\bp(?:_)?([3-9])_ge_(\d+)\b")
+
 
 def canonicalize_hypothesis_tokens(expr: str) -> str:
-    """Normalize hypothesis tokens: `sum_pk_k>=7_at_least_j` → `sum_pk_k>=7 >= j`."""
+    """Normalize hypothesis tokens.
+
+    Rewrites:
+      - `sum_pk_k>=7_at_least_j` → `sum_pk_k>=7 >= j`
+      - `p<k>_eq_<n>`            → `p_<k> = <n>`     (Eberhard / Jučovič)
+      - `p<k>_le_<n>`            → `p_<k> <= <n>`    (Grünbaum tails)
+      - `p<k>_ge_<n>`            → `p_<k> >= <n>`
+    """
     if not isinstance(expr, str) or not expr:
         return expr
 
@@ -48,7 +63,17 @@ def canonicalize_hypothesis_tokens(expr: str) -> str:
             pass
         return f"sum_pk_k>=7 >= {value}"
 
-    return _SUM_AT_LEAST_RE.sub(_replace, expr)
+    out = _SUM_AT_LEAST_RE.sub(_replace, expr)
+    # Split joint structural columns BEFORE the single-predicate regex:
+    # `p3_eq_0_and_p4_eq_0` would not match `\bp_eq_0\b` because the `\b`
+    # after the digit fails when followed by `_and_…`. Inserting an explicit
+    # ` and ` at every `_and_` between two structural tokens makes each
+    # piece word-bounded so the regex matches both.
+    out = re.sub(r"(eq_\d+|le_\d+|ge_\d+)_and_(p)", r"\1 and \2", out)
+    out = _STRUCT_EQ_RE.sub(lambda m: f"p_{m.group(1)} = {m.group(2)}", out)
+    out = _STRUCT_LE_RE.sub(lambda m: f"p_{m.group(1)} <= {m.group(2)}", out)
+    out = _STRUCT_GE_RE.sub(lambda m: f"p_{m.group(1)} >= {m.group(2)}", out)
+    return out
 
 
 def canonicalize_formula(formula: str) -> str:
@@ -148,6 +173,13 @@ class AdvancedConjectureParser:
         # Restore placeholders
         working = working.replace("__IS_POLY__", base_check)
         working = working.replace("__IS_SIMPLE__", base_check)
+
+        # Lift single `=` (DSL equality) to Python `==`, leaving the relational
+        # operators `>=`, `<=`, `!=`, `==` untouched. Needed for structural
+        # predicates like `(p_3 = 0)` so the compiled condition is a valid
+        # Python expression. Negative lookarounds match a `=` not already part
+        # of a relational operator.
+        working = re.sub(r"(?<![<>=!])=(?!=)", "==", working)
 
         # Replace logical operators variants.
         working = working.replace("&&", " and ").replace("||", " or ")
@@ -404,6 +436,22 @@ def ensure_registry_for_specs(specs: List[ConjectureSpec], reg: Dict[str, Dict[s
     return reg
 
 
+def load_iris_scores(source: Optional[Union[str, os.PathLike]] = None) -> Dict[str, Dict[str, Any]]:
+    """Read IRIS scores from conjectures.json. Single source of truth — no
+    registry mirroring. Returns {name: iris_dict}."""
+    out: Dict[str, Dict[str, Any]] = {}
+    try:
+        raw = _load_raw_dataset(str(source) if source else None)
+    except Exception:
+        return out
+    for e in raw["unsolved"] + raw["solved"]:
+        iris = e.get("iris")
+        name = e.get("name")
+        if name and isinstance(iris, dict):
+            out[name] = iris
+    return out
+
+
 def mark_conjecture_status(name: str, status: str, reg: Dict[str, Dict[str, Any]], **updates) -> None:
     rec = reg.setdefault(name, {"name": name, "status": status})
     rec["status"] = status
@@ -549,15 +597,22 @@ def _write_raw_dataset(data: Dict[str, List[dict]], dest: Optional[str] = None) 
     return path
 
 
-def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = None) -> List[str]:
+def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = None,
+                       iris_by_name: Optional[Dict[str, Dict[str, Any]]] = None) -> List[str]:
     """Insert new conjectures, de-duping by normalized formula against BOTH
     lists. New entries land in unsolved with status='new'; existing entries
-    and all their fields are preserved verbatim. Returns inserted names."""
+    and all their fields are preserved verbatim. Returns inserted names.
+
+    iris_by_name (optional): {spec.name: iris_dict} computed by
+    `agent.conjecture_generator.tools.iris_scoring.compute_iris`. Attached as
+    the per-entry "iris" field so the RL CE finder can pick it up via
+    ensure_registry_for_specs."""
     specs = list(specs)
     if not specs:
         return []
 
     data = _load_raw_dataset(dest)
+    iris_by_name = iris_by_name or {}
 
     def _norm(formula: str) -> str:
         try:
@@ -581,12 +636,16 @@ def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = No
             while f"{name}_{suffix}" in used_names:
                 suffix += 1
             name = f"{name}_{suffix}"
-        data["unsolved"].append({
+        entry = {
             "name": name,
             "formula": canonicalize_formula(spec.formula),
             "status": "new",
             "created_at": now,
-        })
+        }
+        iris = iris_by_name.get(spec.name)
+        if iris:
+            entry["iris"] = iris
+        data["unsolved"].append(entry)
         used_names.add(name)
         existing_formulas.add(f_norm)
         inserted.append(name)

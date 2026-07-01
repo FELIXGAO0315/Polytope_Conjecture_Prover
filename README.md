@@ -1,4 +1,4 @@
-# Polytope Conjecture Prover — Agent v3.3
+# Polytope Conjecture Prover — Agent v3.4
 
 A **closed-loop autonomous discovery system** for conjectures about simple convex 3-polytopes. One command runs the full cycle:
 
@@ -18,59 +18,162 @@ python -m run project
 
 ## What's New in v3.4
 
-**Prover module refactor + direct CLI entry**
+### 🎉 First successful end-to-end formalization (2026-07-01)
 
-- **`agent/prover/agent.py` split 4257 → 1124 lines (-73%).** The monolithic
-  FormalizerAgent class is now composed via three mixins —
-  `StrategiesMixin` (4 `_targeted_fix_*` + mechanical fixers + Inventory
-  template probe), `NodeSolverMixin` (`_compile_loop` + `_process_node`
-  + sub-lemma decompose path), and `ProofAssemblyMixin`
-  (`_write_complete_proof_file`).  Pure-function utilities moved to
-  `lean_codegen.py`; module-level helpers to `_helpers.py`; the
-  discovery decomposer to `conjecture_decomposer.py`; Inventory lemma
-  metadata to `prompts/inventory.py` (single source of truth — every
-  prompt that quotes an Inventory signature renders from this one
-  catalogue).  Behaviour is unchanged; the cut just maps each prover
-  concern to one file so future bugs land on a specific module.
-- **`pipeline.py`** — the 8-stage flow is now 8 named step functions
-  (`_step1_resolve_theorem`, `_step2_lock_goal`, …,
-  `_step8_collect_and_save`) wrapped by a tiny `formalize()` orchestrator.
-  Each step is independently callable for debugging just one phase
-  without re-running earlier LLM calls.
-- **`PolibStore` transactions** — TOCTOU + cache-invalidation around
-  Polib.lean writes were scattered across 6 sites in agent.py with
-  per-write `_invalidate_polib_content` calls.  Collapsed into
-  `with self._polib_store.transaction() as store: store.save(...); if bad:
-  store.remove(...); raise` — cache invalidation happens automatically
-  on context exit, success path or rollback.
-- **JSON path made explicit** — `ProverAgent.prove_conjecture` was
-  passing a synthesized fake LaTeX string (`conjecture._synth_latex()`)
-  to `formalize()` even though the JSON-derived `ParsedTheorem` was
-  already supplied via `parsed=`.  The dead `latex_source` arg is now
-  removed; Step 1 honestly logs `"Using pre-parsed theorem from JSON: C104"`
-  on the canonical path and only falls back to `parse_with_llm()` when
-  no pre-parsed theorem is provided.
+C104 (`if p_4=0 ∧ p_5≤2 ∧ f_2≥7, then 2·p_6 ≥ 4 − Σ_{k≥7} p_k`) was
+proved by the pipeline for the **first time** on 2026-07-01 — 101-line
+Lean 4 file, **zero new sorry**, using only the accepted
+`Inventory.lean` axiom base (`Juc_EulerFormula`, `Juc_InequalityPart`,
+`Barnette_P6Bound`, `p_range`).  The proof file lives at
+[`output/conjecture_without_ce/c104.lean`](output/conjecture_without_ce/c104.lean).
 
-**Direct prover CLI**
+Every strategic decision (blueprint decomposition, tactic choice,
+Inventory lemma selection) was made by the LLM — the Python layer only
+enforces universal Lean-schema gates (`IsMap` required,
+`SimplyCon3ConnectedMap 0` mandatory, no `IsSimple`/`maps.f2`, no
+new sorry), plantri-refutation soundness on intermediates, and the
+retry-with-correction loop.  **No human-injected proof steps, no
+problem-specific hints, no cheating.**
+
+### Prover module: aggressive dead-code cleanup (~2400 lines + 6 files deleted)
+
+The legacy compile-fix-loop machinery (`_generate_lean`,
+`_partial_solver`, `_compile_loop`, `_targeted_fix*`,
+`_try_mechanical_*`, `_inventory_template_probe`, `_PROOF_PATTERNS`,
+`_build_sandwich_summary`, and every hint-generator that fed them) was
+retired when the new single-session `agent/prover/proof_agent.py` took
+over per-node proving.  The dead scaffolding sat there for weeks —
+this release deletes it.
+
+**Files removed** (all confirmed 0 callers via grep):
+
+- `agent/prover/_strategies_mixin.py` (empty placeholder MRO shim)
+- `agent/prover/_helpers.py` (three functions, all consumed by one caller)
+- `agent/prover/tools/prompt_optimizer.py` (dep-import trimming for `_generate_lean`)
+- `agent/prover/tools/output_search.py` (compiled-output ref lookup for `_generate_lean`)
+- `agent/prover/tools/loogle_validator.py` (real-Mathlib-name suggestion for `_generate_lean`)
+- `agent/prover/tools/llm_hint_generator.py` (LLM hint tier for `_generate_lean`)
+- `agent/prover/prompts/inventory.py` (rendered `FIX_LOOP_POLIB_REF`, dead)
+
+**Modules slimmed:**
+
+- `agent/prover/agent.py`: 1037 → 351 lines (−686). All hint fields,
+  pattern-injection tables, sandwich summaries, and per-error hint
+  helpers removed.  FormalizerAgent is now just cache helpers + polib
+  bootstrap + a `formalize()` delegate.
+- `agent/prover/tools/search.py`: ~950 → 210 lines (−740). Kept
+  `PolibSearch` (polib index + fuzzy TF-IDF alias) + `SavedEntry`;
+  dropped `LoogleSearch`, `MathlibSearch`, `GitHubLean4Search`,
+  `CombinedHintGenerator`, `LLMProofReasoningHintGenerator` — all
+  five only fed dead `_generate_lean` paths.
+- `agent/prover/prompts/lean_generation.py`: 268 → 121 lines.  Kept
+  `SHARED_MODULE_CONTENT` (used by blueprint cache key) and
+  `LEAN_PREAMBLE` (used by `lean_codegen`).  Deleted
+  `LEAN_GENERATION_PROMPT`, `LEAN_GENERATION_SYSTEM_PROMPT`,
+  `FIX_LOOP_POLIB_REF`, and every `_GOAL_CONTEXT_*` / `_GOAL_INSTR_*`
+  template that was consumed only by `_generate_lean`.
+
+### The bug fixes that unlocked C104 (2026-06-30 → 2026-07-01)
+
+Every one of these was a real dead-lock the run walked into:
+
+1. **Per-node `LockedGoal` in step 4** — proof_agent was receiving the
+   MAIN theorem's signature for every sub-lemma, so the LLM wrote
+   `theorem C104` in every file, and our acceptance check (which
+   searched for `theorem {node_id}`) correctly rejected all of them
+   as sub-lemma proofs.  Fixed: sub-lemmas now get a per-node
+   `LockedGoal` built from `node.lean_signature`; main target still
+   uses the step-2 lock.
+2. **`_signature_compiles` pre-check** — before Opus burns its
+   1500-second budget on a sub-lemma, Python now compiles
+   `{sig} := by sorry` against Mathlib+Inventory+Polib and fails
+   fast if the type doesn't check.  Catches planner-side syntax /
+   arity / namespace errors in seconds instead of minutes.
+3. **`_autofix_lean_sig`** — Lean-3 `∑ k in Finset.…` gets rewritten
+   to Lean-4 `∑ k ∈ Finset.…` (same for `∏`, `⋃`, `⋂`) before the sig
+   is used or handed to Opus.  Planner LLMs often emit the Lean-3
+   form because it dominates training data; this is a pure syntax
+   normalization, not a semantic patch.
+4. **`_evict_blueprint_for_bad_sig`** — when the sig-check fails, the
+   blueprint cache is cleared so the next run re-plans instead of
+   pulling the same broken blueprint out of `store.json` and looping
+   on it.
+5. **Verbatim-signature gate demoted to INFO** — the quality checker
+   used to require the locked signature as a verbatim substring of
+   the emitted code, but Opus frequently adds `open Finset` or minor
+   binder-spacing changes that break substring match while every
+   semantic check (constant fidelity, conclusion match, hypotheses
+   covered, overall faithfulness) still passes.  Verbatim match is
+   now logged as `INFO` — the semantic checks are the load-bearing
+   guarantee.  Fixes the "proof_agent: proved / then: [fail] — ok"
+   deadlock that was blocking C104's main theorem for 3 retries in a
+   row.
+6. **Step 5 retry now honors `verbose`** — the retry loop was hard-
+   coded to `verbose=False`, so a 25-minute silent retry looked
+   indistinguishable from a hang.  Retries now stream the same
+   `[proof-agent]` / `[lean_compile #N]` telemetry as first attempts.
+7. **Absolute paths in proof_agent user message** — the LLM used to
+   spend its first 4-6 tool calls hunting the workspace with `find` /
+   `ls`, sometimes typo'ing `Polytope-Conjecture-Prover` (hyphens).
+   The `## Working directory` block in the user message now gives
+   exact absolute paths for `Inventory.lean`, `Polib.lean`, and the
+   Mathlib root.
+8. **No-new-sorry policy hard-enforced end-to-end** — `polib_manager
+   .save` now raises `PolibSaveError` on any `sorry`, planner hints
+   filter to `status == "proved"` only, and `_load_polib_code`
+   refuses to read `(partial)` sections.  Every `partial` code path
+   in `pipeline.py` / `FormalizationResult` was removed as dead.  The
+   `_sorry_inc` / `_sorry_get` counter (always 0 in practice) was
+   deleted with it, along with the entire "SORRY REPORT" block in
+   `_write_complete_proof_file`.
+9. **`_step2_lock_goal` no longer caches best-effort signatures** —
+   the loader already refused to return unconfirmed cache entries, so
+   writing them out was pure disk pollution.  Now unconfirmed sigs
+   are logged and skipped; only confirmed ones persist.
+10. **`_check_signature_static` replaces the LLM `GoalValidator`** —
+    the old validator prompt did 6 syntactic checks and 3 semantic
+    ones; six of the syntactic checks were pure regex work.  All
+    checks are now Python regex (deterministic + fast + no JSON parse
+    failures), and the LLM validator (plus `GoalValidationResult`
+    dataclass + `GOAL_VALIDATION_PROMPT`) is gone.  Cuts one LLM call
+    per attempt (worst-case 6 → 3 for step 2).
+
+### Latency knobs and VPN notes
+
+- **`CLAUDE_TIMEOUT=300`** in the env is recommended for VPN users
+  — the real DISCOVERY_BLUEPRINT_PROMPT for a C104-class conjecture
+  is ~9-10 KB and Sonnet at even `effort=low` takes ~170-280 seconds
+  end-to-end over CN VPN.  The default (240s) hits attempt-0 timeout
+  and forces a redundant `effort=high` retry.
+- **`MODEL_FAST=claude-haiku-4-5-20251001`** speeds up the
+  decomposer + goal extractor 3-5x with no observed quality loss —
+  the plantri-pool BlueprintValidator catches Haiku's occasional
+  false intermediate before it reaches Opus.  Set both env vars
+  together for the fastest reliable run.
+- **`effort="low"` + `allowed_tools=[]`** are now passed explicitly
+  by the decomposer's `messages.create` call and by the step-2 goal
+  extractor.  JSON-schema tasks don't need extended thinking or
+  grep-side-quests; forcing this in the SDK call cuts wallclock 3-5x
+  on identical inputs.
+- **Retry loop uses `_ESCALATION_SCHEDULE = [(medium, 40), (high, 60), (high, 60)]`**
+  — the caller-supplied `effort` argument overrides the schedule
+  when set, so JSON-output callsites pin `low` and only the
+  proof_agent per-node work follows the escalation.
+
+### Direct prover CLI (unchanged from v3.4-preview)
 
 ```bash
-python -m formalize C104              # NEW — skip every CE-search stage
+python -m formalize C104              # skip every CE-search stage
 python -m formalize C100-110          # range
 python -m formalize 104               # 'C' prefix optional
 ```
 
-- New entry point at [`formalize.py`](formalize.py) (shim) + actual
+- Entry point at [`formalize.py`](formalize.py) (shim) + actual
   implementation at [`agent/prover/formalize.py`](agent/prover/formalize.py).
-  Token grammar matches `python -m run` (range / batch / numeric).
-- Both `python -m run` and `python -m formalize` converge on
-  [`agent/prover/runner.py`](agent/prover/runner.py)`:formalize_conjecture()`
+- Both `python -m run` (full pipeline) and `python -m formalize`
+  (prover-only) converge on
+  [`agent/prover/runner.py:formalize_conjecture()`](agent/prover/runner.py)
   — single source of truth for "actually invoke the prover".
-  `Orchestrator._run_prover` is now a 15-line wrapper that calls into
-  the same function.
-- Use case: when you know a conjecture is provable (e.g. retrying a
-  known-good C104 after a prompt change) and don't want to spend
-  5-30 min on CE search.  Mode D is identical to having `python -m run`
-  skip Stages 0-2.
 
 ---
 

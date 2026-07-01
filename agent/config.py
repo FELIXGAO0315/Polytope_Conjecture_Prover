@@ -32,25 +32,41 @@ class Config:
     polib_path: Path = field(default_factory=_resolve_polib_path)
     store_path: Path = field(default_factory=lambda: _PROJECT_ROOT / "store.json")
     lake_binary: str = field(default_factory=lambda: os.environ.get("LAKE_BINARY", "lake"))
-    max_rounds_per_node: int = field(default_factory=lambda: int(os.environ.get("MAX_ROUNDS_PER_NODE", "3")))
+    max_rounds_per_node: int = field(default_factory=lambda: int(os.environ.get("MAX_ROUNDS_PER_NODE", "5")))
     max_node_retries: int = field(default_factory=lambda: int(os.environ.get("MAX_NODE_RETRIES", "4")))
     max_sorry_total: int = field(default_factory=lambda: int(os.environ.get("MAX_SORRY_TOTAL", "0")))
+    # Default models target proof-quality, not throughput:
+    # - main: Opus 4.7 for actual proof work (generation + fix loop). Sonnet 4.6
+    #   was the previous default but lost too often on harder combinatorial proofs.
+    # - fast: Sonnet 4.6 for peripheral structured work (hint generation, JSON
+    #   decisions). Haiku 4.5 was the previous default but produced too many
+    #   shallow / hallucinated lemma names downstream.
+    # Override via MODEL_MAIN / MODEL_FAST env vars.
     model_main: str = field(
-        default_factory=lambda: os.environ.get("MODEL_MAIN", "claude-sonnet-4-6")
+        default_factory=lambda: os.environ.get("MODEL_MAIN", "claude-opus-4-7")
     )
     model_fast: str = field(
-        default_factory=lambda: os.environ.get("MODEL_FAST", "claude-haiku-4-5-20251001")
+        default_factory=lambda: os.environ.get("MODEL_FAST", "claude-sonnet-4-6")
     )
     compile_timeout_seconds: int = 180
     keep_temp_on_failure: bool = field(
         default_factory=lambda: os.environ.get("KEEP_TEMP_ON_FAILURE", "").lower() == "true"
     )
     max_parallel_nodes: int = field(default_factory=lambda: int(os.environ.get("MAX_PARALLEL_NODES", "6")))
-    enable_github_search: bool = field(
-        default_factory=lambda: os.environ.get(
-            "ENABLE_GITHUB_SEARCH", "true"
-        ).lower() == "true"
+
+    # proof_agent session knobs — passed straight into prove_node() per step 4 node.
+    # Defaults are sized for hard combinatorial proofs (Opus + high effort + 80
+    # turns + 25-minute timeout); each node can override the budget via env var.
+    proof_agent_effort: str = field(
+        default_factory=lambda: os.environ.get("PROOF_AGENT_EFFORT", "high")
     )
+    proof_agent_max_turns: int = field(
+        default_factory=lambda: int(os.environ.get("PROOF_AGENT_MAX_TURNS", "80"))
+    )
+    proof_agent_timeout_seconds: int = field(
+        default_factory=lambda: int(os.environ.get("PROOF_AGENT_TIMEOUT", "1500"))
+    )
+
     verbose: bool = True
 
     def __post_init__(self):

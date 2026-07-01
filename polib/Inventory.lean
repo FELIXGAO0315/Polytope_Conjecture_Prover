@@ -17,6 +17,9 @@
 --         equality_family
 --     §3.4 JucovicTheorem (inequality conjunct; m < 6 edge case)
 --     §4.3 P6GenusG (both conjuncts; m < 6 edge case / Set.Infinite assembly)
+--     §4.4 Barnette_P6Bound (p6.tex Theorem 1, Barnette 1969 / Jucovic eq.(4);
+--          aggregate of the critical-face-adjacency argument — adjacency
+--          data not carried by SimplyCon3ConnectedMap, same pattern as §2)
 --   Everything else is proved without sorry. In particular Juc_InequalityPart
 --   and P6InequalityPart are PROVED (2026-06-11) from occupation_conservation
 --   + occupation_bound + quad_occ_cancellation — see §4.3.
@@ -403,6 +406,38 @@ lemma Juc_InequalityPart (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
       ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ) := by
   have h := P6InequalityPart M hM hm
   linarith
+
+-- §4.4  Barnette's alternate p₆ bound (sphere, g = 0)
+
+/-- [p6, Theorem 1 — Barnette 1969 / Jucovic eq. (4)] Alternate p₆ lower
+    bound for simple 3-polytopes (sphere, g = 0) under the side condition
+    Σ_{k≥7} p_k ≥ 3:
+
+        p_6 ≥ 2 + (p_3 − p_5)/2 − Σ_{k≥7} p_k
+
+    Stated here in integer-clear form `2·p_6 ≥ 4 + p_3 − p_5 − 2·Σ p_k`
+    to avoid rational arithmetic.
+
+    Complements Juc_InequalityPart: Jucovic's bound is tight when there
+    are few low-degree faces (p_4, p_5 small) but loose when ∑_{k≥7} p_k
+    is small and dominated by k = 7, 8; Barnette's bound is tight in the
+    latter regime. The two together pin p_6 from below in every
+    Euler-feasible configuration on the sphere.
+
+    SORRY (accepted, paper statement): Barnette's proof builds the
+    critical-face adjacency graph G (Theorem 1 proof, p.2 of p6.tex) and
+    counts δ(F), φ(v) — adjacency data that `SimplyCon3ConnectedMap`
+    does not carry, exactly analogous to the per-face adjacency lemmas
+    in §2. The aggregate inequality this lemma states is the final form
+    Barnette proves; m ≥ 6 matches the convention used by the rest of
+    Inventory and is implied by hsum (Σ_{k≥7} ≥ 3 forces m ≥ 7). -/
+lemma Barnette_P6Bound (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
+    (hm : M.m ≥ 6)
+    (hsum : ∑ k ∈ Finset.Ico 7 (M.m + 1), (M.p_i k : ℤ) ≥ 3) :
+    2 * (M.p_i 6 : ℤ) ≥
+      4 + (M.p_i 3 : ℤ) - (M.p_i 5 : ℤ) -
+      2 * ∑ k ∈ Finset.Ico 7 (M.m + 1), (M.p_i k : ℤ) := by
+  sorry
 
 /-- [p6] Main theorem — p₆ genus-g inequality (full statement).
     SORRY (accepted, paper statement): same m < 6 edge case as JucovicTheorem

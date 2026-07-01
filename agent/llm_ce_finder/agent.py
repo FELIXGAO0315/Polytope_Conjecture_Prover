@@ -32,6 +32,11 @@ _LLM_CE_TIER4_FUTILE = int(os.environ.get("LLM_CE_TIER4_FUTILE", "12"))
 # the LLM track declares itself dead for this conjecture. A dead CLI (auth,
 # usage limit, session conflicts) otherwise burns every remaining round.
 _LLM_CE_CALL_BREAKER = int(os.environ.get("LLM_CE_CALL_BREAKER", "3"))
+# Stricter breaker for *timeouts specifically*: a stuck SDK subprocess or
+# network stall reliably produces consecutive 180s timeouts (one of the
+# expensive failure modes). Don't wait for the generic 3-failure breaker —
+# 2 consecutive timeouts is already a strong signal the track is dead.
+_LLM_CE_TIMEOUT_BREAKER = int(os.environ.get("LLM_CE_TIMEOUT_BREAKER", "2"))
 # Extended-thinking effort for CE rounds. "low" is deliberate: candidates are
 # cheap to verify locally (tiers 1-3 instant, tier 4 is the real gate), so
 # breadth beats depth. Measured: default/inherited effort thought for >240s
@@ -178,6 +183,7 @@ class LLMCEFinder:
         tried_keys: set[frozenset] = set()
         tier4_deaths = 0  # consecutive tier-4-only failures (futility signal)
         consec_call_errors = 0  # consecutive CLI call failures (breaker)
+        consec_timeouts = 0     # consecutive timeouts only (stricter breaker)
 
         # Progress is summarised once every 3 rounds (window aggregation)
         window_new = 0
@@ -188,7 +194,9 @@ class LLMCEFinder:
 
         for rnd in range(1, self.num_rounds + 1):
             if self.stop_event.is_set():
-                print("[LLM ce finding] stopped — CE search settled by another track")
+                # Another track already settled the search — exit silently
+                # so the orchestrator's "[Stage 2] CE found by ..." follows
+                # the [Output] save line directly with no LLM noise between.
                 return None
 
             try:
@@ -203,8 +211,21 @@ class LLMCEFinder:
                                          stop_event=self.stop_event, max_attempts=1,
                                          effort=_LLM_CE_EFFORT)
             except Exception as exc:
+                # Silent abort when another track set stop_event mid-call —
+                # the "call aborted: stop_event set" exception is expected,
+                # not a failure worth logging.
+                if "stop_event" in str(exc):
+                    return None
                 consec_call_errors += 1
+                is_timeout = "timed out" in str(exc).lower()
+                if is_timeout:
+                    consec_timeouts += 1
                 print(f"[LLM ce finding] Round {rnd}/{self.num_rounds}: skipping ({exc})")
+                if consec_timeouts >= _LLM_CE_TIMEOUT_BREAKER:
+                    print(f"[LLM ce finding] {consec_timeouts} consecutive timeout(s) — "
+                          f"SDK/network appears stuck, LLM track disabled "
+                          f"(RL/Hopper continue; Stage 2 re-entry still runs)")
+                    return None
                 if consec_call_errors >= _LLM_CE_CALL_BREAKER:
                     print(f"[LLM ce finding] {consec_call_errors} consecutive CLI "
                           f"failures — LLM track disabled for this conjecture "
@@ -213,10 +234,10 @@ class LLMCEFinder:
                 continue
 
             if self.stop_event.is_set():
-                print("[LLM ce finding] stopped — CE search settled by another track")
                 return None
 
             consec_call_errors = 0
+            consec_timeouts = 0
             candidates = self._parse_candidates(text)
             skipped_dupes = 0
             best_passed_count = -1   # max checks passed by any violating candidate

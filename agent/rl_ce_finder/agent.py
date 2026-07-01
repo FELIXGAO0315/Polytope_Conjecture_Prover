@@ -30,6 +30,7 @@ from agent.conjectures import (
     load_registry,
     save_registry,
     ensure_registry_for_specs,
+    load_iris_scores,
     mark_conjecture_status,
     mark_conjecture_as_solved,
     record_ce_found,
@@ -1045,34 +1046,6 @@ def train_on_conjecture(formula: str, name: str = None, num_episodes: int = 5000
             if len(counterexamples) == 1:
                 ce_found_time = time.time() - start_time
 
-            _ce_out_dir = Path(__file__).resolve().parents[2] / "output" / "conjecture_with_ce"
-            _ce_out_dir.mkdir(parents=True, exist_ok=True)
-            _ce_out_file = _ce_out_dir / f"{name or 'formula'}.json"
-            _ce_record = {
-                "name": name or "formula",
-                "formula": formula,
-                "counterexamples": [
-                    {
-                        "p_vector": c["p_vector"],
-                        "p3": c["properties"].get("p3"),
-                        "p4": c["properties"].get("p4"),
-                        "p5": c["properties"].get("p5"),
-                        "p6": c["properties"].get("p6"),
-                        "sum_pk_after_p6": c["properties"].get("sum_pk_after_p6"),
-                        "vertices": c["properties"].get("num_vertices"),
-                        "episode": c["episode"],
-                        "margin": c["margin"],
-                        "found_at": c.get("found_at"),
-                        # witness graph (node-link format) — without it a CE
-                        # that fails downstream re-construction is lost forever
-                        "graph": c.get("graph"),
-                    }
-                    for c in counterexamples
-                ],
-            }
-            with open(_ce_out_file, "w") as _f:
-                json.dump(_ce_record, _f, indent=2)
-
             print(f"\n[RL ce finding] Episode {episode}: CE found❗ — p_vector={env.props['p_vector']}\n")
             if stop_event is not None and not stop_event.is_set():
                 stop_event.set()
@@ -1148,13 +1121,8 @@ def run_loaded_conjectures(source: Optional[str] = None, episodes: int = 2000,
     reg = ensure_registry_for_specs(specs, load_registry(source_dir))
     reg = sync_registry_from_ce_map(reg)
 
-    # Extract IRIS scores from registry (written there by conjecture_agent)
-    iris_scores: Dict[str, Dict] = {}
-    for spec_name, rec in reg.items():
-        if isinstance(rec, dict):
-            iris = rec.get("metrics", {}).get("iris")
-            if iris and isinstance(iris, dict):
-                iris_scores[spec_name] = iris
+    # IRIS scores live on the conjectures.json entries (single source of truth).
+    iris_scores: Dict[str, Dict] = load_iris_scores(source)
 
     name_to_spec = {s.name: s for s in specs}
     if target_names:
@@ -1937,10 +1905,24 @@ if __name__ == "__main__":
     else:  # ce
         _ABLATION_ORDER = ["T", "R", "L", "TR", "TL", "RL", "TRL"]
 
+        # Filter / consolidate output from the 7 child subprocesses:
+        # drop per-100-Episode summaries (they flood when ×7), surface CE-found
+        # lines tagged with the sort that found it, and pass through errors.
+        _STATUS_PATH = lambda s: Path(f"/tmp/ablation_status_{s}.json")
+        _NOISE_RE = re.compile(r"\[RL ce finding\] Episode \d+ \| R:")
+        _CE_RE = re.compile(r"\[RL ce finding\] Episode (\d+): CE found.* — (p_vector=.+)$")
+        _KEEP_KEYWORDS = ("Traceback", "Error", "Exception", "Warning",
+                          "ModuleNotFound", "ImportError")
+
         def _run_one_sort(iris_sort_val):
-            """Run one iris_sort combination in a subprocess and return its results."""
+            """Run one iris_sort combination in a subprocess.
+
+            Stdout is filtered live: per-100 episode summaries are dropped (the
+            consolidated heartbeat below covers all 7 at once); CE-found lines
+            are re-emitted with the sort tag + current conjecture so the user
+            can verify which sort scored. Errors are kept and prefixed."""
             import subprocess, sys
-            cmd = [sys.executable, "-m", "agents.counterexample_finding_agent",
+            cmd = [sys.executable, "-m", "agent.rl_ce_finder.agent",
                    "--mode", "ce",
                    "--episodes", str(args.episodes),
                    "--max-nodes", str(args.max_nodes),
@@ -1955,33 +1937,107 @@ if __name__ == "__main__":
                 cmd += ["--run-full-episodes"]
             if args.no_end_on_caps:
                 cmd += ["--no-end-on-caps"]
-            print(f"[parallel] Launching iris-sort={iris_sort_val} ...")
+            print(f"[parallel] launched iris-sort={iris_sort_val}", flush=True)
             from agent.procutil import set_pdeathsig
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                    text=True, preexec_fn=set_pdeathsig)
-            out_lines = []
-            for line in proc.stdout:
-                out_lines.append(line)
+                                    text=True, preexec_fn=set_pdeathsig, bufsize=1)
+            for raw in proc.stdout:
+                line = raw.rstrip("\r\n")
+                if not line.strip():
+                    continue
+                if _NOISE_RE.search(line):
+                    continue   # episode summary — drop, heartbeat covers it
+                m = _CE_RE.search(line)
+                if m:
+                    ep, pv_part = m.group(1), m.group(2)
+                    conj = "?"
+                    try:
+                        with open(_STATUS_PATH(iris_sort_val)) as _sf:
+                            conj = json.load(_sf).get("conjecture", "?")
+                    except Exception:
+                        pass
+                    # Convert auto_<ts>_<N> → C<N> (orchestrator-style short id).
+                    _m = re.search(r"_(\d+)$", conj)
+                    short = f"C{_m.group(1)}" if _m else conj
+                    print(f"\n[CE FOUND] iris-sort={iris_sort_val}  "
+                          f"conjecture={short}  episode={ep}  {pv_part}\n",
+                          flush=True)
+                    continue
+                if any(k in line for k in _KEEP_KEYWORDS):
+                    print(f"[{iris_sort_val}] {line}", flush=True)
+                    continue
+                # everything else (init banners, tqdm bars, etc.) → drop
             proc.wait()
             return iris_sort_val, proc.returncode
 
         if args.iris_sort == "all":
             # ── Parallel: spawn all 7 subprocesses at once ───────────────────
             import concurrent.futures
-            print(f"\n{'='*60}")
-            print(f"  ABLATION: running all 7 IRIS combinations in parallel")
-            print(f"{'='*60}\n")
+            import threading
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
-                futures = {executor.submit(_run_one_sort, s): s for s in _ABLATION_ORDER}
-                for fut in concurrent.futures.as_completed(futures):
-                    sort_val, rc = fut.result()
-                    status = "OK" if rc == 0 else f"FAILED (code {rc})"
-                    print(f"\n[parallel] iris-sort={sort_val} finished -> {status}")
+            print(f"\n{'='*60}")
+            print(f"  ABLATION: 7 IRIS sorts running in parallel")
+            print(f"  per-100-episode noise hidden — heartbeat every 5 s")
+            print(f"  CE finds + errors always surfaced with sort tag")
+            print(f"{'='*60}\n", flush=True)
+
+            # Clear stale status files from previous runs so the heartbeat
+            # doesn't print pre-launch garbage in the first few seconds.
+            for _s in _ABLATION_ORDER:
+                try:
+                    os.unlink(_STATUS_PATH(_s))
+                except FileNotFoundError:
+                    pass
+                except Exception:
+                    pass
+
+            _hb_stop = threading.Event()
+
+            def _heartbeat():
+                """Every 5s, one line summarising all 7 sorts' progress."""
+                while not _hb_stop.is_set():
+                    if _hb_stop.wait(5.0):
+                        return
+                    parts = []
+                    any_live = False
+                    for s in _ABLATION_ORDER:
+                        try:
+                            with open(_STATUS_PATH(s)) as _sf:
+                                st = json.load(_sf)
+                            ep = int(st.get("episode", 0))
+                            tot_ep = int(st.get("total_episodes", 0))
+                            ci = int(st.get("conj_idx", 0))
+                            tc = int(st.get("total_conj", 0))
+                            ce = int(st.get("ce_count", 0))
+                            parts.append(
+                                f"{s:>3s}:C{ci}/{tc} ep{ep}/{tot_ep} ce={ce}"
+                            )
+                            any_live = True
+                        except FileNotFoundError:
+                            parts.append(f"{s:>3s}:- (warming up)")
+                        except Exception:
+                            parts.append(f"{s:>3s}:?")
+                    if any_live:
+                        print("[7 sorts] " + "  |  ".join(parts), flush=True)
+
+            _hb_thread = threading.Thread(target=_heartbeat, daemon=True)
+            _hb_thread.start()
+
+            try:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+                    futures = {executor.submit(_run_one_sort, s): s for s in _ABLATION_ORDER}
+                    for fut in concurrent.futures.as_completed(futures):
+                        sort_val, rc = fut.result()
+                        status = "OK" if rc == 0 else f"FAILED (code {rc})"
+                        print(f"[parallel] iris-sort={sort_val} finished → {status}",
+                              flush=True)
+            finally:
+                _hb_stop.set()
+                _hb_thread.join(timeout=2)
 
             print(f"\n{'='*60}")
             print("  All 7 ablation runs complete.")
-            print(f"{'='*60}")
+            print(f"{'='*60}", flush=True)
 
             # Final consolidated chart from accumulated ablation_data.json
             try:

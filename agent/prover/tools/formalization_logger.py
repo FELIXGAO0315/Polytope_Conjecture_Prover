@@ -70,6 +70,12 @@ class FormalizationLogger:
         log_dir.mkdir(parents=True, exist_ok=True)
         self._flush()
 
+    def set_theorem_name(self, theorem_name: str) -> None:
+        """Update the recorded theorem name (set later than __init__ in the pipeline)."""
+        with self._lock:
+            self._data["theorem_name"] = theorem_name
+            self._flush()
+
     # ------------------------------------------------------------------
     # Node lifecycle
     # ------------------------------------------------------------------

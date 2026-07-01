@@ -66,10 +66,66 @@ def add_failure_hint(formula: str, reason: str) -> None:
     _add("failure", formula, reason)
 
 
-def format_hint_block(entries: list[dict], max_entries: int = 30) -> str:
+def format_hint_block(entries: list[dict], max_entries: int = 15) -> str:
     """Render hint entries for prompt embedding (most recent last)."""
     if not entries:
         return "  (none yet)"
     lines = [f"  - {e.get('formula')}\n      ↳ {e.get('reason', '')}"
              for e in entries[-max_entries:]]
     return "\n".join(lines)
+
+
+# ── survivor hints ─────────────────────────────────────────────────────────────
+# A "survivor" is an unsolved conjecture that has weathered many RL CE attempts
+# without being refuted. That's a strong (though weaker than Lean) signal that
+# the bound is probably valid and its STRUCTURE is worth mimicking — far ahead
+# of waiting for the prover to produce a real success hint.
+
+SURVIVOR_THRESHOLD = 20  # registry's `increment_attempt` threshold
+
+
+def enrich_hints_with_survivors(hints: dict,
+                                source: str | None = None,
+                                threshold: int = SURVIVOR_THRESHOLD,
+                                max_entries: int = 20) -> dict:
+    """Mutate `hints` in place, adding `hints['survivor']` populated from
+    registry + conjectures.json. Picks unsolved entries with
+    `attempts_without_ce >= threshold`. Does NOT persist (transient signal —
+    a future CE attempt could refute the survivor at any time)."""
+    from agent.conjectures import (   # local import to dodge cycle
+        load_registry,
+        _load_raw_dataset,
+    )
+    hints.setdefault("survivor", [])
+    try:
+        reg = load_registry(source)
+        raw = _load_raw_dataset(source)
+    except Exception:
+        return hints
+
+    name_to_formula = {e.get("name"): e.get("formula")
+                       for e in raw["unsolved"] + raw["solved"]
+                       if e.get("name") and e.get("formula")}
+
+    candidates = []
+    for name, rec in reg.items():
+        if not isinstance(rec, dict):
+            continue
+        if rec.get("status") != "unsolved":
+            continue
+        attempts = int(rec.get("attempts_without_ce", 0) or 0)
+        if attempts < threshold:
+            continue
+        formula = name_to_formula.get(name)
+        if not formula:
+            continue
+        candidates.append((attempts, name, formula))
+
+    # most-survived first; keep up to max_entries
+    candidates.sort(reverse=True)
+    for attempts, name, formula in candidates[:max_entries]:
+        hints["survivor"].append({
+            "formula": formula,
+            "reason": f"survived {attempts} CE attempts (potentially_valid)",
+        })
+    return hints

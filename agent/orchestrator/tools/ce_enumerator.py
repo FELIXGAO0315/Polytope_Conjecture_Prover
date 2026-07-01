@@ -68,16 +68,89 @@ def enumerate_ce_candidates(
     hyps = list(conjecture.hypotheses)
     conclusion = conjecture.conclusion
 
+    # Adapt bounds to the hypothesis demands. Without this, hypotheses like
+    # `(sum_pk_k>=7 >= 8)` or `(f_2>=_45)` produce zero enumerated candidates
+    # because the default n_large_max=2 / f2_max=36 don't cover the region
+    # where a CE could even satisfy the hypothesis. Stratified discovery
+    # frequently emits both forms, so this auto-widening is now load-bearing.
+    import re as _re
+    hyp_joined = " ".join(hyps)
+
+    # Required minimum number of k>=7 faces. Each contributes exactly 1 to
+    # `sum_pk_k>=7`, so multisets smaller than this can't satisfy the
+    # hypothesis — used both to start the iteration above 1 (skipping pure
+    # waste) and to short-circuit when even the cap can't reach the demand.
+    _n_large_min = 0
+    for m in _re.finditer(r"sum_pk_k>=7\s*>=\s*(\d+)", hyp_joined):
+        _n_large_min = max(_n_large_min, int(m.group(1)))
+
+    # Required minimum f_2. Used to bail early when the hypothesis pushes
+    # candidates past plantri's exhaustive reach (every candidate would
+    # land in `unreachable` downstream and the screen would do nothing).
+    _f2_min_hyp = 0
+    for m in _re.finditer(r"f_2(?:>=_|\s*>=\s*)(\d+)", hyp_joined):
+        _f2_min_hyp = max(_f2_min_hyp, int(m.group(1)))
+
+    # Hard cap on multiset size. Without it, `sum_pk_k>=7 >= 9` widens
+    # n_large_max to 9, and `combinations_with_replacement(range(7, k_max+1),
+    # 9)` alone is ≈ 500k tuples; with the inner DS triple loop on top the
+    # function effectively never returns (billions of pure-Python iterations,
+    # observed wall-stuck on C62). The cap restricts enumeration to the
+    # range where this engine is actually productive — deeper hypotheses
+    # are handed straight to LLM/RL/Hopper/constructor.
+    _NL_CAP = _env_int("CE_ENUM_NLARGE_HARDCAP", 5)
+    n_large_max = min(max(n_large_max, _n_large_min), _NL_CAP)
+
+    for m in _re.finditer(r"f_2(?:>=_|\s*>=\s*)(\d+)", hyp_joined):
+        # Need to leave headroom on top of the threshold so the enumerator
+        # actually iterates over CE-shaped p-vectors above it, not just the
+        # boundary. 12 face slots covers the typical "p_6 grows linearly
+        # with f_2" CE pattern without exploding cost.
+        f2_max = max(f2_max, int(m.group(1)) + 12)
+
     cache_key = (tuple(hyps), conclusion, f2_max, k_max, n_large_max, max_results)
     with _ENUM_LOCK:
         if cache_key in _ENUM_CACHE:
             return list(_ENUM_CACHE[cache_key])
 
+    # Early skip: when the hypothesis pushes p-vectors past what plantri can
+    # exhaustively handle, every enumerated candidate would fail downstream
+    # anyway — bail with a clear diagnostic instead of grinding for minutes
+    # over the impossible region. Two independent triggers:
+    #   (a) f_2 lower bound exceeds plantri's exhaustive reach (max 36 for
+    #       the min-deg-5 batch mode);
+    #   (b) sum_pk_k>=7 lower bound exceeds CE_ENUM_NLARGE_HARDCAP — the
+    #       multiset iteration alone would be ≈ 500k tuples.
+    # Either case prints WHICH constraint fired so the user can tune.
+    _plantri_reach = int(os.environ.get("PLANTRI_F2_MAX_M5", "36"))
+    skip_reason = None
+    if _f2_min_hyp > _plantri_reach:
+        skip_reason = (f"hypothesis requires f_2 >= {_f2_min_hyp} but plantri "
+                       f"exhaustive reach is f_2 <= {_plantri_reach}")
+    elif _n_large_min > n_large_max:
+        skip_reason = (f"hypothesis requires sum_pk_k>=7 >= {_n_large_min} "
+                       f"but CE_ENUM_NLARGE_HARDCAP={_NL_CAP} caps the "
+                       f"iteration")
+
+    if skip_reason:
+        print(f"[ce_enumerator] {skip_reason} — exhaustive method "
+              f"ineffective, deferring to constructor + LLM/RL/Hopper "
+              f"tracks", flush=True)
+        with _ENUM_LOCK:
+            _ENUM_CACHE[cache_key] = []
+        return []
+
     out: list[CECandidate] = []
 
-    # Large-face multisets (sizes >= 7), including the empty multiset.
-    large_sets: list[tuple[int, ...]] = [()]
-    for n in range(1, n_large_max + 1):
+    # Large-face multisets (sizes >= 7). Start at _n_large_min — multisets
+    # below that always fail `sum_pk_k>=7 >= _n_large_min`, so iterating
+    # them is pure waste. Empty multiset is only valid when the hypothesis
+    # is absent (_n_large_min == 0).
+    _n_start = max(1, _n_large_min)
+    large_sets: list[tuple[int, ...]] = []
+    if _n_large_min == 0:
+        large_sets.append(())
+    for n in range(_n_start, n_large_max + 1):
         large_sets.extend(combinations_with_replacement(range(7, k_max + 1), n))
 
     for large in large_sets:

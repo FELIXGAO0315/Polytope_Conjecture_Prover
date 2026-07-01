@@ -1,0 +1,132 @@
+{
+  "conjecture_id": "C36",
+  "conjecture_latex": "if ((is_simple)  and  (f_2>=_10)), then p6 >= (2*p3 + -6.5*sum_pk_after_p6)",
+  "hypotheses": [
+    "(is_simple)",
+    "(f_2>=_10)"
+  ],
+  "conclusion": "p6 >= (2*p3 + -6.5*sum_pk_after_p6)",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      4,
+      0,
+      0,
+      6
+    ],
+    "p3": 4,
+    "p4": 0,
+    "p5": 0,
+    "p6": 6,
+    "f2": 10,
+    "num_vertices": 16,
+    "num_edges": 24,
+    "witness_graph": {
+      "format": "edge_list",
+      "num_vertices": 16,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          6
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          9
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          9
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          5,
+          14
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          15
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          7,
+          15
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          8,
+          10
+        ],
+        [
+          10,
+          11
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          14
+        ],
+        [
+          13,
+          15
+        ]
+      ]
+    }
+  },
+  "found_by": "plantri ce finder",
+  "found_at_round": 2,
+  "violation_detail": "p6=6.0 < RHS=8.0000 (violation)",
+  "found_at": "2026-06-27T11:49:03.510857+00:00",
+  "other_candidates_not_checked": []
+}

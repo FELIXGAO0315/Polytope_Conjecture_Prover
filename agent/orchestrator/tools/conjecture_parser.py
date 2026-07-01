@@ -1,67 +1,99 @@
+"""JSON-conjecture parser.
+
+The prover pipeline only consumes conjectures from ``conjectures.json``.
+``ParsedConjecture`` is the in-memory view of one such row; the canonical
+input is its ``formula`` string, e.g.::
+
+    if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_7)),
+        then p6 >= (((-0.5 * sum_pk_after_p6) + 2))
+
+``from_conjecture_spec`` splits this into ``(hypotheses, conclusion)`` and
+forwards it to the prover, with two normalisations:
+
+* Tokens that are no-ops in the Lean theory (``is_simple``, ``is_3_connected``)
+  are dropped at parse time so they never reach the goal-extractor LLM.
+* If the formula does not match the ``if ..., then ...`` shape, we fail
+  fast — silent fallback used to mask malformed conjectures and let them
+  flow into the LLM as garbage.
+"""
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from agent.prover.tools.latex_parser import ParsedTheorem, ProofStep, _sha256
+from agent.prover.tools.parsed_theorem import ParsedTheorem, _sha256
 
 if TYPE_CHECKING:
     from agent.conjectures import ConjectureSpec
 
 
+# Hypotheses that exist in the conjecture DSL but have no Lean counterpart.
+# `SimplyCon3ConnectedMap` already encodes simplicity + 3-connectedness, so
+# leaking them as separate hypotheses would force the goal extractor to spend
+# a prompt rule on dropping them every time. Drop here instead.
+_NOOP_HYPOTHESES = frozenset({"is_simple", "is_3_connected"})
+
+# Non-greedy split at the FIRST ", then " so multi-paren cond expressions like
+# `((a) and (b))` are captured whole.  Outer parens (one or many wrappers) are
+# stripped afterwards by `_strip_outer_parens`.
+_IF_THEN_RE = re.compile(
+    r'^\s*if\s+(?P<cond>.+?)\s*,\s*then\s+(?P<concl>.+?)\s*$',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
 @dataclass
 class ParsedConjecture:
-    conjecture_id: str        # "C2", "C4", …
-    statement_latex: str      # raw LaTeX of the full statement (still inside $…$)
-    hypotheses: list[str]     # conditions extracted from "If …"
-    conclusion: str           # extracted from "then …"
-    iris_scores: dict[str, float] = field(default_factory=dict)  # T, R, L, IRIS
+    conjecture_id: str        # short form, e.g. "C104"
+    statement_latex: str      # raw formula string (DSL, not LaTeX)
+    hypotheses: list[str]
+    conclusion: str
+    # NOTE: never populated by ``from_conjecture_spec`` today — ConjectureSpec
+    # has no IRIS fields.  Kept because orchestrator._sort_by_iris reads it;
+    # see TODO in that method (currently a no-op sort).
+    iris_scores: dict[str, float] = field(default_factory=dict)
 
     @property
     def short_id(self) -> str:
-        """Return a short display ID like 'C45' from 'auto_20260310_142638_45'."""
+        """Display ID like 'C45' derived from the numeric suffix."""
         m = re.search(r'_(\d+)$', self.conjecture_id)
-        if m:
-            return f"C{m.group(1)}"
-        return self.conjecture_id
+        return f"C{m.group(1)}" if m else self.conjecture_id
 
     def to_parsed_theorem(self) -> ParsedTheorem:
-        """Convert to ParsedTheorem with empty proof_steps for the prove pipeline."""
-        name = self.conjecture_id
-        synth = self._synth_latex()
+        """Build the prover-side view of this conjecture."""
+        content = f"{self.conjecture_id}|{'|'.join(self.hypotheses)}|{self.conclusion}"
         return ParsedTheorem(
-            name=name,
-            theorem_type="theorem",
+            name=self.conjecture_id,
             hypotheses=self.hypotheses,
             conclusion=self.conclusion,
-            proof_steps=[],
-            latex_source=synth,
-            latex_hash=_sha256(synth),
-            source_label=self.conjecture_id,
-        )
-
-    def _synth_latex(self) -> str:
-        """Minimal LaTeX theorem block wrapping this conjecture (no proof)."""
-        return (
-            f"\\begin{{theorem}}[{self.conjecture_id}]\n"
-            f"{self.statement_latex}\n"
-            f"\\end{{theorem}}"
+            content_hash=_sha256(content),
         )
 
     @classmethod
     def from_conjecture_spec(cls, spec: ConjectureSpec) -> ParsedConjecture:
-        """Build a ParsedConjecture from a JSON ConjectureSpec (name + formula)."""
+        """Build a ParsedConjecture from a JSON ConjectureSpec.
+
+        Raises ``ValueError`` if ``spec.formula`` does not have the
+        ``if ..., then ...`` shape — silent fallback would hand the raw
+        formula to the goal extractor as the conclusion.
+        """
         formula = spec.formula
-        m = re.match(r'if\s*\((.*)\)\s*,?\s*then\s+(.*)', formula, re.IGNORECASE | re.DOTALL)
-        if m:
-            cond_raw = m.group(1).strip()
-            conclusion = m.group(2).strip()
-            hypotheses = [c.strip() for c in re.split(r'\s+and\s+', cond_raw) if c.strip()]
-        else:
-            hypotheses, conclusion = [], formula
-        m = re.search(r'_(\d+)$', spec.name)
-        cid = f"C{m.group(1)}" if m else spec.name
+        m = _IF_THEN_RE.match(formula)
+        if not m:
+            raise ValueError(
+                f"ParsedConjecture: formula for {spec.name!r} does not match "
+                f"'if ..., then ...':\n  {formula!r}"
+            )
+        cond_raw = _strip_outer_parens(m.group('cond'))
+        conclusion = m.group('concl').strip()
+        hypotheses = [
+            c.strip()
+            for c in _split_top_level_and(cond_raw)
+            if c.strip() and _normalize_token(c) not in _NOOP_HYPOTHESES
+        ]
+        cid_match = re.search(r'_(\d+)$', spec.name)
+        cid = f"C{cid_match.group(1)}" if cid_match else spec.name
         return cls(
             conjecture_id=cid,
             statement_latex=formula,
@@ -70,121 +102,56 @@ class ParsedConjecture:
         )
 
 
-# ---------------------------------------------------------------------------
-# Statement parsing helpers
-# ---------------------------------------------------------------------------
+def _strip_outer_parens(s: str) -> str:
+    """Strip one matching outer paren pair, depth-aware.
 
-def _strip_dollar(s: str) -> str:
+    `((a) and (b))` → `(a) and (b)`.
+    `(a) and (b)`  → `(a) and (b)`  (leading ( closes before end → leave alone).
+    """
     s = s.strip()
-    if s.startswith("$") and s.endswith("$"):
-        s = s[1:-1].strip()
-    return s
+    if not (s.startswith('(') and s.endswith(')')):
+        return s
+    depth = 0
+    for i, ch in enumerate(s):
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+        if depth == 0 and i < len(s) - 1:
+            return s  # outer ( closes before the last char → not a single wrapper
+    return s[1:-1].strip()
 
 
-def _parse_if_then(latex_stmt: str) -> tuple[list[str], str]:
-    """Split 'If CONDS, then CONCLUSION' into (hypotheses, conclusion).
-
-    Works on the raw LaTeX string (still contains \\text{}, \\wedge, etc.).
-    Falls back to ([], full_stmt) if the pattern is not found.
-    """
-    raw = _strip_dollar(latex_stmt)
-
-    # Spacing commands: \; \, \! \:  — character after \ must be explicit (no ?)
-    # to avoid eating the \ of the next \text / \wedge / etc.
-    _SP = r"(?:\\[;,!:]\s*)*"
-
-    # Split at ",SPACING\text{then }SPACING"
-    split_re = re.compile(
-        r"," + _SP + r"\\text\{then\s*\}\s*" + _SP,
-        re.IGNORECASE,
-    )
-    parts = split_re.split(raw, maxsplit=1)
-
-    if len(parts) != 2:
-        return [], raw.strip()
-
-    cond_part, conclusion = parts[0].strip(), parts[1].strip()
-
-    # Remove leading "\text{If }SPACING"
-    cond_part = re.sub(
-        r"^\\text\{If\s*\}\s*" + _SP,
-        "",
-        cond_part,
-        flags=re.IGNORECASE,
-    ).strip()
-
-    # Split conditions by \;\wedge\;  (spacing commands must be explicit)
-    wedge_re = re.compile(_SP + r"\\wedge\s*" + _SP)
-    conds = [c.strip() for c in wedge_re.split(cond_part) if c.strip()]
-
-    return conds, conclusion.strip()
+def _split_top_level_and(s: str) -> list[str]:
+    """Split on ``\\s+and\\s+`` at paren depth 0 only."""
+    out: list[str] = []
+    depth = 0
+    last = 0
+    i = 0
+    # Match ' and ' as a whole word at depth 0
+    pattern = re.compile(r'\s+and\s+', re.IGNORECASE)
+    while i < len(s):
+        ch = s[i]
+        if ch == '(':
+            depth += 1
+            i += 1
+        elif ch == ')':
+            depth -= 1
+            i += 1
+        elif depth == 0:
+            m = pattern.match(s, i)
+            if m:
+                out.append(s[last:i])
+                last = m.end()
+                i = m.end()
+            else:
+                i += 1
+        else:
+            i += 1
+    out.append(s[last:])
+    return out
 
 
-# ---------------------------------------------------------------------------
-# Parser
-# ---------------------------------------------------------------------------
-
-class ConjectureParser:
-    """Parses the conjecture longtable format from the IRIS conjectures TeX file.
-
-    Each table row is a single physical line ending with \\\\ :
-        C$_{N}$ & $STATEMENT$ & T & R & L & IRIS \\\\
-    """
-
-    # Identifies a row's first column: C$_{digits}$
-    _ID_RE = re.compile(r"^C\$_\{(\d+)\}\$$")
-    # Validates a score column (plain float)
-    _FLOAT_RE = re.compile(r"^[\d.]+$")
-
-    def parse_file(self, tex_source: str) -> list[ParsedConjecture]:
-        """Return all conjectures found in *tex_source*, in document order."""
-        conjectures: list[ParsedConjecture] = []
-        for line in tex_source.splitlines():
-            row = line.rstrip()
-            # Every data row ends with \\ (two backslash chars)
-            if not row.endswith("\\\\"):
-                continue
-            row = row[:-2].rstrip()
-
-            # Split on & — expect exactly 6 columns
-            cols = [c.strip() for c in row.split("&")]
-            if len(cols) != 6:
-                continue
-
-            id_col, stmt_col, t_col, r_col, l_col, iris_col = cols
-
-            # Validate ID column: must be exactly  C$_{N}$
-            id_m = self._ID_RE.match(id_col)
-            if not id_m:
-                continue
-
-            # Validate score columns
-            if not all(self._FLOAT_RE.match(c) for c in (t_col, r_col, l_col, iris_col)):
-                continue
-
-            cid = f"C{id_m.group(1)}"
-            statement = stmt_col
-            t, r, l_score, iris = (
-                float(t_col), float(r_col), float(l_col), float(iris_col)
-            )
-            hypotheses, conclusion = _parse_if_then(statement)
-            conjectures.append(
-                ParsedConjecture(
-                    conjecture_id=cid,
-                    statement_latex=statement,
-                    hypotheses=hypotheses,
-                    conclusion=conclusion,
-                    iris_scores={"T": t, "R": r, "L": l_score, "IRIS": iris},
-                )
-            )
-        return conjectures
-
-    def parse_statement(self, statement_latex: str, conjecture_id: str = "C?") -> ParsedConjecture:
-        """Parse a single statement string (e.g. pasted from the table)."""
-        hypotheses, conclusion = _parse_if_then(statement_latex)
-        return ParsedConjecture(
-            conjecture_id=conjecture_id,
-            statement_latex=statement_latex,
-            hypotheses=hypotheses,
-            conclusion=conclusion,
-        )
+def _normalize_token(cond: str) -> str:
+    """Strip surrounding parentheses + whitespace so '(is_simple)' matches."""
+    return cond.strip().strip("()").strip().lower()

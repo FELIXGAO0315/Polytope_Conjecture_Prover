@@ -205,6 +205,19 @@ def _compile_conclusion(conc: str) -> tuple:
     if m:
         fn = _compile_rhs(m.group(1).strip())
         return ('le', fn) if fn else ('unknown', None)
+    # Negated LHS: "-(p6) >= EXPR" ≡ "p6 <= -EXPR" and the symmetric form.
+    # Some upstream conjecture generators normalize a `p6 <= …` clause by
+    # negating both sides (C55: "-(p6) >= -((1.833·sum_pk_k>=7) + -2)" is
+    # really "p6 <= (1.833·sum_pk_k>=7) - 2"). Flip the relation and wrap the
+    # RHS in an extra unary minus so the rest of the pipeline is unchanged.
+    m = re.match(r'-\s*\(?\s*p_?\{?6\}?\s*\)?\s*(?:\\geq|>=)\s*(.+)', s, re.DOTALL)
+    if m:
+        fn = _compile_rhs(f"-({m.group(1).strip()})")
+        return ('le', fn) if fn else ('unknown', None)
+    m = re.match(r'-\s*\(?\s*p_?\{?6\}?\s*\)?\s*(?:\\leq|<=)\s*(.+)', s, re.DOTALL)
+    if m:
+        fn = _compile_rhs(f"-({m.group(1).strip()})")
+        return ('ge', fn) if fn else ('unknown', None)
     return ('unknown', None)
 
 

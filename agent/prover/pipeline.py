@@ -8,8 +8,8 @@ exception handler around stages 1-5.
 
 The 8 stages mirror the ``[N/8]`` log messages the prover prints:
 
-    1.  Parse LaTeX                     -> ParsedTheorem
-    2.  Lock + validate goal signature  -> GoalLock
+    1.  Receive pre-parsed conjecture   -> ParsedTheorem
+    2.  Lock + validate goal signature  -> LockedGoal
     3.  Decompose into blueprint DAG    -> Blueprint
     4.  Per-node compile loop (parallel by dep level)
     5.  Retry failed nodes
@@ -39,53 +39,38 @@ from typing import TYPE_CHECKING
 
 from agent.exceptions import GoalTamperedError
 from agent.prover.tools.formalization_logger import FormalizationLogger
-from agent.prover.tools.goal_lock import GoalLock
+from agent.prover.tools.goal_lock import LockedGoal, lock_goal
 
 if TYPE_CHECKING:
     from agent.prover.agent import FormalizationResult, FormalizerAgent
     from agent.prover.tools.blueprint import Blueprint
-    from agent.prover.tools.latex_parser import ParsedTheorem
+    from agent.prover.tools.parsed_theorem import ParsedTheorem
 
 
 # ---------------------------------------------------------------------------
-# Stage 1 - Resolve theorem (from pre-parsed conjecture, or LaTeX fallback)
+# Stage 1 - Receive pre-parsed conjecture
 # ---------------------------------------------------------------------------
 
 def _step1_resolve_theorem(
     agent: "FormalizerAgent",
-    latex_source: str,
-    parsed: "ParsedTheorem | None",
+    parsed: "ParsedTheorem",
     verbose: bool,
 ) -> "ParsedTheorem":
-    """Resolve the theorem to formalize.
+    """Receive the conjecture to formalize.
 
-    The primary path is **JSON-driven**: ``ProverAgent.prove_conjecture``
-    builds a ``ParsedTheorem`` directly from a ``ParsedConjecture`` (which
-    came from ``conjectures.json``) and passes it in via ``parsed=``.  No
-    LLM call is needed.
-
-    The LaTeX-parsing path (``parsed is None``) is a fallback for the rare
-    case where only a raw LaTeX string is available — it invokes the
-    LLM-backed LaTeX parser.  This path is **not** used by the current
-    ``python -m formalize`` / ``python -m run`` CLIs.
+    The pipeline is JSON-only: ``ProverAgent.prove_conjecture`` builds a
+    ``ParsedTheorem`` directly from a ``ParsedConjecture`` (sourced from
+    ``conjectures.json``) and passes it in.  No parsing happens here — this
+    stage's only job is to log a structural summary so debugging later
+    stages does not require re-deriving what step 1 saw, and to record the
+    theorem name on the run logger.
     """
-    if parsed is not None:
-        agent._log(verbose,
-            f"[1/8] Using pre-parsed theorem from JSON: "
-            f"{parsed.name} ({len(parsed.proof_steps)} step(s))")
-    else:
-        if not latex_source:
-            raise ValueError(
-                "_step1_resolve_theorem: need either parsed= or non-empty latex_source"
-            )
-        agent._log(verbose, "[1/8] Parsing LaTeX source (fallback path, no pre-parsed theorem)...")
-        parsed = agent._parser.parse_with_llm(
-            latex_source, agent._sdk_fast, agent._config.model_fast,
-        )
-        agent._log(verbose,
-            f"      parsed: {parsed.name} ({len(parsed.proof_steps)} step(s))")
-    agent._flog._data["theorem_name"] = parsed.name
-    agent._flog._flush()
+    n_hyps = len(parsed.hypotheses)
+    conc_preview = parsed.conclusion[:80].replace("\n", " ")
+    agent._log(verbose,
+        f"[1/8] Received conjecture {parsed.name}: "
+        f"{n_hyps} hypothesis(es), conclusion='{conc_preview}'")
+    agent._flog.set_theorem_name(parsed.name)
     return parsed
 
 
@@ -93,59 +78,39 @@ def _step1_resolve_theorem(
 # Stage 2 - Lock goal signature
 # ---------------------------------------------------------------------------
 
-# Goal signatures using these substrings indicate the LLM hallucinated a
-# predicate that does not exist in Inventory.  Discard the cache and
-# re-extract rather than letting downstream compiles all fail with
-# "unknown identifier IsSimple" etc.
-_BAD_SIG_PATTERNS = (
-    "IsSimple", "maps.simple", "maps.is_simple", "simple maps",
-    "maps.f2 ", "maps.f_2 ", "maps.f2\n", "maps.f_2\n",
-)
-_TRIVIAL_CONCLUSION_RE = re.compile(r":\s*(?:True|False|Prop)\s*:=\s*by\s*$")
-_F2_INT_COMPARE_RE = re.compile(r"maps\.p_i 2\s*[≥≤><=]")
-
-
-def _signature_is_rejectable(sig: str) -> bool:
-    if any(p in sig for p in _BAD_SIG_PATTERNS):
-        return True
-    if _TRIVIAL_CONCLUSION_RE.search(sig.strip()):
-        return True
-    if _F2_INT_COMPARE_RE.search(sig):
-        return True
-    return False
-
-
 def _step2_lock_goal(
     agent: "FormalizerAgent",
     parsed: "ParsedTheorem",
     verbose: bool,
-) -> GoalLock:
-    """Lock the theorem's Lean signature (cache first, re-extract on bad sig)."""
+) -> LockedGoal:
+    """Lock the theorem's Lean signature.
+
+    Truth source = ``_check_signature_static`` (deterministic Python regex,
+    no LLM call).  ``_load_cached_goal`` already refuses to return unconfirmed
+    entries, so any non-None cache hit short-circuits the extractor.  Best-
+    effort signatures are NEVER persisted to the cache.
+    """
+    locked = agent._load_cached_goal(parsed, verbose=verbose)
+    if locked is not None:
+        agent._log(verbose, f"[2/8] Goal cached: {locked.lean_signature[:80]}...")
+        return locked
+
     agent._log(verbose, "[2/8] Extracting & locking goal...")
-    goal_lock = agent._load_cached_goal(parsed, verbose=verbose) or GoalLock.create(
-        parsed, agent._extractor, agent._validator, max_attempts=3,
+    locked = lock_goal(
+        parsed, agent._sdk_fast, agent._config.model_fast,
+        max_attempts=3,
+        log=(lambda msg: agent._log(verbose, msg)),
     )
-    # Reject signatures using undefined predicates / wrong f_2 translation —
-    # they would fail every downstream compile.
-    if _signature_is_rejectable(goal_lock.goal.lean_signature):
-        agent._log(verbose,
-            "  [goal-reject] Signature uses undefined predicate or wrong f_2 — "
-            "discarding cache and re-extracting.")
-        goal_lock = GoalLock.create(
-            parsed, agent._extractor, agent._validator, max_attempts=3,
-        )
-    agent._save_cached_goal(parsed, goal_lock)
-
-    if not goal_lock.goal.validator_confirmed:
+    if locked.validator_confirmed:
+        agent._save_cached_goal(parsed, locked)
+    else:
         agent._log(True,
-            f"\n  *** WARNING: Goal signature was NOT confirmed by the validator. ***\n"
-            f"  *** Proceeding with best-effort signature: ***\n"
-            f"  *** {goal_lock.goal.lean_signature[:100]} ***\n"
-            f"  *** Notes: {goal_lock.goal.validator_notes} ***\n"
+            "\n  *** Static check could not confirm the signature after 3 attempts. ***\n"
+            f"  *** Best-effort signature: {locked.lean_signature[:100]} ***\n"
+            "  *** Not saving to cache — re-extracted next run.\n"
         )
-
-    agent._log(verbose, f"      signature: {goal_lock.goal.lean_signature[:80]}...")
-    return goal_lock
+    agent._log(verbose, f"      signature: {locked.lean_signature[:80]}...")
+    return locked
 
 
 # ---------------------------------------------------------------------------
@@ -155,28 +120,32 @@ def _step2_lock_goal(
 def _step3_blueprint(
     agent: "FormalizerAgent",
     parsed: "ParsedTheorem",
-    goal_lock: GoalLock,
+    locked: LockedGoal,
     verbose: bool,
 ) -> "Blueprint":
-    """Decompose the proof into a DAG of nodes (cached by latex hash)."""
+    """Decompose the proof into a DAG of nodes (cached by content hash)."""
+    cached = agent._load_cached_blueprint(parsed, locked, verbose=verbose)
+    if cached is not None:
+        agent._log(verbose,
+            f"[3/8] Blueprint cached: {len(cached.nodes)} node(s), "
+            f"topo order: {cached.topo_order}")
+        return cached
+
     agent._log(verbose, "[3/8] Decomposing blueprint...")
+    # Only show fully-proved Polib entries to the planner.  Partial entries
+    # are sorry-tainted: calling one transitively pulls its sorry into our
+    # new proof's dependency closure, violating the no-new-sorry policy.
     proved_lemmas = [
-        {
-            "node_id": e["node_id"],
-            "description": (
-                e.get("description", "")
-                + (" [partial — has sorry, use for structural reference only]"
-                   if e.get("status") == "partial" else "")
-            ),
-        }
+        {"node_id": e["node_id"], "description": e.get("description", "")}
         for e in (agent._store.get("polib_index") or [])
-        if isinstance(e, dict) and e.get("status") in ("proved", "partial")
+        if isinstance(e, dict) and e.get("status") == "proved"
     ]
-    blueprint = (
-        agent._load_cached_blueprint(parsed, goal_lock, verbose=verbose)
-        or agent._decomposer.decompose(parsed, goal_lock.goal, proved_lemmas=proved_lemmas)
+    blueprint = agent._decomposer.decompose(
+        parsed, locked,
+        proved_lemmas=proved_lemmas,
+        log=(lambda msg: agent._log(verbose, msg)),
     )
-    agent._save_cached_blueprint(parsed, goal_lock, blueprint)
+    agent._save_cached_blueprint(parsed, locked, blueprint)
     agent._log(verbose, f"      nodes: {[n.node_id for n in blueprint.nodes]}")
     agent._log(verbose, f"      topo order: {blueprint.topo_order}")
     return blueprint
@@ -189,7 +158,7 @@ def _step3_blueprint(
 def _step4_node_loop(
     agent: "FormalizerAgent",
     blueprint: "Blueprint",
-    goal_lock: GoalLock,
+    locked: LockedGoal,
     parsed: "ParsedTheorem",
     category: str,
     verbose: bool,
@@ -208,11 +177,11 @@ def _step4_node_loop(
         if len(level_nodes) == 1:
             node_id = level_nodes[0]
             status = agent._process_node(
-                node_id, blueprint, goal_lock, parsed,
+                node_id, blueprint, locked, parsed,
                 category, list(proven_node_ids), verbose,
                 proven_dep_imports=dict(proven_dep_imports),
             )
-            if status in ("proved", "partial"):
+            if status == "proved":
                 proven_node_ids.append(node_id)
                 proven_dep_imports[node_id] = "Polib"
         else:
@@ -227,7 +196,7 @@ def _step4_node_loop(
                 future_to_node = {
                     executor.submit(
                         agent._process_node,
-                        nid, blueprint, goal_lock, parsed,
+                        nid, blueprint, locked, parsed,
                         category, snapshot_ids, verbose,
                         snapshot_imports,
                     ): nid
@@ -244,8 +213,7 @@ def _step4_node_loop(
                         level_results[nid] = "pending"
 
             for nid in level_nodes:
-                res = level_results.get(nid)
-                if res in ("proved", "partial"):
+                if level_results.get(nid) == "proved":
                     proven_node_ids.append(nid)
                     proven_dep_imports[nid] = "Polib"
 
@@ -256,13 +224,10 @@ def _step4_node_loop(
 # Stage 5 - Retry failed nodes
 # ---------------------------------------------------------------------------
 
-_MAX_RETRY_ITERS = 20
-
-
 def _step5_retry_failed(
     agent: "FormalizerAgent",
     blueprint: "Blueprint",
-    goal_lock: GoalLock,
+    locked: LockedGoal,
     parsed: "ParsedTheorem",
     category: str,
     verbose: bool,
@@ -271,20 +236,20 @@ def _step5_retry_failed(
 ) -> None:
     """Retry nodes that failed in stage 4.
 
-    Instead of restarting the whole pipeline N times (which would redo
-    parse / goal / blueprint each time), retry just the failed nodes here.
-    Each retry feeds the cross-run failure memory + newly-available dep
-    signatures back into the generation prompt.
+    The loop terminates when either (a) all nodes are settled, (b) every
+    remaining node is out of per-node retry budget, or (c) two consecutive
+    iterations make zero progress. There is no separate "max iterations"
+    cap — the retry budget per node already bounds the total work.
 
     Mutates ``proven_node_ids`` and ``proven_dep_imports`` in place as nodes
-    flip from failed to proved/partial.
+    flip from failed to proved.
     """
 
     def _collect_failed() -> list[str]:
         _nodes = agent._session.data.get("nodes", {})
         return [
             nid for nid in blueprint.topo_order
-            if _nodes.get(nid, {}).get("status") not in ("proved", "partial")
+            if _nodes.get(nid, {}).get("status") != "proved"
         ]
 
     failed_now = _collect_failed()
@@ -297,7 +262,7 @@ def _step5_retry_failed(
     consecutive_no_progress = 0
     iter_count = 0
 
-    while failed_now and iter_count < _MAX_RETRY_ITERS:
+    while failed_now:
         iter_count += 1
         any_progress = False
         attempted_any = False
@@ -326,8 +291,8 @@ def _step5_retry_failed(
                 f"regenerate with updated dep signatures + cross-run failure memory")
             try:
                 status = agent._process_node(
-                    nid, blueprint, goal_lock, parsed,
-                    category, list(proven_node_ids), verbose=False,
+                    nid, blueprint, locked, parsed,
+                    category, list(proven_node_ids), verbose=verbose,
                     proven_dep_imports=dict(proven_dep_imports),
                 )
             except GoalTamperedError:
@@ -336,8 +301,8 @@ def _step5_retry_failed(
                 agent._log(verbose, f"  [{nid}] retry crashed: {exc}")
                 status = "pending"
 
-            if status in ("proved", "partial"):
-                agent._log(verbose, f"  [{nid}] retry successfully → {status}")
+            if status == "proved":
+                agent._log(verbose, f"  [{nid}] retry successfully → proved")
                 still_failing.discard(nid)
                 if nid not in proven_node_ids:
                     proven_node_ids.append(nid)
@@ -398,10 +363,16 @@ def _step6_quality_summary(
 # ---------------------------------------------------------------------------
 
 def _step7_polib_repair(agent: "FormalizerAgent", verbose: bool) -> None:
-    """Run PolibValidator on the assembled Polib.lean; downgrade session
-    state for any node it removed so stage 8 classifies it as failed."""
+    """Post-flight Polib sanity check.
+
+    Stage 4's per-save `_verify_polib_builds` already guards each entry
+    transactionally, so most cross-node breakage is caught at save time.
+    This stage is the safety net: it re-validates the assembled Polib and
+    downgrades any node whose section turns out to be broken when the file
+    is read as a whole. If nothing is removed, the stage is a no-op.
+    """
     from agent.prover.tools.polib_validator import PolibValidator
-    agent._log(verbose, "[7/8] Validating Polib...")
+    agent._log(verbose, "[7/8] Validating Polib (post-flight safety net)...")
     validator = PolibValidator(
         polib_lean=agent._polib_mgr._polib_lean,
         workspace=Path(agent._config.polib_path),
@@ -418,65 +389,56 @@ def _step7_polib_repair(agent: "FormalizerAgent", verbose: bool) -> None:
 # Stage 8 - Collect results + assemble proof file
 # ---------------------------------------------------------------------------
 
-def _classify_final_status(
-    nodes_proved: list[str],
-    nodes_partial: list[str],
-    nodes_failed: list[str],
-) -> str:
-    if nodes_failed and not (nodes_proved or nodes_partial):
-        return "failed"
-    if nodes_failed or nodes_partial:
-        return "partial"
-    return "success"
+def _classify_final_status(nodes_proved: list[str], nodes_failed: list[str]) -> str:
+    """Under no-new-sorry policy a conjecture is ``"success"`` iff EVERY blueprint
+    node was fully proved (zero sorry, zero failures).  Any failed node makes
+    the whole thing ``"failed"`` — there is no intermediate ``"partial"`` state.
+    """
+    if not nodes_proved and not nodes_failed:
+        return "failed"          # blueprint produced no nodes at all
+    return "success" if not nodes_failed else "failed"
 
 
 def _step8_collect_and_save(
     agent: "FormalizerAgent",
     parsed: "ParsedTheorem",
     blueprint: "Blueprint",
-    tex_path: str | None,
+    output_stem: str,
     verbose: bool,
     nodes_proved: list[str],
-    nodes_partial: list[str],
     nodes_failed: list[str],
     dep_graph_path: str,
     session_state_path: str,
 ) -> "FormalizationResult":
     """Read final per-node status from the session, assemble the output
-    .lean file, and build the FormalizationResult to return to the caller."""
+    .lean file, and build the FormalizationResult to return to the caller.
+
+    Stale ``"partial"`` session entries (from before the no-new-sorry policy)
+    are mapped to ``failed`` — they are sorry-tainted and not real proofs.
+    """
     from agent.prover.agent import FormalizationResult  # avoid circular import
 
     all_session_nodes = agent._session.data.get("nodes", {})
     for node_id in blueprint.topo_order:
-        node_data = all_session_nodes.get(node_id, {})
-        status = node_data.get("status")
+        status = all_session_nodes.get(node_id, {}).get("status")
         if status == "proved":
             nodes_proved.append(node_id)
-        elif status == "partial":
-            nodes_partial.append(node_id)
         else:
             nodes_failed.append(node_id)
 
     if agent._flog:
         agent._flog.finish_run()
 
-    sorry_total = agent._sorry_get()
-
-    if tex_path:
-        lean_out_path, _, _ = agent._write_complete_proof_file(
-            tex_path,
-            parsed.name if parsed is not None else "(unknown)",
-            nodes_proved, nodes_partial, nodes_failed, sorry_total,
-        )
-        agent._log(verbose, f"[8/8] Formalization saved → {lean_out_path}")
+    lean_out_path, _, _ = agent._write_complete_proof_file(
+        output_stem, parsed.name, nodes_proved, nodes_failed,
+    )
+    agent._log(verbose, f"[8/8] Formalization saved → {lean_out_path}")
 
     return FormalizationResult(
         theorem_name=parsed.name,
-        status=_classify_final_status(nodes_proved, nodes_partial, nodes_failed),
+        status=_classify_final_status(nodes_proved, nodes_failed),
         nodes_proved=nodes_proved,
-        nodes_partial=nodes_partial,
         nodes_failed=nodes_failed,
-        total_sorry_count=sorry_total,
         error=None,
         dep_graph_path=dep_graph_path,
         session_state_path=session_state_path,
@@ -491,23 +453,20 @@ def _collect_session_into(
     agent: "FormalizerAgent",
     blueprint: "Blueprint | None",
     nodes_proved: list[str],
-    nodes_partial: list[str],
     nodes_failed: list[str],
 ) -> None:
     """Best-effort population of result lists from session state when an
-    exception aborted stages 1-5."""
+    exception aborted stages 1-5.  Anything not ``"proved"`` counts as failed.
+    """
     if blueprint is None:
         return
     try:
         session_nodes = agent._session.data.get("nodes", {})
         for nid in blueprint.topo_order:
-            nd = session_nodes.get(nid, {})
-            st = nd.get("status")
+            st = session_nodes.get(nid, {}).get("status")
             if st == "proved" and nid not in nodes_proved:
                 nodes_proved.append(nid)
-            elif st == "partial" and nid not in nodes_partial:
-                nodes_partial.append(nid)
-            elif st not in ("proved", "partial") and nid not in nodes_failed:
+            elif st != "proved" and nid not in nodes_failed:
                 nodes_failed.append(nid)
     except Exception:
         pass
@@ -518,7 +477,6 @@ def _build_failed_result(
     parsed: "ParsedTheorem | None",
     exc: BaseException,
     nodes_proved: list[str],
-    nodes_partial: list[str],
     nodes_failed: list[str],
     dep_graph_path: str,
     session_state_path: str,
@@ -535,9 +493,7 @@ def _build_failed_result(
         theorem_name=parsed.name if parsed is not None else "Unknown",
         status="failed",
         nodes_proved=nodes_proved,
-        nodes_partial=nodes_partial,
         nodes_failed=nodes_failed,
-        total_sorry_count=agent._sorry_get(),
         error=err_msg,
         dep_graph_path=dep_graph_path,
         session_state_path=session_state_path,
@@ -550,19 +506,17 @@ def _build_failed_result(
 
 def formalize(
     agent: "FormalizerAgent",
-    latex_source: str = "",
+    parsed: "ParsedTheorem",
+    output_stem: str,
     category: str = "Polytope",
     verbose: bool = True,
-    tex_path: str | None = None,
-    parsed: "ParsedTheorem | None" = None,
 ) -> "FormalizationResult":
-    """Run the 8-stage prover pipeline on a single theorem.
+    """Run the 8-stage prover pipeline on one pre-parsed conjecture.
 
-    The primary entry passes ``parsed=`` (a pre-built ``ParsedTheorem``
-    coming from a JSON conjecture); ``latex_source`` is then unused and
-    can be omitted.  The legacy LaTeX-only path remains supported: if
-    ``parsed`` is None, ``latex_source`` MUST be a non-empty LaTeX string
-    and the LLM-backed LaTeX parser will run as stage 1.
+    ``parsed`` comes from ``ParsedConjecture.to_parsed_theorem()`` (built
+    upstream from a row of ``conjectures.json``).  ``output_stem`` is the
+    filename stem of the final ``.lean`` proof — the run writes
+    ``output/{agent._proof_subdir}/{output_stem}.lean``.
 
     Stages 1-5 (which call out to Claude + lake) are wrapped in a
     try/except so a crash still returns a structured FormalizationResult
@@ -575,7 +529,6 @@ def formalize(
     session_state_path = store_path_str
 
     nodes_proved: list[str] = []
-    nodes_partial: list[str] = []
     nodes_failed: list[str] = []
     blueprint: "Blueprint | None" = None
 
@@ -591,32 +544,32 @@ def formalize(
     agent._flog = FormalizationLogger(log_dir, run_id, theorem_name="(pending)")
 
     try:
-        parsed = _step1_resolve_theorem(agent, latex_source, parsed, verbose)
-        goal_lock = _step2_lock_goal(agent, parsed, verbose)
-        blueprint = _step3_blueprint(agent, parsed, goal_lock, verbose)
+        parsed = _step1_resolve_theorem(agent, parsed, verbose)
+        locked = _step2_lock_goal(agent, parsed, verbose)
+        blueprint = _step3_blueprint(agent, parsed, locked, verbose)
         proven_node_ids, proven_dep_imports = _step4_node_loop(
-            agent, blueprint, goal_lock, parsed, category, verbose,
+            agent, blueprint, locked, parsed, category, verbose,
         )
         _step5_retry_failed(
-            agent, blueprint, goal_lock, parsed, category, verbose,
+            agent, blueprint, locked, parsed, category, verbose,
             proven_node_ids, proven_dep_imports,
         )
     except GoalTamperedError as exc:
         return _build_failed_result(
-            agent, parsed, exc, nodes_proved, nodes_partial, nodes_failed,
+            agent, parsed, exc, nodes_proved, nodes_failed,
             dep_graph_path, session_state_path, include_traceback=False,
         )
     except Exception as exc:
-        _collect_session_into(agent, blueprint, nodes_proved, nodes_partial, nodes_failed)
+        _collect_session_into(agent, blueprint, nodes_proved, nodes_failed)
         return _build_failed_result(
-            agent, parsed, exc, nodes_proved, nodes_partial, nodes_failed,
+            agent, parsed, exc, nodes_proved, nodes_failed,
             dep_graph_path, session_state_path, include_traceback=True,
         )
 
     _step6_quality_summary(agent, blueprint, verbose)
     _step7_polib_repair(agent, verbose)
     return _step8_collect_and_save(
-        agent, parsed, blueprint, tex_path, verbose,
-        nodes_proved, nodes_partial, nodes_failed,
+        agent, parsed, blueprint, output_stem, verbose,
+        nodes_proved, nodes_failed,
         dep_graph_path, session_state_path,
     )

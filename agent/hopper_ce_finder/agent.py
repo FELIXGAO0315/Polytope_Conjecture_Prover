@@ -248,7 +248,6 @@ class HopperCEFinder:
 
     def run(self) -> Optional[dict]:
         self._pool = self._init_pool()
-        print(f"{_TAG} Init: {len(self._pool)} seed(s) in pool | device: {device}")
         if not self._pool:
             print(f"{_TAG} No valid seeds — aborting")
             return None

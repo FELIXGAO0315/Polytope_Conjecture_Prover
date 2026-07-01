@@ -163,9 +163,9 @@
       ]
     }
   },
-  "found_by": "boundary_enumeration",
+  "found_by": "plantri ce finder",
   "found_at_round": 3,
   "violation_detail": "p6=1.0 < RHS=2.0000 (violation)",
-  "found_at": "2026-06-11T11:16:20.882450+00:00",
+  "found_at": "2026-06-27T10:49:01.458052+00:00",
   "other_candidates_not_checked": []
 }

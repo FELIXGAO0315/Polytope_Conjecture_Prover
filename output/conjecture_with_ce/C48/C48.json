@@ -1,0 +1,68 @@
+{
+  "conjecture_id": "C48",
+  "conjecture_latex": "if ((is_simple)  and  (f_2>=_5)), then p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)",
+  "hypotheses": [
+    "(is_simple)",
+    "(f_2>=_5)"
+  ],
+  "conclusion": "p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)",
+  "status": "failed",
+  "counterexample": {
+    "p_vector": [
+      2,
+      3
+    ],
+    "p3": 2,
+    "p4": 3,
+    "f2": 5,
+    "num_vertices": 6,
+    "num_edges": 9,
+    "witness_graph": {
+      "format": "edge_list",
+      "num_vertices": 6,
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          5
+        ]
+      ]
+    }
+  },
+  "found_by": "plantri ce finder",
+  "found_at_round": 1,
+  "violation_detail": "p6=0.0 < RHS=0.0000 (violation)",
+  "found_at": "2026-06-27T15:54:14.504839+00:00",
+  "other_candidates_not_checked": []
+}

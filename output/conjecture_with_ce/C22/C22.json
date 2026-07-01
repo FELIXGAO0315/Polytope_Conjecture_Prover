@@ -22,9 +22,9 @@
     "num_vertices": 62,
     "num_edges": 93
   },
-  "found_by": "boundary_enumeration",
+  "found_by": "plantri ce finder",
   "found_at_round": 1,
   "violation_detail": "p6=21.0 < RHS=22.0000 (violation)",
-  "found_at": "2026-06-12T04:55:17.095146+00:00",
+  "found_at": "2026-06-27T11:24:04.265155+00:00",
   "other_candidates_not_checked": []
 }

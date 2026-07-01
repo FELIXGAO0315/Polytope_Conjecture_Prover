@@ -382,9 +382,9 @@
       ]
     }
   },
-  "found_by": "boundary_enumeration",
+  "found_by": "plantri ce finder",
   "found_at_round": 30,
   "violation_detail": "p6=8.0 < RHS=9.0000 (violation)",
-  "found_at": "2026-06-12T02:47:23.278877+00:00",
+  "found_at": "2026-06-27T10:55:46.403673+00:00",
   "other_candidates_not_checked": []
 }

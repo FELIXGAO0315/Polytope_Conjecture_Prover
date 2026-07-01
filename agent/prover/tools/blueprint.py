@@ -1,133 +1,18 @@
+"""Blueprint DAG types + parsing helpers.
+
+The actual decomposer lives in ``agent/prover/conjecture_decomposer.py``
+(``ConjectureDecomposer``); this module only owns the data classes
+(``BlueprintNode``, ``Blueprint``) and the shared JSON-parsing / topo-sort
+/ schema-validation helpers it uses.
+"""
 from __future__ import annotations
 
-import hashlib
 import json
 import re
-import time
 from collections import deque
 from dataclasses import dataclass
 
 from agent.exceptions import BlueprintError
-from agent.prover.tools.goal_lock import LockedGoal
-from agent.prover.tools.latex_parser import ParsedTheorem
-
-BLUEPRINT_PROMPT = """\
-You are a Lean 4 formalization expert. Decompose the following LaTeX proof into a directed acyclic graph (DAG) of blueprint nodes.
-
-Theorem: {theorem_name}
-Lean signature: {lean_signature}
-Hypotheses:
-{hypotheses}
-Conclusion: {conclusion}
-
-Proof steps:
-{proof_steps}
-
-## Already-proved Inventory lemmas (available via `import Inventory` — do NOT re-prove these)
-{available_lemmas}
-
-## ⛔ PROHIBITED NODES — NEVER create nodes for these (they are already in Inventory):
-These mathematical facts are ALREADY PROVED in Inventory.lean. Creating a blueprint node to
-re-derive them is FORBIDDEN. Instead, the node that needs them should call them directly.
-
-| Mathematical content | Inventory lemma to call |
-|---|---|
-| Euler formula: V − E + F = 2 − 2g | `euler_formula maps hM` |
-| Handshaking lemma: 2E = Σ k·p_k | `handshake maps hM` |
-| 3-regularity: 3V = 2E | `regularity maps hM` |
-| Dehn-Sommerville / edge-count eq: 3p₃ = 12(1−g) − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `P6EdgeCountEquation maps hM` |
-| Edge-count equation for sphere (g=0): 3p₃ = 12 − 2p₄ − p₅ + Σ_{k≥7}(k−6)p_k | `Juc_EulerFormula maps hM` |
-| Hexagon lower bound (general g): 3p₆ ≥ 12(1−g) − 2p₄ − 3p₅ + Σ_{k≥7}(⌊(k+1)/2⌋−6)p_k | `P6InequalityPart maps hM hm` |
-| Hexagon lower bound (sphere g=0): same bound | `Juc_InequalityPart maps hM hm` |
-| Quadrangle net-zero occupation: Σ_{k∈[4,m]∖{6}} occ ≤ Σ_{k∈[5,m]∖{6}} ⌊k/2⌋p_k | `quad_occ_cancellation maps hM hm` |
-| Jučovič theorem: lower bound ∧ equality family | `JucovicTheorem maps hM h1` |
-
-(`hM : IsMap maps` is the realizability token — every theorem signature carries it
- and every Inventory call requires it right after `maps`.)
-
-**Naming test**: If your node title contains any of these words — "Euler", "Handshak", "Dehn-Sommerville",
-"edge count equation", "regularity", "Hexagon lower bound" — STOP. That content is already in Inventory.
-Do NOT create the node. Instead, in the CALLING node's description, write:
-  "Uses `P6EdgeCountEquation maps hM` (or the relevant lemma) directly via linarith."
-
-## Inventory lemma exact Lean signatures (for reference; hM : IsMap maps):
-- `P6EdgeCountEquation maps hM` : `3 * (maps.p_i 3 : ℤ) = 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ)`
-- `Juc_EulerFormula maps hM` : same for g=0 (M : SimplyCon3ConnectedMap 0)
-- `P6InequalityPart maps hM hm` : `3 * (maps.p_i 6 : ℤ) ≥ 12 * (1 - g) - 2 * (maps.p_i 4 : ℤ) - 3 * (maps.p_i 5 : ℤ) + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ)`  where `hm : maps.m ≥ 6`
-- `euler_formula maps hM` : `(maps.v : ℤ) - maps.e + ∑ k ∈ Finset.Ico 3 (maps.m + 1), (maps.p_i k : ℤ) = 2 - 2 * g`
-- `handshake maps hM` : `2 * maps.e = ∑ k ∈ Finset.Ico 3 (maps.m + 1), k * maps.p_i k`
-- `regularity maps hM` : `3 * maps.v = 2 * maps.e`
-
-## When a node's proof IS just Inventory + linarith:
-If a node's conclusion follows directly from one or two Inventory lemma calls + `linarith`,
-write this verbatim in the description field:
-  "Proved by: `have h := P6EdgeCountEquation maps hM; linarith`"
-  OR "Proved by: `have h := Juc_EulerFormula maps hM; linarith`"
-  OR "Proved by: `have h1 := P6EdgeCountEquation maps hM; have h2 := P6InequalityPart maps hM hm; linarith`"
-The prover will use this as a fast first attempt before running the full proof search.
-
-For any node whose proof can directly call one of these lemmas, say so explicitly in the
-`description` field (e.g. "Follows directly from `P6EdgeCountEquation` via linarith").
-A node that is already fully covered by an existing Inventory lemma should still appear in the
-blueprint (for name-stability) but its description must reference the lemma by name and include
-the verbatim proof template as shown above.
-
-## Instructions
-
-### Node structure
-- Each distinct definition or auxiliary lemma that must exist before the main theorem gets its own node.
-- Node types: "def" for structures/type definitions, "lemma" for auxiliary results, "theorem" for the main target.
-- Exactly ONE node must have "is_main_target": true (the main theorem).
-- "latex_fragment" must be a verbatim excerpt from the proof above — do not paraphrase.
-
-### CRITICAL — Node naming to avoid Inventory collisions
-All nodes live in a shared global library (Inventory). A node named `InequalityPart` from theorem A
-will be REUSED (not re-proved) by theorem B if theorem B also produces a node with that name.
-To prevent incorrect reuse across theorems:
-- **FIRST**: check `Already-proved Inventory lemmas` above. If an existing lemma covers the same
-  mathematical content, name your node identically to that lemma and mark it as proved via that lemma.
-- **Otherwise**: prefix generic names with `{node_prefix}`.
-  BAD:  `"node_id": "InequalityPart"`          — too generic, will collide across theorems
-  GOOD: `"node_id": "{node_prefix}InequalityPart"` — theorem-scoped, no collision risk
-  GOOD: `"node_id": "InequalityPart"`          — only if it reuses an existing Inventory lemma of the same name
-- Exception: nodes that define shared structure (defs, type classes) may keep generic names
-  IF they are mathematically identical to their Inventory counterpart.
-
-### CRITICAL — Dependency rules (read carefully)
-A node B should list node A as a dependency ONLY IF:
-  1. B's proof directly CALLS or APPLIES a result from A (e.g. B rewrites using a lemma proved in A), OR
-  2. B's TYPE SIGNATURE mentions a type or constant defined in A.
-
-DO NOT add A as a dependency of B if:
-  - A and B merely appear in the same proof
-  - A is "earlier" in the proof text but B does not use A's result
-  - A defines something that B could re-derive independently
-  - You are unsure — when in doubt, omit the dependency
-
-### Why this matters
-Unnecessary dependencies force sequential compilation. Nodes with no dependency between them will be compiled in PARALLEL, which is much faster. Only add a dependency edge when it is logically required.
-
-### Example of BAD dependencies (too many):
-  LemmaB depends on [DefA, LemmaX, LemmaY]  ← wrong if B only uses DefA
-
-### Example of GOOD dependencies (minimal):
-  LemmaB depends on [DefA]  ← correct if B only references types from DefA
-
-Respond with ONLY valid JSON matching this schema. No prose. No markdown fences.
-
-{{
-  "nodes": [
-    {{
-      "node_id": "CamelCaseUniqueId",
-      "node_type": "def" | "lemma" | "theorem",
-      "description": "One sentence describing what this node proves or defines.",
-      "latex_fragment": "verbatim excerpt from the proof",
-      "dependencies": ["only_direct_deps_here"],
-      "is_main_target": false
-    }}
-  ]
-}}
-"""
 
 
 @dataclass
@@ -138,6 +23,11 @@ class BlueprintNode:
     latex_fragment: str
     dependencies: list[str]
     is_main_target: bool
+    # Optional Lean 4 signature for sub-lemmas. When the planner supplies this,
+    # the prover treats it as a LOCKED goal (same way the main theorem's
+    # goal_lock works) instead of asking the LLM to re-invent a signature from
+    # `latex_fragment` each round. Eliminates signature drift across retries.
+    lean_signature: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -147,6 +37,7 @@ class BlueprintNode:
             "latex_fragment": self.latex_fragment,
             "dependencies": self.dependencies,
             "is_main_target": self.is_main_target,
+            "lean_signature": self.lean_signature,
         }
 
     @classmethod
@@ -158,31 +49,28 @@ class BlueprintNode:
             latex_fragment=d["latex_fragment"],
             dependencies=d["dependencies"],
             is_main_target=d["is_main_target"],
+            lean_signature=d.get("lean_signature"),
         )
 
 
 @dataclass
 class Blueprint:
-    theorem_name: str
     nodes: list[BlueprintNode]
     topo_order: list[str]
-    blueprint_hash: str
 
     def to_dict(self) -> dict:
         return {
-            "theorem_name": self.theorem_name,
             "nodes": [n.to_dict() for n in self.nodes],
             "topo_order": self.topo_order,
-            "blueprint_hash": self.blueprint_hash,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> "Blueprint":
+        # Old store.json entries may have `theorem_name` + `blueprint_hash`
+        # keys; .get-ignored harmlessly.
         return cls(
-            theorem_name=d["theorem_name"],
             nodes=[BlueprintNode.from_dict(n) for n in d["nodes"]],
             topo_order=d["topo_order"],
-            blueprint_hash=d["blueprint_hash"],
         )
 
     def get_node(self, node_id: str) -> BlueprintNode:
@@ -190,10 +78,6 @@ class Blueprint:
             if node.node_id == node_id:
                 return node
         raise KeyError(f"Node '{node_id}' not found in blueprint")
-
-    def get_dependencies(self, node_id: str) -> list[BlueprintNode]:
-        node = self.get_node(node_id)
-        return [self.get_node(dep_id) for dep_id in node.dependencies]
 
 
 def _topological_sort(nodes: list[BlueprintNode]) -> list[str]:
@@ -230,32 +114,60 @@ def _topological_sort(nodes: list[BlueprintNode]) -> list[str]:
     return order
 
 
-def _validate_blueprint_nodes(
-    nodes: list[BlueprintNode],
-    known_polib_ids: set[str] | None = None,
-) -> None:
+def _validate_blueprint_nodes(nodes: list[BlueprintNode]) -> None:
+    """Schema check: exactly one main target, unique node_ids, in-blueprint deps,
+    and every non-main node carries a planner-supplied ``lean_signature``.
+
+    Without ``lean_signature``, a sub-lemma node has no goal for the prover to
+    aim at — the LLM would receive the parent conjecture's signature and write
+    the parent's theorem name in every file, which the acceptance check then
+    rejects.  Make the planner declare the sub-lemma signatures upfront so the
+    prover always knows what to prove.
+    """
     main_targets = [n for n in nodes if n.is_main_target]
     if len(main_targets) != 1:
         raise BlueprintError(
             f"Blueprint must have exactly one main target node, got {len(main_targets)}"
         )
-    node_ids = {n.node_id for n in nodes}
-    allowed = node_ids | (known_polib_ids or set())
+    node_ids = [n.node_id for n in nodes]
+    seen: set[str] = set()
+    dupes: list[str] = []
+    for nid in node_ids:
+        if nid in seen:
+            dupes.append(nid)
+        seen.add(nid)
+    if dupes:
+        raise BlueprintError(
+            f"Duplicate node_id(s) in blueprint: {sorted(set(dupes))} — "
+            f"every node must have a unique identifier"
+        )
+    missing_sig = [
+        n.node_id for n in nodes
+        if not n.is_main_target and not (n.lean_signature or "").strip()
+    ]
+    if missing_sig:
+        raise BlueprintError(
+            f"Non-main-target node(s) missing `lean_signature`: {missing_sig}. "
+            f"Every sub-lemma must declare its exact Lean header (with the node id "
+            f"as the declaration name) so the prover knows what to prove. "
+            f"Only the main-target node may omit it (the system uses the "
+            f"conjecture's locked goal there)."
+        )
     for node in nodes:
         for dep in node.dependencies:
-            if dep not in allowed:
+            if dep not in seen:
                 raise BlueprintError(
-                    f"Node '{node.node_id}' depends on '{dep}' which does not exist"
+                    f"Node '{node.node_id}' depends on '{dep}' which is not "
+                    f"a node in this blueprint (cross-theorem deps are forbidden — "
+                    f"reference Inventory lemmas in `description` instead)"
                 )
 
 
 def _parse_blueprint_json(text: str) -> list[BlueprintNode]:
     """Extract and parse the blueprint JSON from a Claude response."""
-    # Strip markdown fences if present
     text = re.sub(r"```(?:json)?\s*", "", text)
     text = text.strip()
 
-    # Find outermost JSON object or array
     json_match = re.search(r"\{.*\}", text, re.DOTALL)
     if not json_match:
         raise BlueprintError(f"No JSON object found in blueprint response:\n{text[:500]}")
@@ -277,79 +189,3 @@ def _parse_blueprint_json(text: str) -> list[BlueprintNode]:
             raise BlueprintError(f"Invalid node schema: {exc}") from exc
 
     return nodes
-
-
-class BlueprintDecomposer:
-    def __init__(self, client, model: str):
-        self._client = client
-        self._model = model
-
-    def decompose(
-        self,
-        parsed: ParsedTheorem,
-        goal: "LockedGoal | GoalLock",
-        proved_lemmas: list[dict] | None = None,
-    ) -> Blueprint:
-        proof_text = "\n".join(s.latex_text for s in parsed.proof_steps)
-        # Accept either LockedGoal directly or GoalLock wrapper
-        locked_goal = goal.goal if hasattr(goal, "goal") else goal
-        if proved_lemmas:
-            avail = "\n".join(
-                f"  - `{e['node_id']}`" + (f": {e['description']}" if e.get('description') else "")
-                for e in proved_lemmas
-            )
-        else:
-            avail = "  (none yet)"
-        # Escape any curly braces in interpolated values so .format() doesn't choke
-        avail = avail.replace("{", "{{").replace("}", "}}")
-        _m = re.search(r'_(\d+)$', parsed.name)
-        node_prefix = f"c{_m.group(1)}" if _m else parsed.name
-        user_content = BLUEPRINT_PROMPT.format(
-            theorem_name=parsed.name,
-            node_prefix=node_prefix,
-            lean_signature=locked_goal.lean_signature,
-            hypotheses="\n".join(f"  - {h}" for h in parsed.hypotheses),
-            conclusion=parsed.conclusion,
-            proof_steps=proof_text,
-            available_lemmas=avail,
-        )
-
-        polib_ids = {e["node_id"] for e in (proved_lemmas or [])}
-        last_exc: Exception | None = None
-        messages: list[dict] = [{"role": "user", "content": user_content}]
-        for attempt in range(3):
-            if attempt > 0:
-                time.sleep(5 * attempt)
-            response = self._client.messages.create(
-                model=self._model,
-                max_tokens=2048,
-                messages=messages,
-            )
-            text = response.content[0].text.strip()
-            try:
-                nodes = _parse_blueprint_json(text)
-                _validate_blueprint_nodes(nodes, known_polib_ids=polib_ids)
-                topo_order = _topological_sort(nodes)
-                break
-            except BlueprintError as exc:
-                last_exc = exc
-                # Add the bad response + correction request to the conversation and retry
-                messages = messages + [
-                    {"role": "assistant", "content": text},
-                    {"role": "user", "content":
-                        "Your response was not valid JSON matching the required schema. "
-                        "Respond with ONLY the JSON object — no prose, no markdown, no comments. "
-                        "Start your response with '{' and end with '}'."},
-                ]
-        else:
-            raise last_exc  # type: ignore[misc]
-
-        blueprint_data = json.dumps([n.to_dict() for n in nodes], sort_keys=True)
-        blueprint_hash = hashlib.sha256(blueprint_data.encode()).hexdigest()
-
-        return Blueprint(
-            theorem_name=parsed.name,
-            nodes=nodes,
-            topo_order=topo_order,
-            blueprint_hash=blueprint_hash,
-        )

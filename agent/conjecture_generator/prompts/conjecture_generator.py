@@ -10,101 +10,105 @@ Every LLM-proposed formula passes the SAME hard filter as Graffiti3 output
 """
 
 CONJ_GEN_SYSTEM = """\
-You are an expert in combinatorial geometry specialising in simple convex 3-polytopes.
-You assist an automated conjecture generator whose output feeds a
-refutation/proving pipeline (CE search, then Lean formalization).
+You output conjectures about simple convex 3-polytopes in a fixed DSL.
 
-━━━ BACKGROUND ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-A simple 3-polytope has p_k = number of k-gonal faces. Every valid p-vector
-satisfies Dehn-Sommerville: Σ_k (6-k)·p_k = 12. p6 never appears in the DS
-sum, which is why p6 bounds are the interesting open territory.
-
-━━━ FORMULA DSL (output must follow it EXACTLY) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Form (one of):
   if (<hypotheses joined by ' and '>), then p6 >= (<linear expr>)
   if (<hypotheses joined by ' and '>), then p6 <= (<linear expr>)
 
-Allowed hypotheses:
-  (is_simple)               — always include it
-  (f_2>=_N)                 — total face count ≥ N        (N integer)
-  (sum_pk_k>=7 >= j)        — Σ_{k≥7} p_k ≥ j             (j integer)
+Allowed hypothesis atoms:
+  (is_simple) | (f_2>=_N) | (sum_pk_k>=7 >= j) |
+  (p_3 = N) | (p_4 = N) | (p_5 = N) |
+  (p_3 <= N) | (p_4 <= N) | (p_5 <= N) |
+  (p_3 >= N) | (p_4 >= N) | (p_5 >= N)
 
-Allowed RHS variables (linear combinations + rational constants only):
-  p3, p4, p5, sum_pk_after_p6        e.g.  (2*p3 + 0.5*p4 - 3*sum_pk_after_p6 + 7)
+Allowed RHS: linear combinations of {p3, p4, p5, sum_pk_after_p6} + rationals
+with denominators in {1, 2, 3, 6}.
 
-Example of a complete, well-formed conjecture:
-  if ((is_simple) and (f_2>=_14) and (sum_pk_k>=7 >= 1)), then p6 >= (3*sum_pk_after_p6 - 8)
-
-━━━ QUALITY CRITERIA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  1. TIGHT    — attained with equality by some known polytope (sharp bound).
-  2. GENERAL  — hypotheses as weak as possible; avoid over-fitted thresholds
-                (conjectures that die exactly at their f_2>=_N boundary are
-                the classic failure mode).
-  3. NOVEL    — not implied by an already-registered conjecture or a known
-                theorem (Eberhard, Jučovič, Grünbaum).
-  4. PROVABLE — simple structure, small coefficients; the end goal is a Lean
-                proof, not just surviving CE search.
+Always include (is_simple). Always respond with JSON only — no prose.
 """
 
+# Background and quality criteria moved into the propose body where the
+# longer context is cheaper to ignore — keeping the system prompt small lets
+# Sonnet effort=low respond in seconds rather than triggering extended
+# planning that times out at 150–300 s.
+
 CONJ_GEN_PROPOSE_PROMPT = """\
-Propose new conjectures for the pipeline.
+Propose {n_propose} new p6-bound conjectures for simple convex 3-polytopes.
 
-━━━ PROVEN CONJECTURES (success hints — your PRIMARY guide) ━━━━━━━━━━━━━━━━━
-These forms were formally proved in Lean. Prefer structurally similar
-statements: comparable hypothesis shapes, comparable RHS variable sets.
-{success_block}
+You DECIDE which structural shapes to target. Use the two blocks below to
+spot where the registry is thin and where the pool actually has data.
 
-━━━ FAILED CONJECTURES (failure hints — your GATEKEEPER) ━━━━━━━━━━━━━━━━━━━━
-Each was refuted by a concrete counterexample or failed in the prover, with
-the reason attached. Do NOT propose anything that repeats these patterns
-(same hypothesis/RHS shape with merely shifted thresholds counts as a repeat).
-{failure_block}
+━━━ VERIFIED POOL STRUCTURAL COMPOSITION ({n_rows} polytopes) ━━━━━━━━━━━━━━━━
+How many polytopes live in each classical sub-class. A thin sub-class makes
+LP-style bounds easy to fit but cheap to refute; a thick one means there's
+real territory worth a conditional bound.
+{pool_composition_block}
 
-━━━ ALREADY REGISTERED (do not duplicate) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━ REGISTRY COVERAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+How many existing conjectures touch each hypothesis shape. "UNTOUCHED" rows
+are wide-open territory, "thin" rows are under-explored, "saturated" rows
+are already crowded — avoid duplicating those.
+{registry_coverage_block}
+
+━━━ HIGH-TRL TEMPLATES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Already registered, sorted by IRIS-TRL desc. High TRL = tight + diverse +
+spread; structurally mimic those, never duplicate.
 {existing_block}
 
-━━━ DATASET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Your proposals will be checked against {n_rows} verified simple-3-polytope
-p-vectors; any proposal contradicted by one of them is discarded, so only
-propose bounds you believe hold universally.
+━━━ PROVED (success) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{success_block}
 
-━━━ YOUR TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Propose {n_propose} conjectures in the exact DSL from the system prompt.
-Respond ONLY with valid JSON (no prose outside the JSON block):
+━━━ REFUTED (gatekeeper — same shape + shifted constants still counts) ━━━━━━
+{failure_block}
+
+━━━ SURVIVORS (un-refuted; probably valid) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{survivor_block}
+
+━━━ VERIFIED P-VECTORS (mentally test every proposal) ━━━━━━━━━━━━━━━━━━━━━━━
+{verified_block}
+
+━━━ TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Target under-covered regions in the registry coverage table, prefer pool
+sub-classes with substantial data, and feel free to combine hypothesis atoms
+into new shapes the table doesn't list. Each proposal will be re-checked
+against {n_rows} verified p-vectors; RHS coefficients with denominators > 6
+are auto-rejected. Output JSON only:
 {{
-  "reasoning": "brief shared rationale",
   "conjectures": [
-    "if ((is_simple) and (f_2>=_14)), then p6 >= (…)",
+    "if ((is_simple) and ...), then p6 >= (...)",
     ...
   ]
 }}
 """
 
 CONJ_GEN_REVIEW_PROMPT = """\
-Review candidate conjectures before registration. Candidates come from a
-data-driven discoverer (Graffiti3) and an LLM proposer; judge them all by the
-same standard.
+Decide keep/drop on each candidate. Output JSON only.
 
-━━━ PROVEN CONJECTURES (success hints — keep candidates that resemble these) ━
-{success_block}
+Drop a candidate iff any of:
+  (a) any verified p-vector below satisfies the hypothesis AND violates the
+      conclusion (cite it),
+  (b) RHS has a fractional coefficient with denominator > 6 (LP overfit),
+  (c) hypothesis/RHS shape matches a refuted-shape entry (shifted constants
+      still count as the same shape),
+  (d) near-duplicate of another candidate in this batch.
+A "keep" should be sharp on at least one verified p-vector.
 
-━━━ FAILED CONJECTURES (failure hints — drop candidates that repeat these) ━━━
+Refuted shapes (gatekeeper):
 {failure_block}
 
-━━━ CANDIDATES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Verified p-vectors (counterexample check):
+{verified_block}
+
+Candidates:
 {candidate_block}
 
-━━━ YOUR TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-For each candidate, decide keep or drop using the quality criteria
-(success-resemblance is positive; failure-pattern repetition, over-fitted
-thresholds, or near-duplicates of other candidates are negative).
-Respond ONLY with valid JSON (no prose outside the JSON block):
+Output:
 {{
   "reviews": [
     {{"index": 1, "verdict": "keep", "reason": "one sentence"}},
-    {{"index": 2, "verdict": "drop", "reason": "one sentence"}},
-    ...
+    {{"index": 2, "verdict": "drop", "reason": "one sentence"}}
   ]
 }}
-The "index" refers to the 1-based number in the CANDIDATES list. Every
-candidate must receive exactly one review.
+Every candidate gets exactly one review keyed by its 1-based index.
 """

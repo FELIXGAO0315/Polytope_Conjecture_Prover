@@ -47,7 +47,7 @@ from agent.config import Config
 from agent.claude_sdk import ClaudeSDKClient
 from agent.procutil import set_pdeathsig
 from agent.conjectures import load_conjectures, ConjectureSpec
-from agent.orchestrator.tools.conjecture_parser import ConjectureParser, ParsedConjecture
+from agent.orchestrator.tools.conjecture_parser import ParsedConjecture
 from agent.orchestrator.tools.check_pvector import PVectorCheckAgent
 from agent.orchestrator.tools.pvec_eval import (
     _dehn_sommerville,

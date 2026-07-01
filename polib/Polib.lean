@@ -60,3 +60,204 @@ theorem C1 (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) : maps.p_i 6 ≥ 
   have h := P6EdgeCountEquation maps hM
   push_cast at *
   omega
+
+-- === C104_DehnSommervilleLowerDegree (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-06-28T11:59:16.183036+00:00
+/-- From the Dehn–Sommerville relation with p_4 = 0, derive the lower-degree face bound.
+    When no quadrilateral faces are present, the edge-count equation specializes to:
+    3·p₃ + p₅ = 12 + ∑_{k≥7} (k − 6)·p_k -/
+lemma C104_DehnSommervilleLowerDegree
+    (maps : SimplyCon3ConnectedMap 0)
+    (hM : IsMap maps)
+    (h_p4 : maps.p_i 4 = 0) :
+    (3 : ℤ) * (maps.p_i 3 : ℤ) + (maps.p_i 5 : ℤ) =
+    12 + ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ) := by
+  have h := P6EdgeCountEquation maps hM
+  push_cast at *
+  omega
+
+-- === C104_P3LowerBound (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-06-28T15:11:58.280076+00:00
+lemma C104_P3LowerBound (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps)
+    (h_p4 : maps.p_i 4 = 0) (h_p5 : maps.p_i 5 ≤ 2) : 
+    3 * (maps.p_i 3 : ℤ) ≥ 10 + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) - 6) * (maps.p_i k : ℤ)) := by
+  have h := Juc_EulerFormula maps hM
+  linarith [h_p4, h_p5]
+
+-- === C104_CaseLargeSum (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-06-29T07:51:35.509620+00:00
+lemma C104_CaseLargeSum (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps)
+    (hS : ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k > 2) :
+    (maps.p_i 6 : ℤ) + 2 * (∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k : ℤ) > 4 := by
+  have h_S : (∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k : ℤ) > 2 := by exact_mod_cast hS
+  have h_p6 : (maps.p_i 6 : ℤ) ≥ 0 := Nat.cast_nonneg _
+  linarith
+
+-- === C104_DehnSommerville_Application (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-06-29T14:22:47.993657+00:00
+private lemma C104_DehnSommerville_Application (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_p4 : maps.p_i 4 = 0) (h_p5 : maps.p_i 5 ≤ 2) : (3 : ℤ) * maps.p_i 3 ≥ 10 + ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) - 6) * maps.p_i k) := by
+  have h1 := P6EdgeCountEquation maps hM
+  have he := euler_formula maps hM
+  have hh := handshake maps hM
+  push_cast
+  linarith
+
+-- === C104_CaseSmallSum (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-07-01T06:59:11.495297+00:00
+private lemma C104_CaseSmallSum (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h1 : maps.p_i 4 = 0) (h2 : maps.p_i 5 ≤ 2) (h3 : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k ≥ 7) (hS : ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k ≤ 2) : 2 * maps.p_i 6 ≥ 4 - ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k := by
+  set S := ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k with hSdef
+  set SZ : ℤ := ∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ) with hSZdef
+  have hCastS : (S : ℤ) = SZ := by
+    rw [hSZdef, hSdef]; push_cast; rfl
+  have hSZnn : SZ ≥ 0 := by
+    apply Finset.sum_nonneg; intros; exact Int.ofNat_nonneg _
+  -- Step 1: m ≥ 6
+  have hm : maps.m ≥ 6 := by
+    by_contra hlt
+    push_neg at hlt
+    have hIco_empty : Finset.Ico 7 (maps.m + 1) = ∅ :=
+      Finset.Ico_eq_empty (by omega)
+    have hEuler := Juc_EulerFormula maps hM
+    rw [hIco_empty, Finset.sum_empty] at hEuler
+    rw [h1] at hEuler
+    have hp3_le : maps.p_i 3 ≤ 4 := by
+      have h1' : (3 * maps.p_i 3 : ℤ) ≤ 12 := by
+        have hp5nn : (maps.p_i 5 : ℤ) ≥ 0 := Int.ofNat_nonneg _
+        push_cast at hEuler
+        linarith
+      have h2' : (maps.p_i 3 : ℤ) ≤ 4 := by linarith
+      exact_mod_cast h2'
+    have hSub : Finset.Ico 3 (maps.m + 1) ⊆ Finset.Ico 3 6 :=
+      Finset.Ico_subset_Ico_right (by omega)
+    have hSumBound : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k ≤
+                     ∑ k ∈ Finset.Ico 3 6, maps.p_i k :=
+      Finset.sum_le_sum_of_subset hSub
+    have hIco36 : (Finset.Ico 3 6 : Finset ℕ) = {3, 4, 5} := by decide
+    rw [hIco36] at hSumBound
+    simp at hSumBound
+    omega
+  -- Step 2: 3 * p_6 ≥ 6 - 2 * SZ
+  have hIneq := Juc_InequalityPart maps hM hm
+  rw [h1] at hIneq
+  push_cast at hIneq
+  have hSumLB : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ) ≥
+                -2 * SZ := by
+    have hle : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (-2 : ℤ) * (maps.p_i k : ℤ) ≤
+           ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ) := by
+      apply Finset.sum_le_sum
+      intro k hk
+      rw [Finset.mem_Ico] at hk
+      have hk7 : k ≥ 7 := hk.1
+      have hkZ : (k : ℤ) ≥ 7 := by exact_mod_cast hk7
+      have hdiv : ((k : ℤ) + 1) / 2 ≥ 4 := by omega
+      have hcoeff : ((k : ℤ) + 1) / 2 - 6 ≥ -2 := by linarith
+      have hp : (maps.p_i k : ℤ) ≥ 0 := Int.ofNat_nonneg _
+      nlinarith
+    have hEq : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (-2 : ℤ) * (maps.p_i k : ℤ) =
+               (-2) * SZ := by
+      rw [hSZdef, ← Finset.mul_sum]
+    linarith
+  have hp5 : (maps.p_i 5 : ℤ) ≤ 2 := by exact_mod_cast h2
+  have hp6bound : 3 * (maps.p_i 6 : ℤ) ≥ 6 - 2 * SZ := by linarith
+  have hSZle : SZ ≤ 2 := by rw [← hCastS]; exact_mod_cast hS
+  have h2p6 : 2 * (maps.p_i 6 : ℤ) ≥ 4 - SZ := by
+    by_contra hlt
+    push_neg at hlt
+    have hstep1 : 2 * (maps.p_i 6 : ℤ) ≤ 3 - SZ := by linarith
+    have hstep2 : (6 : ℤ) * (maps.p_i 6 : ℤ) ≤ 9 - 3 * SZ := by linarith
+    have hstep3 : (6 : ℤ) * (maps.p_i 6 : ℤ) ≥ 12 - 4 * SZ := by linarith
+    linarith
+  have h_int_conv : (2 * maps.p_i 6 : ℤ) + (S : ℤ) ≥ 4 := by
+    rw [hCastS]; push_cast; linarith
+  have hFinal : 2 * maps.p_i 6 + S ≥ 4 := by exact_mod_cast h_int_conv
+  omega
+
+-- === C104 (proved) ===
+-- quality_score: 1.000 | sorry_count: 0 | saved_at: 2026-07-01T08:28:57.825075+00:00
+open Finset
+
+theorem C104 (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h1 : maps.p_i 4 = 0) (h2 : maps.p_i 5 ≤ 2) (h3 : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k ≥ 7) : 2 * maps.p_i 6 ≥ 4 - ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k := by
+  set S := ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k with hSdef
+  by_cases hS4 : 4 ≤ S
+  · omega
+  push_neg at hS4
+  have hp_range := p_range maps hM
+  have hm6 : maps.m ≥ 6 := by
+    by_contra hm_lt
+    push_neg at hm_lt
+    have hp3_ge : maps.p_i 3 ≥ 5 := by
+      have hle : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k ≤
+                 maps.p_i 3 + maps.p_i 4 + maps.p_i 5 := by
+        have hsub : Finset.Ico 3 (maps.m + 1) ⊆ ({3, 4, 5} : Finset ℕ) := by
+          intro x hx
+          rw [Finset.mem_Ico] at hx
+          simp
+          omega
+        have hset_sum : ∑ k ∈ ({3, 4, 5} : Finset ℕ), maps.p_i k = 
+                        maps.p_i 3 + maps.p_i 4 + maps.p_i 5 := by
+          rw [show ({3, 4, 5} : Finset ℕ) = insert 3 (insert 4 {5}) from rfl]
+          rw [Finset.sum_insert (by decide), Finset.sum_insert (by decide), Finset.sum_singleton]
+          ring
+        calc ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k
+            ≤ ∑ k ∈ ({3, 4, 5} : Finset ℕ), maps.p_i k := by
+              apply Finset.sum_le_sum_of_subset hsub
+          _ = maps.p_i 3 + maps.p_i 4 + maps.p_i 5 := hset_sum
+      linarith
+    have hjuc := Juc_EulerFormula maps hM
+    have hsum_z : ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ) = 0 := by
+      apply Finset.sum_eq_zero
+      intro k hk
+      rw [Finset.mem_Ico] at hk
+      omega
+    rw [hsum_z, add_zero, h1] at hjuc
+    push_cast at hjuc
+    omega
+  have hjuc_ineq := Juc_InequalityPart maps hM hm6
+  have hSint : (S : ℤ) = ∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ) := by
+    rw [hSdef]; push_cast; rfl
+  have hsum_ineq_bd : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (((k : ℤ) + 1) / 2 - 6) * (maps.p_i k : ℤ) 
+                     ≥ -2 * (S : ℤ) := by
+    rw [hSint, Finset.mul_sum]
+    apply Finset.sum_le_sum
+    intro k hk
+    rw [Finset.mem_Ico] at hk
+    have hk7 : (7 : ℤ) ≤ (k : ℤ) := by exact_mod_cast hk.1
+    have hp_nn : (0 : ℤ) ≤ (maps.p_i k : ℤ) := by positivity
+    have hcoef : ((k : ℤ) + 1) / 2 - 6 ≥ -2 := by omega
+    nlinarith
+  rw [h1] at hjuc_ineq
+  push_cast at hjuc_ineq
+  have hp5_z : (maps.p_i 5 : ℤ) ≤ 2 := by exact_mod_cast h2
+  have h3p6 : 3 * (maps.p_i 6 : ℤ) ≥ 12 - 3 * (maps.p_i 5 : ℤ) - 2 * (S : ℤ) := by
+    linarith
+  by_cases hS3 : S = 3
+  · have hSge3 : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ) ≥ 3 := by
+      rw [← hSint]; exact_mod_cast (by omega : S ≥ 3)
+    have hbarnette := Barnette_P6Bound maps hM hm6 hSge3
+    have hjuc_euler := Juc_EulerFormula maps hM
+    have hsum_euler_bd : ∑ k ∈ Finset.Ico 7 (maps.m + 1), ((k : ℤ) - 6) * (maps.p_i k : ℤ) 
+                       ≥ ∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ) := by
+      apply Finset.sum_le_sum
+      intro k hk
+      rw [Finset.mem_Ico] at hk
+      have hk7 : (7 : ℤ) ≤ (k : ℤ) := by exact_mod_cast hk.1
+      have hp_nn : (0 : ℤ) ≤ (maps.p_i k : ℤ) := by positivity
+      nlinarith
+    rw [h1] at hjuc_euler
+    push_cast at hjuc_euler hbarnette
+    have hSint3 : (S : ℤ) = 3 := by exact_mod_cast hS3
+    have hsumeq : ∑ k ∈ Finset.Ico 7 (maps.m + 1), (maps.p_i k : ℤ) = 3 := by linarith
+    have h3p3 : 3 * (maps.p_i 3 : ℤ) ≥ 15 - (maps.p_i 5 : ℤ) := by linarith
+    have hp3ge5 : (maps.p_i 3 : ℤ) ≥ 5 := by
+      have : 3 * (maps.p_i 3 : ℤ) ≥ 13 := by linarith
+      omega
+    have h2p6_z : 2 * (maps.p_i 6 : ℤ) ≥ 1 := by linarith
+    have h2p6 : 2 * maps.p_i 6 ≥ 1 := by exact_mod_cast h2p6_z
+    omega
+  · have hS2 : S ≤ 2 := by omega
+    have hSnat_z : (S : ℤ) ≤ 2 := by exact_mod_cast hS2
+    have h2p6_z : 2 * (maps.p_i 6 : ℤ) ≥ 4 - (S : ℤ) := by omega
+    have h2p6 : 2 * maps.p_i 6 + S ≥ 4 := by
+      have : ((2 * maps.p_i 6 + S : ℕ) : ℤ) ≥ 4 := by push_cast; linarith
+      exact_mod_cast this
+    omega

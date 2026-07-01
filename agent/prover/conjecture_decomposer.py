@@ -1,36 +1,47 @@
 """Discovery-mode blueprint decomposer for conjecture proving.
 
-Subclasses ``BlueprintDecomposer`` to replace the prompt with one tuned for
-\"there\'s no known proof yet — please find one\".  Reads Polib for proved
-lemmas to advertise, ranks the most relevant for the planner prompt, and
-embeds the conjecture as structured JSON so the planner can\'t accidentally
-swap coefficients.
+Drives the planner LLM with a prompt tuned for \"there's no known proof yet —
+please find one\".  Reads Polib for proved lemmas to advertise, ranks the most
+relevant for the planner prompt, and embeds the conjecture as structured JSON
+so the planner can't accidentally swap coefficients.
+
+Public API:
+  * ``ConjectureDecomposer.decompose(parsed, locked, proved_lemmas, log=...)``
+
+The retry loop runs up to 3 attempts.  Each attempt:
+  1. Send the prompt (always single-turn — we recompute the correction
+     hint each round rather than carrying conversation history).
+  2. Parse JSON → schema check → plantri-pool refutation check.
+  3. If all pass → topo-sort and return the Blueprint.
+  4. Otherwise → format the rejection as a correction message for the next
+     attempt's prompt.
 """
 from __future__ import annotations
 
+import json
 import re
+import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
-from agent.prover._helpers import (
-    _build_conjecture_json,
-    _extract_lean_signatures,
-    _rank_lemmas_for_discovery,
-)
+from agent.exceptions import BlueprintError
 from agent.prover.tools.blueprint import (
     Blueprint,
-    BlueprintDecomposer,
+    BlueprintNode,
     _parse_blueprint_json,
     _topological_sort,
     _validate_blueprint_nodes,
 )
 from agent.prover.tools.blueprint_validator import BlueprintValidator
-from agent.exceptions import BlueprintError
 
 if TYPE_CHECKING:
-    from agent.prover.tools.goal_lock import GoalLock, LockedGoal
-    from agent.prover.tools.latex_parser import ParsedTheorem
+    from agent.prover.tools.goal_lock import LockedGoal
+    from agent.prover.tools.parsed_theorem import ParsedTheorem
 
+
+# ---------------------------------------------------------------------------
+# Planner prompt
+# ---------------------------------------------------------------------------
 
 DISCOVERY_BLUEPRINT_PROMPT = """\
 You are a Lean 4 proof discovery expert working in the domain of combinatorial
@@ -67,44 +78,51 @@ exactly into any `latex_fragment` you emit.
   f_2 (total face count) = ∑ k in Finset.Ico 3 (maps.m + 1), maps.p_i k.
   Do NOT add IsSimple, maps.simple, or any simplicity hypothesis — it is not defined.
 
-## Polib lemmas (available via `import Inventory`)
-Two kinds are listed below:
-- **proved** (no tag): fully verified, zero sorry — safe to depend on directly.
-- **partial** (tagged `[partial — has sorry…]`): proof structure exists but incomplete.
-  Use these for **structural reference** (understand the proof approach, reuse sub-steps),
-  but do NOT add them as `dependencies` — treat them as inspiration, not axioms.
-
-The most relevant lemmas are shown with their Lean signatures; others are listed
-by name only. Use signatures to decide which lemma to call and how to apply it.
+## Polib lemmas (available via `import Inventory` / `import Polib`)
+The block below lists already-proved (or partially-proved) lemmas you MAY
+choose to reuse. Treat it as a reference catalogue: invoke a lemma only when
+its conclusion clearly applies; otherwise plan a fresh sub-proof.
 {available_lemmas}
-For any node whose proof can directly call a **proved** lemma, say so explicitly
-in the `description` field.
+
+For any node whose proof can call one of these lemmas directly, mention the
+lemma by name in the `description` so the per-node prompt knows to surface
+its signature.
 
 ## Node structure
 - Each auxiliary definition or lemma needed before the main result gets its own node.
-- **Parallelism**: only add a dependency edge A→B when B's proof body will
+- **Parallelism**: only add a dependency edge A → B when B's proof body will
   DIRECTLY call or apply A by name. Avoid speculative edges — unnecessary
-  dependencies force sequential execution and slow things down.
+  dependencies force sequential execution.
 - **Independence**: if two sub-lemmas don't use each other's results, leave
-  them unconnected so they can run in parallel. For example, extracting the
-  Euler relation and extracting the handshaking identity are independent; only
-  the final combination node should depend on both.
-- Node types: "def" | "lemma" | "theorem"
+  them unconnected so they can run in parallel.
+- Node types: "def" | "lemma" | "theorem".
 - Exactly ONE node must have "is_main_target": true.
-- "latex_fragment": write a brief mathematical description of what this node
-  states (no verbatim proof exists — summarise the sub-goal instead).
-- "lean_signature": for EVERY non-main node, write the COMPLETE Lean 4
-  declaration header up to (and including) the `:= by` or `:=` token, e.g.
-    `private lemma C104_LargeSumCase (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_sum : ∑ k ∈ Finset.Ico 7 (maps.m + 1), maps.p_i k ≥ 4) : maps.p_i 6 ≥ 0 := by`
-  • MUST use the SAME genus as the parent theorem (`SimplyCon3ConnectedMap 0`,
-    not `{{g : ℤ}}`).
-  • MUST reuse the parent's hypothesis variable names (`maps`, `hM`, `h_p4`,
-    `h_p5`, `h_f2`, …) so the main proof can apply it directly.
-  • The lean_signature must be CONSISTENT with the latex_fragment — if you
-    write `latex_fragment = "p_6 ≥ 0"` then lean_signature must conclude
-    `: maps.p_i 6 ≥ 0` (not `≤`, not different RHS).
-  • For the main-target node, leave "lean_signature" as null/omit — the
-    locked goal signature is supplied by the system.
+- "latex_fragment": a brief mathematical description of what this node states.
+- "lean_signature": **MANDATORY for every non-main-target node**.  Provide the
+  EXACT Lean 4 header the prover should prove, including the declaration keyword
+  (`theorem` / `lemma` / `private lemma` / `def`), the node id as the
+  declaration name, all binders (typically `(maps : SimplyCon3ConnectedMap 0)
+  (hM : IsMap maps)` plus any hypothesis binders), the return type, and the
+  terminating ` := by` token.  The declared name MUST be the node's `node_id`.
+  Use the SAME genus as the parent theorem (`SimplyCon3ConnectedMap 0`) and
+  reuse the parent's hypothesis variable names (`maps`, `hM`, `h_p4`, `h_p5`,
+  `h_f2`, …).
+
+  ⚠ **CRITICAL — Lean 4 SUM notation**: use the Unicode `∈` (element-of),
+  NEVER the keyword `in`.  Lean 4 with current Mathlib rejects `∑ k in ...`
+  with `unexpected token 'in'; expected ','`.  The correct form is:
+
+     ✅ CORRECT:  `∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k`
+     ❌ WRONG:    `∑ k in Finset.Ico 3 (maps.m + 1), maps.p_i k`
+
+  Same rule for `∏`, `⋃`, `⋂`, and any other Mathlib big-operator binder.
+
+  Correct example (note `∈` in both sum expressions):
+
+      "lean_signature": "private lemma C104_FaceCountEquation (maps : SimplyCon3ConnectedMap 0) (hM : IsMap maps) (h_f2 : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k ≥ 7) : ∑ k ∈ Finset.Ico 3 (maps.m + 1), maps.p_i k = maps.v - maps.e + 2 := by"
+
+  • For the main-target node ONLY, leave "lean_signature" as null / omit it —
+    the system uses the conjecture's locked goal signature directly.
 
 ## CRITICAL — Node naming
 All nodes live in a shared Inventory namespace. You MUST prefix every new node
@@ -147,8 +165,133 @@ Respond with ONLY valid JSON — no prose, no markdown fences.
 """
 
 
-class ConjectureDecomposer(BlueprintDecomposer):
-    """BlueprintDecomposer variant that uses the discovery-mode prompt.
+# ---------------------------------------------------------------------------
+# Lemma ranking + Polib signature scrape (formerly in _helpers.py)
+# ---------------------------------------------------------------------------
+
+# Stop-word set used to filter low-signal tokens out of the keyword overlap
+# score in _rank_lemmas.
+_RANK_STOP = frozenset(
+    {"maps", "the", "a", "an", "and", "or", "in", "of", "for", "is", "to",
+     "with", "all", "let", "if", "then", "be", "by", "on", "at", "from"}
+)
+
+_SIG_DECL_START = re.compile(
+    r"^(?:private\s+)?(?:lemma|theorem|def|abbrev)\s+(\w+)",
+    re.MULTILINE,
+)
+
+
+def _extract_lean_signatures(polib_lean: Path) -> dict[str, str]:
+    """Return ``{node_id: signature_text}`` by scanning Polib.lean.
+
+    Extracts only the type signature (the part before ``:= by`` or ``:=``),
+    capped at 200 chars so the prompt stays readable.
+    """
+    try:
+        text = polib_lean.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    sigs: dict[str, str] = {}
+    lines = text.splitlines()
+    for i in range(len(lines)):
+        m = _SIG_DECL_START.match(lines[i])
+        if not m:
+            continue
+        name = m.group(1)
+        collected: list[str] = []
+        for j in range(i, min(i + 6, len(lines))):
+            line = lines[j]
+            if ":= by" in line:
+                collected.append(line.split(":= by")[0])
+                break
+            if re.search(r":=\s*\S", line):
+                collected.append(re.split(r":=\s*\S", line)[0] + ":=")
+                break
+            collected.append(line)
+            if re.search(r":=\s*$", line):
+                break
+        sigs[name] = " ".join(collected).strip()[:200]
+    return sigs
+
+
+def _camel_tokens(s: str) -> set[str]:
+    """Split a CamelCase/underscore identifier into lowercase word tokens."""
+    return {w.lower() for w in re.findall(r"[A-Z][a-z]+|[a-z]+|[0-9]+", s)}
+
+
+def _rank_lemmas(
+    proved_lemmas: list[dict],
+    theorem_name: str,
+    hypotheses: list[str],
+    conclusion: str,
+    top_k: int = 12,
+) -> tuple[list[dict], list[dict]]:
+    """Return (top_k_relevant, rest) sorted by token overlap with the conjecture."""
+    if not proved_lemmas:
+        return [], []
+    context_tokens = (
+        _camel_tokens(theorem_name)
+        | {w for w in re.findall(r"\w+", " ".join(hypotheses).lower())}
+        | {w for w in re.findall(r"\w+", conclusion.lower())}
+    ) - _RANK_STOP
+
+    def _score(e: dict) -> int:
+        text = f"{e.get('node_id', '')} {e.get('description', '')}"
+        tokens = _camel_tokens(text) | {w for w in re.findall(r"\w+", text.lower())}
+        return len(tokens & context_tokens)
+
+    ranked = sorted(proved_lemmas, key=_score, reverse=True)
+    return ranked[:top_k], ranked[top_k:]
+
+
+def _build_conjecture_json(parsed: "ParsedTheorem", lean_signature: str) -> str:
+    """Render a structured JSON view of the conjecture for the planner prompt.
+
+    Sources, in priority order:
+      1. ``lean_signature`` — authoritative, parser-validated.
+      2. ``coefficients`` — extracted by AdvancedConjectureParser; lets the LLM
+         cross-check arithmetic without re-deriving from raw text.
+      3. ``raw_formula`` — verbatim DSL string, for context only.
+
+    Why this exists: when only `Hypotheses: …\\nConclusion: …` was passed as
+    free-form text alongside the lean_signature, the planner sometimes synthesised
+    a `latex_fragment` with swapped coefficients (e.g. `p_6 + 2·Σ ≥ 4` instead
+    of `Σ + 2·p_6 ≥ 4`) and decomposed a mathematically false sub-lemma.
+    Funnelling everything through one JSON block with an explicit "trust
+    lean_signature" instruction removes that ambiguity.
+    """
+    payload: dict = {
+        "lean_signature": lean_signature,
+        "hypotheses": list(parsed.hypotheses),
+        "conclusion_raw": parsed.conclusion,
+    }
+    try:
+        from agent.conjectures import AdvancedConjectureParser
+        formula = f"if ({' and '.join(parsed.hypotheses)}), then {parsed.conclusion}"
+        cf = AdvancedConjectureParser().parse_formula_with_coefficients(formula)
+        payload["raw_formula"] = cf.raw_formula
+        payload["conclusion"] = {
+            "lhs": "p_6",
+            "relation": cf.relation,
+            "rhs_constant": float(cf.coefficients.get("const", 0.0)),
+            "rhs_coefficients": {
+                k: float(v) for k, v in cf.coefficients.items() if k != "const"
+            },
+        }
+    except Exception:
+        # Non-IRIS conjecture or unparseable RHS — drop the structured block;
+        # lean_signature + raw conclusion are still present in payload.
+        pass
+    return json.dumps(payload, indent=2, ensure_ascii=False)
+
+
+# ---------------------------------------------------------------------------
+# ConjectureDecomposer
+# ---------------------------------------------------------------------------
+
+class ConjectureDecomposer:
+    """Discovery-mode blueprint decomposer for unproven JSON conjectures.
 
     Wraps the LLM call in a 3-attempt retry-with-correction loop guarded by
     `BlueprintValidator`: when an intermediate node's `latex_fragment` is
@@ -174,7 +317,8 @@ class ConjectureDecomposer(BlueprintDecomposer):
         polib_lean: Path | None = None,
         plantri_pool_path: Path | None = None,
     ) -> None:
-        super().__init__(client, model)
+        self._client = client
+        self._model = model
         self._polib_lean = polib_lean
         self._validator = BlueprintValidator(
             plantri_pool_path or self._DEFAULT_PLANTRI_POOL
@@ -182,125 +326,127 @@ class ConjectureDecomposer(BlueprintDecomposer):
 
     def decompose(
         self,
-        parsed: ParsedTheorem,
-        goal,
+        parsed: "ParsedTheorem",
+        locked: "LockedGoal",
         proved_lemmas: list[dict] | None = None,
+        max_attempts: int = 3,
+        log: Callable[[str], None] | None = None,
     ) -> Blueprint:
-        locked_goal = goal.goal if hasattr(goal, "goal") else goal
+        _log = log or (lambda _msg: None)
 
-        # Load Lean signatures once from Polib.lean (best-effort)
-        sigs: dict[str, str] = {}
-        if self._polib_lean is not None:
-            sigs = _extract_lean_signatures(self._polib_lean)
+        available_block = self._render_available_lemmas(
+            proved_lemmas or [], parsed,
+        )
+        conjecture_json = _build_conjecture_json(parsed, locked.lean_signature)
+        base_prompt = DISCOVERY_BLUEPRINT_PROMPT.format(
+            theorem_name=parsed.name,
+            conjecture_json=conjecture_json,
+            available_lemmas=available_block,
+        )
 
-        # Rank lemmas by relevance; show top-k with signatures, rest names-only
-        all_lemmas: list[dict] = proved_lemmas or []
-        top, rest = _rank_lemmas_for_discovery(
-            all_lemmas,
+        correction = ""   # appended to the next attempt's prompt
+        last_exc: BlueprintError | None = None
+        for attempt in range(1, max_attempts + 1):
+            _log(f"      [planner-attempt {attempt}/{max_attempts}] sending prompt "
+                 f"({len(base_prompt) + len(correction)} chars)")
+            t0 = time.monotonic()
+            response = self._client.messages.create(
+                model=self._model,
+                # 1024 is enough for a 5-10-node blueprint (~150 chars/node
+                # in the JSON schema).  2048 doubled the worst-case streaming
+                # latency over VPN without any quality benefit observed.
+                max_tokens=1024,
+                messages=[{"role": "user", "content": base_prompt + correction}],
+                # JSON-schema task — no need for extended thinking.  `low`
+                # cuts wallclock 3-5x vs the schedule default of "medium".
+                effort="low",
+                # No tools — the prompt already embeds the full Inventory
+                # API surface and the conjecture JSON.  Letting the LLM
+                # grep/read tempts 30-120s detours (especially over WSL+VPN).
+                allowed_tools=[],
+            )
+            text = response.content[0].text.strip()
+            _log(f"      [planner-attempt {attempt}/{max_attempts}] response in "
+                 f"{time.monotonic() - t0:.1f}s ({len(text)} chars)")
+            try:
+                nodes = _parse_blueprint_json(text)
+                _validate_blueprint_nodes(nodes)
+                refutation = self._validator.check(nodes, parsed.hypotheses)
+                if refutation is not None:
+                    raise BlueprintError(refutation.message())
+            except BlueprintError as exc:
+                last_exc = exc
+                err_class = _classify_blueprint_error(str(exc))
+                _log(f"      [planner-attempt {attempt}/{max_attempts}] REJECTED "
+                     f"({err_class}): {str(exc)[:200]}")
+                correction = _format_correction(exc)
+                continue
+            _log(f"      [planner-attempt {attempt}/{max_attempts}] ACCEPTED — "
+                 f"{len(nodes)} nodes, no refutation")
+            return Blueprint(nodes=nodes, topo_order=_topological_sort(nodes))
+
+        _log(f"      [planner] all {max_attempts} attempts failed — "
+             f"last error: {str(last_exc)[:200]}")
+        assert last_exc is not None  # loop ran at least once
+        raise last_exc
+
+    # ------------------------------------------------------------------
+    # Available-lemmas block rendering
+    # ------------------------------------------------------------------
+
+    def _render_available_lemmas(
+        self, proved_lemmas: list[dict], parsed: "ParsedTheorem",
+    ) -> str:
+        if not proved_lemmas:
+            return "  (none yet)"
+        sigs: dict[str, str] = (
+            _extract_lean_signatures(self._polib_lean)
+            if self._polib_lean is not None else {}
+        )
+        top, rest = _rank_lemmas(
+            proved_lemmas,
             theorem_name=parsed.name,
             hypotheses=list(parsed.hypotheses),
             conclusion=parsed.conclusion,
         )
-
-        def _fmt_entry(e: dict) -> str:
+        lines: list[str] = []
+        for e in top:
             line = f"  - `{e['node_id']}`"
             if e.get("description"):
                 line += f": {e['description']}"
             sig = sigs.get(e["node_id"], "")
             if sig:
                 line += f"\n    Lean: `{sig}`"
-            return line
+            lines.append(line)
+        if rest:
+            rest_ids = ", ".join(f"`{e['node_id']}`" for e in rest)
+            lines.append(f"  Also available (name only): {rest_ids}")
+        return "\n".join(lines)
 
-        if all_lemmas:
-            avail_lines = [_fmt_entry(e) for e in top]
-            if rest:
-                rest_ids = ", ".join(f"`{e['node_id']}`" for e in rest)
-                avail_lines.append(
-                    f"  Also available (name only): {rest_ids}"
-                )
-            avail = "\n".join(avail_lines)
-        else:
-            avail = "  (none yet)"
 
-        conjecture_json = _build_conjecture_json(
-            parsed, locked_goal.lean_signature,
+# ---------------------------------------------------------------------------
+# Correction-message helpers
+# ---------------------------------------------------------------------------
+
+def _classify_blueprint_error(err_msg: str) -> str:
+    if "REFUTED" in err_msg:
+        return "REFUTED"
+    if "JSON" in err_msg:
+        return "INVALID_JSON"
+    return "SCHEMA"
+
+
+def _format_correction(exc: BlueprintError) -> str:
+    err_msg = str(exc)
+    if "REFUTED" in err_msg:
+        return (
+            "\n\n" + err_msg + "\n\n"
+            "Re-emit the blueprint with a corrected decomposition. "
+            "The refuted intermediate is mathematically false and must be "
+            "replaced — do not keep it. Output ONLY the JSON object."
         )
-        user_content = DISCOVERY_BLUEPRINT_PROMPT.format(
-            theorem_name=parsed.name,
-            conjecture_json=conjecture_json,
-            available_lemmas=avail,
-        )
-
-        polib_ids = {e["node_id"] for e in (proved_lemmas or [])}
-        messages: list[dict] = [{"role": "user", "content": user_content}]
-        last_exc: Exception | None = None
-        nodes: list[BlueprintNode] | None = None
-        text = ""
-
-        for attempt in range(3):
-            print(f"      [planner attempt {attempt + 1}/3] sending prompt "
-                  f"({len(messages)} messages in history)", flush=True)
-            response = self._client.messages.create(
-                model=self._model,
-                max_tokens=2048,
-                messages=messages,
-            )
-            text = response.content[0].text.strip()
-            try:
-                nodes = _parse_blueprint_json(text)
-                _validate_blueprint_nodes(nodes, known_polib_ids=polib_ids)
-                # Plantri-pool sanity check: refute blueprints whose
-                # intermediate claims are violated by realizable polytopes
-                # satisfying the conjecture's hypotheses. False intermediates
-                # are caught here BEFORE downstream LLM calls burn budget on
-                # proving an unprovable sub-lemma.
-                refutation = self._validator.check(nodes, parsed.hypotheses)
-                if refutation is not None:
-                    raise BlueprintError(refutation.message())
-                print(f"      [planner attempt {attempt + 1}/3] ACCEPTED — "
-                      f"{len(nodes)} nodes, no refutation", flush=True)
-                break
-            except BlueprintError as exc:
-                last_exc = exc
-                err_msg = str(exc)
-                # Log the rejection so the operator can see what L2.A caught
-                # without having to add ad-hoc print statements.
-                err_class = "REFUTED" if "REFUTED" in err_msg else (
-                    "INVALID_JSON" if "JSON" in err_msg else "SCHEMA"
-                )
-                print(f"      [planner attempt {attempt + 1}/3] REJECTED "
-                      f"({err_class}): {err_msg[:200]}", flush=True)
-                if "REFUTED" in err_msg:
-                    correction = (
-                        err_msg + "\n\n"
-                        "Re-emit the blueprint with a corrected decomposition. "
-                        "The refuted intermediate is mathematically false and "
-                        "must be replaced — do not keep it. Output ONLY the "
-                        "JSON object."
-                    )
-                else:
-                    correction = (
-                        "Your response was not valid JSON matching the "
-                        "required schema. Respond with ONLY the JSON object — "
-                        "no prose, no markdown, no comments. Start your "
-                        "response with '{' and end with '}'."
-                    )
-                messages = messages + [
-                    {"role": "assistant", "content": text},
-                    {"role": "user", "content": correction},
-                ]
-        else:
-            print(f"      [planner] all 3 attempts failed — last error: "
-                  f"{str(last_exc)[:200]}", flush=True)
-            raise last_exc  # type: ignore[misc]
-
-        assert nodes is not None  # for type checker
-        topo_order = _topological_sort(nodes)
-        blueprint_data = json.dumps([n.to_dict() for n in nodes], sort_keys=True)
-        blueprint_hash = hashlib.sha256(blueprint_data.encode()).hexdigest()
-        return Blueprint(
-            theorem_name=parsed.name,
-            nodes=nodes,
-            topo_order=topo_order,
-            blueprint_hash=blueprint_hash,
-        )
+    return (
+        "\n\nYour previous response was not valid JSON matching the required "
+        "schema. Respond with ONLY the JSON object — no prose, no markdown, "
+        "no comments. Start your response with '{' and end with '}'."
+    )

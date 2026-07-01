@@ -103,9 +103,37 @@ class PlantriCEFinder:
             _pvec_of, _disk_merge,
         )
 
-        print(f"{TAG} Start working ...")
         tag = f"{TAG} plantri:"
         conjecture = self.conjecture
+
+        # Early skip: when the hypothesis pushes p-vectors past what plantri
+        # can productively handle, bail with one terse line — every candidate
+        # would land in `unreachable` downstream anyway and the enumeration
+        # itself would explode for large n_large (observed wall-stuck on C62).
+        import re as _re
+        hyp_joined = " ".join(conjecture.hypotheses)
+        f2_min_hyp = max(
+            (int(m.group(1)) for m in
+             _re.finditer(r"f_2(?:>=_|\s*>=\s*)(\d+)", hyp_joined)),
+            default=0,
+        )
+        n_large_min_hyp = max(
+            (int(m.group(1)) for m in
+             _re.finditer(r"sum_pk_k>=7\s*>=\s*(\d+)", hyp_joined)),
+            default=0,
+        )
+        f2_reach = int(os.environ.get("PLANTRI_F2_MAX_M5", "36"))
+        nl_cap = int(os.environ.get("CE_ENUM_NLARGE_HARDCAP", "5"))
+        if f2_min_hyp > f2_reach:
+            print(f"{TAG} f_2 >= {f2_min_hyp} > plantri reach "
+                  f"({f2_reach}) — exhaustive infeasible → constructor")
+            return None, []
+        if n_large_min_hyp > nl_cap:
+            print(f"{TAG} sum_pk_k>=7 >= {n_large_min_hyp} > cap "
+                  f"({nl_cap}) — exhaustive infeasible → constructor")
+            return None, []
+
+        print(f"{TAG} Start working ...")
 
         try:
             candidates = enumerate_ce_candidates(conjecture)
@@ -189,11 +217,24 @@ class PlantriCEFinder:
             else:
                 unreachable.append(cand)
 
+        in_reach = sum(len(g) for g in by_n.values()) + len(ad_list)
+
+        # Short-circuit: when every candidate exceeds plantri's exhaustive
+        # reach, the batch/single loops below would do nothing and the "0s
+        # finished" summary would read as if plantri ran. Skip both and
+        # hand all candidates straight to the constructor double-check.
+        if in_reach == 0:
+            min_f2 = min(sum(_nz(c).values()) for c in unreachable)
+            print(f"{tag} all {len(candidates)} candidate(s) have f_2 ≥ "
+                  f"{min_f2} (PLANTRI_F2_MAX={f2cap_ad}, "
+                  f"PLANTRI_F2_MAX_M5={f2cap_m5}) — beyond exhaustive reach, "
+                  f"proceeding to constructor double check directly.")
+            return None, list(candidates)
+
         print(f"{tag} {len(candidates)} candidate p-vector(s) satisfy the "
               f"arithmetic constraints. Exhaustive enumeration can decide "
-              f"{sum(len(g) for g in by_n.values()) + len(ad_list)} of "
-              f"them directly; {len(unreachable)} have too many faces to "
-              f"enumerate exhaustively.")
+              f"{in_reach} of them directly; {len(unreachable)} have too "
+              f"many faces to enumerate exhaustively.")
 
         batch_timeout = float(os.environ.get("CE_SCREEN_BATCH_TIMEOUT", "90"))
         screen_jobs = int(os.environ.get("CE_SCREEN_JOBS", "0")) or None
