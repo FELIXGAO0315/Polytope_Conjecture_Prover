@@ -610,5 +610,275 @@
     "attempts_without_ce": 0,
     "ce_found_count": 0,
     "potentially_valid": false
+  },
+  "C125": {
+    "name": "C125",
+    "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_31)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C126": {
+    "name": "C126",
+    "formula": "if ((is_simple) and (f_2>=_21) and (sum_pk_k>=7 >= 6)), then p6 <= (((2 * p4) + 4))",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C127": {
+    "name": "C127",
+    "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_23)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C128": {
+    "name": "C128",
+    "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_27)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C129": {
+    "name": "C129",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 2)), then p6 >= (p3)",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C130": {
+    "name": "C130",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 3)), then p6 >= ((1.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1782996152,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C131": {
+    "name": "C131",
+    "formula": "if ((is_simple) and (f_2>=_27) and (sum_pk_k>=7 >= 7)), then p6 <= ((((2 * p4) + (0.5 * sum_pk_after_p6)) + -0.5))",
+    "status": "unsolved",
+    "created_at": 1782998417,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C132": {
+    "name": "C132",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_23)), then p6 >= (((0.75 * sum_pk_after_p6) + -1.5))",
+    "status": "unsolved",
+    "created_at": 1782998417,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C133": {
+    "name": "C133",
+    "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.5 * p4) + sum_pk_after_p6))",
+    "status": "unsolved",
+    "created_at": 1782998417,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C134": {
+    "name": "C134",
+    "formula": "if ((is_simple) and (p_4 <= 2) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 <= (((0.5 * p3) + (0.5 * sum_pk_after_p6)))",
+    "status": "unsolved",
+    "created_at": 1782998417,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C135": {
+    "name": "C135",
+    "formula": "if ((is_simple) and (sum_pk_k>=7 >= 9)), then p6 <= ((((1.666666667 * p4) + (0.3333333333 * sum_pk_after_p6)) + 2))",
+    "status": "unsolved",
+    "created_at": 1782998762,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C136": {
+    "name": "C136",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((0.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1782998762,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C137": {
+    "name": "C137",
+    "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)",
+    "status": "unsolved",
+    "created_at": 1783003033,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C138": {
+    "name": "C138",
+    "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_32)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C139": {
+    "name": "C139",
+    "formula": "if ((is_simple) and (p_5 <= 2) and (f_2>=_33)), then p6 <= (((2.5 * sum_pk_after_p6) + -5))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C140": {
+    "name": "C140",
+    "formula": "if ((is_simple) and (f_2>=_47) and (sum_pk_k>=7 >= 1)), then p6 <= (((2.5 * sum_pk_after_p6) + -5))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C141": {
+    "name": "C141",
+    "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C142": {
+    "name": "C142",
+    "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_28)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C143": {
+    "name": "C143",
+    "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_47) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C144": {
+    "name": "C144",
+    "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((3 * p5))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C145": {
+    "name": "C145",
+    "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_26) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C146": {
+    "name": "C146",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_24)), then p6 >= ((1.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C147": {
+    "name": "C147",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_26)), then p6 >= ((2 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C148": {
+    "name": "C148",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 4)), then p6 >= ((1.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C149": {
+    "name": "C149",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (p3)",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C150": {
+    "name": "C150",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_20)), then p6 >= ((1.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C151": {
+    "name": "C151",
+    "formula": "if ((is_simple) and (p_4 = 0) and (p_3 <= 2) and (f_2>=_16)), then p6 >= ((0.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C152": {
+    "name": "C152",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_28)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C153": {
+    "name": "C153",
+    "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C154": {
+    "name": "C154",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= ((0.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783005882,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
   }
 }

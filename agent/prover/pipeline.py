@@ -1,21 +1,22 @@
 """Top-level prover pipeline orchestrator.
 
-Single source of truth for the 8-stage formalization flow.  Each stage is a
+Single source of truth for the 9-stage formalization flow.  Each stage is a
 free function taking ``agent`` (a FormalizerAgent or ProverAgent) plus the
 outputs of earlier stages, and returns its own result.  ``formalize()`` is
 the small orchestrator that strings them together with the shared
 exception handler around stages 1-5.
 
-The 8 stages mirror the ``[N/8]`` log messages the prover prints:
+The 9 stages mirror the ``[N/9]`` log messages the prover prints:
 
     1.  Receive pre-parsed conjecture   -> ParsedTheorem
     2.  Lock + validate goal signature  -> LockedGoal
     3.  Decompose into blueprint DAG    -> Blueprint
     4.  Per-node compile loop (parallel by dep level)
     5.  Retry failed nodes
-    6.  Quality-check summary
+    6.  Deep quality check (drift, axioms, semantic re-check)
     7.  Polib validate + repair
     8.  Collect results + assemble proof file
+    9.  Write natural-language proof (only on clean success)
 
 To debug or replay a single stage, import the function directly:
 
@@ -68,7 +69,7 @@ def _step1_resolve_theorem(
     n_hyps = len(parsed.hypotheses)
     conc_preview = parsed.conclusion[:80].replace("\n", " ")
     agent._log(verbose,
-        f"[1/8] Received conjecture {parsed.name}: "
+        f"[1/9] Received conjecture {parsed.name}: "
         f"{n_hyps} hypothesis(es), conclusion='{conc_preview}'")
     agent._flog.set_theorem_name(parsed.name)
     return parsed
@@ -92,10 +93,10 @@ def _step2_lock_goal(
     """
     locked = agent._load_cached_goal(parsed, verbose=verbose)
     if locked is not None:
-        agent._log(verbose, f"[2/8] Goal cached: {locked.lean_signature[:80]}...")
+        agent._log(verbose, f"[2/9] Goal cached: {locked.lean_signature[:80]}...")
         return locked
 
-    agent._log(verbose, "[2/8] Extracting & locking goal...")
+    agent._log(verbose, "[2/9] Extracting & locking goal...")
     locked = lock_goal(
         parsed, agent._sdk_fast, agent._config.model_fast,
         max_attempts=3,
@@ -109,7 +110,6 @@ def _step2_lock_goal(
             f"  *** Best-effort signature: {locked.lean_signature[:100]} ***\n"
             "  *** Not saving to cache — re-extracted next run.\n"
         )
-    agent._log(verbose, f"      signature: {locked.lean_signature[:80]}...")
     return locked
 
 
@@ -127,11 +127,11 @@ def _step3_blueprint(
     cached = agent._load_cached_blueprint(parsed, locked, verbose=verbose)
     if cached is not None:
         agent._log(verbose,
-            f"[3/8] Blueprint cached: {len(cached.nodes)} node(s), "
+            f"[3/9] Blueprint cached: {len(cached.nodes)} node(s), "
             f"topo order: {cached.topo_order}")
         return cached
 
-    agent._log(verbose, "[3/8] Decomposing blueprint...")
+    agent._log(verbose, "[3/9] Decomposing blueprint...")
     # Only show fully-proved Polib entries to the planner.  Partial entries
     # are sorry-tainted: calling one transitively pulls its sorry into our
     # new proof's dependency closure, violating the no-new-sorry policy.
@@ -168,7 +168,13 @@ def _step4_node_loop(
 
     Returns ``(proven_node_ids_in_topo_order, proven_dep_imports)`` so stage 5
     has a fresh view of what's available for downstream nodes."""
-    agent._log(verbose, "[4/8] Formalizing nodes...")
+    agent._log(verbose, "[4/9] Formalizing nodes...")
+    agent._log(verbose,
+        f"  [proof-agent] Starting session "
+        f"(model={agent._config.model_main}, "
+        f"effort={agent._config.proof_agent_effort}, "
+        f"max_turns={agent._config.proof_agent_max_turns}, "
+        f"timeout={agent._config.proof_agent_timeout_seconds}s)")
     levels = agent._compute_parallel_levels(blueprint)
     proven_node_ids: list[str] = []
     proven_dep_imports: dict[str, str] = {}
@@ -234,61 +240,47 @@ def _step5_retry_failed(
     proven_node_ids: list[str],
     proven_dep_imports: dict[str, str],
 ) -> None:
-    """Retry nodes that failed in stage 4.
+    """Retry nodes that stage 4 did not prove.
 
-    The loop terminates when either (a) all nodes are settled, (b) every
-    remaining node is out of per-node retry budget, or (c) two consecutive
-    iterations make zero progress. There is no separate "max iterations"
-    cap — the retry budget per node already bounds the total work.
+    Truth source is ``proven_node_ids`` (stage 4's actual return), NOT session
+    state — session can carry stale/aliased "proved" entries from prior runs
+    and silently make step 5 skip real failures. ``proven_node_ids`` and
+    ``proven_dep_imports`` are mutated in place as retries succeed.
 
-    Mutates ``proven_node_ids`` and ``proven_dep_imports`` in place as nodes
-    flip from failed to proved.
+    Terminates when all nodes are settled, every remaining node is blocked or
+    out of retry budget, or two consecutive iterations make zero progress.
     """
-
-    def _collect_failed() -> list[str]:
-        _nodes = agent._session.data.get("nodes", {})
-        return [
-            nid for nid in blueprint.topo_order
-            if _nodes.get(nid, {}).get("status") != "proved"
-        ]
-
-    failed_now = _collect_failed()
-    if not failed_now:
+    proven_set = set(proven_node_ids)
+    failed = [nid for nid in blueprint.topo_order if nid not in proven_set]
+    if not failed:
+        agent._log(verbose, "\n[5/9] Retrying failed nodes... (nothing to retry, skipped)")
         return
 
-    agent._log(verbose, "\n[5/8] Retrying failed nodes...")
-    max_node_retries = agent._config.max_node_retries
+    agent._log(verbose, "\n[5/9] Retrying failed nodes...")
+    max_retries = agent._config.max_node_retries
     retry_counts: dict[str, int] = {}
-    consecutive_no_progress = 0
+    no_progress_streak = 0
     iter_count = 0
 
-    while failed_now:
+    while failed:
         iter_count += 1
         any_progress = False
         attempted_any = False
-        still_failing = set(failed_now)
-        for nid in failed_now:
-            # Don't burn a Claude call + lake build on a node whose
-            # direct deps are still failing — it is near-certain to fail.
+        for nid in failed:
             blocked = [d for d in blueprint.get_node(nid).dependencies
-                       if d in still_failing]
+                       if d not in proven_set]
             if blocked:
-                agent._log(verbose,
-                    f"  [{nid}] skipped — waiting on failed dep(s): {blocked}")
+                agent._log(verbose, f"  [{nid}] skipped — waiting on failed dep(s): {blocked}")
                 continue
-            if retry_counts.get(nid, 0) >= max_node_retries:
-                agent._log(verbose,
-                    f"  [{nid}] retry budget exhausted ({max_node_retries})")
+            if retry_counts.get(nid, 0) >= max_retries:
+                agent._log(verbose, f"  [{nid}] retry budget exhausted ({max_retries})")
                 continue
             retry_counts[nid] = retry_counts.get(nid, 0) + 1
             attempted_any = True
-            node_data = agent._session.data.get("nodes", {}).get(nid, {})
-            last_err = (node_data.get("last_error") or "(unknown)").strip()
-            last_err_line = last_err.splitlines()[0][:140] if last_err else "(unknown)"
-            agent._log(verbose, f"  [{nid}] previous failure: {last_err_line}")
+            last_err = (agent._session.data.get("nodes", {}).get(nid, {})
+                        .get("last_error") or "(unknown)").splitlines()[0][:140]
             agent._log(verbose,
-                f"  [{nid}] retry {retry_counts[nid]}/{max_node_retries}: "
-                f"regenerate with updated dep signatures + cross-run failure memory")
+                f"  [{nid}] retry {retry_counts[nid]}/{max_retries} — prev: {last_err}")
             try:
                 status = agent._process_node(
                     nid, blueprint, locked, parsed,
@@ -302,60 +294,137 @@ def _step5_retry_failed(
                 status = "pending"
 
             if status == "proved":
-                agent._log(verbose, f"  [{nid}] retry successfully → proved")
-                still_failing.discard(nid)
-                if nid not in proven_node_ids:
-                    proven_node_ids.append(nid)
-                    proven_dep_imports[nid] = "Polib"
+                agent._log(verbose, f"  [{nid}] retry successful → proved")
+                proven_node_ids.append(nid)
+                proven_dep_imports[nid] = "Polib"
+                proven_set.add(nid)
                 any_progress = True
             else:
                 agent._log(verbose, f"  [{nid}] still failing")
 
-        failed_now = _collect_failed()
+        failed = [nid for nid in blueprint.topo_order if nid not in proven_set]
         if not attempted_any:
             agent._log(verbose,
-                "  [retry-exhausted] remaining nodes are blocked or out of "
-                "retry budget; stopping")
+                "  [retry-exhausted] remaining nodes are blocked or out of retry budget; stopping")
             break
         if not any_progress:
-            consecutive_no_progress += 1
-            if consecutive_no_progress >= 2:
+            no_progress_streak += 1
+            if no_progress_streak >= 2:
                 agent._log(verbose,
                     "  [retry-stall] no progress for 2 consecutive iterations; stopping")
                 break
         else:
-            consecutive_no_progress = 0
+            no_progress_streak = 0
 
-    if not failed_now:
-        agent._log(verbose,
-            f"  [retrying] all nodes resolved after {iter_count} iteration(s)")
+    if not failed:
+        agent._log(verbose, f"  [retrying] all nodes resolved after {iter_count} iteration(s)")
 
 
 # ---------------------------------------------------------------------------
-# Stage 6 - Quality summary
+# Stage 6 - Deep quality check
 # ---------------------------------------------------------------------------
 
-def _step6_quality_summary(
+def _step6_deep_check(
     agent: "FormalizerAgent",
     blueprint: "Blueprint",
+    locked: LockedGoal,
+    parsed: "ParsedTheorem",
     verbose: bool,
 ) -> None:
-    """Print per-node quality reports collected during stages 4-5."""
-    agent._log(verbose, "[6/8] Checking formalization quality...")
+    """Deep quality gate over the saved per-node code.
+
+    Runs 4 independent checks on every node whose session status is
+    ``"proved"`` (see ``agent.prover.tools.deep_check``):
+
+      D1  QR sanity — the per-node report exists and passed.
+      D2  Signature drift — saved code's declaration signature has the
+          same binder count, binder-type multiset, and conclusion as the
+          LOCKED / planner-supplied signature.  Catches "LLM added a
+          spurious hypothesis under the same theorem name".  A textual
+          mismatch is arbitrated by a defeq compile check (`example :
+          <locked ∀-type> := NAME`) so notation noise can't kill a valid
+          proof while real drift still fails the type checker.
+      D3  Axiom sweep — no `axiom` decl in saved code.
+      D4  Instance sweep — no SimplyCon3ConnectedMap construction.
+
+    Any node that fails is (a) downgraded via ``session.mark_pending`` so
+    step 8's success classifier reports it as failed AND (b) purged from
+    Polib via ``polib_mgr.remove`` so a bad entry can't poison downstream
+    proofs on later runs.  A "success" FormalizationResult can no longer
+    coexist with a deep-check failure, and Polib can no longer carry a
+    proof the deep-check rejected.
+    """
+    from agent.prover.tools.deep_check import check_node
+
+    agent._log(verbose, "[6/9] Deep quality check...")
     with agent._run_codes_lock:
+        code_snapshot = dict(agent._run_codes)
         qr_snapshot = dict(agent._run_quality_reports)
         skipped_snapshot = set(agent._run_skipped_nodes)
+
+    session_nodes = agent._session.data.get("nodes", {})
+    total = 0
+    passed = 0
+    downgraded = 0
+
     for node_id in blueprint.topo_order:
-        qr = qr_snapshot.get(node_id)
-        if qr is None:
-            agent._log(verbose, f"  [{node_id}] — not reached (dependency failed)")
+        node = blueprint.get_node(node_id)
+        session_status = session_nodes.get(node_id, {}).get("status")
+        if session_status != "proved":
+            agent._log(verbose,
+                f"  [{node_id}] — not checked (session={session_status!r})")
             continue
-        tag = "PASS" if qr.passed else "FAIL"
-        if node_id in skipped_snapshot:
-            agent._log(verbose, f"  [{node_id}] Retrying... (loaded from Polib)")
-        agent._log(verbose, f"    Quality: {tag} (score={qr.score:.2f})")
-        for finding in qr.findings:
-            agent._log(verbose, f"    • {finding}")
+
+        total += 1
+        expected_sig_full = (
+            locked.lean_signature if node.is_main_target
+            else (node.lean_signature or "")
+        )
+        result = check_node(
+            node_id=node_id,
+            is_main_target=node.is_main_target,
+            saved_code=code_snapshot.get(node_id),
+            qr=qr_snapshot.get(node_id),
+            expected_sig_full=expected_sig_full,
+            parsed=parsed,
+            quality_checker=agent._quality,
+            compiler=agent._compiler,
+        )
+
+        tag = "PASS" if result.passed else "FAIL"
+        origin = " (from Polib cache)" if node_id in skipped_snapshot else ""
+        agent._log(verbose, f"  [{node_id}] Deep check: {tag}{origin}")
+        for f in result.findings:
+            if "FAIL" in f or "WARN" in f:
+                agent._log(verbose, f"    • {f}")
+
+        if result.passed:
+            passed += 1
+        else:
+            agent._log(True,
+                f"  [{node_id}] downgrading — deep check failed "
+                f"(step 8 will report as failed)")
+            agent._session.mark_pending(
+                node_id, 0,
+                f"step-6 deep-check failure: {result.failure_summary}",
+            )
+            # Also purge the tainted entry from Polib so downstream proofs
+            # on later runs can't build on it.  session.mark_pending only
+            # touches the session view; Polib.lean would still carry the
+            # rejected section without this call.
+            try:
+                agent._polib_mgr.remove(node_id)
+                agent._log(verbose,
+                    f"  [{node_id}] purged from Polib (deep check rejected)")
+            except Exception as exc:
+                agent._log(True,
+                    f"  [{node_id}] WARNING: purge failed ({exc}); "
+                    f"Polib may carry a stale rejected entry")
+            downgraded += 1
+
+    tail = f" ({downgraded} downgraded)" if downgraded else ""
+    agent._log(verbose,
+        f"  Deep check summary: {passed}/{total} nodes passed{tail}")
 
 
 # ---------------------------------------------------------------------------
@@ -372,7 +441,7 @@ def _step7_polib_repair(agent: "FormalizerAgent", verbose: bool) -> None:
     is read as a whole. If nothing is removed, the stage is a no-op.
     """
     from agent.prover.tools.polib_validator import PolibValidator
-    agent._log(verbose, "[7/8] Validating Polib (post-flight safety net)...")
+    agent._log(verbose, "[7/9] Validating Polib (post-flight safety net)...")
     validator = PolibValidator(
         polib_lean=agent._polib_mgr._polib_lean,
         workspace=Path(agent._config.polib_path),
@@ -432,7 +501,7 @@ def _step8_collect_and_save(
     lean_out_path, _, _ = agent._write_complete_proof_file(
         output_stem, parsed.name, nodes_proved, nodes_failed,
     )
-    agent._log(verbose, f"[8/8] Formalization saved → {lean_out_path}")
+    agent._log(verbose, f"[8/9] Formalization saved → {lean_out_path}")
 
     return FormalizationResult(
         theorem_name=parsed.name,
@@ -443,6 +512,109 @@ def _step8_collect_and_save(
         dep_graph_path=dep_graph_path,
         session_state_path=session_state_path,
     )
+
+
+# ---------------------------------------------------------------------------
+# Stage 9 - Natural-language proof (Markdown, only on clean success)
+# ---------------------------------------------------------------------------
+
+_NL_PROOF_PROMPT = """You are a professional mathematician writing an informal, paper-style proof for a research paper. Write in clear, connected prose — not a tactic replay.
+
+# Theorem
+**Name:** `{name}`
+
+**Hypotheses:**
+{hyps_block}
+
+**Conclusion:** {conclusion}
+
+# Proof outline (the blueprint the formaliser followed)
+{blueprint_outline}
+
+# Verified Lean 4 proof (ground truth — do not describe any step not present here)
+```lean
+{lean_text}
+```
+
+# Output requirements
+- Pure Markdown; use LaTeX (`$…$` inline, `$$…$$` display) for math
+- Begin with a short **Statement.** paragraph restating the theorem in prose
+- Then a **Proof.** section explaining the argument informally
+- End with `∎` on its own line
+- Do NOT invent steps that are not present in the Lean proof
+- Do NOT include Lean syntax — the reader is a human, not a proof assistant
+- Do NOT wrap the whole response in a code fence
+
+Return only the markdown body; no preamble, no explanation of what you're about to write."""
+
+
+def _step9_nl_proof(
+    agent: "FormalizerAgent",
+    parsed: "ParsedTheorem",
+    blueprint: "Blueprint",
+    output_stem: str,
+    result: "FormalizationResult",
+    verbose: bool,
+) -> None:
+    """Write an informal, paper-style Markdown proof next to the .lean file.
+
+    Only runs when every blueprint node was proved AND every quality report
+    passed — anything else would produce a .md that describes a proof that
+    doesn't fully exist.  Silent no-op on failure (no partial artifact).
+    """
+    if result.status != "success":
+        return
+    with agent._run_codes_lock:
+        qr_snapshot = dict(agent._run_quality_reports)
+    if qr_snapshot and not all(qr.passed for qr in qr_snapshot.values()):
+        return
+
+    out_dir = agent._output_root / agent._proof_subdir / output_stem
+    lean_path = out_dir / f"{output_stem}.lean"
+    md_path = out_dir / f"{output_stem}.md"
+
+    try:
+        lean_text = lean_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        agent._log(verbose, f"[9/9] Writing proof in natural language...")
+        agent._log(verbose, f"  Skipped — cannot read {lean_path.name}: {exc}")
+        return
+
+    agent._log(verbose, "[9/9] Writing proof in natural language...")
+
+    blueprint_outline = "\n".join(
+        f"- **{n.node_id}** ({n.node_type}): {n.description}".rstrip()
+        for n in blueprint.nodes
+    ) or "(single-node proof — no decomposition)"
+    hyps_block = "\n".join(f"- {h}" for h in parsed.hypotheses) or "- (none)"
+
+    prompt = _NL_PROOF_PROMPT.format(
+        name=parsed.name,
+        hyps_block=hyps_block,
+        conclusion=parsed.conclusion,
+        blueprint_outline=blueprint_outline,
+        lean_text=lean_text,
+    )
+
+    try:
+        md_body = agent._sdk._call(
+            prompt,
+            model=agent._config.model_main,
+            effort="medium",
+            allowed_tools=[],
+        )
+    except Exception as exc:
+        agent._log(verbose, f"  Skipped — LLM call failed: {exc}")
+        return
+
+    try:
+        md_path.write_text(md_body.strip() + "\n", encoding="utf-8")
+    except OSError as exc:
+        agent._log(verbose, f"  Skipped — cannot write {md_path.name}: {exc}")
+        return
+
+    agent._log(verbose, "  Done!")
+    agent._log(verbose, f"  Markdown saved → {md_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -511,17 +683,21 @@ def formalize(
     category: str = "Polytope",
     verbose: bool = True,
 ) -> "FormalizationResult":
-    """Run the 8-stage prover pipeline on one pre-parsed conjecture.
+    """Run the 9-stage prover pipeline on one pre-parsed conjecture.
 
     ``parsed`` comes from ``ParsedConjecture.to_parsed_theorem()`` (built
     upstream from a row of ``conjectures.json``).  ``output_stem`` is the
-    filename stem of the final ``.lean`` proof — the run writes
-    ``output/{agent._proof_subdir}/{output_stem}.lean``.
+    stem of both artifacts — the run writes
+    ``output/{agent._proof_subdir}/{output_stem}/{output_stem}.lean`` and
+    (on a clean success) a sibling ``{output_stem}.md`` with an informal
+    natural-language proof.
 
     Stages 1-5 (which call out to Claude + lake) are wrapped in a
     try/except so a crash still returns a structured FormalizationResult
     instead of propagating to the orchestrator.  Stages 6-8 run
-    unconditionally on the success path and produce the final report.
+    unconditionally on the success path and produce the final report;
+    stage 9 (NL proof) only fires when every node proved AND every
+    quality check passed.
     """
     polib_path = Path(agent._config.polib_path)
     store_path_str = str(agent._config.store_path)
@@ -566,10 +742,34 @@ def formalize(
             dep_graph_path, session_state_path, include_traceback=True,
         )
 
-    _step6_quality_summary(agent, blueprint, verbose)
-    _step7_polib_repair(agent, verbose)
-    return _step8_collect_and_save(
-        agent, parsed, blueprint, output_stem, verbose,
-        nodes_proved, nodes_failed,
-        dep_graph_path, session_state_path,
-    )
+    # Stages 6-9 must still return a structured FormalizationResult even if
+    # one of them throws — otherwise callers (Orchestrator, run.py, tests) get
+    # an unhandled exception instead of the "always returns a result" contract
+    # that stages 1-5 uphold above.  Stage 9 in particular is best-effort and
+    # already fails silent internally, but wrapping the whole tail is cheap.
+    try:
+        _step6_deep_check(agent, blueprint, locked, parsed, verbose)
+        _step7_polib_repair(agent, verbose)
+        result = _step8_collect_and_save(
+            agent, parsed, blueprint, output_stem, verbose,
+            nodes_proved, nodes_failed,
+            dep_graph_path, session_state_path,
+        )
+    except Exception as exc:
+        _collect_session_into(agent, blueprint, nodes_proved, nodes_failed)
+        return _build_failed_result(
+            agent, parsed, exc, nodes_proved, nodes_failed,
+            dep_graph_path, session_state_path, include_traceback=True,
+        )
+
+    # Stage 9 is the natural-language proof writer.  If it throws (e.g. the
+    # LLM SDK crashes in an unusual way not caught inside `_step9_nl_proof`),
+    # the .lean is already saved and the run is materially a success — log
+    # the exception and return the successful result rather than downgrading.
+    try:
+        _step9_nl_proof(agent, parsed, blueprint, output_stem, result, verbose)
+    except Exception as exc:
+        agent._log(True,
+            f"[9/9] WARNING: NL proof step crashed — .lean is still saved. "
+            f"({type(exc).__name__}: {exc})")
+    return result

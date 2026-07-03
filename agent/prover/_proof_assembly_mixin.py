@@ -61,7 +61,11 @@ class ProofAssemblyMixin:
         nodes_proved: list[str],
         nodes_failed: list[str],
     ) -> tuple[Path, list[str], int]:
-        """Write ``output/{proof_subdir}/{output_stem}.lean`` for this run.
+        """Write ``output/{proof_subdir}/{output_stem}/{output_stem}.lean``.
+
+        Every proof artifact for this conjecture lives in a dedicated
+        per-stem folder so the .lean and its sibling .md (stage 9) can be
+        bundled together.
 
         Returns ``(out_path, code_missing, actual_sorry_count)`` where:
 
@@ -71,7 +75,7 @@ class ProofAssemblyMixin:
           output (always 0 on a clean run; non-zero means a stale section
           slipped in from Polib and the user should investigate).
         """
-        out_dir = self._output_root / self._proof_subdir
+        out_dir = self._output_root / self._proof_subdir / output_stem
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / f"{output_stem}.lean"
 

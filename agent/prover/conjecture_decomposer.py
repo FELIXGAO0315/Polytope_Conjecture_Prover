@@ -347,9 +347,6 @@ class ConjectureDecomposer:
         correction = ""   # appended to the next attempt's prompt
         last_exc: BlueprintError | None = None
         for attempt in range(1, max_attempts + 1):
-            _log(f"      [planner-attempt {attempt}/{max_attempts}] sending prompt "
-                 f"({len(base_prompt) + len(correction)} chars)")
-            t0 = time.monotonic()
             response = self._client.messages.create(
                 model=self._model,
                 # 1024 is enough for a 5-10-node blueprint (~150 chars/node
@@ -366,8 +363,6 @@ class ConjectureDecomposer:
                 allowed_tools=[],
             )
             text = response.content[0].text.strip()
-            _log(f"      [planner-attempt {attempt}/{max_attempts}] response in "
-                 f"{time.monotonic() - t0:.1f}s ({len(text)} chars)")
             try:
                 nodes = _parse_blueprint_json(text)
                 _validate_blueprint_nodes(nodes)
@@ -377,12 +372,9 @@ class ConjectureDecomposer:
             except BlueprintError as exc:
                 last_exc = exc
                 err_class = _classify_blueprint_error(str(exc))
-                _log(f"      [planner-attempt {attempt}/{max_attempts}] REJECTED "
-                     f"({err_class}): {str(exc)[:200]}")
+                _log(f"      [planner-attempt] REJECTED ({err_class}): {str(exc)[:200]}")
                 correction = _format_correction(exc)
                 continue
-            _log(f"      [planner-attempt {attempt}/{max_attempts}] ACCEPTED — "
-                 f"{len(nodes)} nodes, no refutation")
             return Blueprint(nodes=nodes, topo_order=_topological_sort(nodes))
 
         _log(f"      [planner] all {max_attempts} attempts failed — "

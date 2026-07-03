@@ -1,204 +1,191 @@
+"""Stage-4 per-node quality gate.
+
+The 4 rules below run every time a proof-agent produces a candidate .lean for
+a node.  A node is admitted to Polib only if EVERY applicable rule passes.
+
+  R1  Soundness guard    — no SimplyCon3ConnectedMap instance construction
+                            (Inventory has sorry axioms; a fabricated
+                            instance lets you derive False).
+  R2  Sorry/admit audit  — no `sorry` or `admit` in non-comment portions.
+  R3  Axiom sweep        — no inline `axiom` declaration (only Inventory
+                            may declare axioms).
+  R4  Formula fidelity   — only for the ROOT theorem:
+                            R4a  declaration name present in lean_code
+                            R4b  every numeric constant in JSON hypotheses
+                                 appears in the locked signature
+                            R4c  conclusion direction (≤/≥) matches
+                            R4d  LLM semantic verdict on locked sig vs JSON
+                                 (fail-closed on LLM failure)
+
+Verbatim signature substring match is NOT a rule here — it is enforced
+STRUCTURALLY at stage 6 (deep_check D2, which walks binders + normalizes
+the conclusion).  Duplicating it here would just repeat the same complaint
+twice at different stages.
+"""
 from __future__ import annotations
 
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from agent.prover.tools.goal_lock import LockedGoal
+from agent.prover.tools.lean_compiler import find_struct_construction
 from agent.prover.tools.parsed_theorem import ParsedTheorem
 
 
+# ---------------------------------------------------------------------------
+# Report — only the fields consumed downstream survive
+# ---------------------------------------------------------------------------
+
 @dataclass
 class QualityReport:
+    """Per-node stage-4 verdict.
+
+    Downstream consumers (checked with `grep`):
+      * ``passed``       — _node_solver_mixin gates polib admission on this
+      * ``sorry_count``  — _node_solver_mixin logs / polib_manager rejects >0
+      * ``findings``     — pipeline logs the FAIL/WARN entries
+      * ``score``        — 1.0 iff passed; kept for dashboards
+      * ``summary``      — one-liner for the finalisation logger
+    Anything else was dead weight; removed.
+    """
     passed: bool
     score: float
-    faithfulness_ok: bool
-    no_hallucination: bool
     sorry_count: int
-    sorry_annotated: bool
-    proof_structure_ok: bool
-    allowed_additions: list[str]
-    blocked_additions: list[str]
-    findings: list[str]
-    summary: str
-
-    def to_dict(self) -> dict:
-        return {
-            "passed": self.passed,
-            "score": self.score,
-            "faithfulness_ok": self.faithfulness_ok,
-            "no_hallucination": self.no_hallucination,
-            "sorry_count": self.sorry_count,
-            "sorry_annotated": self.sorry_annotated,
-            "proof_structure_ok": self.proof_structure_ok,
-            "allowed_additions": self.allowed_additions,
-            "blocked_additions": self.blocked_additions,
-            "findings": self.findings,
-            "summary": self.summary,
-        }
-
-    @classmethod
-    def from_dict(cls, d: dict) -> "QualityReport":
-        return cls(
-            passed=d["passed"],
-            score=d["score"],
-            faithfulness_ok=d["faithfulness_ok"],
-            no_hallucination=d["no_hallucination"],
-            sorry_count=d["sorry_count"],
-            sorry_annotated=d["sorry_annotated"],
-            proof_structure_ok=d["proof_structure_ok"],
-            allowed_additions=d["allowed_additions"],
-            blocked_additions=d["blocked_additions"],
-            findings=d["findings"],
-            summary=d["summary"],
-        )
+    findings: list[str] = field(default_factory=list)
+    summary: str = ""
 
 
-# Sorry patterns
-_SORRY_RE = re.compile(r"\bexact\s+sorry\b|\bsorry\b")
-_SORRY_BLOCK_RE = re.compile(
-    r"--\s*\[SORRY\]\s*class:.*\n"
-    r".*--\s*\[SORRY\]\s*reason:.*\n"
-    r".*--\s*\[SORRY\]\s*impact:.*\n"
-    r".*--\s*\[SORRY\]\s*suggested_next:.*\n",
-    re.MULTILINE,
-)
+# ---------------------------------------------------------------------------
+# Non-comment scanning: strips ``--`` line comments AND their prefixes
+# ---------------------------------------------------------------------------
 
-# Proof tactic step counter
-_TACTIC_RE = re.compile(r"^\s*(have|apply|exact|intro|simp|linarith|ring|omega|norm_num)\b", re.MULTILINE)
+_SORRY_RE = re.compile(r"\b(?:sorry|admit)\b")
+_AXIOM_RE = re.compile(r"\baxiom\s+\w+")
+
+# Direction-check anchors, keyed off the JSON formula conclusion.
+_LE_CONC_RE = re.compile(r"p_?\{?6\}?\s*(?:<=|\\leq)")
+_GE_CONC_RE = re.compile(r"p_?\{?6\}?\s*(?:>=|\\geq)")
+
+
+def _strip_comments(lean_code: str) -> str:
+    """Return ``lean_code`` with every ``--`` line-comment tail cut, so the
+    non-comment scanners can't false-positive on things like
+    ``rw [foo] -- sorry ain't in here``.
+
+    We intentionally do NOT strip block comments ``/- ... -/`` because none of
+    our current scanners care about them; adding block-comment stripping later
+    is a one-liner if a rule wants it."""
+    out: list[str] = []
+    for line in lean_code.splitlines():
+        idx = line.find("--")
+        out.append(line[:idx] if idx >= 0 else line)
+    return "\n".join(out)
 
 
 def _count_sorry(lean_code: str) -> int:
-    count = 0
-    for line in lean_code.splitlines():
-        if line.strip().startswith("--"):
-            continue
-        count += len(_SORRY_RE.findall(line))
-    return count
+    """Number of `sorry` or `admit` occurrences in non-comment code."""
+    return len(_SORRY_RE.findall(_strip_comments(lean_code)))
 
 
-def _all_sorrys_annotated(lean_code: str) -> bool:
-    """Check every sorry is preceded by a complete [SORRY] block."""
-    sorry_count = _count_sorry(lean_code)
-    if sorry_count == 0:
-        return True
-    annotated_count = len(_SORRY_BLOCK_RE.findall(lean_code))
-    return annotated_count >= sorry_count
+def _find_axiom_decl(lean_code: str) -> str | None:
+    """First inline `axiom X` declaration, or None."""
+    m = _AXIOM_RE.search(_strip_comments(lean_code))
+    return m.group(0) if m else None
 
 
-def _count_lean_tactics(proof_body: str) -> int:
-    return len(_TACTIC_RE.findall(proof_body))
-
+# ---------------------------------------------------------------------------
+# Formula fidelity — R4b constant match, R4c direction match
+# ---------------------------------------------------------------------------
 
 def _hyp_required_numerals(hyp: str) -> list[str]:
-    """Numeric constants that a hypothesis REQUIRES to appear in the Lean
-    signature. Mirrors the pvec_eval hypothesis grammar. Unknown formats
-    return [] (they are covered by the LLM semantic check instead)."""
+    """Numeric constants a hypothesis REQUIRES to appear in the locked
+    signature.  Only known JSON hypothesis grammars are enumerated —
+    everything else returns [] and is covered by the R4d semantic check.
+    """
     flat = re.sub(r"[()]", "", hyp).strip()
     ns = flat.replace(" ", "")
     if flat == "is_simple" or flat.startswith("\\text"):
         return []
-    m = re.fullmatch(r"f_2(?:>=|<=)_(\d+)", ns)
-    if m:
+
+    if (m := re.fullmatch(r"f_2(?:>=|<=)_(\d+)", ns)):
         return [m.group(1)]
-    m = re.fullmatch(r"sum_pk_k>=7(?:>=|<=)(\d+)", ns)
-    if m:
+    if (m := re.fullmatch(r"sum_pk_k>=7(?:>=|<=)(\d+)", ns)):
         return ["7", m.group(1)]
-    m = re.match(r"\\sum_\{k\s*(?:\\geq|\\ge|>=)\s*(\d+)\}\s*p_k\s*(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)
-    if m:
+    if (m := re.match(
+        r"\\sum_\{k\s*(?:\\geq|\\ge|>=)\s*(\d+)\}\s*p_k\s*"
+        r"(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)):
         return [m.group(1), m.group(2)]
-    m = re.match(r"f_(?:\{2\}|2)\s*(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)
-    if m:
+    if (m := re.match(r"f_(?:\{2\}|2)\s*(?:\\geq|\\leq|>=|<=)\s*(\d+)", flat)):
         return [m.group(1)]
-    m = re.match(r"p_\{?(\d+)\}?\s*(?:\\geq|\\leq|>=|<=|=)\s*(\d+)", flat)
-    if m:
+    if (m := re.match(r"p_\{?(\d+)\}?\s*(?:\\geq|\\leq|>=|<=|=)\s*(\d+)", flat)):
         return [m.group(1), m.group(2)]
     return []
 
 
-def _check_signature_constants(parsed: ParsedTheorem, goal: LockedGoal) -> tuple[bool, list[str]]:
-    """DETERMINISTIC fidelity check (no LLM): every numeric bound in the JSON
-    hypotheses must literally appear in the locked Lean signature, and the
-    conclusion's relation direction must be present. This catches the most
-    dangerous translation drift — wrong constants or flipped inequalities —
-    even if every LLM layer agrees on the same wrong reading."""
+def _check_constant_fidelity(parsed: ParsedTheorem, sig: str) -> tuple[bool, list[str]]:
     findings: list[str] = []
     ok = True
-    sig = goal.lean_signature
-
     for hyp in parsed.hypotheses:
         for n in _hyp_required_numerals(hyp):
             if not re.search(rf"(?<!\d){re.escape(n)}(?!\d)", sig):
                 ok = False
                 findings.append(
-                    f"Constant fidelity: FAIL — hypothesis {hyp!r} requires the "
-                    f"numeral {n} in the Lean signature, but it does not appear"
+                    f"R4b Constant fidelity: FAIL — hypothesis {hyp!r} "
+                    f"requires numeral {n} in the Lean signature"
                 )
-    conc = parsed.conclusion or ""
-    if re.match(r"p_?\{?6\}?\s*(?:>=|\\geq)", conc.strip()) and not re.search(r"≥|>=", sig):
-        ok = False
-        findings.append("Constant fidelity: FAIL — formula conclusion is ≥-form but the "
-                        "signature contains no ≥")
-    if re.match(r"p_?\{?6\}?\s*(?:<=|\\leq)", conc.strip()) and not re.search(r"≤|<=", sig):
-        ok = False
-        findings.append("Constant fidelity: FAIL — formula conclusion is ≤-form but the "
-                        "signature contains no ≤")
     if ok:
-        findings.append("Constant fidelity: PASS — all hypothesis bounds and the relation "
-                        "direction appear in the locked signature")
+        findings.append("R4b Constant fidelity: PASS")
     return ok, findings
 
 
-def _extract_proof_body(lean_code: str) -> str:
-    """Extract everything after `:= by`."""
-    idx = lean_code.find(":= by")
-    if idx == -1:
-        return lean_code
-    return lean_code[idx + len(":= by"):]
+def _check_direction(parsed: ParsedTheorem, sig: str) -> tuple[bool, list[str]]:
+    conc = (parsed.conclusion or "").strip()
+    if _GE_CONC_RE.match(conc) and not re.search(r"≥|>=", sig):
+        return False, ["R4c Direction: FAIL — conclusion ≥-form; signature has no ≥"]
+    if _LE_CONC_RE.match(conc) and not re.search(r"≤|<=", sig):
+        return False, ["R4c Direction: FAIL — conclusion ≤-form; signature has no ≤"]
+    return True, ["R4c Direction: PASS"]
 
 
-# ── Semantic faithfulness prompt ────────────────────────────────────────────
-_FAITHFULNESS_PROMPT = """\
-You are verifying that a Lean 4 theorem signature faithfully represents a mathematical formula.
+# ---------------------------------------------------------------------------
+# R4d — LLM semantic faithfulness on the locked signature
+# ---------------------------------------------------------------------------
 
-Formula hypotheses (from JSON conjecture):
+_FAITHFULNESS_PROMPT = """You are auditing whether a Lean 4 signature faithfully represents a JSON conjecture.
+
+# JSON conjecture
+Hypotheses:
 {hypotheses}
 
-Formula conclusion (from JSON conjecture):
+Conclusion:
 {conclusion}
 
-Lean 4 theorem signature (locked and validated at goal-extraction time):
+# Locked Lean 4 signature
 {lean_signature}
 
-Answer the following questions. Be concise.
+# Ground rules
+- Variable renaming is faithful: `p6` ≡ `maps.p_i 6`, `sum_pk_after_p6` ≡ `∑ k ∈ Finset.Ico 7 …`, `>=` ≡ `≥`.
+- `is_simple` maps to `maps : SimplyCon3ConnectedMap 0`.
+- Bounds like `f_2 >= 22` map to a named binder `h_f2 : maps.f_2 ≥ 22` (or equivalent).
+- The structural parameter `maps : SimplyCon3ConnectedMap g` is NEVER an extra constraint — it encodes the domain.
+- Multiplying both sides of the conclusion by a positive integer to clear a `0.5` (e.g. Lean writes `2*p_6 ≤ 2*f_2 - 2*p_4 - 2*p_5` for the JSON `p_6 ≤ 2 + 0.5*(2*f_2 - 4) - p_4 - p_5`) IS faithful.
 
-Q1: CONCLUSION_MATCH — Does the Lean conclusion faithfully represent the formula conclusion?
-    (Note: variable names may differ, e.g. "p6" = "maps.p_i 6", "sum_pk_after_p6" = "∑ k ∈ Finset.Ico 7 ... maps.p_i k", ">=" = "≥")
-    Answer: yes / no
-
-Q2: HYPOTHESES_COVERED — Are all formula hypotheses represented in the Lean signature?
-    (Note: "is_simple" maps to `maps : SimplyCon3ConnectedMap 0`; "f_2>=_22" maps to the h_f2 hypothesis)
-    Answer: yes / no
-
-Q3: NO_EXTRA_CONSTRAINTS — Does the Lean signature add mathematical constraints beyond what the formula specifies?
-    (Structural parameters like `maps : SimplyCon3ConnectedMap g` are always valid — they encode the domain, not extra constraints)
-    Answer: yes (no extras) / no (has extras)
-
-Q4: OVERALL_FAITHFUL — Overall, is this Lean signature a faithful translation of the formula?
-    Answer: yes / no
-
-Format your response as:
+Answer with EXACTLY this format (nothing else before/after):
 CONCLUSION_MATCH: yes/no
 HYPOTHESES_COVERED: yes/no
 NO_EXTRA_CONSTRAINTS: yes/no
 OVERALL_FAITHFUL: yes/no
-REASON: <one sentence explanation if any answer is "no">
-"""
+REASON: <one sentence, only if any answer above is no>"""
 
+
+# ---------------------------------------------------------------------------
+# Checker
+# ---------------------------------------------------------------------------
 
 class QualityChecker:
     def __init__(self, client=None, model: str = "claude-sonnet-4-5"):
-        self._client = client  # ClaudeSDKClient (has ._call method)
+        self._client = client  # ClaudeSDKClient (needs ._call)
         self._model = model
 
     def check(
@@ -208,241 +195,149 @@ class QualityChecker:
         lean_code: str,
         is_main_target: bool = True,
     ) -> QualityReport:
-        """Check quality of generated Lean code.
+        """Run R1–R4 against ``lean_code``.  Fail-fast: rules run in order
+        and the first FAIL returns immediately with a populated report.
 
-        For intermediate nodes (is_main_target=False):
-          - Only sorry audit applies.
-          - Helper lemmas are internal stepping stones; their signatures are not
-            required to match the root formula and should not be compared against it.
-
-        For the root theorem (is_main_target=True):
-          - Semantic faithfulness: Claude verifies the locked Lean signature faithfully
-            represents the JSON formula (conclusion + hypotheses match, no extra constraints).
-          - No-hallucination: checks the generated code uses the locked signature, not a
-            weaker or different one.
-          - Sorry audit.
-          - Proof structure (soft warning).
-
-        Why Claude instead of token matching:
-          JSON formula tokens (e.g. "is_simple", "f_2") do not literally appear in the
-          Lean signature ("SimplyCon3ConnectedMap", "h_f2"). Token intersection would
-          always be empty, producing false hallucination alerts. Claude understands the
-          semantic equivalence and produces correct verdicts.
+        Helper nodes (``is_main_target=False``) skip R4 — their signatures
+        are LLM-invented stepping stones, not the JSON conjecture.
         """
         findings: list[str] = []
-        allowed_additions: list[str] = []
-        blocked_additions: list[str] = []
 
-        # ── Check 0: soundness guard (applies to ALL nodes) ──────────────────
-        # Constructing a SimplyCon3ConnectedMap instance lets the proof apply
-        # the sorried geometric axioms to fabricated data (e.g. v=0,e=0 makes
-        # euler_formula yield 0 = 2 → False → anything provable). Hard fail.
-        from agent.prover.tools.lean_compiler import find_struct_construction
-        construction = find_struct_construction(lean_code)
-        if construction:
-            findings.append(
-                f"Soundness guard: FAIL — proof constructs a SimplyCon3ConnectedMap "
-                f"instance ({construction}); axioms applied to fabricated data are unsound"
-            )
-        else:
-            findings.append("Soundness guard: PASS — no instance construction")
+        # ── R1  Soundness guard ──────────────────────────────────────────
+        struct = find_struct_construction(lean_code)
+        if struct:
+            findings.append(f"R1 Soundness guard: FAIL — {struct}")
+            return _failed(findings, sorry_count=0)
+        findings.append("R1 Soundness guard: PASS")
 
-        # ── Check 1: sorry audit (applies to ALL nodes) ──────────────────────
+        # ── R2  Sorry / admit audit ──────────────────────────────────────
         sorry_count = _count_sorry(lean_code)
-        sorry_annotated = _all_sorrys_annotated(lean_code)
-        if sorry_count > 0 and not sorry_annotated:
+        if sorry_count > 0:
             findings.append(
-                f"Sorry audit: FAIL — {sorry_count} sorry(s) found, "
-                f"not all have [SORRY] annotations"
-            )
-        elif sorry_count > 0:
-            findings.append(f"Sorry audit: WARN — {sorry_count} sorry(s), all annotated")
-        else:
-            findings.append("Sorry audit: PASS — 0 sorry")
+                f"R2 Sorry/admit audit: FAIL — {sorry_count} occurrence(s)")
+            return _failed(findings, sorry_count=sorry_count)
+        findings.append("R2 Sorry/admit audit: PASS")
+
+        # ── R3  Axiom sweep ──────────────────────────────────────────────
+        axiom = _find_axiom_decl(lean_code)
+        if axiom:
+            findings.append(
+                f"R3 Axiom sweep: FAIL — found `{axiom}` (only Inventory "
+                f"may declare axioms)")
+            return _failed(findings, sorry_count=0)
+        findings.append("R3 Axiom sweep: PASS")
 
         if not is_main_target:
-            # Intermediate helper node — only the sorry audit matters.
-            # Signature matching against the root formula would always false-
-            # positive here because helpers are LLM-chosen stepping stones.
-            findings.append("Formula faithfulness: N/A (intermediate helper node, not root theorem)")
-            faithfulness_ok = True
-            no_hallucination = True
-            proof_structure_ok = True
-            passed = (sorry_count == 0) or sorry_annotated
-        else:
-            # Root theorem — ALL of the following boolean rules must pass:
-            #   R1  no struct construction          (set above)
-            #   R2  zero sorry OR every sorry annotated
-            #   R3  declaration name present
-            #   R4  constant fidelity (hypothesis numerals appear in sig)
-            #   R5  semantic faithfulness verdict from Claude
-            # Verbatim signature match is INFORMATIONAL (not a rule) — Opus
-            # commonly reformats the signature with `open` clauses or unicode-
-            # equivalent forms while proving the same theorem semantically.
-            # There is no weighted score — every rule above is load-bearing.
-            theorem_name = goal.lean_signature.split("(")[0].strip().split()[-1]
-            name_present = bool(
-                re.search(r'(?:theorem|lemma)\s+' + re.escape(theorem_name), lean_code)
-            )
-            findings.append(
-                f"Declaration name: {'PASS' if name_present else 'FAIL'} — '{theorem_name}'"
-            )
+            findings.append("R4 Formula fidelity: N/A (intermediate helper node)")
+            return _passed(findings)
 
-            sig_norm = re.sub(r"\s+", " ", goal.lean_signature).strip()
-            code_norm = re.sub(r"\s+", " ", lean_code)
-            sig_intact = sig_norm in code_norm
-            # Verbatim check is INFORMATIONAL only.  Opus commonly reformats
-            # the signature (adds `open Finset`, tweaks binder spacing, uses
-            # unicode-equivalent forms) without changing semantics — the
-            # semantic checks below (constant fidelity / conclusion match /
-            # hypotheses covered / overall faithfulness) are the load-bearing
-            # guarantees.  Requiring verbatim substring match was blocking
-            # otherwise-clean proofs where every semantic check passed.
-            findings.append(
-                "Locked signature: " + (
-                    "PASS — verbatim match" if sig_intact
-                    else "INFO — reformatted (semantic checks below are authoritative)"
-                )
-            )
+        # ── R4a  Declaration name present ────────────────────────────────
+        theorem_name = goal.lean_signature.split("(")[0].strip().split()[-1]
+        if not re.search(rf'(?:theorem|lemma)\s+{re.escape(theorem_name)}\b', lean_code):
+            findings.append(f"R4a Declaration name: FAIL — `{theorem_name}` not found")
+            return _failed(findings, sorry_count=0)
+        findings.append(f"R4a Declaration name: PASS — `{theorem_name}`")
 
-            const_ok, const_findings = _check_signature_constants(parsed, goal)
-            findings.extend(const_findings)
+        # ── R4b  Constant fidelity ───────────────────────────────────────
+        ok, msgs = _check_constant_fidelity(parsed, goal.lean_signature)
+        findings.extend(msgs)
+        if not ok:
+            return _failed(findings, sorry_count=0)
 
-            faithfulness_ok, no_hallucination, faithfulness_findings = self._semantic_faithfulness_check(
-                parsed, goal
-            )
-            findings.extend(faithfulness_findings)
+        # ── R4c  Direction match ─────────────────────────────────────────
+        ok, msgs = _check_direction(parsed, goal.lean_signature)
+        findings.extend(msgs)
+        if not ok:
+            return _failed(findings, sorry_count=0)
 
-            # Combine: every SEMANTIC rule must hold.  Verbatim match is
-            # informational (see rationale above), not load-bearing.
-            faithfulness_ok = (
-                faithfulness_ok and name_present and const_ok
-            )
-            proof_structure_ok = True  # informational only; not load-bearing
-            passed = (
-                faithfulness_ok
-                and no_hallucination
-                and ((sorry_count == 0) or sorry_annotated)
-            )
+        # ── R4d  LLM semantic faithfulness (fail-closed) ─────────────────
+        ok, msgs = self._semantic_faithfulness_check(parsed, goal)
+        findings.extend(msgs)
+        if not ok:
+            return _failed(findings, sorry_count=0)
 
-        # Composite score: 1.0 iff passed, 0.0 otherwise. The score field is
-        # retained for downstream logs / dashboards that read it, but it no
-        # longer drives any branching — `passed` is the boolean truth.
-        score = 1.0 if passed else 0.0
+        return _passed(findings)
 
-        if construction:
-            passed = False
-            score = 0.0
-
-        return QualityReport(
-            passed=passed,
-            score=round(score, 4),
-            faithfulness_ok=faithfulness_ok,
-            no_hallucination=no_hallucination,
-            sorry_count=sorry_count,
-            sorry_annotated=sorry_annotated,
-            proof_structure_ok=proof_structure_ok,
-            allowed_additions=allowed_additions,
-            blocked_additions=blocked_additions,
-            findings=findings,
-            summary=(
-                f"Score: {score:.2f}. "
-                f"{'PASSED' if passed else 'FAILED'}. "
-                f"{len(findings)} finding(s)."
-            ),
-        )
+    # ------------------------------------------------------------------
+    # LLM helper — kept as a public-ish method because deep_check historically
+    # imported it.  With D5 removed from stage 6 nothing else calls this; it's
+    # now purely an implementation detail of R4d.
+    # ------------------------------------------------------------------
 
     def _semantic_faithfulness_check(
-        self,
-        parsed: ParsedTheorem,
-        goal: LockedGoal,
-    ) -> tuple[bool, bool, list[str]]:
-        """Use Claude to verify the Lean signature faithfully represents the formula.
-
-        Returns (faithfulness_ok, no_hallucination, findings_list).
-        FAIL-CLOSED: if the check cannot run (no client / call fails after a
-        retry), faithfulness is UNVERIFIED and the node FAILS. An unverified
-        statement must never be reported as a faithful formalization.
+        self, parsed: ParsedTheorem, goal: LockedGoal,
+    ) -> tuple[bool, list[str]]:
+        """Ask the LLM: does the LOCKED signature faithfully encode the JSON
+        conjecture?  Fail-closed on no-client / call failure / parse error.
         """
         findings: list[str] = []
-
         if self._client is None:
             findings.append(
-                "Semantic faithfulness: FAIL (fail-closed) — no client available, "
-                "faithfulness UNVERIFIED"
-            )
-            return False, False, findings
+                "R4d Semantic faithfulness: FAIL (fail-closed) — "
+                "no client available; faithfulness UNVERIFIED")
+            return False, findings
 
-        hypotheses_str = "\n".join(f"  - {h}" for h in parsed.hypotheses) or "  (none)"
         prompt = _FAITHFULNESS_PROMPT.format(
-            hypotheses=hypotheses_str,
+            hypotheses="\n".join(f"  - {h}" for h in parsed.hypotheses) or "  (none)",
             conclusion=parsed.conclusion,
             lean_signature=goal.lean_type_only,
         )
-
-        response = None
-        for _attempt in (1, 2):   # one retry on transient failure
+        timeout = int(os.environ.get("PROVER_QC_TIMEOUT", "90"))
+        response: str | None = None
+        last_exc: Exception | None = None
+        for _ in range(2):  # single retry on transient failure
             try:
-                # Use the ClaudeSDKClient._call() which wraps the claude CLI.
-                response = self._client._call(
-                    prompt,
-                    timeout=int(os.environ.get("PROVER_QC_TIMEOUT", "90")),
-                )
+                response = self._client._call(prompt, timeout=timeout)
                 break
             except Exception as exc:
-                _last_exc = exc
+                last_exc = exc
         if response is None:
             findings.append(
-                f"Semantic faithfulness: FAIL (fail-closed) — Claude call failed twice "
-                f"({_last_exc!s:.60}); faithfulness UNVERIFIED"
-            )
-            return False, False, findings
+                f"R4d Semantic faithfulness: FAIL (fail-closed) — LLM "
+                f"call failed twice ({last_exc!s:.60}); faithfulness UNVERIFIED")
+            return False, findings
 
         try:
-
-            conclusion_match = "CONCLUSION_MATCH: yes" in response
-            hyp_covered = "HYPOTHESES_COVERED: yes" in response
-            no_extra = "NO_EXTRA_CONSTRAINTS: yes" in response
-            overall = "OVERALL_FAITHFUL: yes" in response
-
-            # Extract reason line if present
-            reason = ""
-            for line in response.splitlines():
-                if line.strip().startswith("REASON:"):
-                    reason = line.split("REASON:", 1)[1].strip()
-                    break
-
-            faithfulness_ok = conclusion_match and hyp_covered and overall
-            no_hallucination = no_extra
-
-            if conclusion_match:
-                findings.append("Conclusion match: PASS")
-            else:
-                findings.append(f"Conclusion match: FAIL{' — ' + reason if reason else ''}")
-
-            if hyp_covered:
-                findings.append("Hypotheses covered: PASS")
-            else:
-                findings.append(f"Hypotheses covered: FAIL{' — ' + reason if reason else ''}")
-
-            if no_extra:
-                findings.append("No extra constraints: PASS")
-            else:
-                findings.append(f"No extra constraints: FAIL{' — ' + reason if reason else ''}")
-
-            if overall:
-                findings.append("Overall faithfulness: PASS")
-            else:
-                findings.append(f"Overall faithfulness: FAIL{' — ' + reason if reason else ''}")
-
-        except Exception as exc:
-            # FAIL-CLOSED: even a response-parsing error means the verdict is
-            # unknown — an unverified statement must never pass as faithful.
-            findings.append(
-                f"Semantic faithfulness: FAIL (fail-closed) — response parsing "
-                f"error ({exc!s:.60}); faithfulness UNVERIFIED"
+            reason = next(
+                (l.split("REASON:", 1)[1].strip()
+                 for l in response.splitlines()
+                 if l.strip().startswith("REASON:")),
+                "",
             )
-            faithfulness_ok = False
-            no_hallucination = False
+            checks = [
+                ("CONCLUSION_MATCH",     "R4d.1 Conclusion match"),
+                ("HYPOTHESES_COVERED",   "R4d.2 Hypotheses covered"),
+                ("NO_EXTRA_CONSTRAINTS", "R4d.3 No extra constraints"),
+                ("OVERALL_FAITHFUL",     "R4d.4 Overall faithful"),
+            ]
+            all_ok = True
+            for key, label in checks:
+                ok = f"{key}: yes" in response
+                findings.append(
+                    f"{label}: {'PASS' if ok else 'FAIL'}"
+                    + (f" — {reason}" if not ok and reason else ""))
+                all_ok = all_ok and ok
+            return all_ok, findings
+        except Exception as exc:
+            findings.append(
+                f"R4d Semantic faithfulness: FAIL (fail-closed) — response "
+                f"parse error: {exc!s:.60}")
+            return False, findings
 
-        return faithfulness_ok, no_hallucination, findings
+
+# ---------------------------------------------------------------------------
+# Small helpers
+# ---------------------------------------------------------------------------
+
+def _passed(findings: list[str]) -> QualityReport:
+    return QualityReport(
+        passed=True, score=1.0, sorry_count=0, findings=findings,
+        summary=f"PASSED ({len(findings)} finding(s))",
+    )
+
+
+def _failed(findings: list[str], sorry_count: int) -> QualityReport:
+    return QualityReport(
+        passed=False, score=0.0, sorry_count=sorry_count, findings=findings,
+        summary=f"FAILED ({len(findings)} finding(s))",
+    )

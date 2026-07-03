@@ -39,8 +39,8 @@ def main() -> int:
     scored = 0
     skipped_have = 0
     failed = 0
-    for bucket in ("unsolved", "solved"):
-        for entry in data[bucket]:
+    for bucket in ("unsolved", "failed", "proved"):
+        for entry in data.get(bucket, []):
             name = entry.get("name")
             formula = entry.get("formula")
             if not (name and formula):

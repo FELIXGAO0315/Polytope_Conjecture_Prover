@@ -247,24 +247,20 @@ def lock_goal(
     last_issues: list[str] = []
     last_extract_err = ""
     for attempt in range(1, max_attempts + 1):
-        _log(f"      [goal-attempt {attempt}/{max_attempts}] extracting signature")
         try:
             signature = _call_extractor(parsed, client, model, hint)
         except GoalExtractionError as exc:
             last_extract_err = str(exc).splitlines()[0][:160]
-            _log(f"      [goal-attempt {attempt}/{max_attempts}] extractor error: "
-                 f"{last_extract_err}")
+            _log(f"      [goal-attempt] extractor error: {last_extract_err}")
             hint = _format_hint(["extractor produced no `theorem|lemma ... := by` block"])
             continue
         last_signature = signature
         issues = _check_signature_static(signature, parsed)
         if not issues:
-            _log(f"      [goal-attempt {attempt}/{max_attempts}] CONFIRMED: "
-                 f"{signature[:80]}...")
+            _log(f"      CONFIRMED: {signature[:80]}...")
             return LockedGoal(lean_signature=signature, validator_confirmed=True)
         last_issues = issues
-        _log(f"      [goal-attempt {attempt}/{max_attempts}] {len(issues)} issue(s): "
-             f"{issues[0][:140]}")
+        _log(f"      [goal-attempt] {len(issues)} issue(s): {issues[0][:140]}")
         hint = _format_hint(issues)
 
     if last_signature and re.match(r"^(theorem|lemma)\b", last_signature):

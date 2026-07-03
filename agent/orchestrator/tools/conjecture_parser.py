@@ -88,9 +88,9 @@ class ParsedConjecture:
         cond_raw = _strip_outer_parens(m.group('cond'))
         conclusion = m.group('concl').strip()
         hypotheses = [
-            c.strip()
-            for c in _split_top_level_and(cond_raw)
-            if c.strip() and _normalize_token(c) not in _NOOP_HYPOTHESES
+            c
+            for c in _flatten_and_groups(cond_raw)
+            if _normalize_token(c) not in _NOOP_HYPOTHESES
         ]
         cid_match = re.search(r'_(\d+)$', spec.name)
         cid = f"C{cid_match.group(1)}" if cid_match else spec.name
@@ -120,6 +120,28 @@ def _strip_outer_parens(s: str) -> str:
         if depth == 0 and i < len(s) - 1:
             return s  # outer ( closes before the last char → not a single wrapper
     return s[1:-1].strip()
+
+
+def _flatten_and_groups(s: str) -> list[str]:
+    """Split on `and` recursively so nested groups like
+    ``((H1) and (H2)) and (H3)`` yield atomic hypotheses ``[H1, H2, H3]``.
+
+    ``_split_top_level_and`` alone only peels one level; the compound left over
+    (e.g. ``((is_simple) and (f_2>=_37))``) then hits ``_compile_hypothesis``'s
+    fail-closed default and silently drops any p-vec that should satisfy it —
+    which broke IRIS scoring and RL CE search on those conjectures.
+    """
+    parts = _split_top_level_and(s)
+    if len(parts) == 1:
+        atom = parts[0].strip()
+        stripped = _strip_outer_parens(atom)
+        if stripped == atom:
+            return [atom] if atom else []
+        return _flatten_and_groups(stripped)
+    out: list[str] = []
+    for p in parts:
+        out.extend(_flatten_and_groups(p.strip()))
+    return out
 
 
 def _split_top_level_and(s: str) -> list[str]:

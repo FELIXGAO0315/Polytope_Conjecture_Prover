@@ -351,15 +351,23 @@ def load_conjectures_with_status(source: Optional[Union[str, os.PathLike]] = Non
                         if spec:
                             specs.append(spec)
             elif isinstance(data, dict):
+                # New schema: unsolved/failed/proved. `solved` (legacy) is
+                # treated the same as `failed`.
+                _key_status = {
+                    "unsolved": "unsolved",
+                    "failed": "falsified",
+                    "solved": "falsified",   # legacy alias
+                    "proved": "proven",
+                }
                 for status_key, items in data.items():
-                    if status_key not in ("unsolved", "solved") or not isinstance(items, list):
+                    if status_key not in _key_status or not isinstance(items, list):
                         continue
                     for i, obj in enumerate(items):
                         if isinstance(obj, dict):
                             spec = _from_json_obj(obj, i)
                             if spec:
                                 specs.append(spec)
-                                statuses[spec.name] = "falsified" if status_key == "solved" else "unsolved"
+                                statuses[spec.name] = _key_status[status_key]
         except Exception:
             pass
 
@@ -444,7 +452,7 @@ def load_iris_scores(source: Optional[Union[str, os.PathLike]] = None) -> Dict[s
         raw = _load_raw_dataset(str(source) if source else None)
     except Exception:
         return out
-    for e in raw["unsolved"] + raw["solved"]:
+    for e in _all_entries(raw):
         iris = e.get("iris")
         name = e.get("name")
         if name and isinstance(iris, dict):
@@ -506,33 +514,26 @@ def sync_registry_from_ce_map(reg: Dict[str, Dict[str, Any]], map_path: Optional
     return reg
 
 
-def export_conjectures(specs: List[ConjectureSpec], dest: Optional[str] = None) -> str:
-    """Append or write conjectures to a JSONL file in the conjectures dir."""
-    dest_dir = _default_conjecture_dir()
-    if dest is None:
-        dest = os.path.join(dest_dir, "conjectures.jsonl")
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    with open(dest, "a") as f:
-        for i, s in enumerate(specs):
-            f.write(json.dumps({"name": s.name, "formula": canonicalize_formula(s.formula)}) + "\n")
-    return dest
-
-
-def write_conjectures_dataset(unsolved: List[ConjectureSpec], solved: Optional[List[ConjectureSpec]] = None,
-                              dest: Optional[str] = None) -> str:
-    """Write a JSON object with {"unsolved": [...], "solved": [...]} to conjectures.json.
+def write_conjectures_dataset(
+    unsolved: List[ConjectureSpec],
+    failed: Optional[List[ConjectureSpec]] = None,
+    proved: Optional[List[ConjectureSpec]] = None,
+    dest: Optional[str] = None,
+) -> str:
+    """Write a JSON object with the 3-bucket schema to conjectures.json.
 
     Overwrites the file to reflect current dataset.
     """
-    if solved is None:
-        solved = []
+    failed = failed or []
+    proved = proved or []
     dest_dir = _default_conjecture_dir()
     if dest is None:
         dest = os.path.join(dest_dir, "conjectures.json")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     obj = {
         "unsolved": [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in unsolved],
-        "solved": [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in solved],
+        "failed":   [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in failed],
+        "proved":   [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in proved],
     }
     tmp = dest + ".tmp"
     with open(tmp, "w") as f:
@@ -548,53 +549,87 @@ def _dataset_path(dest: Optional[str] = None) -> str:
     return dest_dir
 
 
-def load_conjecture_dataset(dest: Optional[str] = None) -> Tuple[List[ConjectureSpec], List[ConjectureSpec]]:
-    path = _dataset_path(dest)
-    if not os.path.isfile(path):
-        return [], []
-    try:
-        with open(path, 'r') as f:
-            data = json.load(f)
-    except Exception:
-        return [], []
-    unsolved_specs: List[ConjectureSpec] = []
-    solved_specs: List[ConjectureSpec] = []
-    for entry in data.get('unsolved', []):
-        if isinstance(entry, dict) and entry.get('name') and entry.get('formula'):
-            formula = canonicalize_formula(entry['formula'])
-            unsolved_specs.append(ConjectureSpec(name=entry['name'], formula=formula))
-    for entry in data.get('solved', []):
-        if isinstance(entry, dict) and entry.get('name') and entry.get('formula'):
-            formula = canonicalize_formula(entry['formula'])
-            solved_specs.append(ConjectureSpec(name=entry['name'], formula=formula))
-    return unsolved_specs, solved_specs
+def load_conjecture_dataset(
+    dest: Optional[str] = None,
+) -> Tuple[List[ConjectureSpec], List[ConjectureSpec], List[ConjectureSpec]]:
+    """Load conjectures.json split by bucket → (unsolved, failed, proved).
+
+    Tolerates the legacy ``solved`` key by folding it into ``failed`` (same
+    treatment as ``_load_raw_dataset``)."""
+    data = _load_raw_dataset(dest)
+
+    def _specs(bucket: str) -> List[ConjectureSpec]:
+        out: List[ConjectureSpec] = []
+        for entry in data.get(bucket, []):
+            if entry.get('name') and entry.get('formula'):
+                out.append(ConjectureSpec(
+                    name=entry['name'],
+                    formula=canonicalize_formula(entry['formula']),
+                ))
+        return out
+
+    return _specs('unsolved'), _specs('failed'), _specs('proved')
+
+
+_BUCKETS = ("unsolved", "failed", "proved")
 
 
 def _load_raw_dataset(dest: Optional[str] = None) -> Dict[str, List[dict]]:
-    """Load conjectures.json preserving every per-entry field (status, …)."""
+    """Load conjectures.json preserving every per-entry field (status, …).
+
+    Reads the new 3-bucket schema (unsolved/failed/proved). The legacy
+    ``solved`` key (where 'solved' == 'falsified') is folded into ``failed``
+    on load for backward compatibility with old files."""
+    empty = {b: [] for b in _BUCKETS}
     path = _dataset_path(dest)
     if not os.path.isfile(path):
-        return {"unsolved": [], "solved": []}
+        return empty
     try:
         with open(path, "r") as f:
             data = json.load(f)
     except Exception:
-        return {"unsolved": [], "solved": []}
-    return {
-        "unsolved": [e for e in data.get("unsolved", []) if isinstance(e, dict)],
-        "solved": [e for e in data.get("solved", []) if isinstance(e, dict)],
-    }
+        return empty
+    out = {b: [e for e in data.get(b, []) if isinstance(e, dict)] for b in _BUCKETS}
+    # Legacy: `solved` used to hold refuted entries. Merge into `failed`.
+    legacy_solved = [e for e in data.get("solved", []) if isinstance(e, dict)]
+    if legacy_solved:
+        seen = {e.get("name") for e in out["failed"]}
+        for e in legacy_solved:
+            if e.get("name") not in seen:
+                out["failed"].append(e)
+    return out
+
+
+_NAME_SUFFIX_RE = re.compile(r"^(.*?)(\d+)$")
+
+
+def _natural_sort_key(entry: dict) -> Tuple[str, int, str]:
+    """Sort key that puts `foo_2` before `foo_10` (numeric suffix, not lex).
+
+    Matches both the legacy `auto_<ts>_<n>` shape and the new bare `C<n>`
+    shape (trailing digits with any prefix).  Falls back to (name, 0) for
+    entries that don't end in digits so we never crash on legacy names."""
+    name = entry.get("name") or ""
+    m = _NAME_SUFFIX_RE.match(name)
+    if m:
+        return (m.group(1), int(m.group(2)), name)
+    return (name, 0, name)
 
 
 def _write_raw_dataset(data: Dict[str, List[dict]], dest: Optional[str] = None) -> str:
     path = _dataset_path(dest)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
+    obj = {b: sorted(data.get(b, []), key=_natural_sort_key) for b in _BUCKETS}
     with open(tmp, "w") as f:
-        json.dump({"unsolved": data.get("unsolved", []),
-                   "solved": data.get("solved", [])}, f, indent=2)
+        json.dump(obj, f, indent=2)
     os.replace(tmp, path)
     return path
+
+
+def _all_entries(data: Dict[str, List[dict]]) -> List[dict]:
+    """Flatten every bucket into a single list of entries."""
+    return [e for b in _BUCKETS for e in data.get(b, [])]
 
 
 def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = None,
@@ -620,11 +655,12 @@ def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = No
         except Exception:
             return (formula or "").strip()
 
-    all_entries = data["unsolved"] + data["solved"]
+    all_entries = _all_entries(data)
     existing_formulas = {_norm(e.get("formula", "")) for e in all_entries}
     used_names = {e.get("name") for e in all_entries}
 
     inserted: List[str] = []
+    inserted_specs: List[ConjectureSpec] = []
     now = int(time.time())
     for spec in specs:
         f_norm = _norm(spec.formula)
@@ -649,10 +685,33 @@ def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = No
         used_names.add(name)
         existing_formulas.add(f_norm)
         inserted.append(name)
+        inserted_specs.append(ConjectureSpec(name=name, formula=entry["formula"]))
 
     if inserted:
         _write_raw_dataset(data, dest)
+        # Registry entry from day one, so attempts_without_ce accumulates no
+        # matter which CE entry point later runs the conjecture (the survivor
+        # signal died once because only one RL path ever created entries).
+        # Only for the canonical layout — a custom `dest` has no registry.
+        if dest is None:
+            try:
+                reg = ensure_registry_for_specs(inserted_specs, load_registry())
+                save_registry(reg)
+            except Exception:
+                pass
     return inserted
+
+
+# Which bucket does each status live in? Only the terminal outcomes
+# (`refuted` = has CE, `proven` = has Lean proof) move out of unsolved.
+# `new` and `prover_failed` both mean "still undecided": a prover_failed
+# conjecture might be true — the prover just couldn't close it.
+_STATUS_BUCKET = {
+    "new": "unsolved",
+    "prover_failed": "unsolved",
+    "refuted": "failed",
+    "proven": "proved",
+}
 
 
 def set_conjecture_status(
@@ -661,15 +720,14 @@ def set_conjecture_status(
     dest: Optional[str] = None,
     detail: Optional[Dict[str, Any]] = None,
 ) -> bool:
-    """Update a conjecture's status in conjectures.json.
+    """Update a conjecture's status in conjectures.json and move it to the
+    bucket that matches the terminal outcome. Returns False if not found.
 
-    status ∈ {'new', 'refuted', 'proven', 'prover_failed'}. 'refuted' entries
-    move to the legacy 'solved' list (solved == falsified for older
-    consumers); other statuses update in place. Returns False if not found.
-    """
+    Buckets: ``unsolved`` (new / prover_failed), ``failed`` (refuted CE
+    exists), ``proved`` (Lean proof exists)."""
     data = _load_raw_dataset(dest)
     entry, src = None, None
-    for key in ("unsolved", "solved"):
+    for key in _BUCKETS:
         for e in data[key]:
             if e.get("name") == name:
                 entry, src = e, key
@@ -682,18 +740,19 @@ def set_conjecture_status(
     entry["status_at"] = int(time.time())
     if detail:
         entry["status_detail"] = detail
-    if status == "refuted" and src == "unsolved":
-        data["unsolved"].remove(entry)
-        data["solved"].append(entry)
+    dst = _STATUS_BUCKET.get(status, src)
+    if dst != src:
+        data[src].remove(entry)
+        data[dst].append(entry)
     _write_raw_dataset(data, dest)
     return True
 
 
 def get_conjectures_by_status(status: str, dest: Optional[str] = None) -> List[ConjectureSpec]:
-    """Return specs whose entry carries exactly this status (both lists)."""
+    """Return specs whose entry carries exactly this status (any bucket)."""
     data = _load_raw_dataset(dest)
     out: List[ConjectureSpec] = []
-    for e in data["unsolved"] + data["solved"]:
+    for e in _all_entries(data):
         if e.get("status") == status and e.get("name") and e.get("formula"):
             out.append(ConjectureSpec(name=e["name"],
                                       formula=canonicalize_formula(e["formula"])))
@@ -701,8 +760,176 @@ def get_conjectures_by_status(status: str, dest: Optional[str] = None) -> List[C
 
 
 def mark_conjecture_as_solved(name: str, dest: Optional[str] = None) -> None:
-    """Legacy API: a solved conjecture is a falsified one — now also records
-    status='refuted' and preserves all entry fields."""
+    """Legacy API kept for the RL CE finder: marks a conjecture as refuted
+    (which moves it to the ``failed`` bucket).  The name comes from the
+    old schema where 'solved' meant 'falsified'."""
     if not name:
         return
     set_conjecture_status(name, "refuted", dest)
+
+
+# ── artifact reconcile — the single status-sync implementation ──────────────
+#
+# Every terminal outcome the pipeline produces leaves an artifact on disk:
+#   CE found     → output/conjecture_with_ce/<Cx>/<Cx>.json
+#   Lean proof   → output/conjecture_without_ce/<cx>/<cx>.lean  (or legacy flat)
+#   prover stuck → output/conjecture_without_ce/<Cx>.json  (evolution-loop record)
+# but not every entry point that produces them also updates conjectures.json
+# (a direct `formalize` run updates nothing). Reconcile folds the on-disk
+# truth back into the dataset; it is idempotent and cheap, so both run.py and
+# the conjecture generator call it unconditionally before reading statuses.
+
+_TRAILING_NUM_RE = re.compile(r"(\d+)$")
+
+
+def _entry_num(name: str) -> Optional[int]:
+    m = _TRAILING_NUM_RE.search(name or "")
+    return int(m.group(1)) if m else None
+
+
+def _has_active_sorry(lean_text: str) -> bool:
+    """True if a `sorry` survives outside `--` comments. The pipeline never
+    saves dirty proofs, but reconcile re-checks before trusting a .lean file
+    as a proof — the no-new-sorry rule is enforced at every layer."""
+    for line in lean_text.splitlines():
+        code = line.split("--", 1)[0]
+        if re.search(r"\bsorry\b", code):
+            return True
+    return False
+
+
+def reconcile_from_artifacts(dest: Optional[str] = None,
+                             verbose: bool = True) -> Dict[str, str]:
+    """Scan pipeline output artifacts and fold terminal outcomes into
+    conjectures.json. Returns {name: new_status} for entries that changed.
+
+    Precedence: a verified CE beats a proof file (both present for one
+    conjecture means something is deeply wrong — warned loudly, refuted
+    wins because the CE is machine-checked data, not LLM output). The
+    evolution loop's `prover_failed` records only apply to entries that
+    have no terminal outcome."""
+    root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+    ce_dir = os.path.join(root, "output", "conjecture_with_ce")
+    no_ce_dir = os.path.join(root, "output", "conjecture_without_ce")
+    proof_dir = os.path.join(root, "output", "conjecture_proof")  # legacy
+
+    data = _load_raw_dataset(dest)
+    by_num: Dict[int, Tuple[str, dict]] = {}
+    for bucket in _BUCKETS:
+        for e in data[bucket]:
+            num = _entry_num(e.get("name") or "")
+            if num is not None:
+                by_num[num] = (bucket, e)
+
+    import glob as _glob
+
+    # Collect proofs: per-stem subdirs + legacy flat files, both output dirs.
+    proofs: Dict[int, str] = {}
+    for pattern in (os.path.join(no_ce_dir, "*", "*.lean"),
+                    os.path.join(no_ce_dir, "*.lean"),
+                    os.path.join(proof_dir, "*", "*.lean"),
+                    os.path.join(proof_dir, "*.lean")):
+        for lf in sorted(_glob.glob(pattern)):
+            num = _entry_num(os.path.splitext(os.path.basename(lf))[0])
+            if num is None or num in proofs:
+                continue
+            try:
+                if _has_active_sorry(open(lf).read()):
+                    if verbose:
+                        print(f"[reconcile] WARNING: {lf} contains an active "
+                              f"`sorry` — not treated as a proof", flush=True)
+                    continue
+            except Exception:
+                continue
+            proofs[num] = os.path.relpath(lf, root)
+
+    # Collect CEs (with detail for the refuted signal).
+    ces: Dict[int, Dict[str, Any]] = {}
+    for jf in sorted(_glob.glob(os.path.join(ce_dir, "*", "*.json"))):
+        num = _entry_num(os.path.splitext(os.path.basename(jf))[0])
+        if num is None or num in ces:
+            continue
+        try:
+            payload = json.load(open(jf))
+        except Exception:
+            continue
+        ce = payload.get("counterexample") or {}
+        detail: Dict[str, Any] = {}
+        vec = ce.get("p_vector")
+        if isinstance(vec, list):
+            pv = {str(i + 3): int(v) for i, v in enumerate(vec) if int(v or 0)}
+            if pv:
+                detail["ce_p_vector"] = pv
+        if payload.get("violation_detail"):
+            detail["violation"] = payload["violation_detail"]
+        ces[num] = detail
+
+    # Collect evolution-loop prover_failed records (top-level {Cx}.json).
+    # A record contradicted by hard evidence (a proof file or a CE artifact
+    # that arrived later) is STALE — delete it so the directory listing and
+    # the prover-stuck signal stay truthful.
+    stuck: Dict[int, str] = {}
+    for jf in sorted(_glob.glob(os.path.join(no_ce_dir, "*.json"))):
+        num = _entry_num(os.path.splitext(os.path.basename(jf))[0])
+        if num is None:
+            continue
+        try:
+            payload = json.load(open(jf))
+        except Exception:
+            continue
+        if payload.get("status") != "prover_failed":
+            continue
+        if num in proofs or num in ces:
+            try:
+                os.remove(jf)
+                if verbose:
+                    evidence = "proof" if num in proofs else "CE"
+                    print(f"[reconcile] removed stale prover_failed record "
+                          f"{os.path.basename(jf)} (superseded by {evidence})",
+                          flush=True)
+            except Exception:
+                pass
+            continue
+        stuck[num] = payload.get("outcome") or "failed"
+
+    changes: Dict[str, str] = {}
+
+    def _apply(num: int, status: str, detail: Optional[Dict[str, Any]]) -> None:
+        bucket, entry = by_num[num]
+        target_bucket = _STATUS_BUCKET.get(status, bucket)
+        if entry.get("status") == status and bucket == target_bucket:
+            return
+        entry["status"] = status
+        entry["status_at"] = int(time.time())
+        if detail:
+            entry.setdefault("status_detail", {}).update(detail)
+        if target_bucket != bucket:
+            data[bucket].remove(entry)
+            data[target_bucket].append(entry)
+            by_num[num] = (target_bucket, entry)
+        changes[entry.get("name") or str(num)] = status
+
+    for num, path in proofs.items():
+        if num in by_num and num not in ces:
+            _apply(num, "proven", {"proof": path})
+    for num, detail in ces.items():
+        if num not in by_num:
+            continue
+        if num in proofs and verbose:
+            print(f"[reconcile] WARNING: #{num} has BOTH a CE artifact and a "
+                  f"proof file — keeping refuted; inspect immediately",
+                  flush=True)
+        _apply(num, "refuted", detail or None)
+    for num, outcome in stuck.items():
+        if num in by_num and num not in ces and num not in proofs:
+            bucket, entry = by_num[num]
+            if bucket == "unsolved" and entry.get("status") in (None, "new"):
+                _apply(num, "prover_failed", {"outcome": outcome})
+
+    if changes:
+        _write_raw_dataset(data, dest)
+        if verbose:
+            print(f"[reconcile] {len(changes)} status change(s): "
+                  + ", ".join(f"{n}→{s}" for n, s in sorted(changes.items())),
+                  flush=True)
+    return changes

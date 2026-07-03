@@ -7,9 +7,10 @@ Entry point shortcut.
   python -m run auto_xxx_42  # single: exact name match
   python -m run C2 C3 C4 …   # sequential: run each named conjecture in order
   python -m run C104-122     # range: expands to C104 C105 … C122
-  python -m run project      # evolution loop: generate → CE search → prover,
-                             # hints feed the next generation (extra flags are
-                             # forwarded, e.g. python -m run project --rl-episodes 50)
+  python -m run project      # evolution loop: generate → CE search → prover;
+                             # outcomes feed the next generation via
+                             # conjectures.json (extra flags are forwarded,
+                             # e.g. python -m run project --rl-episodes 50)
 """
 import re
 import sys
@@ -21,7 +22,7 @@ sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
 from agent.orchestrator.orchestrator import Orchestrator, _PROJECT_ROOT
-from agent.conjectures import load_conjectures, set_conjecture_status
+from agent.conjectures import load_conjectures, reconcile_from_artifacts
 
 
 _RANGE_RE = re.compile(r"^[cC]?(\d+)\s*-\s*[cC]?(\d+)$")
@@ -51,8 +52,9 @@ def _resolve_name(token: str) -> str:
     # strip leading 'c'/'C' to get the numeric suffix
     suffix = token.lstrip("cC")
 
-    # match names ending with '_<suffix>'
-    candidates = [n for n in names if n.endswith(f"_{suffix}")]
+    # match legacy `auto_…_<suffix>` names AND the new bare `C<suffix>` shape
+    candidates = [n for n in names
+                  if n.endswith(f"_{suffix}") or n.lower() == f"c{suffix}"]
     if len(candidates) == 1:
         return candidates[0]
     if len(candidates) > 1:
@@ -65,57 +67,24 @@ def _resolve_name(token: str) -> str:
     sys.exit(1)
 
 
-def _sync_conjectures_json(orch: Orchestrator, name: str, conjecture) -> bool:
-    """Mirror this conjecture's pipeline outcome into conjectures.json.
-
-    Priority (filesystem state wins over in-memory result):
-      1. CE artifact exists → status='refuted' (moves into 'solved' list)
-      2. Lean proof exists  → status='proven'
-      3. No artifact, but conjecture was attempted → leave as-is (we can't
-         distinguish 'prover_failed' from 'never ran' just from disk; the
-         caller decides whether to mark it).
-    Returns True iff the status actually changed. Wrapped so a sync failure
-    never kills the batch."""
-    ce_file = orch._ce_dir / conjecture.short_id / f"{conjecture.short_id}.json"
-    proof_file = _PROJECT_ROOT / "output" / "conjecture_proof" / f"{conjecture.conjecture_id}.lean"
-    no_ce_lean = orch._no_ce_dir / f"{conjecture.conjecture_id}.lean"
-
-    if ce_file.is_file():
-        target = "refuted"
-    elif proof_file.is_file() or no_ce_lean.is_file():
-        target = "proven"
-    else:
-        return False
-
+def _reconcile() -> None:
+    """Fold on-disk CE/proof artifacts into conjectures.json — the single
+    shared implementation (same one the conjecture generator runs before
+    deriving its prompt signals). Wrapped so a sync failure never kills a
+    batch."""
     try:
-        return bool(set_conjecture_status(name, target))
+        reconcile_from_artifacts()
     except Exception as exc:
-        print(f"[run] warning: conjectures.json status sync for "
-              f"{name!r} → {target!r} failed: {exc}")
-        return False
-
-
-def _sync_batch(orch: Orchestrator) -> None:
-    """After `orch.run_batch()`, reconcile every conjecture's status against
-    the on-disk artifacts. Without this, batch mode never updates
-    conjectures.json (orchestrator only writes per-conjecture output dirs).
-
-    Uses original `spec.name` (e.g. `auto_20260627_163213_105`) because
-    conjectures.json is keyed by full name, while ParsedConjecture rewrites
-    the id to its short form (e.g. `C105`)."""
-    from agent.orchestrator.tools.conjecture_parser import ParsedConjecture
+        print(f"[run] warning: status reconcile failed: {exc}")
+    # End-of-run scratch cleanup: Lake's content-cache only helps within a
+    # run's fix loops; leftover _Temp sources + oleans are pure disk weight.
     try:
-        specs = load_conjectures(str(_PROJECT_ROOT / "conjectures" / "conjectures.json"))
+        from agent.prover.tools.lean_compiler import wipe_temp_scratch
+        n = wipe_temp_scratch()
+        if n:
+            print(f"[run] wiped {n} Polib/_Temp scratch file(s)")
     except Exception as exc:
-        print(f"[run] warning: batch status sync failed to load conjectures: {exc}")
-        return
-    synced = 0
-    for spec in specs:
-        conjecture = ParsedConjecture.from_conjecture_spec(spec)
-        if _sync_conjectures_json(orch, spec.name, conjecture):
-            synced += 1
-    if synced:
-        print(f"[run] conjectures.json synced ({synced} status updates)")
+        print(f"[run] warning: scratch cleanup failed: {exc}")
 
 
 def main() -> None:
@@ -128,8 +97,10 @@ def main() -> None:
     orch = Orchestrator()
 
     if len(sys.argv) == 1:
-        orch.run_batch()
-        _sync_batch(orch)
+        try:
+            orch.run_batch()
+        finally:
+            _reconcile()
         return
 
     # Expand range tokens (e.g. C104-122 → C104 C105 … C122) before resolving.
@@ -146,31 +117,33 @@ def main() -> None:
     print(f"[run] Resolved {len(tokens)} token(s): {list(zip(tokens, names))}")
 
     processed = []  # (name, ParsedConjecture) — for the cleanup sweep
-    for idx, (token, name) in enumerate(zip(tokens, names), start=1):
-        print(f"\n[run] ({idx}/{len(names)}) {token!r} → {name!r}")
-        try:
-            conjecture = orch._load_conjecture(name)
-            orch.run(conjecture)
-            processed.append((name, conjecture))
-            _sync_conjectures_json(orch, name, conjecture)
-        except KeyboardInterrupt:
-            print(f"[run] Interrupted on {name!r}; aborting remaining batch.")
-            raise
-        except Exception as exc:
-            print(f"[run] {name!r} failed: {type(exc).__name__}: {exc}")
-            print(f"[run] continuing with next conjecture …")
+    try:
+        for idx, (token, name) in enumerate(zip(tokens, names), start=1):
+            print(f"\n[run] ({idx}/{len(names)}) {token!r} → {name!r}")
+            try:
+                conjecture = orch._load_conjecture(name)
+                orch.run(conjecture)
+                processed.append((name, conjecture))
+            except KeyboardInterrupt:
+                print(f"[run] Interrupted on {name!r}; aborting remaining batch.")
+                raise
+            except Exception as exc:
+                print(f"[run] {name!r} failed: {type(exc).__name__}: {exc}")
+                print(f"[run] continuing with next conjecture …")
 
-    # Witness pool re-sweep over the run's still-undecided conjectures: any CE
-    # persisted later in this run may refute one that failed earlier. Cheap
-    # (≤1 s/conjecture, same 5-check gate). Skipped for single-conjecture runs.
-    if len(processed) >= 2:
-        undecided = [c for _, c in processed
-                     if not (orch._ce_dir / c.short_id / f"{c.short_id}.json").exists()]
-        if undecided:
-            orch._witness_pool_resweep(undecided, tag="[run]")
-            # Re-sweep may have refuted some — sync those too.
-            for name, conjecture in processed:
-                _sync_conjectures_json(orch, name, conjecture)
+        # Witness pool re-sweep over the run's still-undecided conjectures:
+        # any CE persisted later in this run may refute one that failed
+        # earlier. Cheap (≤1 s/conjecture, same 5-check gate). Skipped for
+        # single-conjecture runs.
+        if len(processed) >= 2:
+            undecided = [c for _, c in processed
+                         if not (orch._ce_dir / c.short_id / f"{c.short_id}.json").exists()]
+            if undecided:
+                orch._witness_pool_resweep(undecided, tag="[run]")
+    finally:
+        # One reconcile covers every outcome above (including re-sweep CEs
+        # and a Ctrl-C mid-batch) — artifacts on disk are the truth source.
+        _reconcile()
 
 
 if __name__ == "__main__":

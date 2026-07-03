@@ -117,6 +117,24 @@ def main() -> None:
             print(f"[formalize] {name!r} raised {type(exc).__name__}: {exc}")
             failures.append(conjecture.conjecture_id)
 
+    # Fold the new proofs into conjectures.json — same shared reconcile as
+    # run.py and the generator. Without this, a direct formalize run leaves
+    # a proved conjecture marked 'prover_failed'/'new' and the generator
+    # misreads it as stuck.
+    try:
+        from agent.conjectures import reconcile_from_artifacts
+        reconcile_from_artifacts()
+    except Exception as exc:
+        print(f"[formalize] warning: status reconcile failed: {exc}")
+
+    try:
+        from agent.prover.tools.lean_compiler import wipe_temp_scratch
+        n = wipe_temp_scratch()
+        if n:
+            print(f"[formalize] wiped {n} Polib/_Temp scratch file(s)")
+    except Exception as exc:
+        print(f"[formalize] warning: scratch cleanup failed: {exc}")
+
     print()
     if failures:
         print(f"[formalize] {len(failures)}/{len(names)} did NOT reach 'proved': {failures}")

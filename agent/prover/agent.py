@@ -132,7 +132,18 @@ class FormalizerAgent(NodeSolverMixin, ProofAssemblyMixin):
         """
         from agent.prover.tools.polib_manager import _SECTION_MARKER
         polib_lean = polib_path / "Polib.lean"
-        (polib_path / "Polib" / "_Temp").mkdir(parents=True, exist_ok=True)
+        temp_dir = polib_path / "Polib" / "_Temp"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        # Scratch modules linger when a compile fails (keep_on_failure) or a
+        # run dies mid-compile; prune to the newest 50 at startup so the dir
+        # can't grow without bound (it once reached 242 files / 1.1 MB).
+        stale = sorted(temp_dir.glob("*.lean"),
+                       key=lambda p: p.stat().st_mtime)[:-50]
+        for f in stale:
+            try:
+                f.unlink()
+            except OSError:
+                pass
 
         header = (
             "-- Polib.lean\n"

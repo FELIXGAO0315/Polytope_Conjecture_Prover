@@ -1,7 +1,8 @@
 """Prompts for the conjecture generator's LLM steps.
 
-Two roles, both fed by the hint store (success = primary guide, failure =
-gatekeeper):
+Two roles, both fed by signals derived from conjectures.json + registry
+(proved = primary guide, refuted = gatekeeper, prover-stuck/survivor =
+structure worth mimicking):
   - co-generator: CONJ_GEN_PROPOSE_PROMPT — propose new formulas directly
   - reviewer:     CONJ_GEN_REVIEW_PROMPT  — keep/drop merged candidates
 
@@ -56,24 +57,41 @@ Already registered, sorted by IRIS-TRL desc. High TRL = tight + diverse +
 spread; structurally mimic those, never duplicate.
 {existing_block}
 
-━━━ PROVED (success) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━ PROVED — Lean-verified theorems (strongest signal) ━━━━━━━━━━━━━━━━━━━━━━
+Machine-checked truths. Extend them: sharper constants, neighbouring strata,
+generalised or weakened hypotheses of the same bound family.
 {success_block}
 
 ━━━ REFUTED (gatekeeper — same shape + shifted constants still counts) ━━━━━━
 {failure_block}
 
-━━━ SURVIVORS (un-refuted; probably valid) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━ CE-SURVIVED BUT UNPROVED (probably true; prover lacks tools) ━━━━━━━━━━━━
+Beat every counterexample search, but the Lean prover could not close them
+from the current axiom Inventory. Their hypothesis families are fertile —
+propose variants with SIMPLER RHS shapes a counting/Euler argument reaches.
+{stuck_block}
+
+━━━ SURVIVORS (un-refuted after many CE attempts) ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {survivor_block}
+
+━━━ FOCUS CELLS (uncovered hypothesis territory this round) ━━━━━━━━━━━━━━━━━
+{focus_block}
 
 ━━━ VERIFIED P-VECTORS (mentally test every proposal) ━━━━━━━━━━━━━━━━━━━━━━━
 {verified_block}
 
 ━━━ TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Target under-covered regions in the registry coverage table, prefer pool
-sub-classes with substantial data, and feel free to combine hypothesis atoms
-into new shapes the table doesn't list. Each proposal will be re-checked
-against {n_rows} verified p-vectors; RHS coefficients with denominators > 6
-are auto-rejected. Output JSON only:
+Split your proposals across three modes:
+  1. EXPLORE — target the FOCUS CELLS and other under-covered regions in the
+     coverage table; combine hypothesis atoms into shapes the table doesn't
+     list.
+  2. SHARPEN — take a PROVED bound and propose a strictly stronger sibling
+     (tighter constant, or one hypothesis atom removed).
+  3. REPAIR — take a recent REFUTED bound and move it just past its
+     counterexample (shift the constant, or add the hypothesis atom the CE
+     fails). A repaired bound must clear every CE listed for that shape.
+Each proposal is re-checked against {n_rows} verified p-vectors; RHS
+coefficients with denominators > 6 are auto-rejected. Output JSON only:
 {{
   "conjectures": [
     "if ((is_simple) and ...), then p6 >= (...)",
@@ -89,8 +107,9 @@ Drop a candidate iff any of:
   (a) any verified p-vector below satisfies the hypothesis AND violates the
       conclusion (cite it),
   (b) RHS has a fractional coefficient with denominator > 6 (LP overfit),
-  (c) hypothesis/RHS shape matches a refuted-shape entry (shifted constants
-      still count as the same shape),
+  (c) it matches a refuted-shape entry WITHOUT clearing that entry's cited
+      CE (a genuine repair — constants moved past the counterexample — is
+      legitimate and should be kept),
   (d) near-duplicate of another candidate in this batch.
 A "keep" should be sharp on at least one verified p-vector.
 

@@ -137,7 +137,6 @@ class NodeSolverMixin:
         )
         result = self._compiler.compile(test_code, f"_sigcheck_{node_id}")
         if result.success:
-            self._log(verbose, f"  [sig-ok] {node_id}: signature compiles")
             return True
         err = (
             result.errors[0].raw_message[:160] if result.errors
@@ -152,13 +151,31 @@ class NodeSolverMixin:
     # Cache-accept helpers — keep the 3 "already proved" paths DRY
     # ------------------------------------------------------------------
 
-    def _record_skip(self, node_id: str, code: str, parsed, locked, is_main_target: bool) -> None:
-        """Record a node whose code was loaded from cache/Polib (no LLM call)."""
+    def _record_skip(
+        self, node_id: str, code: str, parsed, locked, is_main_target: bool,
+        verbose: bool, log_tag: str,
+    ) -> bool:
+        """Cache-accept gate: run QC on *code* against the CURRENT conjecture.
+
+        Returns True iff the report passes; caller MUST NOT mark_done on False.
+        The cached code has drifted from the current conjecture (e.g. the JSON
+        was edited between runs) and must be re-proved.  Previously this helper
+        ran the check but silently discarded the verdict — a stale Polib entry
+        whose signature no longer matched the current JSON would then be
+        reported as "proved" and slip through to a "success" FormalizationResult
+        with a semantically inconsistent .lean file.
+        """
         report = self._quality.check(parsed, locked, code, is_main_target=is_main_target)
+        if not report.passed:
+            fail = next((f for f in report.findings if "FAIL" in f), "no detail")
+            self._log(verbose,
+                f"  [{log_tag}-reject] {node_id}: cached code fails current QC — {fail[:160]}")
+            return False
         with self._run_codes_lock:
             self._run_codes[node_id] = code
             self._run_quality_reports[node_id] = report
             self._run_skipped_nodes.add(node_id)
+        return True
 
     def _accept_existing_code(
         self,
@@ -187,6 +204,15 @@ class NodeSolverMixin:
             return None
 
         if existing.node_id != node_id:
+            # The main target IS the conjecture — never alias it to a sub-lemma
+            # (or anything else). C124 fuzzy-matching its own C124_SumSplit
+            # sub-lemma silently registered an alias and marked the conjecture
+            # "proved" without actually proving it.
+            if node.is_main_target:
+                self._log(verbose,
+                    f"  [alias-reject] {node_id} → {existing.node_id} "
+                    f"(main target must be proved under its own name)")
+                return None
             n_tok = lean_codegen.face_count_tokens(node_id)
             e_tok = lean_codegen.face_count_tokens(existing.node_id)
             if n_tok and e_tok and not (n_tok & e_tok):
@@ -195,7 +221,6 @@ class NodeSolverMixin:
                     f"(face-count mismatch: {sorted(n_tok)} vs {sorted(e_tok)})")
                 return None
             self._polib_search.register_alias(node_id, existing.node_id)
-            self._log(verbose, f"  [alias] {node_id} → {existing.node_id}")
 
         code = self._load_polib_code(existing.node_id)
         if not code:
@@ -205,9 +230,13 @@ class NodeSolverMixin:
                 f"  [{log_tag}-skip] {node_id} matched polib but code has sorry "
                 f"(no-new-sorry policy — will re-prove)")
             return None
-        self._log(verbose, f"  [{log_tag}] {node_id} (proved in polib)")
+        # QC gate BEFORE mark_done: cached code may have been proved under a
+        # prior JSON that no longer matches the current parsed conjecture.
+        if not self._record_skip(
+            node_id, code, parsed, locked, node.is_main_target, verbose, log_tag,
+        ):
+            return None
         self._session.mark_done(node_id, "proved")
-        self._record_skip(node_id, code, parsed, locked, node.is_main_target)
         return "proved"
 
     # ------------------------------------------------------------------
@@ -232,11 +261,15 @@ class NodeSolverMixin:
         # (a) Session says done — try the exact-name code, then fuzzy fallback.
         if self._session.is_done(node_id):
             code = self._load_polib_code(node_id)
-            if code:
+            if code and self._record_skip(
+                node_id, code, parsed, locked, node.is_main_target,
+                verbose, "session-skip",
+            ):
                 self._log(verbose, f"  [skip] {node_id} (proved, session)")
-                self._record_skip(node_id, code, parsed, locked, node.is_main_target)
                 return "proved"
-            # Stale session — exact code missing, try fuzzy polib recovery.
+            # Either code was missing, or QC rejected it as inconsistent with
+            # the current parsed conjecture.  Either way the session is stale;
+            # try fuzzy polib recovery, else fall through to a fresh prove.
             fallback = self._polib_search.search(node, parsed)
             if fallback is not None:
                 status = self._accept_existing_code(
@@ -244,9 +277,10 @@ class NodeSolverMixin:
                 )
                 if status is not None:
                     return status
-            self._log(verbose,
-                f"  [skip-stale] {node_id}: session proved but code missing — re-proving")
-            self._session.mark_pending(node_id, 0, "stale session: code missing from polib")
+            stale_reason = ("cached code fails current QC" if code
+                            else "session proved but code missing")
+            self._log(verbose, f"  [skip-stale] {node_id}: {stale_reason} — re-proving")
+            self._session.mark_pending(node_id, 0, f"stale session: {stale_reason}")
 
         # (b) Session not done — try exact polib lookup (catches "session went
         #     stale during a prior run but Polib.lean does have it").

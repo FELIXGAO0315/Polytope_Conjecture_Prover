@@ -5,19 +5,28 @@ Discovers new p6-bound conjectures and registers them into
 conjectures/conjectures.json with status='new' (the evolution loop only ever
 runs 'new' entries).
 
-Candidate sources (both pass the SAME hard filter — no source is trusted):
-  - Graffiti3: data-driven LP fitting on the verified-polytope table
+Candidate sources (ALL pass the SAME hard filter — no source is trusted):
+  - Graffiti3: data-driven LP fitting on the verified-polytope table —
+    fixed classical strata PLUS dynamic cells rotated through the registry's
+    uncovered hypothesis combinations, so the LP attacks fresh territory
+    every run instead of replaying itself.
+  - Mutation engine (tools/mutations.py): repairs refuted bounds past their
+    CEs, sharpens slack proved bounds to pool contact, weakens hypotheses of
+    proved theorems — new conjectures BUILT FROM existing outcomes; the pool
+    of sources grows with every result, so this never dries up.
   - LLM (optional, when `client` is given): proposes formulas directly,
-    guided by the hint store (success hints = primary, failure = gatekeeper)
+    guided by signals DERIVED from conjectures.json + registry + artifacts
+    (proved = primary, refuted = gatekeeper, prover-stuck/survivor = mimic),
+    with explicit mutation directives and the round's focus cells.
 
 Hard filter, identical for every candidate:
   1. must render/parse in the project DSL and be evaluable by pvec_eval
   2. must hold on every pipeline-verified realizable p-vector
-  3. dedup: in-batch + against conjectures.json (unsolved AND solved)
+  3. dedup: in-batch + against conjectures.json (all three buckets)
 
-When `client` is given, an LLM review pass (keep/drop, hint-aware) runs AFTER
-the hard filter. Hints influence generation only — never CE finding or any
-verification gate.
+When `client` is given, an LLM review pass (keep/drop, signal-aware) runs
+AFTER the hard filter. Signals influence generation only — never CE finding
+or any verification gate.
 
 Standalone:  python -m agent.conjecture_generator [--dry-run] [--limit N] …
 """
@@ -33,6 +42,7 @@ from agent.conjectures import (
     ConjectureSpec,
     canonicalize_formula,
     load_conjecture_dataset,
+    reconcile_from_artifacts,
     upsert_conjectures,
 )
 from agent.conjecture_generator.prompts.conjecture_generator import (
@@ -46,12 +56,12 @@ from agent.conjecture_generator.tools.dataset import (
     format_pvec_for_prompt,
     select_representative_pvecs,
 )
-from agent.conjecture_generator.tools.hints import (
-    enrich_hints_with_survivors,
+from agent.conjecture_generator.tools.signals import (
+    derive_signals,
     format_hint_block,
-    load_hints,
 )
 from agent.conjecture_generator.tools.iris_scoring import compute_iris
+from agent.conjecture_generator.tools.mutations import generate_mutations
 from agent.conjecture_generator.tools.render import render_txgraffiti_conjecture
 from agent.conjectures import load_iris_scores
 from agent.llm_ce_finder.agent import _extract_json_from_text
@@ -78,7 +88,7 @@ class ConjectureGenerator:
         quick: bool = True,
         linear_only: bool = True,
         enable_sophie: bool = False,
-        llm_propose_n: int = 8,   # how many formulas to ask the LLM for
+        llm_propose_n: int = 12,  # how many formulas to ask the LLM for
         dry_run: bool = False,    # discover + filter, but do not write anything
         propose_model: str | None = None,  # Haiku via fast_model path; falls back
                                            # to client.model on retry
@@ -105,6 +115,30 @@ class ConjectureGenerator:
         print(f"[conjecture generator] discovery table: {len(table)} rows, "
               f"{len(hyp_cols)} hypothesis column(s)", flush=True)
 
+        # Hard-gate dataset: the FULL verified pool, NOT the stratified LP
+        # sample. The sample (60 rows per f_2 bucket) exists to bound
+        # Graffiti3's LP cost; the consistency gate has no such excuse —
+        # C133 and the recycled C137 (2026-07-02) both passed the sampled
+        # gate and were refuted minutes later by Stage 0's full-pool replay,
+        # wasting a full CE-search cycle each. Same rows Stage 0 scans.
+        gate_pvecs = row_pvecs
+        try:
+            from agent.conjecture_generator.tools.dataset import load_verified_pvecs
+            seen: set[tuple] = set()
+            gate_pvecs = []
+            for pv in row_pvecs + [rec["p_vec"] for rec in load_verified_pvecs()]:
+                key = tuple(sorted(pv.items()))
+                if key not in seen:
+                    seen.add(key)
+                    gate_pvecs.append(pv)
+            print(f"[conjecture generator] pool gate armed with "
+                  f"{len(gate_pvecs)} verified p-vector(s) (full pool)",
+                  flush=True)
+        except Exception as exc:
+            print(f"[conjecture generator] full-pool load failed ({exc}) — "
+                  f"gate falls back to the {len(row_pvecs)}-row sample",
+                  flush=True)
+
         # Full-table pass — the historical behavior. LP sees every hypothesis
         # column (including structural ones from dataset.py) and may pick any.
         discovered = self._discover(table) or []
@@ -127,29 +161,37 @@ class ConjectureGenerator:
         # `candidates` further down.
         stratified_formulas = self._discover_stratified(table)
 
-        hints = load_hints()
-        enrich_hints_with_survivors(hints)
-        n_survivors = len(hints.get("survivor") or [])
-        if n_survivors:
-            print(f"[conjecture generator] {n_survivors} survivor hint(s) "
-                  f"(unsolved + many CE attempts) — feeding LLM as secondary "
-                  f"success signal", flush=True)
-        existing_unsolved, existing_solved = load_conjecture_dataset()
-        known_formulas = {
-            canonicalize_formula(s.formula)
-            for s in existing_unsolved + existing_solved
-        }
+        # Fold any pipeline outcomes still sitting only on disk into
+        # conjectures.json, THEN derive prompt signals — the generator always
+        # sees the latest proved/refuted/stuck truth even when the prover ran
+        # through an entry point that skipped status sync.
+        reconcile_from_artifacts()
+        signals = derive_signals()
+        print(f"[conjecture generator] signals: "
+              f"{len(signals['proved'])} proved, "
+              f"{len(signals['refuted'])} refuted, "
+              f"{len(signals['prover_stuck'])} prover-stuck, "
+              f"{len(signals['survivor'])} survivor(s)", flush=True)
+        existing_unsolved, existing_failed, existing_proved = load_conjecture_dataset()
+        existing_all = existing_unsolved + existing_failed + existing_proved
+        known_formulas = {canonicalize_formula(s.formula) for s in existing_all}
         # IRIS scores for the LLM's "already registered" template signal.
         existing_iris = load_iris_scores()
 
         # ── gather candidates from all sources ────────────────────────────────
-        # Shape-fingerprint set for hints['failure'] — used to drop sibling
-        # LP-fits that share hypothesis-predicate + direction + RHS-variable
-        # structure with a previously refuted formula. Constants/coefficients
-        # are ignored; LP just keeps producing the same shape with different
-        # numbers until the pool grows enough to refute it.
+        # Shape fingerprints of refuted formulas are no longer a HARD drop.
+        # With the gate armed with the full pool (every CE witness included),
+        # an exact sibling re-fit dies on its own counterexample, while a
+        # candidate that clears every known CE is a genuine repair — the
+        # dalmatian dynamic the old hard filter blocked. What remains of the
+        # filter: a shape-repeat must TOUCH the pool hull (min slack = 0),
+        # so only extremal repairs get through, not slack near-duplicates.
+        # Shapes that appear among proved theorems are exempt entirely.
+        proved_shapes = {self._formula_shape(e.get("formula", ""))
+                         for e in signals["proved"]}
         failure_shapes = {self._formula_shape(e.get("formula", ""))
-                          for e in (hints.get("failure") or [])}
+                          for e in signals["refuted"]}
+        failure_shapes -= proved_shapes
         failure_shapes.discard(None)
 
         candidates: list[tuple[str, str]] = []   # (formula, source)
@@ -160,30 +202,31 @@ class ConjectureGenerator:
                 rejected.append({"raw": _safe_repr(obj), "source": "graffiti3",
                                  "reason": "render_failed"})
                 continue
-            formula = self._simplify_hypothesis_clause(formula)
-            shape = self._formula_shape(formula)
-            if shape is not None and shape in failure_shapes:
-                rejected.append({"formula": formula, "source": "graffiti3",
-                                 "reason": f"shape_match_failure: {shape}"})
-                continue
-            candidates.append((formula, "graffiti3"))
-        # Merge stratified-pass candidates — already rendered + stratum
-        # predicate injected. Run them through the same shape filter so
-        # repeated failure-shape variants are dropped before the pool gate.
+            candidates.append((self._simplify_hypothesis_clause(formula),
+                               "graffiti3"))
         for formula, src_tag in stratified_formulas:
-            formula = self._simplify_hypothesis_clause(formula)
-            shape = self._formula_shape(formula)
-            if shape is not None and shape in failure_shapes:
-                rejected.append({"formula": formula, "source": src_tag,
-                                 "reason": f"shape_match_failure: {shape}"})
-                continue
-            candidates.append((formula, src_tag))
+            candidates.append((self._simplify_hypothesis_clause(formula),
+                               src_tag))
 
-        n_shape_drop = sum(1 for r in rejected
-                           if str(r.get("reason", "")).startswith("shape_match_failure"))
-        if n_shape_drop:
-            print(f"[conjecture generator] shape filter dropped {n_shape_drop} "
-                  f"candidate(s) matching prior-failure shapes", flush=True)
+        # Dynamic-cell pass — Graffiti3 aimed at uncovered hypothesis cells.
+        focus_cells = self._dynamic_cells(existing_all, table)
+        if focus_cells:
+            print(f"[conjecture generator] dynamic cells this round: "
+                  + ", ".join(lbl for lbl, *_ in focus_cells), flush=True)
+            for formula, src_tag in self._discover_stratified(
+                    table, strata=focus_cells, tag="cell"):
+                candidates.append((self._simplify_hypothesis_clause(formula),
+                                   src_tag))
+
+        # Mutation engine — new conjectures BUILT FROM existing outcomes.
+        mutated = generate_mutations(signals, gate_pvecs)
+        if mutated:
+            print(f"[conjecture generator] mutation engine proposed "
+                  f"{len(mutated)} candidate(s) from existing outcomes",
+                  flush=True)
+        for formula, src_tag in mutated:
+            candidates.append((self._simplify_hypothesis_clause(formula),
+                               src_tag))
         # Verified-pool witness sample fed into BOTH propose and review prompts
         # — diverse cross-section the LLM can mentally do CE checks against.
         verified_sample = select_representative_pvecs(row_pvecs)
@@ -192,9 +235,13 @@ class ConjectureGenerator:
         ) or "  (no verified p-vectors available)"
 
         if self.client is not None:
-            for formula in self._llm_propose(hints, existing_unsolved + existing_solved,
+            focus_block = "\n".join(
+                f"  - {pred}" for _, pred, _, _ in focus_cells
+            ) or "  (none — every cell with data already has conjectures)"
+            for formula in self._llm_propose(signals, existing_all,
                                              existing_iris, len(table),
                                              verified_block=verified_block,
+                                             focus_block=focus_block,
                                              row_pvecs=row_pvecs):
                 candidates.append((formula, "llm"))
 
@@ -203,20 +250,36 @@ class ConjectureGenerator:
         # (see _write_run_log); stdout shows only the aggregate counts at the
         # end so the orchestrator log stays readable.
         accepted: list[tuple[str, str]] = []
+        n_shape_slack = 0
         for idx, (formula, source) in enumerate(candidates, start=1):
             norm = canonicalize_formula(formula)
             if norm in known_formulas:
                 rejected.append({"formula": norm, "source": source,
                                  "reason": "duplicate"})
                 continue
-            ok, why = self._consistent_with_verified(norm, row_pvecs)
+            ok, why, min_slack = self._consistent_with_verified(norm, gate_pvecs)
             if not ok:
                 rejected.append({"formula": norm, "source": source, "reason": why})
+                continue
+            # Shape-repeat tightness rule (replaces the old hard shape drop):
+            # a candidate matching a refuted shape is admitted ONLY when it
+            # touches the pool hull — an extremal repair, not a slack sibling.
+            shape = self._formula_shape(norm)
+            if (shape is not None and shape in failure_shapes
+                    and not (min_slack is not None and min_slack <= 1e-9)):
+                n_shape_slack += 1
+                rejected.append({"formula": norm, "source": source,
+                                 "reason": ("shape_repeat_not_tight: matches a "
+                                            "refuted shape and is slack on the "
+                                            "pool — a repair must touch the hull")})
                 continue
             known_formulas.add(norm)
             accepted.append((norm, source))
             if self.limit and len(accepted) >= self.limit:
                 break
+        if n_shape_slack:
+            print(f"[conjecture generator] tightness rule dropped {n_shape_slack} "
+                  f"slack shape-repeat(s)", flush=True)
         print(f"[conjecture generator] pool gate: {len(accepted)} kept, "
               f"{len(candidates) - len(accepted)} dropped", flush=True)
 
@@ -239,13 +302,13 @@ class ConjectureGenerator:
 
         # ── LLM review (advisory keep/drop, after the hard filter) ────────────
         if self.client is not None and accepted:
-            accepted, review_drops = self._llm_review(accepted, hints,
+            accepted, review_drops = self._llm_review(accepted, signals,
                                                      verified_block=verified_block)
             rejected.extend(review_drops)
 
         run_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         specs = self._assign_names([f for f, _ in accepted], run_ts,
-                                   existing_unsolved + existing_solved)
+                                   existing_all)
         sources = {spec.formula: src for spec, (_, src) in zip(specs, accepted)}
         print(f"[conjecture generator] accepted {len(specs)}, "
               f"rejected {len(rejected)}", flush=True)
@@ -391,30 +454,36 @@ class ConjectureGenerator:
     # fewer naturally.
     _STRAT_PER_STRATUM_CAP = 12
 
-    def _discover_stratified(self, table) -> list[tuple[str, str]]:
+    def _discover_stratified(self, table, strata=None,
+                             tag: str = "strat") -> list[tuple[str, str]]:
         """Run Graffiti3 on each structural stratum; return (formula, source)
         pairs already rendered with the stratum predicate injected into the
         hypothesis clause. The full-table pass is the historical one and runs
-        separately; this is purely additive."""
+        separately; this is purely additive.
+
+        ``strata`` defaults to the fixed classical list (_STRATA); the
+        dynamic-cell pass feeds computed strata through the same machinery
+        with ``tag='cell'``."""
         out: list[tuple[str, str]] = []
-        # The stratum row-masks rely on raw p_3, p_4, p_5 — pull them from the
-        # numeric columns dataset.py always keeps in the table.
+        # The stratum row-masks rely on raw p_3, p_4, p_5 (+ the big-face
+        # sum) — pull them from the numeric columns dataset.py always keeps.
         try:
             p3 = table["p_3"].astype(int)
             p4 = table["p_4"].astype(int)
             p5 = table["p_5"].astype(int)
+            s7 = table["sum_pk_k>=7"].astype(int)
         except Exception as exc:
             print(f"[conjecture generator] stratified discovery skipped "
                   f"(p_k columns missing: {exc})", flush=True)
             return []
 
-        for label, predicate, mask_expr, drop_cols in self._STRATA:
+        for label, predicate, mask_expr, drop_cols in (strata or self._STRATA):
             # Evaluate the filter using the bound locals — `eval` here is
-            # constrained to the {p_3, p_4, p_5} aliases we control.
+            # constrained to the {p_3, p_4, p_5, s7} aliases we control.
             try:
                 mask = eval(mask_expr,
                             {"__builtins__": {}},
-                            {"p_3": p3, "p_4": p4, "p_5": p5})
+                            {"p_3": p3, "p_4": p4, "p_5": p5, "s7": s7})
             except Exception as exc:
                 print(f"[conjecture generator] stratum {label!r} mask failed "
                       f"({exc}); skipping", flush=True)
@@ -452,7 +521,7 @@ class ConjectureGenerator:
                 if canon in seen_in_stratum:
                     continue
                 seen_in_stratum.add(canon)
-                stratum_out.append((canon, f"graffiti3:strat:{label}"))
+                stratum_out.append((canon, f"graffiti3:{tag}:{label}"))
                 if len(stratum_out) >= self._STRAT_PER_STRATUM_CAP:
                     break
             out.extend(stratum_out)
@@ -460,6 +529,85 @@ class ConjectureGenerator:
                   f"rendered from stratum {label!r} "
                   f"(cap={self._STRAT_PER_STRATUM_CAP})", flush=True)
         return out
+
+    # ── dynamic cells: uncovered hypothesis combinations ──────────────────────
+
+    # Atom menu for cell construction: (key, DSL predicate, mask expr over
+    # {p_3, p_4, p_5, s7}, coverage regex, structural cols to drop).
+    _CELL_ATOMS: list[tuple[str, str, str, str, list[str]]] = [
+        ("p3=0",  "(p_3 = 0)",             "p_3 == 0", r"p_3\s*=\s*0(?!\d)",
+         ["p3_eq_0", "p3_eq_0_and_p4_eq_0", "p3_le_2"]),
+        ("p4=0",  "(p_4 = 0)",             "p_4 == 0", r"p_4\s*=\s*0(?!\d)",
+         ["p4_eq_0", "p3_eq_0_and_p4_eq_0", "p4_eq_0_and_p5_eq_0", "p4_le_2"]),
+        ("p5=0",  "(p_5 = 0)",             "p_5 == 0", r"p_5\s*=\s*0(?!\d)",
+         ["p5_eq_0", "p4_eq_0_and_p5_eq_0", "p5_le_2"]),
+        ("p3<=2", "(p_3 <= 2)",            "p_3 <= 2", r"p_3\s*<=\s*2",
+         ["p3_le_2"]),
+        ("p4<=2", "(p_4 <= 2)",            "p_4 <= 2", r"p_4\s*<=\s*2",
+         ["p4_le_2"]),
+        ("p5<=2", "(p_5 <= 2)",            "p_5 <= 2", r"p_5\s*<=\s*2",
+         ["p5_le_2"]),
+        ("s7>=3", "(sum_pk_k>=7 >= 3)",    "s7 >= 3",  r"sum_pk_k>=7\s*>=\s*3",
+         [f"sum_pk_k>=7_at_least_{i}" for i in range(1, 4)]),
+        ("s7>=5", "(sum_pk_k>=7 >= 5)",    "s7 >= 5",  r"sum_pk_k>=7\s*>=\s*5",
+         [f"sum_pk_k>=7_at_least_{i}" for i in range(1, 6)]),
+    ]
+
+    _DYNAMIC_CELLS_PER_RUN = 3
+
+    def _dynamic_cells(self, existing_specs: list[ConjectureSpec],
+                       table) -> list[tuple[str, str, str, list[str]]]:
+        """Uncovered atom-pair cells, ranked by table support, rotated by the
+        registry size so successive runs attack different territory.
+
+        A cell is 'uncovered' when no registered conjecture's hypothesis
+        matches BOTH atoms. Returns stratum tuples consumable by
+        _discover_stratified. Deterministic per registry state — the
+        rotation seed moves whenever any conjecture lands, and coverage
+        itself shrinks the candidate set as cells get colonized."""
+        import re as _re
+        try:
+            p3 = table["p_3"].astype(int)
+            p4 = table["p_4"].astype(int)
+            p5 = table["p_5"].astype(int)
+            s7 = table["sum_pk_k>=7"].astype(int)
+        except Exception:
+            return []
+        env = {"p_3": p3, "p_4": p4, "p_5": p5, "s7": s7}
+
+        def _var(key: str) -> str:
+            return key.split("=")[0].split("<")[0]
+
+        cells: list[tuple[int, str, str, str, list[str]]] = []
+        atoms = self._CELL_ATOMS
+        for i in range(len(atoms)):
+            for j in range(i + 1, len(atoms)):
+                k1, pred1, m1, rx1, drop1 = atoms[i]
+                k2, pred2, m2, rx2, drop2 = atoms[j]
+                if _var(k1) == _var(k2):
+                    continue
+                covered = any(_re.search(rx1, s.formula)
+                              and _re.search(rx2, s.formula)
+                              for s in existing_specs)
+                if covered:
+                    continue
+                try:
+                    mask = eval(f"({m1}) & ({m2})", {"__builtins__": {}}, env)
+                    support = int(mask.sum())
+                except Exception:
+                    continue
+                if support < self._STRAT_MIN_ROWS:
+                    continue
+                cells.append((support, f"{k1}&{k2}",
+                              f"{pred1} and {pred2}",
+                              f"({m1}) & ({m2})", drop1 + drop2))
+        if not cells:
+            return []
+        cells.sort(reverse=True)
+        seed = len(existing_specs) % len(cells)
+        picked = [cells[(seed + k) % len(cells)]
+                  for k in range(min(self._DYNAMIC_CELLS_PER_RUN, len(cells)))]
+        return [(label, pred, mask, drop) for _, label, pred, mask, drop in picked]
 
     @staticmethod
     def _inject_predicate(formula: str, predicate: str) -> Optional[str]:
@@ -570,9 +718,10 @@ class ConjectureGenerator:
     # ── discovery: LLM proposer ───────────────────────────────────────────────
 
     def _llm_propose(
-        self, hints: dict, existing_specs: list[ConjectureSpec],
+        self, signals: dict, existing_specs: list[ConjectureSpec],
         existing_iris: dict[str, dict], n_rows: int,
         verified_block: str = "  (none)",
+        focus_block: str = "  (none)",
         max_existing: int = 20,
         row_pvecs: list[dict[int, int]] | None = None,
     ) -> list[str]:
@@ -604,9 +753,11 @@ class ConjectureGenerator:
         )
         registry_coverage_block = self._registry_coverage_block(existing_specs)
         prompt = CONJ_GEN_PROPOSE_PROMPT.format(
-            success_block=format_hint_block(hints["success"]),
-            failure_block=format_hint_block(hints["failure"]),
-            survivor_block=format_hint_block(hints.get("survivor") or []),
+            success_block=format_hint_block(signals["proved"]),
+            failure_block=format_hint_block(signals["refuted"]),
+            stuck_block=format_hint_block(signals["prover_stuck"]),
+            survivor_block=format_hint_block(signals["survivor"]),
+            focus_block=focus_block,
             existing_block=existing_block,
             verified_block=verified_block,
             pool_composition_block=pool_composition_block,
@@ -906,6 +1057,71 @@ class ConjectureGenerator:
     # ── trivial-RHS guard ─────────────────────────────────────────────────────
 
     @staticmethod
+    def _rhs_sup_under_hypothesis(formula: str, rhs: str) -> Optional[float]:
+        """Supremum of a LINEAR RHS over the box the hypothesis atoms allow.
+
+        Box constraints read from the hypothesis clause:
+          `p_k = N` → [N,N]   `p_k <= N` → [0,N]   `p_k >= N` → [N,∞)
+          `sum_pk_k>=7 >= j` → [j,∞)
+        Every count variable is non-negative; unmentioned vars are [0,∞).
+
+        Returns None when the sup is unbounded above or the RHS is
+        nonlinear / unevaluable — the guard acts only on a PROVABLE bound,
+        never on a guess.
+        """
+        import re as _re
+        hyp = formula.split(", then", 1)[0]
+        names = ("p3", "p4", "p5", "sum_pk_after_p6")
+        bounds: dict[str, list[float]] = {v: [0.0, float("inf")] for v in names}
+        for m in _re.finditer(r"p_([3-5])\s*=\s*(\d+)", hyp):
+            v, n = f"p{m.group(1)}", float(m.group(2))
+            bounds[v] = [n, n]
+        for m in _re.finditer(r"p_([3-5])\s*<=\s*(\d+)", hyp):
+            v, n = f"p{m.group(1)}", float(m.group(2))
+            bounds[v][1] = min(bounds[v][1], n)
+        for m in _re.finditer(r"p_([3-5])\s*>=\s*(\d+)", hyp):
+            v, n = f"p{m.group(1)}", float(m.group(2))
+            bounds[v][0] = max(bounds[v][0], n)
+        m = _re.search(r"sum_pk_k>=7\s*>=\s*(\d+)", hyp)
+        if m:
+            bounds["sum_pk_after_p6"][0] = max(
+                bounds["sum_pk_after_p6"][0], float(m.group(1)))
+
+        expr = rhs.replace("sum_pk_k>=7", "sum_pk_after_p6").replace("p_", "p")
+
+        def _ev(env: dict[str, float]) -> float:
+            return float(eval(expr, {"__builtins__": {}},
+                              {n: env.get(n, 0.0) for n in names}))
+
+        try:
+            const = _ev({})
+            coeffs: dict[str, float] = {}
+            for v in names:
+                c = _ev({v: 1.0}) - const
+                if abs((_ev({v: 2.0}) - const) - 2 * c) > 1e-9:
+                    return None          # nonlinear in v
+                coeffs[v] = c
+            # joint probe catches cross-terms (p3*p5, …) single-var probes miss
+            if abs(_ev({v: 1.0 for v in names})
+                   - (const + sum(coeffs.values()))) > 1e-9:
+                return None
+        except Exception:
+            return None
+
+        sup = const
+        for v, c in coeffs.items():
+            if abs(c) < 1e-12:
+                continue
+            lo, hi = bounds[v]
+            if c > 0:
+                if hi == float("inf"):
+                    return None          # unbounded above — not provably vacuous
+                sup += c * hi
+            else:
+                sup += c * lo
+        return sup
+
+    @staticmethod
     def _drop_trivial_rhs(
         accepted: list[tuple[str, str]],
     ) -> tuple[list[tuple[str, str]], list[dict]]:
@@ -913,6 +1129,12 @@ class ConjectureGenerator:
 
         Triggered shapes:
           • `p6 >= K` with K ≤ 0  — always true (p6 ≥ 0 by definition).
+          • `p6 >= RHS(vars)` where the hypothesis atoms already force
+            sup(RHS) ≤ 0 — the variable flavour of the same vacuity, judged
+            by interval arithmetic (`_rhs_sup_under_hypothesis`). The C137
+            lesson (2026-07-02): `p5 ≤ 2 ∧ Σ₇₊ ≥ 5 ⟹ -0.5·Σ₇₊ + p5 ≤ -0.5`
+            survived CE search (nothing to refute) and was trivially proved
+            — a Lean theorem with zero mathematical content.
           • `p6 <= K` with K < 0  — never satisfiable; no math, just omega.
           • `p6 <= K` with K > 0 and a hypothesis too weak to bound p6 to a
             constant — empirically refutable, RL just rarely budgets enough
@@ -936,6 +1158,17 @@ class ConjectureGenerator:
             op, rhs = m.group(1), m.group(2).strip()
             has_var = bool(_re.search(r"\bp[3-9]\b|sum_pk_after_p6", rhs))
             if has_var:
+                if op == ">=":
+                    sup = ConjectureGenerator._rhs_sup_under_hypothesis(
+                        formula, rhs)
+                    if sup is not None and sup <= 0:
+                        dropped.append({
+                            "formula": formula, "source": source,
+                            "reason": (f"vacuous_rhs: hypothesis forces "
+                                       f"sup(RHS) = {sup:g} ≤ 0, and p6 ≥ 0 "
+                                       f"always — bound excludes nothing"),
+                        })
+                        continue
                 kept.append((formula, source))
                 continue
             try:
@@ -976,7 +1209,7 @@ class ConjectureGenerator:
     # ── LLM reviewer ──────────────────────────────────────────────────────────
 
     def _llm_review(
-        self, accepted: list[tuple[str, str]], hints: dict,
+        self, accepted: list[tuple[str, str]], signals: dict,
         verified_block: str = "  (none)",
     ) -> tuple[list[tuple[str, str]], list[dict]]:
         """Hint-aware keep/drop. Advisory only: on any LLM/parse error the
@@ -986,7 +1219,7 @@ class ConjectureGenerator:
             for i, (f, src) in enumerate(accepted, start=1)
         )
         prompt = CONJ_GEN_REVIEW_PROMPT.format(
-            failure_block=format_hint_block(hints["failure"]),
+            failure_block=format_hint_block(signals["refuted"]),
             verified_block=verified_block,
             candidate_block=candidate_block,
         )
@@ -1031,24 +1264,30 @@ class ConjectureGenerator:
 
     def _consistent_with_verified(
         self, formula: str, row_pvecs: list[dict[int, int]]
-    ) -> tuple[bool, str]:
+    ) -> tuple[bool, str, Optional[float]]:
         """A candidate must hold on every verified realizable p-vector.
 
         FAIL-CLOSED: an unevaluable conclusion or hypotheses that match no
         verified polytope reject the candidate — never register a conjecture
         the pipeline's evaluators cannot falsify.
+
+        Returns (ok, why, min_slack). min_slack is the smallest distance to
+        equality over the support (0.0 = the bound touches the pool hull) —
+        the tightness certificate the shape-repeat rule consumes; None when
+        the conclusion direction gives no slack notion.
         """
         try:
             parsed = ParsedConjecture.from_conjecture_spec(
                 ConjectureSpec(name="candidate_0", formula=formula))
         except Exception as exc:
-            return False, f"parse_failed: {exc}"
+            return False, f"parse_failed: {exc}", None
 
         kind, rhs_fn = _compile_conclusion(parsed.conclusion)
         if kind == "unknown" or rhs_fn is None:
-            return False, f"unevaluable conclusion: {parsed.conclusion[:80]}"
+            return False, f"unevaluable conclusion: {parsed.conclusion[:80]}", None
 
         support = 0
+        min_slack: Optional[float] = None
         for pv in row_pvecs:
             try:
                 if not all(_eval_hypothesis(h, pv) for h in parsed.hypotheses):
@@ -1058,10 +1297,19 @@ class ConjectureGenerator:
             except Exception:
                 continue
             if violated:
-                return False, f"contradicted by verified p-vector {pv} ({detail})"
+                return False, f"contradicted by verified p-vector {pv} ({detail})", None
+            if kind in ("ge", "le"):
+                try:
+                    rhs = float(rhs_fn(pv))
+                    p6 = float(pv.get(6, 0))
+                    s = (p6 - rhs) if kind == "ge" else (rhs - p6)
+                    if min_slack is None or s < min_slack:
+                        min_slack = s
+                except Exception:
+                    pass
         if support == 0:
-            return False, "hypotheses match no verified polytope (vacuous or unparsable)"
-        return True, ""
+            return False, "hypotheses match no verified polytope (vacuous or unparsable)", None
+        return True, "", min_slack
 
     # ── registration helpers ──────────────────────────────────────────────────
 
@@ -1072,10 +1320,11 @@ class ConjectureGenerator:
         used_names = set(formula_to_name.values())
         specs: list[ConjectureSpec] = []
         # Continue the GLOBAL numeric suffix: short_id ('C<suffix>') keys the CE
-        # output dirs, so restarting at _1 per run would collide with old Cn.
+        # output dirs, so restarting at 1 per run would collide with existing Cn.
+        # Accept both the legacy `auto_<ts>_<n>` shape and the new bare `C<n>`.
         max_suffix = 0
         for n in used_names:
-            m = re.search(r"_(\d+)$", n or "")
+            m = re.search(r"(\d+)$", n or "")
             if m:
                 max_suffix = max(max_suffix, int(m.group(1)))
         next_index = max_suffix + 1
@@ -1083,7 +1332,7 @@ class ConjectureGenerator:
             name = formula_to_name.get(formula)
             if name is None:
                 while True:
-                    candidate = f"auto_{run_ts}_{next_index}"
+                    candidate = f"C{next_index}"
                     next_index += 1
                     if candidate not in used_names:
                         name = candidate

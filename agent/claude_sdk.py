@@ -338,9 +338,6 @@ class ClaudeSDKClient:
         """
         if timeout is None:
             timeout = int(os.environ.get("CLAUDE_TIMEOUT", "240"))
-        if os.environ.get("CLAUDE_SDK_DIAG_TIMEOUT") == "1":
-            print(f"[claude_sdk diag] base timeout={timeout}s (CLAUDE_TIMEOUT="
-                  f"{os.environ.get('CLAUDE_TIMEOUT', '<unset>')})", flush=True)
 
         MAX_PROMPT_CHARS = 48_000
         if len(prompt) > MAX_PROMPT_CHARS:

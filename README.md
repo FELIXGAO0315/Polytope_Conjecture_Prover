@@ -1,4 +1,4 @@
-# Polytope Conjecture Prover — Agent v3.4
+# Polytope Conjecture Prover — Agent v3.5
 
 A **closed-loop autonomous discovery system** for conjectures about simple convex 3-polytopes. One command runs the full cycle:
 
@@ -10,11 +10,102 @@ A **closed-loop autonomous discovery system** for conjectures about simple conve
 Every counterexample is backed by an **explicit verified witness polytope** (5 independent checks); every proof is a **compiling Lean 4 file** that uses only the hand-curated `Inventory.lean` axiom base.
 
 ```bash
-# one-click autonomous mode: generate → CE search → prove → feed back hints
+# one-click autonomous mode: generate → CE search → prove → outcomes feed the next generation
 python -m run project
 ```
 
 ---
+
+## What's New in v3.5 (2026-07-02)
+
+### The generator can no longer run dry — conjectures now breed conjectures
+
+The deterministic Graffiti3 source is a pure function of (table, strata): a
+frozen pool meant identical candidates every generation, two empty
+generations, loop stop. v3.5 makes every existing outcome a SOURCE of new
+candidates:
+
+- **Mutation engine** (`agent/conjecture_generator/tools/mutations.py`) —
+  the dalmatian dynamic, made explicit. From every **refuted** bound:
+  `repair-const` (shift the RHS constant just past the worst violator,
+  snapped outward to denominator ≤ 6) and `repair-f2` (raise/add the
+  `f_2>=_N` atom to exclude every known violator, then chain a
+  constant-sharpen so the repair lands ON the pool hull). From every
+  **proved / survivor / prover-stuck** bound: `sharpen-const` (pull a slack
+  constant to pool contact) and `weaken-hyp` (drop one hypothesis atom —
+  a strictly stronger theorem candidate). All exact-Fraction arithmetic,
+  self-verified against the full pool before emission, ≤ 12 per run,
+  most-recent outcomes first. **The fuel supply grows with every result.**
+- **Dynamic cells** — each run picks up to 3 uncovered hypothesis-atom
+  pairs (pool support ≥ 60, zero registered conjectures) and aims a
+  dedicated Graffiti3 pass at them, rotated by registry size so successive
+  runs attack different territory.
+- **Shape filter retired → tight-repair rule.** The old hard drop on
+  refuted shapes blocked exactly the repair loop above. Now the pool gate
+  itself kills exact re-fits (every CE witness is in the gate data), and a
+  shape-repeat is admitted only when it **touches the pool hull**
+  (`min_slack = 0`) — extremal repairs pass, slack near-duplicates don't.
+- **Full-pool hard gate.** `_consistent_with_verified` now checks ~25k
+  verified p-vectors (sampled table ∪ full plantri harvest ∪ every CE
+  witness) instead of the 60-per-f₂-bucket LP sample — twice a candidate
+  had passed the sampled gate only to die minutes later in Stage 0.
+- **Vacuity gate** (the C137 lesson). `p6 >= RHS` whose hypothesis atoms
+  already force `sup(RHS) ≤ 0` is information-free — un-refutable (nothing
+  to refute) and trivially provable, the perfect exploit of a loop that
+  stops on "proved". Detected by deterministic interval arithmetic and
+  dropped at generation; the heuristic TRL≈0 warning stays warn-only.
+- **LLM propose** default 8 → 12; the prompt now has explicit
+  EXPLORE / SHARPEN / REPAIR task modes plus a FOCUS CELLS block.
+
+Measured effect: same data, **no LLM**, previous config accepted 0 — v3.5
+accepts 36 (the accumulated repair debt of 135 refutations; later
+generations shrink naturally as repairs register).
+
+### Signals are derived, never stored (hints.json deleted)
+
+The old side-channel hint store rotted the moment a prover run bypassed the
+evolution loop — 3 Lean-proved theorems and 100+ refutations never reached
+the generator. Now every prompt signal (**proved / refuted / prover-stuck /
+survivor**) is derived fresh from `conjectures.json` + `registry.json` +
+on-disk artifacts at generation time (`tools/signals.py`), and
+`reconcile_from_artifacts()` (agent/conjectures.py) folds on-disk outcomes
+(CE JSON, proof `.lean`, evolution-loop records) back into
+`conjectures.json` from **every** entry point — `run.py`, `formalize`,
+the evolution loop, and the generator itself. Stale `prover_failed`
+records contradicted by later evidence self-heal (deleted). Proved-but-
+vacuous theorems (touch = 0 on the pool) are excluded from the PROVED
+prompt block — an empty bound must not become a template.
+
+### Step 6 deep check: Lean itself is now the arbiter
+
+C137 was proved sorry-free and killed by a textual false positive
+(`∑ k in` vs `∑ k ∈` — the pipeline's own autofix — plus an explicit
+`(… : ℤ)` ascription the elaborator inserts anyway). Two fixes:
+
+- `_norm` collapses known-equivalent notation (big-operator `in`/`∈`,
+  atomic numeric ascriptions) — general `∈`/`in` still distinct.
+- **Defeq arbitration**: when the textual comparison still fails, the gate
+  appends `example : ∀ <locked binders>, <locked conclusion> := <name>` to
+  the saved code and compiles it. Lean's definitional equality is stricter
+  than any string match against real drift (an added hypothesis cannot
+  typecheck) while being immune to notation noise. Not a weakening — an
+  upgrade to the mathematically correct comparison.
+
+Footnote: C137 itself turned out to be *vacuously true* (hypothesis forces
+RHS ≤ −1 < 0 ≤ p6) and was deleted end-to-end (dataset, registry, proof
+artifacts, Polib sections, store caches) — hence the vacuity gate above.
+
+### Housekeeping
+
+- **Post-run scratch cleanup**: `wipe_temp_scratch()` removes
+  `polib/Polib/_Temp` sources **and** their `.lake` build artifacts after
+  every run (once measured at 1217 files / 1.6 GB), then removes the empty
+  scaffolding dirs; everything is auto-recreated on demand. Hooked into all
+  three entry points; a startup prune covers killed runs.
+- New conjectures use bare `C<n>` names (global suffix continues);
+  `run.py` name resolution accepts both `auto_…_<n>` and `C<n>`.
+- Registering a conjecture now also ensures its `registry.json` entry, so
+  survivor counters accumulate regardless of which CE entry point runs.
 
 ## What's New in v3.4
 
@@ -25,7 +116,7 @@ proved by the pipeline for the **first time** on 2026-07-01 — 101-line
 Lean 4 file, **zero new sorry**, using only the accepted
 `Inventory.lean` axiom base (`Juc_EulerFormula`, `Juc_InequalityPart`,
 `Barnette_P6Bound`, `p_range`).  The proof file lives at
-[`output/conjecture_without_ce/c104.lean`](output/conjecture_without_ce/c104.lean).
+[`output/conjecture_without_ce/c104/c104.lean`](output/conjecture_without_ce/c104/c104.lean), with a companion informal proof at [`c104.md`](output/conjecture_without_ce/c104/c104.md).
 
 Every strategic decision (blueprint decomposition, tactic choice,
 Inventory lemma selection) was made by the LLM — the Python layer only
@@ -195,7 +286,7 @@ python -m formalize 104               # 'C' prefix optional
 **Conjecture generator — IRIS-feedback + plantri-pool ground truth**
 
 - **Plantri pool harvester** (`tools/plantri_harvest.py` → `output/conjecture_generator/plantri_pool.json`): replaces the old `local/` data engines. ~24k verified-realizable p-vectors stratified by f₂ ∈ {0, 20, 30, 40} buckets via `_stratify_augmentation`, each bucket gated by `(f_2 >= N)` so the LP rows stay informative; structural extremals kept first. The pool is the *only* gate now (`_consistent_with_verified` on the full augmented row_pvecs); `verify_on_polytopes` / `CLASSICAL_BATTERY` / `is_structurally_sound` / R1-R5 / `pool_saturation_stats` are all gone — their role is subsumed by plantri ground truth + the verified-p-vec sample injected into both prompts.
-- **IRIS-feedback prompt** (2026-06-18): LLM propose now sees the existing conjecture block sorted by IRIS-TRL descending, plus survivor hints (unsolved entries with ≥20 CE attempts). Degenerate TRL ≈ 0 is warned, not gated.
+- **IRIS-feedback prompt** (2026-06-18): LLM propose now sees the existing conjecture block sorted by IRIS-TRL descending, plus survivor signals (unsolved entries with ≥20 CE attempts). Degenerate TRL ≈ 0 is warned, not gated.
 - **LLM model refit**: propose = Haiku, effort=low, ≤90s. Review = Sonnet, effort=medium, ≤90s. Bypassed the previous `convex_hull` shortcut entirely.
 - **LP overfit drop** (`_drop_lp_overfit`): any coefficient with denominator > 6 is rejected — replaces the old `pool_saturation_stats` / `formula_signature` heuristics. Drop reason logged.
 - **Stratified hull by f₂** (`compute_pool_facets`): runs on the FULL pool (not a downsample), buckets by f₂, emits each facet with its own `f_2 >= _N` guard.
@@ -261,7 +352,7 @@ python -m formalize 104               # 'C' prefix optional
 **The loop is closed — generation joined the pipeline**
 
 - **`ConjectureGenerator`** (`agent/conjecture_generator/`): Graffiti3 (`txgraffiti`) discovers candidate inequalities over the polytope discovery table; an optional LLM co-proposer adds candidates and an LLM reviewer filters; duplicates against the known dataset are rejected. Survivors are registered with `status='new'` in `conjectures/registry.json`.
-- **Evolution loop** (`agent/orchestrator/evolution_loop.py`, `python -m run project`): each generation runs generate → CE search → prover for every new conjecture. Outcomes update the registry (`refuted` / `proven` / `prover_failed`) and append hints (`agent/conjecture_generator/hints.json`). Hints feed **only** the generator prompts — never CE finding, never a verification gate. Stops on the first Lean-proved conjecture, `--max-generations`, or two consecutive empty generations.
+- **Evolution loop** (`agent/orchestrator/evolution_loop.py`, `python -m run project`): each generation runs generate → CE search → prover for every new conjecture. Outcomes are written to `conjectures/conjectures.json` (`refuted` / `proven` / `prover_failed`, with CE / proof detail); the generator derives its prompt signals (proved / refuted / prover-stuck / survivor) fresh from that store plus on-disk artifacts each generation — there is no side-channel hint file to go stale. Signals feed **only** the generator prompts — never CE finding, never a verification gate. Stops on the first Lean-proved conjecture, `--max-generations`, or two consecutive empty generations.
 
 **Stage 2/3 merged into one unified CE search stage**
 
@@ -346,7 +437,7 @@ python -m formalize 104               # 'C' prefix optional
 - **Quality Checker rewrite**: The old quality checker used token-matching between JSON formula tokens (e.g. `is_simple`, `f_2`) and Lean code tokens — this was always false because JSON tokens never appear literally in Lean. The checker is now fully rewritten to use Claude semantic verification. For intermediate helper nodes, only a sorry audit is performed (signatures need not match the root formula). For the root theorem node, Claude answers four questions: `CONCLUSION_MATCH`, `HYPOTHESES_COVERED`, `NO_EXTRA_CONSTRAINTS`, and `OVERALL_FAITHFUL`. Scoring: faithfulness 0.70 + sorry audit 0.20 + proof structure 0.10. A node passes when `score >= 0.85` and `faithfulness_ok`.
 - **Auto-retry**: The orchestrator retries failed nodes up to 3 times. Nodes that are already proved are already in Polib and are loaded (skipped); only failed nodes are re-attempted.
 - **Cross-run failure memory**: On each failure the last error message plus up to 1 200 characters of the failed code are stored in `store.json` (up to 4 records per node). On retry, `_generate_lean` injects a "Previous failed attempts — do NOT repeat these approaches" block into the Claude prompt.
-- **Improved terminal display**: Step numbering `[1/8]`–`[8/8]`, a `[6/8] Checking formalization quality...` section, a `[fix]` log line before each fix attempt, and a `fix #N` counter that increments across all rounds.
+- **Improved terminal display**: Step numbering `[1/9]`–`[8/9]`, a `[6/9] Checking formalization quality...` section, a `[fix]` log line before each fix attempt, and a `fix #N` counter that increments across all rounds.
 
 ---
 
@@ -400,18 +491,22 @@ Modes A/B/C run the full pipeline: Stage 0 (witness pool replay) → Stage 1 (ra
 
 In autonomous mode (`python -m run project`) the whole diagram below is wrapped
 in the **evolution loop**: a generation starts at the generator, every new
-conjecture flows through Stages 1–3, and the outcomes return to the generator
-as hints. In single/batch mode the run starts directly at the Formula Parser
-with existing conjectures.
+conjecture flows through Stages 1–3, and the outcomes flow back into
+`conjectures.json`, from which the next generation derives its prompt signals.
+In single/batch mode the run starts directly at the Formula Parser with
+existing conjectures.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Conjecture Generator  (evolution mode only)                │
-│  Graffiti3 (txgraffiti) over the discovery table            │
-│  + LLM co-proposer + LLM reviewer  (both hint-aware)        │
-│  dedup vs. known dataset → register status='new'            │
+│  Graffiti3 (txgraffiti): full table + classical strata      │
+│    + dynamic cells (uncovered hypothesis combos, rotated)   │
+│  + Mutation engine (repair refuted / sharpen proved bounds) │
+│  + LLM co-proposer + LLM reviewer  (signal-aware)           │
+│  full-pool gate (~25k p-vecs) + tight-repair rule +         │
+│  vacuity / overfit guards → register status='new'           │
 └────────────────────────┬────────────────────────────────────┘
-                         │ conjectures/registry.json
+                         │ conjectures/conjectures.json (+ registry entry)
                          ▼
 conjectures/conjectures.json
          │
@@ -462,12 +557,14 @@ conjectures/conjectures.json
 │  Lemma search over Mathlib + polib/Inventory.lean           │
 └────────────────────────┬────────────────────────────────────┘
                          ▼
-              output/conjecture_without_ce/{id}.lean
+              output/conjecture_without_ce/{id}/{id}.lean
+              output/conjecture_without_ce/{id}/{id}.md    (informal proof)
 
-   (evolution mode) every outcome → registry status update
-        refuted / prover_failed → failure hint ┐
-        proved                  → success hint ├─► next generation's
-                                               ┘   generator prompts
+   every outcome → conjectures.json (reconcile from artifacts,
+                   ALL entry points: run.py / formalize / evolution loop)
+        refuted        → REFUTED signal + repair-mutation source ┐
+        prover_failed  → PROVER-STUCK signal (mimic, don't avoid)├─► next
+        proved         → PROVED signal + sharpen-mutation source ┘   generation
 ```
 
 ---
@@ -476,19 +573,19 @@ conjectures/conjectures.json
 
 `python -m run project` runs `agent/orchestrator/evolution_loop.py`. One generation:
 
-1. **Generate** — `ConjectureGenerator` builds the discovery table, runs Graffiti3 (`--g3-mode fast|standard|deep`), optionally asks the LLM to propose `--llm-propose-n` extra formulas and to review the merged pool, rejects duplicates of anything already in the dataset, and registers survivors with `status='new'` in `conjectures/registry.json`.
+1. **Generate** — `ConjectureGenerator` reconciles statuses from on-disk artifacts, derives the four prompt signals (proved / refuted / prover-stuck / survivor), builds the discovery table, then gathers candidates from every source: Graffiti3 full-table + classical strata + this round's dynamic cells, the mutation engine (repairs of refuted bounds, sharpenings of proved ones), and optionally `--llm-propose-n` LLM proposals with an LLM review pass. Every candidate faces the same hard gates — full-pool consistency (~25k verified p-vectors), tight-repair rule for refuted shapes, LP-overfit and vacuity guards, dedup — before registration with `status='new'` in `conjectures.json` (+ a `registry.json` entry for survivor counters).
 2. **Evaluate** — every `status='new'` conjecture runs the full pipeline (Stage 0 → 1 → 2; survivors → Stage 3):
-   - CE found → `status='refuted'` + failure hint (CE p-vector + violation recorded)
-   - proved in Lean → `status='proven'` + success hint → **loop stops**
-   - prover failed → `status='prover_failed'` + failure hint
-3. **Next generation** — the generator's prompts now contain this round's outcomes.
+   - CE found → `status='refuted'` (+ CE p-vector + violation detail)
+   - proved in Lean → `status='proven'` (+ proof path) → **loop stops**
+   - prover failed → `status='prover_failed'` (+ outcome)
+3. **Next generation** — signals are re-derived from `conjectures.json`, so this round's outcomes (and any result produced meanwhile through `run.py` or `formalize`) feed the next one automatically.
 
 **Stop conditions**: first proven conjecture, `--max-generations` exhausted (default 10), or two consecutive generations producing zero new conjectures.
 
 **Rules enforced** (soundness is non-negotiable):
 - Only `status='new'` entries are ever evaluated — conjectures with results never re-enter the loop.
-- Success hints come **only** from prover success. Surviving CE search is *not* success — a prover failure still records a failure hint.
-- Hints feed the generator only. CE finding, the 5-Check Validator, and the prover run exactly as in single/batch mode.
+- `proven` comes **only** from prover success. Surviving CE search is *not* success — it records `prover_failed`, a distinct signal class (probably-true-but-unprovable) the generator treats as structure to mimic, not territory to avoid.
+- Signals feed the generator only. CE finding, the 5-Check Validator, and the prover run exactly as in single/batch mode.
 
 **Flags** (`python -m run project [flags]`):
 
@@ -498,11 +595,11 @@ conjectures/conjectures.json
 | `--rl-episodes` | 600 | RL track budget per conjecture |
 | `--llm-rounds` | 15 | LLM track budget per conjecture |
 | `--g3-mode` | `fast` | Graffiti3 search depth (`fast` / `standard` / `deep`) |
-| `--llm-propose-n` | 8 | extra formulas requested from the LLM co-proposer |
+| `--llm-propose-n` | 12 | extra formulas requested from the LLM co-proposer |
 | `--generator-limit` | 0 | cap accepted conjectures per generation (0 = no cap) |
 | `--no-llm-gen` | off | disable LLM propose/review (pure Graffiti3) |
 
-**State files**: `conjectures/registry.json` (per-conjecture status + details, auto-created), `agent/conjecture_generator/hints.json` (accumulated success/failure hints).
+**State files**: `conjectures/conjectures.json` (3-bucket dataset — the single source of truth for statuses) and `conjectures/registry.json` (CE-attempt counters, auto-created). Generator signals are derived, never stored.
 
 ---
 
@@ -961,9 +1058,9 @@ python agent/orchestrator/tools/draw_ce_witness.py output/conjecture_with_ce/C5/
 
 The folder name uses the **short ID** (`C5`) derived from the trailing number of the full conjecture name.
 
-### No counterexample → `output/conjecture_without_ce/{id}.lean`
+### No counterexample → `output/conjecture_without_ce/{id}/{id}.lean` (+ `{id}.md`)
 
-If the CE search ends with nothing — the samplers exhaust their budgets and the constructor double check completes with no CE — the conjecture goes to **ProverAgent** (Stage 3) unconditionally. See the [Stage 3](#stage-3--lean-4-prover) section below for the full 8-step pipeline, quality checker, inline retry loop, and cross-run failure memory.
+If the CE search ends with nothing — the samplers exhaust their budgets and the constructor double check completes with no CE — the conjecture goes to **ProverAgent** (Stage 3) unconditionally. See the [Stage 3](#stage-3--lean-4-prover) section below for the full 9-step pipeline, quality checker, inline retry loop, cross-run failure memory, and the natural-language proof written alongside the Lean file on clean success.
 
 > **Note on `sorry` placeholders:** Sub-goals that require planar graph geometry lemmas not yet present in Mathlib (Steinitz's theorem, Eberhard's theorem, face-counting for 3-polytopes) are left as `sorry`. The surrounding proof structure still type-checks and compiles.
 
@@ -971,24 +1068,25 @@ If the CE search ends with nothing — the samplers exhaust their budgets and th
 
 ## Stage 3 — Lean 4 Prover
 
-When no counterexample is found, **ProverAgent** produces a Lean 4 formalization through a 8-step pipeline. The prover runs unconditionally on every survivor — the old Inventory-entailment precheck (which used to gate Stage 3 on the existence of arithmetic countermodels) was retired on 2026-06-15. Honest Lean proofs can still be derived from Mathlib first principles even when Inventory alone doesn't entail the conclusion, so gating on Inventory entailment was unnecessarily lossy.
+When no counterexample is found, **ProverAgent** produces a Lean 4 formalization through a 9-step pipeline. The prover runs unconditionally on every survivor — the old Inventory-entailment precheck (which used to gate Stage 3 on the existence of arithmetic countermodels) was retired on 2026-06-15. Honest Lean proofs can still be derived from Mathlib first principles even when Inventory alone doesn't entail the conclusion, so gating on Inventory entailment was unnecessarily lossy.
 
 ### Soundness Guard
 
 Generated proofs must work only with the `maps` parameter given in the theorem signature. Any construction of a `SimplyCon3ConnectedMap` instance — `.mk`, a structure literal `{ m := …, p_i := … }`, an ascribed anonymous constructor `⟨…⟩ : SimplyCon3ConnectedMap`, a `where`-definition, or a `{ maps with … }` copy-update — is rejected **before compilation** (error class `X`, fed back to the fix loop) and independently fails the quality check. Reason: the geometric axioms are sorried statements that hold only for maps of real polytopes; applied to fabricated data they yield `False` (e.g. v = 0, e = 0 ⟹ `euler_formula` gives `0 = 2`), from which any goal is "provable".
 
-### The 8-Step Pipeline
+### The 9-Step Pipeline
 
 | Step | Name | What it does |
 |---|---|---|
-| `[1/8]` | Parse conjecture | Reads the JSON formula and resolves the conjecture name |
-| `[2/8]` | Extract & lock goal | Derives the root Lean theorem signature; caches it in `store.json` (keyed by formula hash) |
-| `[3/8]` | Decompose blueprint | Calls Claude to decompose the root goal into a DAG of helper lemmas; computes topological order |
-| `[4/8]` | Formalize nodes | For each node in topological order: search hints → generate Lean → compile → fix loop (up to `MAX_ROUNDS_PER_NODE` rounds) |
-| `[5/8]` | Retry failed nodes | Inline retry loop — re-attempts only the failed nodes, feeding cross-run failure memory and newly-proved dep signatures back into the prompts |
-| `[6/8]` | Check quality | Semantic quality check for every node (see below) |
-| `[7/8]` | Validate Polib | `PolibValidator` end-to-end integrity check of `Polib.lean`; broken sections are removed and their nodes downgraded to failed |
-| `[8/8]` | Collect & save | Classifies node statuses and writes the complete `.lean` file to `output/conjecture_without_ce/` |
+| `[1/9]` | Parse conjecture | Reads the JSON formula and resolves the conjecture name |
+| `[2/9]` | Extract & lock goal | Derives the root Lean theorem signature; caches it in `store.json` (keyed by formula hash) |
+| `[3/9]` | Decompose blueprint | Calls Claude to decompose the root goal into a DAG of helper lemmas; computes topological order |
+| `[4/9]` | Formalize nodes | For each node in topological order: search hints → generate Lean → compile → fix loop (up to `MAX_ROUNDS_PER_NODE` rounds) |
+| `[5/9]` | Retry failed nodes | Inline retry loop — re-attempts only the failed nodes, feeding cross-run failure memory and newly-proved dep signatures back into the prompts |
+| `[6/9]` | Deep quality check | Per-node deep check: QR sanity, signature drift vs locked sig, axiom sweep, instance sweep. A textual signature mismatch is arbitrated by a defeq compile check (`example : <locked ∀-type> := NAME`) so notation noise can't kill a valid proof while real drift still fails the type checker. Failed nodes are downgraded AND purged from `Polib.lean` |
+| `[7/9]` | Validate Polib | `PolibValidator` end-to-end integrity check of `Polib.lean`; broken sections are removed and their nodes downgraded to failed |
+| `[8/9]` | Collect & save | Classifies node statuses and writes the complete `.lean` file to `output/conjecture_without_ce/{id}/{id}.lean` |
+| `[9/9]` | Write NL proof | On clean success only: one LLM call that reads the locked goal + blueprint + verified `.lean` and writes an informal Markdown proof to `{id}.md` alongside the Lean file. Silent no-op on any earlier failure. |
 
 ### Quality Checker
 
@@ -1049,15 +1147,15 @@ Within each formalization round, fix attempts are numbered with a `fix #N` count
 
 ```
 [Stage 3] ProverAgent starting for C2 …
-[1/8] Parsing conjecture...
+[1/9] Parsing conjecture...
       theorem: C2 (0 steps)
-[2/8] Extracting & locking goal...
+[2/9] Extracting & locking goal...
       [cache hit] goal loaded from store (key=f33f8...)
       signature: theorem C2 (maps : SimplyCon3ConnectedMap 0) ...
-[3/8] Decomposing blueprint...
+[3/9] Decomposing blueprint...
       nodes: ['C2_DomainConstraintsFromMap', 'C2_LowerDegreeFacesBound', 'C2_MainGoalConversion', 'C2']
       topo order: ['C2_DomainConstraintsFromMap', ...]
-[4/8] Formalizing nodes...
+[4/9] Formalizing nodes...
   [hints] C2_DomainConstraintsFromMap: 4 (combined, verified)
   [gen] C2_DomainConstraintsFromMap — 4 hints (validated)
   [ok]  C2_DomainConstraintsFromMap compiled (round 0)
@@ -1079,22 +1177,16 @@ Within each formalization round, fix attempts are numbered with a `fix #N` count
   [C2] retry 1/4: regenerate with updated dep signatures + cross-run failure memory
   [C2] retry successfully → proved
   [retrying] all nodes resolved after 1 iteration(s)
-[6/8] Checking formalization quality...
-  [C2_DomainConstraintsFromMap] Quality: PASS (score=1.00)
-    • Soundness guard: PASS — no instance construction
-    • Sorry audit: PASS — 0 sorry
-    • Formula faithfulness: N/A (intermediate helper node, not root theorem)
-  [C2] Quality: PASS (score=0.90)
-    • Soundness guard: PASS — no instance construction
-    • Sorry audit: PASS — 0 sorry
-    • Conclusion match: PASS
-    • Hypotheses covered: PASS
-    • No extra constraints: PASS
-    • Overall faithfulness: PASS
-    • Proof structure: PASS (12 tactic steps)
-[7/8] Validating Polib...
+[6/9] Deep quality check...
+  [C2_DomainConstraintsFromMap] Deep check: PASS
+  [C2] Deep check: PASS
+  [6/9] Deep check summary: 2/2 nodes passed
+[7/9] Validating Polib (post-flight safety net)...
   [polib-validate] Polib builds cleanly — no repairs needed
-[8/8] Formalization saved → /home/.../output/conjecture_without_ce/c2.lean
+[8/9] Formalization saved → /home/.../output/conjecture_without_ce/c2/c2.lean
+[9/9] Writing proof in natural language...
+  Done!
+  Markdown saved → /home/.../output/conjecture_without_ce/c2/c2.md
 
 [Stage 3] Done. Result: success
 ```
@@ -1198,21 +1290,20 @@ lemma eulerInductiveStep (v e f : ℤ) (h : v - e + f = 2) : v - (e + 1) + (f + 
 Polytope_Conjecture_Prover/
 ├── run.py                              # CLI entry point (python -m run [project|<id>])
 ├── conjectures/
-│   ├── conjectures.json                # All conjectures (unsolved / solved)
-│   └── registry.json                   # Per-conjecture status for the evolution loop (auto-created)
+│   ├── conjectures.json                # All conjectures (unsolved / failed / proved) — single truth source
+│   └── registry.json                   # CE-attempt counters for the survivor signal (auto-created)
 ├── agent/
 │   ├── config.py                       # Config (env vars, paths, model names)
 │   ├── claude_sdk.py                   # Thin wrapper around the claude CLI binary
 │   ├── procutil.py                     # PR_SET_PDEATHSIG helper — every child dies with its parent
 │   ├── conjectures.py                  # JSON loader + formula canonicalizer + registry I/O
 │   ├── conjecture_generator/
-│   │   ├── agent.py                    # Graffiti3 + LLM co-proposer/reviewer (hint-aware)
-│   │   ├── hints.json                  # Accumulated success/failure hints (auto-created)
+│   │   ├── agent.py                    # Graffiti3 + LLM co-proposer/reviewer (signal-aware)
 │   │   ├── data/                       # Discovery table assembly
-│   │   └── tools/                      # dataset / hints / render helpers
+│   │   └── tools/                      # dataset / signals / mutations / render helpers
 │   ├── orchestrator/
 │   │   ├── orchestrator.py             # Top-level pipeline (stages 0–3)
-│   │   ├── evolution_loop.py           # Autonomous mode: generate → CE → prove → hints
+│   │   ├── evolution_loop.py           # Autonomous mode: generate → CE → prove → statuses
 │   │   └── tools/
 │   │       ├── check_pvector.py        # 5-Check Validator (+ spawn-pool worker entry)
 │   │       ├── polytope_constructor.py # Witness graph builder (Tier 4, plantri early-exit, failure cache)
@@ -1246,7 +1337,7 @@ Polytope_Conjecture_Prover/
 ├── output/
 │   ├── realizability_cache.json        # permanent verdicts + construction-failure records
 │   ├── conjecture_with_ce/             # C{id}/C{id}.json + C{id}_witness.png per refuted conjecture
-│   └── conjecture_without_ce/         # {id}.lean — Lean proofs
+│   └── conjecture_without_ce/         # {id}/{id}.lean + {id}.md — Lean proof + informal NL proof
 ├── polib/
 │   ├── Inventory.lean                  # Foundational lemma library
 │   └── lakefile.lean                   # Lake build config for polib
@@ -1343,7 +1434,7 @@ LLM_CE_EFFORT=low                     # extended-thinking effort for CE rounds (
 ## Usage
 
 ```bash
-# Autonomous evolution loop (generate → CE search → prove → hints)
+# Autonomous evolution loop (generate → CE search → prove → feed back outcomes)
 python -m run project
 python -m run project --max-generations 5 --rl-episodes 300 --llm-rounds 10
 python -m run project --no-llm-gen --g3-mode deep --generator-limit 12

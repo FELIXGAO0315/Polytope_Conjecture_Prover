@@ -402,12 +402,10 @@ def _make_lean_compile_tool(compiler: "LeanCompiler", node_id: str, log_fn):
 
         if result.success:
             if _has_sorry(code):
-                log_fn(f"    [lean_compile #{n}] compiled WITH sorry (rejected)")
                 return {"content": [{"type": "text", "text":
                     "COMPILED, BUT THE FILE STILL CONTAINS sorry. "
                     "The final answer will be rejected unless every sorry is removed."
                 }]}
-            log_fn(f"    [lean_compile #{n}] compiled cleanly")
             return {"content": [{"type": "text", "text": "COMPILED SUCCESSFULLY (no sorry)."}]}
 
         # Cap to first 6 errors so the context doesn't bloat.
@@ -420,7 +418,6 @@ def _make_lean_compile_tool(compiler: "LeanCompiler", node_id: str, log_fn):
         more = (f"\n... and {len(result.errors) - 6} more error(s)."
                 if len(result.errors) > 6 else "")
         body = f"FAILED ({len(result.errors)} error(s)):\n" + "\n".join(err_lines) + more
-        log_fn(f"    [lean_compile #{n}] FAILED ({len(result.errors)} error(s))")
         return {"content": [{"type": "text", "text": body}]}
 
     return lean_compile, call_count
@@ -493,12 +490,6 @@ def prove_node(
         env=env_overrides,
     )
 
-    log_fn(
-        f"  [proof-agent] {node.node_id}: starting session "
-        f"(model={model}, effort={effort}, max_turns={max_turns}, "
-        f"timeout={timeout_seconds}s, deps={len(dep_sigs)})"
-    )
-
     text_chunks: list[str] = []
     tool_uses: list[str] = []
     result_msg: ResultMessage | None = None
@@ -506,34 +497,14 @@ def prove_node(
     async def _run() -> None:
         nonlocal result_msg
         gen = query(prompt=user_msg, options=options)
-        msg_count = 0
         try:
             async for msg in gen:
-                msg_count += 1
-                if msg_count <= 3 or msg_count % 100 == 0:
-                    log_fn(f"    [msg #{msg_count}] {type(msg).__name__}")
                 if isinstance(msg, AssistantMessage):
                     for block in msg.content:
                         if isinstance(block, TextBlock):
                             text_chunks.append(block.text)
-                            snippet = block.text.strip().replace("\n", " ")[:80]
-                            if snippet:
-                                log_fn(f"    [agent-text] {snippet}")
                         elif isinstance(block, ToolUseBlock):
                             tool_uses.append(block.name)
-                            short = block.name.split("__")[-1]
-                            args_preview = ""
-                            inp = block.input or {}
-                            if isinstance(inp, dict):
-                                for k, v in inp.items():
-                                    s = str(v)
-                                    if len(s) > 60:
-                                        s = s[:60] + "…"
-                                    args_preview += f"{k}={s} "
-                            log_fn(
-                                f"    [tool-use #{len(tool_uses)}] {short} "
-                                f"{args_preview.strip()}"
-                            )
                 elif isinstance(msg, ResultMessage):
                     result_msg = msg
         finally:

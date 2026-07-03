@@ -564,18 +564,69 @@ def _write_ce_json(
                   f"(witness rendering failed: {exc})")
     else:
         print(f"[Output] json saved → {conjecture.short_id} (no witness graph)")
+
+    # Purge stale no-CE artifacts: a previous formalize run may have written
+    # output/conjecture_without_ce/{c123.lean, C123.json}. This conjecture is
+    # now refuted, so those files are a lie — nuke them.
+    _purge_no_ce_artifacts(conjecture, out_dir.parent / "conjecture_without_ce")
+
     return out_path
 
 
+def _purge_no_ce_artifacts(conjecture: ParsedConjecture, no_ce_dir: Path) -> None:
+    """Remove any stale no-CE artifacts for a now-refuted conjecture.
+
+    Handles the current per-stem layout (``no_ce_dir/c123/`` folder holding
+    ``c123.lean`` + ``c123.md``) and the legacy flat layout (top-level
+    ``c123.lean``).  The evolution-loop ``C123.json`` status file lives at
+    the top level in both layouts.  Silent no-op when nothing is there."""
+    stem_lower = conjecture.short_id.lower()
+    subdir = no_ce_dir / stem_lower
+    if subdir.is_dir():
+        try:
+            import shutil
+            shutil.rmtree(subdir)
+            print(f"[Output] removed stale no-CE artifact → {subdir.name}/")
+        except OSError as exc:
+            print(f"[Output] failed to remove {subdir}: {exc}")
+    legacy_files = [
+        no_ce_dir / f"{stem_lower}.lean",                  # legacy flat layout
+        no_ce_dir / f"{conjecture.short_id}.json",         # evolution-loop status
+    ]
+    for path in legacy_files:
+        if path.is_file():
+            try:
+                path.unlink()
+                print(f"[Output] removed stale no-CE artifact → {path.name}")
+            except OSError as exc:
+                print(f"[Output] failed to remove {path}: {exc}")
+
+
 def _resolve_lean_output(conjecture: ParsedConjecture, no_ce_dir: Path) -> Optional[Path]:
-    """Find the Lean file written by ProverAgent and copy it to no_ce_dir."""
-    # ProverAgent writes to output/conjecture_proof/{id}.lean by default
-    prover_out = _PROJECT_ROOT / "output" / "conjecture_proof" / f"{conjecture.conjecture_id}.lean"
-    if prover_out.exists():
-        dst = no_ce_dir / f"{conjecture.conjecture_id}.lean"
-        dst.write_text(prover_out.read_text())
-        return dst
-    return None
+    """Find the Lean file written by ProverAgent and copy it (plus any
+    sibling .md) into a per-stem subdir under ``no_ce_dir``.
+
+    ProverAgent writes to ``output/conjecture_proof/{id}/{id}.lean`` (per-
+    stem layout).  Legacy runs may still have ``output/conjecture_proof/
+    {id}.lean`` at the top level; both are handled."""
+    stem = conjecture.conjecture_id
+    prover_root = _PROJECT_ROOT / "output" / "conjecture_proof"
+    src_subdir = prover_root / stem
+    src_lean = src_subdir / f"{stem}.lean"
+    if not src_lean.exists():
+        src_lean = prover_root / f"{stem}.lean"  # legacy flat layout
+        src_subdir = None
+    if not src_lean.exists():
+        return None
+    dst_subdir = no_ce_dir / stem.lower()
+    dst_subdir.mkdir(parents=True, exist_ok=True)
+    dst = dst_subdir / f"{stem}.lean"
+    dst.write_text(src_lean.read_text())
+    if src_subdir is not None:
+        src_md = src_subdir / f"{stem}.md"
+        if src_md.exists():
+            (dst_subdir / f"{stem}.md").write_text(src_md.read_text())
+    return dst
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1521,7 +1572,7 @@ class Orchestrator:
         """Load every conjecture from a JSON file or directory of individual *.json files.
 
         Supports:
-        - conjectures.json (array or {"unsolved": [...], "solved": [...]})
+        - conjectures.json (array or {"unsolved": [...], "failed": [...], "proved": [...]})
         - Directory of individual {name}.json files, each {"name": ..., "formula": ...}
         """
         source = Path(json_path) if json_path else _PROJECT_ROOT / "conjectures" / "conjectures.json"

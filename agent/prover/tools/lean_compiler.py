@@ -40,6 +40,59 @@ _STRUCT_CONSTRUCTION_PATTERNS: list[tuple[re.Pattern, str]] = [
 ]
 
 
+def wipe_temp_scratch(workspace: "Path | None" = None) -> int:
+    """Delete every ``Polib/_Temp`` scratch module AND its ``.lake`` build
+    artifacts. Called by the entry points after a run completes — Lake's
+    content-cache pays off only WITHIN a run's fix loops; cross-run leftovers
+    are dead weight (once measured at 1217 artifacts / 1.6 GB).
+
+    Safe by construction: nothing ever imports ``Polib._Temp.*`` modules, so
+    removing their sources and oleans cannot break the Polib/Inventory libs.
+    Returns the number of files removed."""
+    if workspace is None:
+        workspace = Path(__file__).resolve().parents[3] / "polib"
+    workspace = Path(workspace)
+    removed = 0
+    src_dir = workspace / "Polib" / "_Temp"
+    if src_dir.is_dir():
+        for f in src_dir.glob("*.lean"):
+            try:
+                f.unlink()
+                removed += 1
+            except OSError:
+                pass
+    build_root = workspace / ".lake" / "build"
+    if build_root.is_dir():
+        for d in build_root.rglob("_Temp"):
+            if not d.is_dir() or "Polib" not in d.parts:
+                continue
+            for f in d.rglob("*"):
+                if f.is_file():
+                    try:
+                        f.unlink()
+                        removed += 1
+                    except OSError:
+                        pass
+    # Remove the now-empty scaffolding dirs too (polib/Polib/, the _Temp
+    # trees under .lake) so the workspace tree is clean between runs — both
+    # the agent startup and every compile() mkdir them back on demand.
+    # rmdir refuses non-empty dirs, so this can never eat real content.
+    import os as _os
+    candidates = [src_dir, src_dir.parent]
+    if build_root.is_dir():
+        candidates += [d for d in build_root.rglob("_Temp")
+                       if d.is_dir() and "Polib" in d.parts]
+    for d in sorted(set(candidates), key=lambda p: len(p.parts), reverse=True):
+        for target in (d, *d.parents):
+            if target in (workspace, build_root) or workspace not in target.parents:
+                break
+            try:
+                _os.rmdir(target)
+            except OSError:
+                break
+    return removed
+
+
 def find_struct_construction(lean_code: str) -> str | None:
     """Return a short description + offending snippet if the code constructs a
     SimplyCon3ConnectedMap instance, else None. Comment lines are ignored."""

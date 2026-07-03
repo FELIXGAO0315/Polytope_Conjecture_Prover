@@ -2,13 +2,15 @@
 agent/orchestrator/evolution_loop.py — generator ⇄ pipeline evolution loop.
 
 One generation:
-  ① ConjectureGenerator (Graffiti3 + LLM, hint-aware) registers status='new'
+  ① ConjectureGenerator (Graffiti3 + LLM, signal-aware) registers status='new'
   ② every 'new' conjecture runs CE search (Stage 1 → 2)
-       CE found → status='refuted'      + failure hint
+       CE found → status='refuted' (+ CE detail)
        no CE    → Stage 3 prover:
-           proved           → status='proven'        + success hint → STOP
-           failed / skipped → status='prover_failed' + failure hint
-  ③ next generation — the generator now knows this round's outcomes
+           proved           → status='proven' (+ proof path) → STOP
+           failed / skipped → status='prover_failed' (+ outcome)
+  ③ next generation — the generator derives its prompt signals straight from
+     conjectures.json, so this round's outcomes feed the next one with no
+     side-channel hint store
 
 Stop conditions: first proven conjecture, --max-generations exhausted, or two
 consecutive generations producing zero new conjectures.
@@ -16,10 +18,10 @@ consecutive generations producing zero new conjectures.
 Rules enforced here:
   - only status='new' conjectures are ever evaluated; entries with results
     never re-enter the loop
-  - success hints come ONLY from prover success; surviving CE search is not
-    success (prover failure → failure hint)
-  - hints feed the generator only; CE finding and all verification gates run
-    exactly as in the normal pipeline
+  - 'proven' comes ONLY from prover success; surviving CE search is
+    'prover_failed', a distinct signal class for the generator
+  - signals feed the generator only; CE finding and all verification gates
+    run exactly as in the normal pipeline
 
 Usage:
   python -m agent.orchestrator.evolution_loop
@@ -40,7 +42,6 @@ from agent.conjectures import (
     set_conjecture_status,
 )
 from agent.conjecture_generator import ConjectureGenerator
-from agent.conjecture_generator.tools.hints import add_failure_hint, add_success_hint
 from agent.orchestrator.orchestrator import (
     Orchestrator,
     _resolve_lean_output,
@@ -202,8 +203,6 @@ class EvolutionLoop:
             proof = _resolve_lean_output(c, self.orch._no_ce_dir)
             set_conjecture_status(spec.name, "proven",
                                   detail={"proof": str(proof) if proof else None})
-            add_success_hint(spec.formula,
-                             f"proved in Lean ({proof or 'output path unresolved'})")
             record_path = _write_no_ce_record(spec, c, status="proven",
                                               outcome=outcome, proof_path=proof)
             if record_path is not None:
@@ -212,9 +211,6 @@ class EvolutionLoop:
 
         set_conjecture_status(spec.name, "prover_failed",
                               detail={"outcome": outcome})
-        add_failure_hint(spec.formula,
-                         f"prover {outcome}: survived CE search but could not "
-                         f"be proved from the current Inventory")
         record_path = _write_no_ce_record(spec, c, status="prover_failed",
                                           outcome=outcome)
         if record_path is not None:
@@ -226,7 +222,6 @@ class EvolutionLoop:
         set_conjecture_status(spec.name, "refuted",
                               detail={"ce_p_vector": _pv_jsonable(pv),
                                       "violation": violation})
-        add_failure_hint(spec.formula, f"refuted by CE {pv} ({violation})")
         return "refuted"
 
 
@@ -238,13 +233,28 @@ def main() -> None:
     ap.add_argument("--rl-episodes", type=int, default=600)
     ap.add_argument("--llm-rounds", type=int, default=15)
     ap.add_argument("--g3-mode", default="fast", choices=["fast", "standard", "deep"])
-    ap.add_argument("--llm-propose-n", type=int, default=8)
+    ap.add_argument("--llm-propose-n", type=int, default=12)
     ap.add_argument("--generator-limit", type=int, default=0,
                     help="cap accepted conjectures per generation (0 = no cap)")
     ap.add_argument("--no-llm-gen", action="store_true",
                     help="disable the LLM co-generator/reviewer (pure Graffiti3)")
     args = ap.parse_args()
 
+    try:
+        _run_loop(args)
+    finally:
+        # End-of-run scratch cleanup (same rationale as run.py): _Temp
+        # sources + oleans only pay off within a run's fix loops.
+        try:
+            from agent.prover.tools.lean_compiler import wipe_temp_scratch
+            n = wipe_temp_scratch()
+            if n:
+                print(f"[Evolution] wiped {n} Polib/_Temp scratch file(s)")
+        except Exception as exc:
+            print(f"[Evolution] warning: scratch cleanup failed: {exc}")
+
+
+def _run_loop(args) -> None:
     EvolutionLoop(
         max_generations=args.max_generations,
         rl_episodes=args.rl_episodes,
