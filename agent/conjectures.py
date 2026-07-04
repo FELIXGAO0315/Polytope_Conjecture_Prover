@@ -797,10 +797,12 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
 
     # Collect proofs: per-stem subdirs + legacy flat files, both output dirs.
     # A .lean artifact is a proof of C<num> ONLY if the ROOT theorem is
-    # actually declared in it. Step 8 of the prover saves partial artifacts
-    # (proved sub-lemmas only, zero sorry) even when the run FAILED — those
-    # must land in `partials`, not `proofs`, or a failed formalization gets
-    # recorded as proven (C1/C193 incident, 2026-07-03).
+    # actually declared in it. Since 2026-07-04 step 8 writes NO artifact on
+    # a failed run (conjecture_without_ce/ holds complete proofs only), but
+    # the qualification guard stays: a stray or legacy partial artifact
+    # (proved sub-lemmas only, zero sorry) must land in `partials`, not
+    # `proofs`, or a failed formalization gets recorded as proven
+    # (C1/C193 incident, 2026-07-03).
     proofs: Dict[int, str] = {}
     partials: Dict[int, str] = {}
     _failed_hdr = re.compile(r"^--\s*Failed\s*\((\d+)\)", re.MULTILINE)

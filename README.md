@@ -87,6 +87,14 @@ in its own header. Fixes (`agent/conjectures.py`):
   the prover ran and lost, to `new` when nothing is on disk — and the
   stale `status_detail.proof` pointer is removed. Disk artifacts are now
   the single source of truth in BOTH directions.
+- **Update (2026-07-04, same day)**: step 8 now writes **no `.lean`
+  artifact at all** on a failed run — `output/conjecture_without_ce/`
+  holds complete proofs only (currently exactly c104, c124, c201).
+  Nothing is lost: a failed run's proved sub-lemmas persist in
+  `Polib.lean` for the future re-run. The pre-existing partial artifacts
+  (c1, c193, c195) were deleted and their stale `status_detail.partial`
+  pointers cleaned; the reconcile qualification guard stays as a
+  belt-and-suspenders check against stray or legacy files.
 
 ### Generator: semantic-duplicate filter (the C193 ≡ C199 lesson)
 

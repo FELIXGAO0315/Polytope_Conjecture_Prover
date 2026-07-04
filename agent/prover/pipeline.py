@@ -547,6 +547,11 @@ def _step8_collect_and_save(
     """Read final per-node status from the session, assemble the output
     .lean file, and build the FormalizationResult to return to the caller.
 
+    The .lean artifact is written ONLY on success: ``conjecture_without_ce/``
+    holds complete proofs, nothing else. A failed run leaves no artifact —
+    its proved sub-lemmas already persist in Polib.lean, and the failure is
+    recorded via conjecture status + the evolution loop's ``{Cx}.json``.
+
     Stale ``"partial"`` session entries (from before the no-new-sorry policy)
     are mapped to ``failed`` — they are sorry-tainted and not real proofs.
     """
@@ -575,14 +580,20 @@ def _step8_collect_and_save(
             f"  [unused] {len(unused)} failed node(s) never referenced by "
             f"the root proof — recorded as unused, not as failure(s): {unused}")
 
-    lean_out_path, _, _ = agent._write_complete_proof_file(
-        output_stem, parsed.name, nodes_proved, blocking, unused,
-    )
-    agent._log(verbose, f"[8/9] Formalization saved → {lean_out_path}")
+    status = _classify_final_status(main_target_id, nodes_proved, blocking)
+    if status == "success":
+        lean_out_path, _, _ = agent._write_complete_proof_file(
+            output_stem, parsed.name, nodes_proved, blocking, unused,
+        )
+        agent._log(verbose, f"[8/9] Formalization saved → {lean_out_path}")
+    else:
+        agent._log(verbose,
+            f"[8/9] Formalization FAILED (blocking: {blocking or ['no root proof']}) "
+            f"— no .lean artifact saved; proved sub-lemmas remain in Polib.lean")
 
     return FormalizationResult(
         theorem_name=parsed.name,
-        status=_classify_final_status(main_target_id, nodes_proved, blocking),
+        status=status,
         nodes_proved=nodes_proved,
         nodes_failed=blocking,
         error=None,

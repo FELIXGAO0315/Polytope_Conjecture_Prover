@@ -33,8 +33,7 @@
       },
       "status_at": 1783077009,
       "status_detail": {
-        "outcome": "partial_formalization",
-        "partial": "output/conjecture_without_ce/c193/c193.lean"
+        "outcome": "prover_failed"
       }
     },
     {
@@ -133,8 +132,7 @@
       "status": "prover_failed",
       "status_at": 1783077009,
       "status_detail": {
-        "outcome": "partial_formalization",
-        "partial": "output/conjecture_without_ce/c1/c1.lean"
+        "outcome": "prover_failed"
       }
     }
   ],
