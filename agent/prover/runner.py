@@ -104,6 +104,9 @@ def formalize_conjecture(
 
     if result.nodes_failed:
         print(f"  Failed nodes: {result.nodes_failed}")
+    if getattr(result, "nodes_unused", None):
+        print(f"  Unused nodes (root proof never referenced them): "
+              f"{result.nodes_unused}")
     # Surface ProverAgent's internal error (caught by ``except Exception`` in
     # prove_conjecture).  Without this, silent failures during blueprint
     # decomposition or other early-stage exceptions are invisible.

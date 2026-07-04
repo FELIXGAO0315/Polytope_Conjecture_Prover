@@ -412,10 +412,19 @@ class ClaudeSDKClient:
                 except Exception as exc:
                     last_exc = exc
 
+            # A stop_event abort is intentional cancellation (another track
+            # settled the search), not a failure — re-raise immediately:
+            # no escalate log, no backoff, no further attempts.
+            if last_exc is not None and "stop_event" in str(last_exc):
+                raise last_exc
+
             # Advance schedule index for next attempt (now mostly a no-op
             # since all tiers are identical — kept for log-symmetry and
-            # future tunability).
-            if last_exc is not None and schedule_index < len(self._ESCALATION_SCHEDULE) - 1:
+            # future tunability). Gated on a next attempt actually existing:
+            # printing "next try: ..." on the final attempt would be a lie
+            # (seen as noise after every settled search when max_attempts=1).
+            if (last_exc is not None and attempt < max_attempts - 1
+                    and schedule_index < len(self._ESCALATION_SCHEDULE) - 1):
                 old_eff, old_turns = self._ESCALATION_SCHEDULE[schedule_index]
                 schedule_index += 1
                 if verbose_escalation:

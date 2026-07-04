@@ -60,6 +60,7 @@ class ProofAssemblyMixin:
         theorem_name: str,
         nodes_proved: list[str],
         nodes_failed: list[str],
+        nodes_unused: list[str] | None = None,
     ) -> tuple[Path, list[str], int]:
         """Write ``output/{proof_subdir}/{output_stem}/{output_stem}.lean``.
 
@@ -91,6 +92,14 @@ class ProofAssemblyMixin:
         ]
         if nodes_failed:
             lines.append(f"-- Failed ({len(nodes_failed)}): {', '.join(nodes_failed)}")
+        # Unused ≠ failed: blueprint nodes the root proof never referenced.
+        # Reconcile keys "partial artifact" off the `-- Failed (N)` header,
+        # so unused nodes must not appear there or a fully-proved root gets
+        # bookkept as unproved (the C201 incident).
+        if nodes_unused:
+            lines.append(
+                f"-- Unused ({len(nodes_unused)}): {', '.join(nodes_unused)} "
+                f"(not referenced by the root proof)")
         lines += ["", *header_lines, ""]
 
         # ── Section reuse / dedup state ────────────────────────────────

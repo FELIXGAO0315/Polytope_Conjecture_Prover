@@ -1,17 +1,17 @@
 """Shared Lean-side constants consumed by the prover pipeline.
 
-Only two things remain here:
+Only one thing remains here:
 
   * ``SHARED_MODULE_CONTENT`` — the canonical Inventory header (data
     structure + opaque ``IsMap`` predicate + geometric axiom signatures).
     Hashed into the blueprint cache key so any change to the structure
     or to an axiom signature auto-invalidates cached blueprints.
-  * ``LEAN_PREAMBLE`` — the import header injected by
-    ``lean_codegen.ensure_preamble`` when normalising LLM output.
 
 The full ``LEAN_GENERATION_PROMPT`` / ``LEAN_GENERATION_SYSTEM_PROMPT`` /
 ``FIX_LOOP_POLIB_REF`` / per-goal context templates that used to live here
-were retired together with the legacy ``_generate_lean`` fix-loop machinery.
+were retired together with the legacy ``_generate_lean`` fix-loop machinery;
+``LEAN_PREAMBLE`` followed in the v3.5-plus cleanup (its only consumer,
+``lean_codegen.ensure_preamble``, was dead code).
 """
 
 # Content of Inventory/Shared.lean — shown to Claude as context; Claude must NOT redefine it.
@@ -116,6 +116,3 @@ lemma equality_family {g : ℤ} :
         12 * (1 - g) - (2 * (M_n.p_i 4 : ℤ) + 3 * (M_n.p_i 5 : ℤ)) +
         ∑ k ∈ Finset.Ico 7 (M_n.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M_n.p_i k : ℤ) := by sorry
 """
-
-# Used by lean_codegen.ensure_preamble when normalising LLM-emitted code.
-LEAN_PREAMBLE = "import Mathlib\nimport Inventory\nimport Polib\n"

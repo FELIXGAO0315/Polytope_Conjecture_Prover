@@ -62,6 +62,7 @@ from agent.conjecture_generator.tools.signals import (
 )
 from agent.conjecture_generator.tools.iris_scoring import compute_iris
 from agent.conjecture_generator.tools.mutations import generate_mutations
+from agent.conjecture_generator.tools.support_miner import mine_support_bounds
 from agent.conjecture_generator.tools.render import render_txgraffiti_conjecture
 from agent.conjectures import load_iris_scores
 from agent.llm_ce_finder.agent import _extract_json_from_text
@@ -209,7 +210,14 @@ class ConjectureGenerator:
                                src_tag))
 
         # Dynamic-cell pass — Graffiti3 aimed at uncovered hypothesis cells.
-        focus_cells = self._dynamic_cells(existing_all, table)
+        # Coverage counts only ALIVE conjectures (unsolved + proved): a cell
+        # whose every registered formula was refuted is open territory again
+        # — its boundary deserves a re-fit against the grown pool. Rotation
+        # is seeded by the FULL registry size so it advances every
+        # productive generation even while the alive count stands still.
+        alive_specs = existing_unsolved + existing_proved
+        focus_cells = self._dynamic_cells(alive_specs, table,
+                                          seed=len(existing_all))
         if focus_cells:
             print(f"[conjecture generator] dynamic cells this round: "
                   + ", ".join(lbl for lbl, *_ in focus_cells), flush=True)
@@ -225,6 +233,19 @@ class ConjectureGenerator:
                   f"{len(mutated)} candidate(s) from existing outcomes",
                   flush=True)
         for formula, src_tag in mutated:
+            candidates.append((self._simplify_hypothesis_clause(formula),
+                               src_tag))
+
+        # Support-function miner — systematically sweeps the tight lower-hull
+        # bounds (the C104 class: DS-forced hexagon lower bounds on
+        # small-face-starved cells) that dalmatian LP surfaces only by
+        # accident. Tight + pool-consistent by construction; known formulas
+        # are excluded up front so it always probes NEW edges.
+        mined = mine_support_bounds(gate_pvecs, known_formulas)
+        if mined:
+            print(f"[conjecture generator] support miner proposed "
+                  f"{len(mined)} tight lower bound(s)", flush=True)
+        for formula, src_tag in mined:
             candidates.append((self._simplify_hypothesis_clause(formula),
                                src_tag))
         # Verified-pool witness sample fed into BOTH propose and review prompts
@@ -299,6 +320,12 @@ class ConjectureGenerator:
         # target" — registering them would burn CE / prover cycles).
         accepted, trivial_drops = self._drop_trivial_rhs(accepted)
         rejected.extend(trivial_drops)
+
+        # ── Semantic-duplicate filter: same hypotheses + same arithmetic
+        # CE-candidate set as an alive conjecture ⇒ same attack surface,
+        # regardless of RHS coefficients (C193 ≡ C199 lesson, 2026-07-04).
+        accepted, semdup_drops = self._drop_semantic_dupes(accepted, alive_specs)
+        rejected.extend(semdup_drops)
 
         # ── LLM review (advisory keep/drop, after the hard filter) ────────────
         if self.client is not None and accepted:
@@ -556,15 +583,16 @@ class ConjectureGenerator:
     _DYNAMIC_CELLS_PER_RUN = 3
 
     def _dynamic_cells(self, existing_specs: list[ConjectureSpec],
-                       table) -> list[tuple[str, str, str, list[str]]]:
-        """Uncovered atom-pair cells, ranked by table support, rotated by the
-        registry size so successive runs attack different territory.
+                       table, seed: int = 0,
+                       ) -> list[tuple[str, str, str, list[str]]]:
+        """Uncovered atom-pair cells, ranked by table support, rotated by
+        `seed` so successive runs attack different territory.
 
-        A cell is 'uncovered' when no registered conjecture's hypothesis
-        matches BOTH atoms. Returns stratum tuples consumable by
-        _discover_stratified. Deterministic per registry state — the
-        rotation seed moves whenever any conjecture lands, and coverage
-        itself shrinks the candidate set as cells get colonized."""
+        A cell is 'uncovered' when no ALIVE conjecture's hypothesis matches
+        BOTH atoms — pass unsolved+proved specs, not the failed bucket:
+        refuted-only territory reopens for a boundary re-fit against the
+        grown pool. Returns stratum tuples consumable by
+        _discover_stratified. Deterministic per (registry state, seed)."""
         import re as _re
         try:
             p3 = table["p_3"].astype(int)
@@ -604,8 +632,8 @@ class ConjectureGenerator:
         if not cells:
             return []
         cells.sort(reverse=True)
-        seed = len(existing_specs) % len(cells)
-        picked = [cells[(seed + k) % len(cells)]
+        offset = seed % len(cells)
+        picked = [cells[(offset + k) % len(cells)]
                   for k in range(min(self._DYNAMIC_CELLS_PER_RUN, len(cells)))]
         return [(label, pred, mask, drop) for _, label, pred, mask, drop in picked]
 
@@ -1204,6 +1232,84 @@ class ConjectureGenerator:
         if dropped:
             print(f"[conjecture generator] trivial-RHS guard dropped "
                   f"{len(dropped)} candidate(s)", flush=True)
+        return kept, dropped
+
+    # ── Semantic-duplicate filter ─────────────────────────────────────────────
+
+    @staticmethod
+    def _semantic_signature(formula: str) -> Optional[tuple]:
+        """Attack-surface signature: (canonical hypothesis atoms, frozenset of
+        DS-valid CE-candidate p-vectors inside a pinned enumeration box).
+
+        Two same-hypothesis conjectures with identical candidate sets are
+        attacked — witness-replayed, plantri-screened, refuted, proved —
+        identically even when their RHS coefficients differ: C193
+        `p6 ≥ -2S+4` vs C199 `p6 ≥ -3S+5` demand the same p6 on every
+        arithmetically feasible p-vector (2026-07-04 lesson), so registering
+        both burns a full CE-search + prover cycle on a re-run.
+
+        Returns None (candidate exempt from this filter) when parsing fails,
+        the enumeration is empty (two tight bounds with different content
+        would collide on the empty set), or the enumerator truncated at
+        max_results (set equality unreliable under truncation). Bounds are
+        pinned rather than env-derived so signatures stay comparable across
+        one run regardless of ambient CE_ENUM_* overrides."""
+        try:
+            from agent.conjectures import ConjectureSpec
+            from agent.orchestrator.tools.ce_enumerator import (
+                enumerate_ce_candidates,
+            )
+            conj = ParsedConjecture.from_conjecture_spec(
+                ConjectureSpec(name="_semdup_probe", formula=formula))
+            cap = 400
+            cands = enumerate_ce_candidates(
+                conj, f2_max=36, k_max=20, n_large_max=2, max_results=cap)
+            if not cands or len(cands) >= cap:
+                return None
+            hyp_key = tuple(sorted(str(h) for h in conj.hypotheses))
+            pv_key = frozenset(tuple(sorted(c.p_vec.items())) for c in cands)
+            return (hyp_key, pv_key)
+        except Exception:
+            return None
+
+    def _drop_semantic_dupes(
+        self,
+        accepted: list[tuple[str, str]],
+        alive_specs: list,
+    ) -> tuple[list[tuple[str, str]], list[dict]]:
+        """Drop candidates whose attack surface duplicates an ALIVE registered
+        conjecture (unsolved + proved) or an earlier candidate in this batch.
+
+        Refuted entries are deliberately NOT compared against: a duplicate of
+        a refuted formula dies in Stage 0 for the cost of one witness replay,
+        while a duplicate of an alive one wastes a full pipeline cycle — and
+        signature computation across ~190 refuted entries would dominate the
+        filter's cost for no protection."""
+        sigs: dict[tuple, str] = {}
+        for spec in alive_specs:
+            sig = self._semantic_signature(spec.formula)
+            if sig is not None and sig not in sigs:
+                sigs[sig] = spec.name
+        kept: list[tuple[str, str]] = []
+        dropped: list[dict] = []
+        for formula, source in accepted:
+            sig = self._semantic_signature(formula)
+            if sig is not None and sig in sigs:
+                dropped.append({
+                    "formula": formula, "source": source,
+                    "reason": (f"semantic_duplicate of {sigs[sig]}: same "
+                               f"hypotheses + identical arithmetic "
+                               f"CE-candidate set — different coefficients, "
+                               f"same attack surface"),
+                })
+                continue
+            if sig is not None:
+                sigs[sig] = f"this batch: {formula[:60]}"
+            kept.append((formula, source))
+        if dropped:
+            print(f"[conjecture generator] semantic-dup filter dropped "
+                  f"{len(dropped)} candidate(s) (same attack surface as an "
+                  f"alive conjecture)", flush=True)
         return kept, dropped
 
     # ── LLM reviewer ──────────────────────────────────────────────────────────

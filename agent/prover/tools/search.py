@@ -193,6 +193,16 @@ class PolibSearch:
         with self._alias_lock:
             self._alias_map[planner_name] = real_polib_name
 
+    def resolve_alias(self, planner_name: str) -> "str | None":
+        """Return the real polib name registered for ``planner_name`` (or None).
+
+        Step-6 deep check needs this: an alias-accepted node's saved code
+        declares the REAL lemma name, so the drift check must look for that
+        declaration, not the planner's blueprint name.
+        """
+        with self._alias_lock:
+            return self._alias_map.get(planner_name)
+
     def register(self, entry: SavedEntry) -> None:
         """Append ``entry`` to the index (replacing any same-node_id entry) and persist."""
         self._entries = [e for e in self._entries if e.node_id != entry.node_id]

@@ -124,6 +124,17 @@ def main() -> None:
                 conjecture = orch._load_conjecture(name)
                 orch.run(conjecture)
                 processed.append((name, conjecture))
+                # Per-conjecture status sync: fold this item's artifact into
+                # conjectures.json now instead of only at batch end. Quiet
+                # mode — reconcile's per-call artifact warnings would repeat
+                # every iteration; the end-of-batch _reconcile() stays loud.
+                try:
+                    changes = reconcile_from_artifacts(verbose=False)
+                    if changes:
+                        print("[run] status sync: " + ", ".join(
+                            f"{n}→{s}" for n, s in sorted(changes.items())))
+                except Exception as exc:
+                    print(f"[run] warning: mid-batch status sync failed: {exc}")
             except KeyboardInterrupt:
                 print(f"[run] Interrupted on {name!r}; aborting remaining batch.")
                 raise

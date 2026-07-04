@@ -514,34 +514,6 @@ def sync_registry_from_ce_map(reg: Dict[str, Dict[str, Any]], map_path: Optional
     return reg
 
 
-def write_conjectures_dataset(
-    unsolved: List[ConjectureSpec],
-    failed: Optional[List[ConjectureSpec]] = None,
-    proved: Optional[List[ConjectureSpec]] = None,
-    dest: Optional[str] = None,
-) -> str:
-    """Write a JSON object with the 3-bucket schema to conjectures.json.
-
-    Overwrites the file to reflect current dataset.
-    """
-    failed = failed or []
-    proved = proved or []
-    dest_dir = _default_conjecture_dir()
-    if dest is None:
-        dest = os.path.join(dest_dir, "conjectures.json")
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    obj = {
-        "unsolved": [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in unsolved],
-        "failed":   [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in failed],
-        "proved":   [{"name": s.name, "formula": canonicalize_formula(s.formula)} for s in proved],
-    }
-    tmp = dest + ".tmp"
-    with open(tmp, "w") as f:
-        json.dump(obj, f, indent=2)
-    os.replace(tmp, dest)
-    return dest
-
-
 def _dataset_path(dest: Optional[str] = None) -> str:
     dest_dir = _default_conjecture_dir() if dest is None else dest
     if os.path.isdir(dest_dir):
@@ -824,7 +796,14 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
     import glob as _glob
 
     # Collect proofs: per-stem subdirs + legacy flat files, both output dirs.
+    # A .lean artifact is a proof of C<num> ONLY if the ROOT theorem is
+    # actually declared in it. Step 8 of the prover saves partial artifacts
+    # (proved sub-lemmas only, zero sorry) even when the run FAILED — those
+    # must land in `partials`, not `proofs`, or a failed formalization gets
+    # recorded as proven (C1/C193 incident, 2026-07-03).
     proofs: Dict[int, str] = {}
+    partials: Dict[int, str] = {}
+    _failed_hdr = re.compile(r"^--\s*Failed\s*\((\d+)\)", re.MULTILINE)
     for pattern in (os.path.join(no_ce_dir, "*", "*.lean"),
                     os.path.join(no_ce_dir, "*.lean"),
                     os.path.join(proof_dir, "*", "*.lean"),
@@ -834,14 +813,31 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
             if num is None or num in proofs:
                 continue
             try:
-                if _has_active_sorry(open(lf).read()):
-                    if verbose:
-                        print(f"[reconcile] WARNING: {lf} contains an active "
-                              f"`sorry` — not treated as a proof", flush=True)
-                    continue
+                text = open(lf).read()
             except Exception:
                 continue
-            proofs[num] = os.path.relpath(lf, root)
+            rel = os.path.relpath(lf, root)
+            if _has_active_sorry(text):
+                if verbose:
+                    print(f"[reconcile] WARNING: {lf} contains an active "
+                          f"`sorry` — not treated as a proof", flush=True)
+                partials.setdefault(num, rel)
+                continue
+            m = _failed_hdr.search(text)
+            root_decl = re.search(
+                rf"^\s*(?:private\s+|protected\s+)?(?:theorem|lemma)\s+"
+                rf"C{num}(?:_Main)?\b", text, re.MULTILINE)
+            if (m and int(m.group(1)) > 0) or root_decl is None:
+                if verbose:
+                    why = (f"header declares {m.group(1)} failed node(s)"
+                           if m and int(m.group(1)) > 0
+                           else f"root theorem C{num} not declared")
+                    print(f"[reconcile] {rel}: partial formalization "
+                          f"({why}) — not treated as a proof", flush=True)
+                partials.setdefault(num, rel)
+                continue
+            proofs[num] = rel
+            partials.pop(num, None)
 
     # Collect CEs (with detail for the refuted signal).
     ces: Dict[int, Dict[str, Any]] = {}
@@ -920,6 +916,24 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
                   f"proof file — keeping refuted; inspect immediately",
                   flush=True)
         _apply(num, "refuted", detail or None)
+    # Demotion: an entry sitting in `proved` with no qualifying proof
+    # artifact must not stay proven — artifacts on disk are the truth
+    # source. A partial artifact (prover ran and failed) demotes to
+    # prover_failed; no artifact at all demotes to new.
+    for num in list(by_num):
+        bucket, entry = by_num[num]
+        if bucket != "proved" or num in proofs or num in ces:
+            continue
+        entry.get("status_detail", {}).pop("proof", None)  # stale pointer
+        if num in partials:
+            _apply(num, "prover_failed",
+                   {"outcome": "partial_formalization",
+                    "partial": partials[num]})
+        else:
+            _apply(num, "new", None)
+        if verbose:
+            print(f"[reconcile] DEMOTED {entry.get('name') or num}: was in "
+                  f"'proved' without a qualifying proof artifact", flush=True)
     for num, outcome in stuck.items():
         if num in by_num and num not in ces and num not in proofs:
             bucket, entry = by_num[num]

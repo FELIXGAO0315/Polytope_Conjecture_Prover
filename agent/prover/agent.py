@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from agent.claude_sdk import ClaudeSDKClient
@@ -50,10 +50,13 @@ class FormalizationResult:
     theorem_name: str
     status: str  # "success" | "failed"
     nodes_proved: list[str]
-    nodes_failed: list[str]
+    nodes_failed: list[str]  # blocking failures only — see nodes_unused
     error: str | None
     dep_graph_path: str
     session_state_path: str
+    # Failed blueprint nodes the root proof never referenced (planner
+    # over-decomposition); they don't block a "success" verdict.
+    nodes_unused: list[str] = field(default_factory=list)
 
     @property
     def success(self) -> bool:
@@ -68,6 +71,7 @@ class FormalizationResult:
             "error": self.error,
             "dep_graph_path": self.dep_graph_path,
             "session_state_path": self.session_state_path,
+            "nodes_unused": self.nodes_unused,
         }
 
 

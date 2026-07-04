@@ -1,4 +1,4 @@
-# Polytope Conjecture Prover — Agent v3.5
+# Polytope Conjecture Prover — Agent v3.5 plus
 
 A **closed-loop autonomous discovery system** for conjectures about simple convex 3-polytopes. One command runs the full cycle:
 
@@ -13,6 +13,135 @@ Every counterexample is backed by an **explicit verified witness polytope** (5 i
 # one-click autonomous mode: generate → CE search → prove → outcomes feed the next generation
 python -m run project
 ```
+
+---
+
+## What's New in v3.5 plus (2026-07-04)
+
+### 🎉 C201 proved — the third real theorem
+
+`python -m formalize C201` went end-to-end: 7 nodes, zero `sorry`, root
+theorem compiles. C201 (`p4=0 ∧ p5=0 ∧ Σ₇₊ ≥ 1 ⟹ p6 ≥ −Σ₇₊ + 2`) closes
+through `P6InequalityPart` — the m≥6-gated Jucovič inequality part in
+`Inventory.lean` — combined with the per-term coefficient bound
+`⌊(k+1)/2⌋ − 6 ≥ −2` for k ≥ 7, giving `3·p6 ≥ 12 − 2·Σ₇₊ = 10` in the
+single-big-face case. Lesson recorded: that lemma is stronger than the
+occupation section suggests — check its reach BEFORE declaring a survivor
+unprovable (the pre-run analysis here predicted a missing axiom; the prover
+found the route on its own).
+
+### The first genuine open conjectures: C193, C195, C198
+
+The v3.5 batch produced three survivors that beat the ENTIRE arsenal —
+witness replay, pool replay, random walk, exhaustive plantri screen,
+constructor double check, RL, Hopper, LLM — and then failed the prover for
+a reason that is now precisely understood. All three are "reverse bounds"
+`p6 ≥ −c·Σ₇₊ + d`: they only constrain maps with ≤ 1 big face, so a
+counterexample must be an **ocean of small faces enclosing at most one
+exceptional face** — a configuration that is arithmetically feasible but
+(on all evidence) geometrically impossible. The entailment pre-check's
+countermodels double as a non-derivability proof: the conclusions are NOT
+logical consequences of Inventory's arithmetic content, so the prover
+fails exactly at the case that needs realizability — not a skill issue,
+a missing-theorem issue.
+
+- **C193** (`p3=0, f2≥17 ⟹ p6 ≥ −2Σ₇₊+4`) — needs: *no simple 3-polytope
+  is pentagons(+squares) + exactly one k≥7-gon + ≤1 hexagon*. ~170
+  candidates decided by plantri exhaustion (pipeline screen + an
+  independent audit up to f2=30), zero realizable. No such theorem in
+  Inventory, Mathlib, or (as far as we know) the literature — nearest
+  neighbors are Eberhard's theorem, Grünbaum–Motzkin's fullerene p6=1
+  impossibility, and the (5,6,k)-sphere literature. Prover failed at
+  `C193_CaseOneS` after proving the other 4 sub-lemmas: `linarith` rightly
+  finds no contradiction, because arithmetically there is none.
+- **C195** (`p5=0, f2≥7 ⟹ p6 ≥ −Σ₇₊+2`) — the smallest gap: one textbook
+  fact (`f2 ≥ m+1`, a k-gon has k distinct neighbors) closes the whole
+  S=1 case, leaving a single finite hole: `{4:6, 6:1}` is plantri-proven
+  non-realizable but invisible to the axiom base.
+- **C198** (`p4=0, f2≥17 ⟹ p6 ≥ −2Σ₇₊+4`) — the triangle variant of
+  C193's missing lemma.
+- **C199 deleted** — semantically identical to C193 (`−3Σ₇₊+5` vs
+  `−2Σ₇₊+4` demand the same p6 on every DS-feasible p-vector; their 144
+  arithmetic CE candidates coincide exactly). See the new generator
+  filter below.
+
+Current standing: **proved 3** (C104, C124, C201), **refuted 190** (all
+witness-verified), **open 3** (C193, C195, C198 — each with its missing
+lemma documented).
+
+### Soundness fix: a failed formalization can no longer be recorded "proven"
+
+Step 8 of the prover saves a partial artifact (the proved sub-lemmas,
+zero `sorry`) even when the run FAILS — and `reconcile_from_artifacts`
+treated any sorry-free `.lean` under `conjecture_without_ce/` as a full
+proof. C193's failed run landed in the `proved` bucket, and the audit
+found C1 had been sitting there since 06-30 with `-- Failed (1): C1_Main`
+in its own header. Fixes (`agent/conjectures.py`):
+
+- **Proof qualification**: an artifact counts only if it has zero active
+  `sorry`, no `-- Failed (n>0)` header line, AND the root theorem
+  declaration (`theorem C<num>`, `_Main` variant accepted) is present.
+  Anything else is a *partial* artifact.
+- **Demotion pass**: an entry sitting in `proved` without a qualifying
+  artifact is demoted — to `prover_failed` when a partial artifact shows
+  the prover ran and lost, to `new` when nothing is on disk — and the
+  stale `status_detail.proof` pointer is removed. Disk artifacts are now
+  the single source of truth in BOTH directions.
+
+### Generator: semantic-duplicate filter (the C193 ≡ C199 lesson)
+
+Two formulas with different RHS coefficients can still be the same
+conjecture: their demands differ only on arithmetically infeasible
+p-vectors. New filter in the accept pipeline (after the trivial-RHS
+guard, before LLM review): each candidate gets an **attack-surface
+signature** — (sorted hypothesis atoms, frozenset of its
+`enumerate_ce_candidates` p-vectors under pinned bounds) — and is dropped
+when it matches an ALIVE conjecture (unsolved + proved) or an earlier
+candidate in the batch. Refuted entries are deliberately not compared:
+their duplicates die in Stage 0 for one witness replay, and ~190 extra
+signatures would dominate the filter's cost. Conservative by design:
+parse failure, empty candidate set, or truncation at the 400 cap exempts
+the candidate (two tight bounds must not merge on the empty set).
+
+### Log hygiene: stop_event cancellation is not a failure
+
+When one CE track wins, the losers abort mid-LLM-call with
+`call aborted: stop_event set`. That expected cancellation used to
+produce two lies per settled search: a `[claude_sdk escalate] … next try:
+effort=high` line (there is no next try — the retry loop re-raises
+immediately) and `[LLM ce finding] disabled — CLI preflight failed`
+(reads like a tripped breaker; the search was simply over).
+`claude_sdk._call` now re-raises stop_event aborts immediately — no
+escalate log, no backoff, no phantom retries — and skips the escalate
+message on genuinely final attempts; the LLM preflight exits silently on
+stop_event, same rule as the round loop. Real failures still log loudly.
+
+### Housekeeping: dead-code sweep (−302 lines, 1 file)
+
+Whole-repo reconnaissance (3 parallel read-only scans, every finding
+re-verified by grep before deletion):
+
+- `agent/prover/lean_codegen.py` **330 → 46 lines**: 11 functions with
+  zero external references deleted (`rename_last_decl`, `strip_markdown`,
+  `format_errors_for_prompt`, …) — the last orphans of the legacy
+  `_generate_lean` fix loop retired in v3.4. Survivors: `has_sorry`,
+  `face_count_tokens`.
+- `LEAN_PREAMBLE` deleted from `prompts/lean_generation.py` — its only
+  consumer was the dead `ensure_preamble` (supersedes the v3.4 note that
+  kept it).
+- `agent/conjecture_generator/backfill_iris.py` deleted — one-off IRIS
+  backfill, verified 100% complete (200/200 entries scored).
+- `agent/exceptions.py:ParseError`, `Config.max_sorry_total` (env knob
+  never read — and misleading under the zero-`sorry` policy), and
+  `conjectures.py:write_conjectures_dataset()` (never called) deleted.
+- Deliberately KEPT after inspection: `plantri_harvest.py` (pool
+  maintenance tool), both `__main__.py` entry shims, `store.json` +
+  `logs/` (actively written by `StoreManager` / `FormalizationLogger`),
+  `draw_ce_witness.py` (renders every saved CE), the legacy
+  `solved`→`failed` load fold, and all `set_pdeathsig` wiring.
+- Regression after the sweep: `compileall` clean, 64/64 modules import,
+  functional spot checks on every edited module (Config, lean_codegen,
+  exceptions, reconcile idempotency, semantic-dup signature) all pass.
 
 ---
 
@@ -54,12 +183,31 @@ candidates:
   to refute) and trivially provable, the perfect exploit of a loop that
   stops on "proved". Detected by deterministic interval arithmetic and
   dropped at generation; the heuristic TRL≈0 warning stays warn-only.
+- **Support-function miner** (`tools/support_miner.py`) — the C104
+  factory. C104 is geometrically a lower hull edge of the pool: a tight
+  supporting line on a small-face-starved cell, forced by Dehn-Sommerville.
+  Dalmatian LP surfaces that class only by accident; the miner sweeps it
+  systematically — for every (cell × RHS variable × denominator-≤6 slope),
+  compute the exact support constant `c = min(p6 − a·v)` over the full
+  pool and emit `p6 ≥ a·v + c` when it is a true edge (≥ 2 touching rows
+  at distinct v), supported (≥ 30 rows) and non-vacuous. Tight and
+  consistent BY CONSTRUCTION; acceptance test: the miner re-derives C104
+  verbatim from the pool. Lower bounds only — the provable direction.
+- **Three-strikes lineage rule** (mutation engine) — a shape refuted ≥ 3
+  times keeps dying because its violator family scales with f₂ (hexagon
+  bands exist at every size); repairs for such lineages stop.
+- **Alive-only cell coverage** — dynamic-cell territory is claimed only by
+  unsolved/proved conjectures; refuted-only cells reopen for boundary
+  re-fits against the grown pool.
 - **LLM propose** default 8 → 12; the prompt now has explicit
   EXPLORE / SHARPEN / REPAIR task modes plus a FOCUS CELLS block.
 
-Measured effect: same data, **no LLM**, previous config accepted 0 — v3.5
-accepts 36 (the accumulated repair debt of 135 refutations; later
-generations shrink naturally as repairs register).
+Measured effect: same data, **no LLM**, previous config accepted 0 — the
+full v3.5 stack accepts 51, including 14 miner-class negative-slope lower
+bounds (the accumulated repair debt of 150+ refutations plus reopened
+territory; later generations shrink naturally as candidates register).
+First runs after the upgrade are a burst — `--generator-limit 15` bounds a
+generation.
 
 ### Signals are derived, never stored (hints.json deleted)
 
@@ -461,7 +609,7 @@ python -m run project
 
 # with budgets / knobs (all optional):
 python -m run project --max-generations 5 --rl-episodes 300 --llm-rounds 10 \
-                      --g3-mode fast --llm-propose-n 8
+                      --g3-mode fast --llm-propose-n 12 --generator-limit 15
 python -m run project --no-llm-gen          # pure Graffiti3, no LLM co-proposer
 
 # ── B. Attack a single existing conjecture ───────────────────────────────────
@@ -502,9 +650,10 @@ existing conjectures.
 │  Graffiti3 (txgraffiti): full table + classical strata      │
 │    + dynamic cells (uncovered hypothesis combos, rotated)   │
 │  + Mutation engine (repair refuted / sharpen proved bounds) │
+│  + Support miner (tight C104-class lower-hull bounds)       │
 │  + LLM co-proposer + LLM reviewer  (signal-aware)           │
 │  full-pool gate (~25k p-vecs) + tight-repair rule +         │
-│  vacuity / overfit guards → register status='new'           │
+│  vacuity / overfit / semantic-dup guards → status='new'     │
 └────────────────────────┬────────────────────────────────────┘
                          │ conjectures/conjectures.json (+ registry entry)
                          ▼
@@ -573,7 +722,7 @@ conjectures/conjectures.json
 
 `python -m run project` runs `agent/orchestrator/evolution_loop.py`. One generation:
 
-1. **Generate** — `ConjectureGenerator` reconciles statuses from on-disk artifacts, derives the four prompt signals (proved / refuted / prover-stuck / survivor), builds the discovery table, then gathers candidates from every source: Graffiti3 full-table + classical strata + this round's dynamic cells, the mutation engine (repairs of refuted bounds, sharpenings of proved ones), and optionally `--llm-propose-n` LLM proposals with an LLM review pass. Every candidate faces the same hard gates — full-pool consistency (~25k verified p-vectors), tight-repair rule for refuted shapes, LP-overfit and vacuity guards, dedup — before registration with `status='new'` in `conjectures.json` (+ a `registry.json` entry for survivor counters).
+1. **Generate** — `ConjectureGenerator` reconciles statuses from on-disk artifacts, derives the four prompt signals (proved / refuted / prover-stuck / survivor), builds the discovery table, then gathers candidates from every source: Graffiti3 full-table + classical strata + this round's dynamic cells, the mutation engine (repairs of refuted bounds, sharpenings of proved ones), the support-function miner (tight C104-class lower bounds swept from the full pool), and optionally `--llm-propose-n` LLM proposals with an LLM review pass. Every candidate faces the same hard gates — full-pool consistency (~25k verified p-vectors), tight-repair rule for refuted shapes, LP-overfit and vacuity guards, dedup (exact-formula AND attack-surface: same hypotheses + same arithmetic CE-candidate set as an alive conjecture ⇒ semantic duplicate, dropped) — before registration with `status='new'` in `conjectures.json` (+ a `registry.json` entry for survivor counters).
 2. **Evaluate** — every `status='new'` conjecture runs the full pipeline (Stage 0 → 1 → 2; survivors → Stage 3):
    - CE found → `status='refuted'` (+ CE p-vector + violation detail)
    - proved in Lean → `status='proven'` (+ proof path) → **loop stops**
@@ -585,6 +734,7 @@ conjectures/conjectures.json
 **Rules enforced** (soundness is non-negotiable):
 - Only `status='new'` entries are ever evaluated — conjectures with results never re-enter the loop.
 - `proven` comes **only** from prover success. Surviving CE search is *not* success — it records `prover_failed`, a distinct signal class (probably-true-but-unprovable) the generator treats as structure to mimic, not territory to avoid.
+- Since v3.5 plus, `reconcile_from_artifacts` enforces this in both directions: a `.lean` artifact qualifies as a proof only with the root theorem declared and no failed nodes in its header, and a `proved` entry whose artifact is missing or partial is demoted (`prover_failed` / `new`) automatically.
 - Signals feed the generator only. CE finding, the 5-Check Validator, and the prover run exactly as in single/batch mode.
 
 **Flags** (`python -m run project [flags]`):
@@ -1300,7 +1450,7 @@ Polytope_Conjecture_Prover/
 │   ├── conjecture_generator/
 │   │   ├── agent.py                    # Graffiti3 + LLM co-proposer/reviewer (signal-aware)
 │   │   ├── data/                       # Discovery table assembly
-│   │   └── tools/                      # dataset / signals / mutations / render helpers
+│   │   └── tools/                      # dataset / signals / mutations / support_miner / render
 │   ├── orchestrator/
 │   │   ├── orchestrator.py             # Top-level pipeline (stages 0–3)
 │   │   ├── evolution_loop.py           # Autonomous mode: generate → CE → prove → statuses

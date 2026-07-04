@@ -174,6 +174,12 @@ class LLMCEFinder:
                               stop_event=self.stop_event, max_attempts=1,
                               effort=_LLM_CE_EFFORT)
         except Exception as exc:
+            # Silent exit when another track set stop_event mid-preflight —
+            # expected cancellation, not a CLI failure (same rule as the
+            # round loop below). "preflight failed" here read like a tripped
+            # breaker in the evolution logs when the search was simply over.
+            if "stop_event" in str(exc):
+                return None
             print(f"[LLM ce finding] disabled — CLI preflight failed ({exc}); "
                   f"RL/Hopper/constructor tracks continue")
             return None

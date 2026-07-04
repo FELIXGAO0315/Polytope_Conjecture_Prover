@@ -22,6 +22,12 @@ Runs 4 independent checks over each node whose session status is ``"proved"``:
                          `∑ x ∈ s`, explicit vs elaborator-inserted casts) —
                          the exact false-positive class that killed C137's
                          valid proof on 2026-07-02.
+                         Alias-accepted nodes (fuzzy polib reuse under a
+                         different lemma name) are checked against the REAL
+                         declaration name; a planner-signature mismatch is
+                         WARN, not FAIL — see ``check_node``'s docstring.
+                         Before 2026-07-04 this check was alias-blind and
+                         rejected every legitimate reuse (C201 incident).
   D3  Axiom sweep      — no `axiom` declarations in saved code.  Only the
                          Inventory module may declare axioms; anything the
                          prover writes inline is an unauthorized soundness
@@ -385,6 +391,7 @@ def check_node(
     parsed,
     quality_checker,
     compiler=None,
+    alias_name: str | None = None,
 ) -> DeepCheckResult:
     """Run D1–D4 for one saved node.
 
@@ -394,6 +401,18 @@ def check_node(
 
     ``compiler`` (a LeanCompiler, optional): enables defeq arbitration when
     the textual D2 comparison fails — see ``_defeq_arbitrate``.
+
+    ``alias_name``: set when the node was cache-accepted by reusing an
+    already-proved lemma under a DIFFERENT name (fuzzy polib match, see
+    ``_accept_existing_code``).  The saved code then declares ``alias_name``,
+    not the planner's blueprint name, so the declaration lookup and defeq
+    arbitration must use it.  A planner-signature mismatch on an aliased
+    node is a WARN, not a FAIL: the reused lemma's statement legitimately
+    differs from the planner's intent — it was vetted at cache-accept QC,
+    downstream provers compile against the real lemma, and the whole-Polib
+    build (step 7) remains the soundness gate.  The declaration-missing
+    case still hard-fails regardless of aliasing.  (Never applies to the
+    main target: alias-accept is rejected for it upstream.)
 
     ``is_main_target``, ``parsed``, and ``quality_checker`` are accepted
     for API stability; they are unused now that D5 (semantic re-check on
@@ -420,7 +439,7 @@ def check_node(
     findings.append(msg_in)
     ok = ok and ok_in
 
-    expected_name = _head_name(expected_sig_full) or node_id
+    expected_name = alias_name or _head_name(expected_sig_full) or node_id
     expected_body = strip_head_and_body(expected_sig_full)
     saved_sig = extract_decl_signature(saved_code, expected_name)
 
@@ -445,6 +464,19 @@ def check_node(
             sig_findings.append(f"Signature defeq: FAIL — {detail}")
         else:
             sig_findings.append(f"Signature defeq: WARN — {detail}")
+    # Alias reuse: the saved code IS another proved lemma; comparing it to
+    # this node's planner signature is a category error, so a residual
+    # mismatch demotes to WARN (see docstring).  Requires the aliased
+    # declaration to actually exist — saved_sig None stays a hard FAIL.
+    if not ok_sig and alias_name is not None and saved_sig is not None:
+        ok_sig = True
+        sig_findings = [
+            f.replace("FAIL", "WARN (alias reuse)") for f in sig_findings
+        ]
+        sig_findings.append(
+            f"Signature drift: N/A — node satisfied by reused lemma "
+            f"`{alias_name}`; planner-signature comparison does not apply"
+        )
     findings.extend(sig_findings)
     ok = ok and ok_sig
 

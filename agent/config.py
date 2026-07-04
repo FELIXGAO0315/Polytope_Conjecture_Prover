@@ -34,7 +34,6 @@ class Config:
     lake_binary: str = field(default_factory=lambda: os.environ.get("LAKE_BINARY", "lake"))
     max_rounds_per_node: int = field(default_factory=lambda: int(os.environ.get("MAX_ROUNDS_PER_NODE", "5")))
     max_node_retries: int = field(default_factory=lambda: int(os.environ.get("MAX_NODE_RETRIES", "4")))
-    max_sorry_total: int = field(default_factory=lambda: int(os.environ.get("MAX_SORRY_TOTAL", "0")))
     # Default models target proof-quality, not throughput:
     # - main: Opus 4.7 for actual proof work (generation + fix loop). Sonnet 4.6
     #   was the previous default but lost too often on harder combinatorial proofs.

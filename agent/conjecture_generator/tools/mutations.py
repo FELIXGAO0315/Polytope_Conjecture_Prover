@@ -43,6 +43,13 @@ from agent.orchestrator.tools.pvec_eval import (
 # and the cohort rotates as new results land.
 MUTATION_MAX = 12
 
+# Three-strikes: a shape family refuted this many times keeps dying because
+# its violator family scales with f_2 (hexagon bands exist at EVERY size),
+# not because the constants were off — stop pouring CE cycles into it.
+# Observed 2026-07-02: C125 (f_2≥31) → repair → C138 (f_2≥32) → re-refuted
+# by the next band member {4:6, 6:26}; the treadmill never converges.
+MAX_LINEAGE_REPAIRS = 3
+
 _CONC_RE = re.compile(r"(.*then\s+p6\s*)(<=|>=)(\s*\()(.*)(\)\s*)$", re.DOTALL)
 _F2_ATOM_RE = re.compile(r"\(f_2>=_(\d+)\)")
 _ATOM_SPLIT_RE = re.compile(r"\s+and\s+")
@@ -228,7 +235,22 @@ def generate_mutations(
         if _take(_sharpen(e.get("formula", ""), pool)):
             return out
 
-    for e in reversed(signals.get("refuted") or []):   # most recent first
+    # Lineage census for the three-strikes rule (lazy import: agent.py
+    # imports this module at load time, but by the time generate_mutations
+    # runs the cycle is fully resolved).
+    from collections import Counter
+    from agent.conjecture_generator.agent import ConjectureGenerator as _G
+    lineage: Counter = Counter()
+    refuted = signals.get("refuted") or []
+    for e in refuted:
+        s = _G._formula_shape(e.get("formula", ""))
+        if s is not None:
+            lineage[s] += 1
+
+    for e in reversed(refuted):                        # most recent first
+        shape = _G._formula_shape(e.get("formula", ""))
+        if shape is not None and lineage[shape] >= MAX_LINEAGE_REPAIRS:
+            continue                                   # three strikes — out
         if _take(_repair(e.get("formula", ""), pool)):
             return out
     return out

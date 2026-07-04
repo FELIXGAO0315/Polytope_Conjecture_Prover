@@ -348,10 +348,13 @@ def _step6_deep_check(
       D4  Instance sweep — no SimplyCon3ConnectedMap construction.
 
     Any node that fails is (a) downgraded via ``session.mark_pending`` so
-    step 8's success classifier reports it as failed AND (b) purged from
-    Polib via ``polib_mgr.remove`` so a bad entry can't poison downstream
-    proofs on later runs.  A "success" FormalizationResult can no longer
-    coexist with a deep-check failure, and Polib can no longer carry a
+    step 8's success classifier reports it as failed (or unused, when the
+    root proof never references it) AND (b) purged from Polib via
+    ``polib_mgr.remove`` so a bad entry can't poison downstream proofs on
+    later runs (skipped for alias-reused nodes — nothing was saved under
+    their name, and the alias target belongs to another conjecture).  A
+    "success" FormalizationResult can no longer coexist with a deep-check
+    failure ON THE ROOT'S PROOF CLOSURE, and Polib can no longer carry a
     proof the deep-check rejected.
     """
     from agent.prover.tools.deep_check import check_node
@@ -380,6 +383,7 @@ def _step6_deep_check(
             locked.lean_signature if node.is_main_target
             else (node.lean_signature or "")
         )
+        alias_name = agent._polib_search.resolve_alias(node_id)
         result = check_node(
             node_id=node_id,
             is_main_target=node.is_main_target,
@@ -389,10 +393,14 @@ def _step6_deep_check(
             parsed=parsed,
             quality_checker=agent._quality,
             compiler=agent._compiler,
+            alias_name=alias_name,
         )
 
         tag = "PASS" if result.passed else "FAIL"
-        origin = " (from Polib cache)" if node_id in skipped_snapshot else ""
+        origin = ""
+        if node_id in skipped_snapshot:
+            origin = (f" (from Polib cache → {alias_name})" if alias_name
+                      else " (from Polib cache)")
         agent._log(verbose, f"  [{node_id}] Deep check: {tag}{origin}")
         for f in result.findings:
             if "FAIL" in f or "WARN" in f:
@@ -403,7 +411,8 @@ def _step6_deep_check(
         else:
             agent._log(True,
                 f"  [{node_id}] downgrading — deep check failed "
-                f"(step 8 will report as failed)")
+                f"(step 8 reports it as failed, or unused if the root "
+                f"proof never references it)")
             agent._session.mark_pending(
                 node_id, 0,
                 f"step-6 deep-check failure: {result.failure_summary}",
@@ -411,15 +420,22 @@ def _step6_deep_check(
             # Also purge the tainted entry from Polib so downstream proofs
             # on later runs can't build on it.  session.mark_pending only
             # touches the session view; Polib.lean would still carry the
-            # rejected section without this call.
-            try:
-                agent._polib_mgr.remove(node_id)
+            # rejected section without this call.  Aliased nodes wrote
+            # nothing under their own name — the alias TARGET belongs to
+            # another conjecture and passed its own gates, so it stays.
+            if alias_name is not None:
                 agent._log(verbose,
-                    f"  [{node_id}] purged from Polib (deep check rejected)")
-            except Exception as exc:
-                agent._log(True,
-                    f"  [{node_id}] WARNING: purge failed ({exc}); "
-                    f"Polib may carry a stale rejected entry")
+                    f"  [{node_id}] alias reuse rejected — nothing to purge "
+                    f"(target `{alias_name}` untouched)")
+            else:
+                try:
+                    agent._polib_mgr.remove(node_id)
+                    agent._log(verbose,
+                        f"  [{node_id}] purged from Polib (deep check rejected)")
+                except Exception as exc:
+                    agent._log(True,
+                        f"  [{node_id}] WARNING: purge failed ({exc}); "
+                        f"Polib may carry a stale rejected entry")
             downgraded += 1
 
     tail = f" ({downgraded} downgraded)" if downgraded else ""
@@ -458,14 +474,63 @@ def _step7_polib_repair(agent: "FormalizerAgent", verbose: bool) -> None:
 # Stage 8 - Collect results + assemble proof file
 # ---------------------------------------------------------------------------
 
-def _classify_final_status(nodes_proved: list[str], nodes_failed: list[str]) -> str:
-    """Under no-new-sorry policy a conjecture is ``"success"`` iff EVERY blueprint
-    node was fully proved (zero sorry, zero failures).  Any failed node makes
-    the whole thing ``"failed"`` — there is no intermediate ``"partial"`` state.
+def _classify_final_status(
+    main_target_id: str | None,
+    nodes_proved: list[str],
+    nodes_failed_blocking: list[str],
+) -> str:
+    """``"success"`` iff the ROOT theorem is proved (zero sorry) and no failed
+    node is referenced by any surviving proof.
+
+    The root theorem is the deliverable: it compiled sorry-free inside Polib,
+    and step 7 re-validated the whole Polib build — so every declaration its
+    proof actually pulls in is itself proved.  A failed blueprint node the
+    root never references is planner over-decomposition, not a gap in the
+    proof (the C201 incident: 3 alias-reused sub-lemmas were downgraded by an
+    alias-blind deep check while the root proved itself without them, and the
+    all-nodes rule reported the fully-proved theorem as "failed").
+    ``nodes_failed_blocking`` must already exclude unused failures — see
+    ``_split_unused_failures``.
     """
-    if not nodes_proved and not nodes_failed:
-        return "failed"          # blueprint produced no nodes at all
-    return "success" if not nodes_failed else "failed"
+    if main_target_id is None or main_target_id not in nodes_proved:
+        return "failed"
+    return "success" if not nodes_failed_blocking else "failed"
+
+
+def _split_unused_failures(
+    main_target_id: str | None,
+    nodes_proved: list[str],
+    nodes_failed: list[str],
+    run_codes: dict[str, str],
+) -> tuple[list[str], list[str]]:
+    """Partition ``nodes_failed`` into (blocking, unused).
+
+    A failed node is *unused* when no proved node's saved code references it
+    by name — the root proof simply never needed it.  The scan is a
+    belt-and-suspenders redundancy: a failed node's declaration was purged
+    from Polib in step 6, so a surviving proof referencing it would have
+    already broken the step-7 whole-Polib build.  Comment lines are skipped
+    so a prose mention of the planner name can't flag a false reference.
+    Without a proved main target every failure is blocking — nothing can be
+    "unused" when there is no root proof to be unused BY.
+    """
+    if main_target_id is None or main_target_id not in nodes_proved:
+        return list(nodes_failed), []
+    proved_code_lines: list[str] = []
+    for nid in nodes_proved:
+        for ln in (run_codes.get(nid) or "").splitlines():
+            stripped = ln.strip()
+            if stripped and not stripped.startswith("--"):
+                proved_code_lines.append(ln)
+    blob = "\n".join(proved_code_lines)
+    blocking: list[str] = []
+    unused: list[str] = []
+    for fid in nodes_failed:
+        if re.search(rf"\b{re.escape(fid)}\b", blob):
+            blocking.append(fid)
+        else:
+            unused.append(fid)
+    return blocking, unused
 
 
 def _step8_collect_and_save(
@@ -498,19 +563,32 @@ def _step8_collect_and_save(
     if agent._flog:
         agent._flog.finish_run()
 
+    main_target_id = next(
+        (nid for nid in blueprint.topo_order
+         if blueprint.get_node(nid).is_main_target), None)
+    with agent._run_codes_lock:
+        run_codes = dict(agent._run_codes)
+    blocking, unused = _split_unused_failures(
+        main_target_id, nodes_proved, nodes_failed, run_codes)
+    if unused:
+        agent._log(verbose,
+            f"  [unused] {len(unused)} failed node(s) never referenced by "
+            f"the root proof — recorded as unused, not as failure(s): {unused}")
+
     lean_out_path, _, _ = agent._write_complete_proof_file(
-        output_stem, parsed.name, nodes_proved, nodes_failed,
+        output_stem, parsed.name, nodes_proved, blocking, unused,
     )
     agent._log(verbose, f"[8/9] Formalization saved → {lean_out_path}")
 
     return FormalizationResult(
         theorem_name=parsed.name,
-        status=_classify_final_status(nodes_proved, nodes_failed),
+        status=_classify_final_status(main_target_id, nodes_proved, blocking),
         nodes_proved=nodes_proved,
-        nodes_failed=nodes_failed,
+        nodes_failed=blocking,
         error=None,
         dep_graph_path=dep_graph_path,
         session_state_path=session_state_path,
+        nodes_unused=unused,
     )
 
 
