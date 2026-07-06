@@ -14,6 +14,11 @@
   "timeout_used": 0.0,
   "verdict": "non_realizable"
  },
+ "3:1,4:1,5:11,7:4": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "realizable"
+ },
  "3:1,4:1,5:12,6:1,11:1": {
   "count": -1,
   "timeout_used": 0.0,
@@ -242,6 +247,12 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:1,4:1,5:23,11:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:1,4:1,5:23,12:1,16:1": {
   "attempts": 1,
   "count": 0,
@@ -338,13 +349,13 @@
   "verdict": "non_realizable"
  },
  "3:1,4:10,17:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:1,4:11,19:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -463,6 +474,12 @@
   "verdict": "construction_failed"
  },
  "3:1,4:2,5:21,6:1,14:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:2,5:22,12:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -591,6 +608,18 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:1,4:3,5:21,13:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:3,5:21,14:1,16:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:1,4:3,5:21,15:2": {
   "attempts": 1,
   "count": 0,
@@ -639,6 +668,12 @@
   "timeout_used": 30.0,
   "verdict": "construction_failed"
  },
+ "3:1,4:36,5:14,7:1,8:8,10:8,11:2,15:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
+  "verdict": "construction_failed"
+ },
  "3:1,4:4,5:14,6:7,19:1": {
   "count": -1,
   "timeout_used": 30.0,
@@ -655,6 +690,18 @@
   "verdict": "timeout"
  },
  "3:1,4:4,5:19,6:1,15:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:4,5:20,14:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:4,5:20,15:1,16:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -695,6 +742,18 @@
   "timeout_used": 30.0,
   "verdict": "timeout"
  },
+ "3:1,4:5,5:19,15:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:5,5:19,16:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:1,4:5,5:26,19:1,20:1": {
   "attempts": 6,
   "count": 0,
@@ -708,7 +767,13 @@
   "verdict": "construction_failed"
  },
  "3:1,4:5,7:1": {
-  "attempts": 3,
+  "attempts": 7,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,4:6,5:18,16:1,17:1": {
+  "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -720,13 +785,13 @@
   "verdict": "construction_failed"
  },
  "3:1,4:6,9:1": {
-  "attempts": 3,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:1,4:7,11:1": {
-  "attempts": 3,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -736,6 +801,12 @@
   "timeout_used": 0.0,
   "verdict": "realizable"
  },
+ "3:1,4:7,5:17,17:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:1,4:7,5:23,7:3,10:1,13:3": {
   "attempts": 1,
   "count": 0,
@@ -743,13 +814,13 @@
   "verdict": "construction_failed"
  },
  "3:1,4:8,13:1": {
-  "attempts": 3,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:1,4:9,15:1": {
-  "attempts": 2,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -925,6 +996,12 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:1,5:18,7:9": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
+  "verdict": "construction_failed"
+ },
  "3:1,5:19,16:1": {
   "count": -1,
   "timeout_used": 0.0,
@@ -951,6 +1028,12 @@
   "verdict": "construction_failed"
  },
  "3:1,5:19,6:7,16:1": {
+  "count": 0,
+  "timeout_used": 30.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,5:19,7:10": {
+  "attempts": 1,
   "count": 0,
   "timeout_used": 30.0,
   "verdict": "construction_failed"
@@ -1180,10 +1263,9 @@
   "verdict": "construction_failed"
  },
  "3:1,5:23,6:1,20:1": {
-  "attempts": 2,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "3:1,5:23,6:2,20:1": {
   "count": -1,
@@ -1226,6 +1308,12 @@
   "attempts": 5,
   "count": 0,
   "timeout_used": 180.0,
+  "verdict": "construction_failed"
+ },
+ "3:1,5:24,10:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:1,5:24,11:1,16:1": {
@@ -1383,7 +1471,7 @@
   "verdict": "construction_failed"
  },
  "3:10,10:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -1401,7 +1489,7 @@
   "verdict": "construction_failed"
  },
  "3:10,11:1,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -1413,7 +1501,7 @@
   "verdict": "construction_failed"
  },
  "3:10,12:1,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -1424,19 +1512,19 @@
   "verdict": "non_realizable"
  },
  "3:10,13:1,17:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,14:1,16:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,15:2": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -2351,19 +2439,19 @@
   "verdict": "non_realizable"
  },
  "3:10,6:1,10:1,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:1,11:1,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:1,12:1,18:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -2374,31 +2462,55 @@
   "verdict": "non_realizable"
  },
  "3:10,6:1,13:1,17:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:1,14:1,16:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:1,15:2": {
+  "attempts": 2,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:10,6:2,10:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:10,6:2,11:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:10,6:2,12:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:10,6:2,13:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:2,14:1,16:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:10,6:2,15:2": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -2512,25 +2624,25 @@
   "verdict": "construction_failed"
  },
  "3:11,13:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:11,14:1,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:11,15:1,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:11,16:1,17:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -3057,26 +3169,68 @@
   "timeout_used": 90.0,
   "verdict": "non_realizable"
  },
+ "3:11,6:1,13:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:1,14:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:1,15:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:11,6:1,16:1,17:1": {
+  "attempts": 2,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:2,13:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:2,14:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:2,15:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:11,6:2,16:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:12,16:1,20:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:12,17:1,19:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:12,18:2": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -3293,8 +3447,44 @@
   "timeout_used": 30.0,
   "verdict": "construction_failed"
  },
+ "3:12,6:1,16:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:12,6:1,17:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:12,6:1,18:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:12,6:2,16:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:12,6:2,17:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:12,6:2,18:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:13,19:1,20:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -3362,6 +3552,18 @@
   "timeout_used": 30.0,
   "verdict": "construction_failed"
  },
+ "3:13,6:1,19:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:13,6:2,19:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:13,6:5,19:1,20:1": {
   "attempts": 1,
   "count": 0,
@@ -3394,6 +3596,11 @@
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
+ },
+ "3:14,8:2,14:1,15:2": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
  },
  "3:15,5:2,14:1,15:3": {
   "count": -1,
@@ -3595,6 +3802,18 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:2,4:1,5:21,6:1,11:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:1,5:21,6:1,12:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:2,4:1,5:21,6:1,13:1,16:1": {
   "attempts": 1,
   "count": 0,
@@ -3602,6 +3821,18 @@
   "verdict": "construction_failed"
  },
  "3:2,4:1,5:21,6:1,14:1,15:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:1,5:22,12:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:1,5:22,13:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -3788,9 +4019,21 @@
   "verdict": "construction_failed"
  },
  "3:2,4:10,20:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:11,6:7,8:8": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:15,8:12": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
   "verdict": "construction_failed"
  },
  "3:2,4:17,5:2,11:2,12:2,14:1": {
@@ -3858,6 +4101,18 @@
   "timeout_used": 0.0,
   "verdict": "realizable"
  },
+ "3:2,4:2,5:20,6:1,12:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:2,5:20,6:1,13:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:2,4:2,5:20,6:1,14:1,16:1": {
   "attempts": 1,
   "count": 0,
@@ -3865,6 +4120,18 @@
   "verdict": "construction_failed"
  },
  "3:2,4:2,5:20,6:1,15:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:2,5:21,13:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:2,5:21,14:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -4031,7 +4298,31 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:2,4:3,5:19,6:1,13:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:3,5:19,6:1,14:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:2,4:3,5:19,6:1,15:1,16:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:3,5:20,14:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:3,5:20,15:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -4145,7 +4436,19 @@
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:2,4:4,5:18,6:1,15:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:2,4:4,5:18,6:1,16:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:4,5:19,16:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -4218,13 +4521,13 @@
   "verdict": "construction_failed"
  },
  "3:2,4:4,8:1": {
-  "attempts": 3,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:2,4:5,10:1": {
-  "attempts": 3,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -4236,6 +4539,18 @@
   "verdict": "construction_failed"
  },
  "3:2,4:5,5:16,6:2,16:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:5,5:17,6:1,16:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:5,5:18,17:2": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -4278,12 +4593,18 @@
   "verdict": "construction_failed"
  },
  "3:2,4:6,12:1": {
-  "attempts": 3,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:2,4:6,5:1,13:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,4:6,5:16,6:1,17:2": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -4336,7 +4657,7 @@
   "verdict": "construction_failed"
  },
  "3:2,4:7,14:1": {
-  "attempts": 2,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -4376,7 +4697,7 @@
   "verdict": "construction_failed"
  },
  "3:2,4:8,16:1": {
-  "attempts": 2,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -4393,7 +4714,7 @@
   "verdict": "realizable"
  },
  "3:2,4:9,18:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -4504,7 +4825,7 @@
   "verdict": "realizable"
  },
  "3:2,5:16,7:10": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 30.0,
   "verdict": "construction_failed"
@@ -4549,6 +4870,12 @@
  "3:2,5:17,6:7,17:1": {
   "count": 0,
   "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,5:17,7:11": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
   "verdict": "construction_failed"
  },
  "3:2,5:17,7:9,8:1": {
@@ -4776,6 +5103,12 @@
   "timeout_used": 20.0,
   "verdict": "timeout"
  },
+ "3:2,5:21,7:15": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 30.0,
+  "verdict": "construction_failed"
+ },
  "3:2,5:21,8:1,19:1": {
   "count": -1,
   "timeout_used": 20.0,
@@ -4791,6 +5124,18 @@
   "timeout_used": 20.0,
   "verdict": "timeout"
  },
+ "3:2,5:22,6:1,10:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,5:22,6:1,11:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:2,5:22,6:1,12:1,16:1": {
   "attempts": 1,
   "count": 0,
@@ -4804,6 +5149,18 @@
   "verdict": "construction_failed"
  },
  "3:2,5:22,6:1,14:2": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,5:23,11:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:2,5:23,12:1,17:1": {
   "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
@@ -5784,13 +6141,13 @@
   "verdict": "construction_failed"
  },
  "3:3,4:3,9:1": {
-  "attempts": 4,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:3,4:4,11:1": {
-  "attempts": 4,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -5898,7 +6255,7 @@
   "verdict": "construction_failed"
  },
  "3:3,4:5,13:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -5988,7 +6345,7 @@
   "verdict": "construction_failed"
  },
  "3:3,4:6,15:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -6042,7 +6399,7 @@
   "verdict": "construction_failed"
  },
  "3:3,4:7,17:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -6054,7 +6411,7 @@
   "verdict": "construction_failed"
  },
  "3:3,4:8,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -6847,7 +7204,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:2,10:1": {
-  "attempts": 4,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7104,7 +7461,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:3,12:1": {
-  "attempts": 3,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7319,7 +7676,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:4,14:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7481,7 +7838,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:5,16:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7559,7 +7916,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:6,18:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7589,7 +7946,7 @@
   "verdict": "construction_failed"
  },
  "3:4,4:7,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -7631,43 +7988,43 @@
   "verdict": "construction_failed"
  },
  "3:4,5:11,6:1,17:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:12,18:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:12,6:1,18:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:13,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:13,6:1,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:14,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:4,5:14,6:1,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -8087,6 +8444,11 @@
   "timeout_used": 0.0,
   "verdict": "realizable"
  },
+ "3:4,6:3": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
  "3:4,6:6": {
   "count": -1,
   "timeout_used": 0.0,
@@ -8117,7 +8479,7 @@
   "verdict": "construction_failed"
  },
  "3:5,4:1,11:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -8456,7 +8818,7 @@
   "verdict": "construction_failed"
  },
  "3:5,4:2,13:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -8731,7 +9093,7 @@
   "verdict": "construction_failed"
  },
  "3:5,4:3,15:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -8941,7 +9303,7 @@
   "verdict": "construction_failed"
  },
  "3:5,4:4,17:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9030,7 +9392,7 @@
   "verdict": "construction_failed"
  },
  "3:5,4:5,19:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9107,19 +9469,19 @@
   "verdict": "construction_failed"
  },
  "3:5,5:10,6:1,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:5,5:11,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:5,5:11,6:1,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9485,13 +9847,18 @@
   "verdict": "construction_failed"
  },
  "3:5,6:1,7:1,8:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:5,6:1,7:3": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
  "3:5,6:1,9:1": {
-  "attempts": 4,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9501,14 +9868,25 @@
   "timeout_used": 0.0,
   "verdict": "realizable"
  },
+ "3:5,6:2,7:1,8:1": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
  "3:5,6:2,9:1": {
+  "attempts": 4,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:5,6:3,9:1": {
   "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:5,7:1,8:1": {
-  "attempts": 5,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9549,7 +9927,7 @@
   "verdict": "construction_failed"
  },
  "3:6,4:1,14:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -9973,7 +10351,7 @@
   "verdict": "construction_failed"
  },
  "3:6,4:2,16:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -10254,7 +10632,7 @@
   "verdict": "construction_failed"
  },
  "3:6,4:3,18:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -10404,7 +10782,7 @@
   "verdict": "construction_failed"
  },
  "3:6,4:4,20:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -10916,43 +11294,48 @@
   "verdict": "construction_failed"
  },
  "3:6,6:1,12:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,6:1,7:1,11:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,6:1,8:1,10:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:6,6:1,8:3": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
  "3:6,6:1,9:2": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,6:2,12:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,6:2,7:1,11:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,6:2,8:1,10:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -10963,19 +11346,29 @@
   "verdict": "non_realizable"
  },
  "3:6,6:3,12:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:6,7:1,11:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:6,7:2,8:2": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
+ "3:6,7:4,8:1": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
+ },
  "3:6,8:1,10:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -10986,7 +11379,7 @@
   "verdict": "non_realizable"
  },
  "3:6,9:2": {
-  "attempts": 5,
+  "attempts": 7,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -11028,7 +11421,7 @@
   "verdict": "construction_failed"
  },
  "3:7,4:1,17:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -11724,7 +12117,7 @@
   "verdict": "construction_failed"
  },
  "3:7,4:2,19:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -13343,7 +13736,7 @@
   "verdict": "non_realizable"
  },
  "3:7,6:1,10:1,11:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -13355,55 +13748,55 @@
   "verdict": "construction_failed"
  },
  "3:7,6:1,7:1,14:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
- },
- "3:7,6:1,8:1,13:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
- },
- "3:7,6:1,9:1,12:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
- },
- "3:7,6:2,10:1,11:1": {
-  "attempts": 1,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
- },
- "3:7,6:2,15:1": {
   "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
+ "3:7,6:1,8:1,13:1": {
+  "attempts": 4,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:7,6:1,9:1,12:1": {
+  "attempts": 4,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:7,6:2,10:1,11:1": {
+  "attempts": 2,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:7,6:2,15:1": {
+  "attempts": 5,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:7,6:2,7:1,14:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:7,6:2,8:1,13:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:7,6:2,9:1,12:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:7,6:3,15:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -13436,6 +13829,11 @@
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
+ },
+ "3:7,7:1,8:4": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "non_realizable"
  },
  "3:7,7:1,9:1,11:1": {
   "attempts": 1,
@@ -13549,7 +13947,7 @@
   "verdict": "construction_failed"
  },
  "3:8,4:1,20:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15434,7 +15832,7 @@
   "verdict": "construction_failed"
  },
  "3:8,6:1,10:1,14:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15445,13 +15843,13 @@
   "verdict": "non_realizable"
  },
  "3:8,6:1,11:1,13:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:1,12:2": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15475,7 +15873,7 @@
   "verdict": "construction_failed"
  },
  "3:8,6:1,7:1,17:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15520,7 +15918,7 @@
   "verdict": "non_realizable"
  },
  "3:8,6:1,8:1,16:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15543,7 +15941,7 @@
   "verdict": "non_realizable"
  },
  "3:8,6:1,9:1,15:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -15555,43 +15953,49 @@
   "verdict": "construction_failed"
  },
  "3:8,6:2,10:1,14:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,11:1,13:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,12:2": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,18:1": {
-  "attempts": 4,
+  "attempts": 5,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,7:1,17:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,8:1,16:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:8,6:2,9:1,15:1": {
-  "attempts": 2,
+  "attempts": 3,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:8,6:3,18:1": {
+  "attempts": 1,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -16951,7 +17355,7 @@
   "verdict": "non_realizable"
  },
  "3:9,6:1,10:1,17:1": {
-  "attempts": 2,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -16963,7 +17367,7 @@
   "verdict": "construction_failed"
  },
  "3:9,6:1,11:1,16:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -16974,13 +17378,13 @@
   "verdict": "non_realizable"
  },
  "3:9,6:1,12:1,15:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "3:9,6:1,13:1,14:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17010,7 +17414,7 @@
   "verdict": "construction_failed"
  },
  "3:9,6:1,7:1,20:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17052,7 +17456,7 @@
   "verdict": "construction_failed"
  },
  "3:9,6:1,8:1,19:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17087,7 +17491,7 @@
   "verdict": "non_realizable"
  },
  "3:9,6:1,9:1,18:1": {
-  "attempts": 1,
+  "attempts": 2,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17103,15 +17507,57 @@
   "timeout_used": 0.0,
   "verdict": "non_realizable"
  },
+ "3:9,6:2,10:1,17:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:9,6:2,11:1,16:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:9,6:2,11:3": {
   "count": -1,
   "timeout_used": 0.0,
   "verdict": "non_realizable"
  },
+ "3:9,6:2,12:1,15:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:9,6:2,13:1,14:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:9,6:2,7:1,20:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
+ "3:9,6:2,8:1,19:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
+ },
  "3:9,6:2,9:1,12:2": {
   "count": -1,
   "timeout_used": 0.0,
   "verdict": "non_realizable"
+ },
+ "3:9,6:2,9:1,18:1": {
+  "attempts": 1,
+  "count": 0,
+  "timeout_used": 90.0,
+  "verdict": "construction_failed"
  },
  "3:9,6:9,13:1,14:1": {
   "count": -1,
@@ -17143,7 +17589,7 @@
   "verdict": "construction_failed"
  },
  "3:9,7:1,20:1": {
-  "attempts": 5,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17484,7 +17930,7 @@
   "verdict": "non_realizable"
  },
  "4:1,5:22,6:1,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 1800.0,
   "verdict": "construction_failed"
@@ -17532,10 +17978,9 @@
   "verdict": "non_realizable"
  },
  "4:1,5:23,6:1,19:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "4:1,5:23,6:2,19:1": {
   "count": -1,
@@ -17586,10 +18031,9 @@
   "verdict": "non_realizable"
  },
  "4:1,5:24,6:1,20:1": {
-  "attempts": 4,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "4:1,5:24,6:2,20:1": {
   "count": -1,
@@ -17642,25 +18086,25 @@
   "verdict": "construction_failed"
  },
  "4:10,14:1": {
-  "attempts": 1,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:10,5:5,6:1,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:10,5:6,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:10,5:6,6:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17681,7 +18125,7 @@
   "verdict": "realizable"
  },
  "4:11,16:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17692,7 +18136,7 @@
   "verdict": "realizable"
  },
  "4:11,5:4,6:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17703,13 +18147,13 @@
   "verdict": "realizable"
  },
  "4:12,18:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:13,20:1": {
-  "attempts": 1,
+  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -17879,10 +18323,9 @@
   "verdict": "non_realizable"
  },
  "4:2,5:18,6:1,16:1": {
-  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:2,5:18,6:3,16:1": {
   "count": 0,
@@ -17910,10 +18353,9 @@
   "verdict": "non_realizable"
  },
  "4:2,5:19,6:1,17:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 238.8,
+  "verdict": "non_realizable"
  },
  "4:2,5:19,6:2,17:1": {
   "count": 0,
@@ -17946,10 +18388,9 @@
   "verdict": "non_realizable"
  },
  "4:2,5:20,6:1,18:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 923.0,
+  "verdict": "non_realizable"
  },
  "4:2,5:20,6:4,18:1": {
   "count": 0,
@@ -17983,10 +18424,9 @@
   "verdict": "non_realizable"
  },
  "4:2,5:21,6:1,19:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "4:2,5:21,6:3,19:1": {
   "count": -1,
@@ -18026,16 +18466,14 @@
   "verdict": "construction_failed"
  },
  "4:2,5:22,20:1": {
-  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:2,5:22,6:1,20:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "4:2,5:22,6:2,20:1": {
   "count": -1,
@@ -18205,10 +18643,9 @@
   "verdict": "non_realizable"
  },
  "4:3,5:17,6:1,17:1": {
-  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:3,5:17,6:3,17:1": {
   "count": 0,
@@ -18236,10 +18673,9 @@
   "verdict": "non_realizable"
  },
  "4:3,5:18,6:1,18:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 219.1,
+  "verdict": "non_realizable"
  },
  "4:3,5:18,6:5,18:1": {
   "count": 0,
@@ -18262,10 +18698,9 @@
   "verdict": "non_realizable"
  },
  "4:3,5:19,6:1,19:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 878.1,
+  "verdict": "non_realizable"
  },
  "4:3,5:19,6:4,19:1": {
   "count": -1,
@@ -18299,10 +18734,9 @@
   "verdict": "non_realizable"
  },
  "4:3,5:20,6:1,20:1": {
-  "attempts": 3,
-  "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "count": -1,
+  "timeout_used": 1800.0,
+  "verdict": "timeout"
  },
  "4:3,5:20,6:3,20:1": {
   "count": -1,
@@ -18418,10 +18852,9 @@
   "verdict": "non_realizable"
  },
  "4:4,5:16,6:1,18:1": {
-  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:4,5:16,6:6,18:1": {
   "count": 0,
@@ -18439,10 +18872,9 @@
   "verdict": "non_realizable"
  },
  "4:4,5:17,6:1,19:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 206.6,
+  "verdict": "non_realizable"
  },
  "4:4,5:17,6:5,19:1": {
   "count": -1,
@@ -18465,10 +18897,9 @@
   "verdict": "non_realizable"
  },
  "4:4,5:18,6:1,20:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 843.8,
+  "verdict": "non_realizable"
  },
  "4:4,5:18,6:4,20:1": {
   "count": -1,
@@ -18573,10 +19004,9 @@
   "verdict": "non_realizable"
  },
  "4:5,5:15,6:1,19:1": {
-  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:5,5:15,6:6,19:1": {
   "count": -1,
@@ -18594,10 +19024,9 @@
   "verdict": "non_realizable"
  },
  "4:5,5:16,6:1,20:1": {
-  "attempts": 3,
   "count": 0,
-  "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "timeout_used": 203.8,
+  "verdict": "non_realizable"
  },
  "4:5,5:16,6:5,20:1": {
   "count": -1,
@@ -18665,10 +19094,9 @@
   "verdict": "non_realizable"
  },
  "4:6,5:14,6:1,20:1": {
-  "attempts": 3,
   "count": 0,
   "timeout_used": 90.0,
-  "verdict": "construction_failed"
+  "verdict": "non_realizable"
  },
  "4:6,5:14,6:6,20:1": {
   "count": -1,
@@ -18703,7 +19131,7 @@
   "verdict": "construction_failed"
  },
  "4:7,5:10,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -18714,7 +19142,7 @@
   "verdict": "non_realizable"
  },
  "4:7,5:11,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -18725,7 +19153,7 @@
   "verdict": "non_realizable"
  },
  "4:7,5:12,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -18746,7 +19174,7 @@
   "verdict": "non_realizable"
  },
  "4:7,5:9,17:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -18761,6 +19189,11 @@
   "timeout_used": 0.0,
   "verdict": "realizable"
  },
+ "4:7,6:15,7:2": {
+  "count": -1,
+  "timeout_used": 0.0,
+  "verdict": "realizable"
+ },
  "4:7,6:38,7:2": {
   "attempts": 1,
   "count": 0,
@@ -18768,61 +19201,61 @@
   "verdict": "construction_failed"
  },
  "4:7,8:1": {
-  "attempts": 2,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,10:1": {
-  "attempts": 2,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:10,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:10,6:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:7,6:1,17:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:8,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:8,6:1,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:9,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:8,5:9,6:1,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:9,12:1": {
-  "attempts": 2,
+  "attempts": 6,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
@@ -18833,31 +19266,31 @@
   "verdict": "realizable"
  },
  "4:9,5:6,6:1,18:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:9,5:7,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:9,5:7,6:1,19:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:9,5:8,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"
  },
  "4:9,5:8,6:1,20:1": {
-  "attempts": 3,
+  "attempts": 4,
   "count": 0,
   "timeout_used": 90.0,
   "verdict": "construction_failed"

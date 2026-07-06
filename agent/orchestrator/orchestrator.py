@@ -11,7 +11,9 @@ Given a conjecture name, runs three stages:
            15 rounds) + RL (600 episodes) + Hopper + the finder's constructor
            double check (one stochastic build attempt per survivor)
   Stage 3: Lean prover (gated by the Inventory-entailment pre-check, which
-           also runs the automatic plantri decision of any countermodels)
+           also runs the automatic plantri decision of any countermodels;
+           since 2026-07-05 a NOT-entailed conclusion with no realized
+           countermodel SKIPS the prover — the conjecture stays unsolved)
 
 If any stage finds a CE that passes validation:
   → output/conjecture_with_ce/{Cx}/{Cx}.json          (status=failed)
@@ -566,8 +568,8 @@ def _write_ce_json(
         print(f"[Output] json saved → {conjecture.short_id} (no witness graph)")
 
     # Purge stale no-CE artifacts: a previous formalize run may have written
-    # output/conjecture_without_ce/{c123.lean, C123.json}. This conjecture is
-    # now refuted, so those files are a lie — nuke them.
+    # output/conjecture_without_ce/c123/. This conjecture is now refuted,
+    # so those files are a lie — nuke them.
     _purge_no_ce_artifacts(conjecture, out_dir.parent / "conjecture_without_ce")
 
     return out_path
@@ -577,9 +579,9 @@ def _purge_no_ce_artifacts(conjecture: ParsedConjecture, no_ce_dir: Path) -> Non
     """Remove any stale no-CE artifacts for a now-refuted conjecture.
 
     Handles the current per-stem layout (``no_ce_dir/c123/`` folder holding
-    ``c123.lean`` + ``c123.md``) and the legacy flat layout (top-level
-    ``c123.lean``).  The evolution-loop ``C123.json`` status file lives at
-    the top level in both layouts.  Silent no-op when nothing is there."""
+    ``c123.lean`` + ``c123.md``) and two retired flat layouts (top-level
+    ``c123.lean`` and the evolution-loop ``C123.json`` status record,
+    removed 2026-07-06).  Silent no-op when nothing is there."""
     stem_lower = conjecture.short_id.lower()
     subdir = no_ce_dir / stem_lower
     if subdir.is_dir():
@@ -590,8 +592,8 @@ def _purge_no_ce_artifacts(conjecture: ParsedConjecture, no_ce_dir: Path) -> Non
         except OSError as exc:
             print(f"[Output] failed to remove {subdir}: {exc}")
     legacy_files = [
-        no_ce_dir / f"{stem_lower}.lean",                  # legacy flat layout
-        no_ce_dir / f"{conjecture.short_id}.json",         # evolution-loop status
+        no_ce_dir / f"{stem_lower}.lean",                  # retired flat layout
+        no_ce_dir / f"{conjecture.short_id}.json",         # retired status record
     ]
     for path in legacy_files:
         if path.is_file():
@@ -1192,18 +1194,26 @@ class Orchestrator:
 
     # ── Private helpers ────────────────────────────────────────────────────────
 
-    def _entailment_precheck(self, conjecture: ParsedConjecture) -> bool:
-        """Diagnostic + last-chance CE finder before Stage 3.
+    def _entailment_precheck(self, conjecture: ParsedConjecture) -> str:
+        """Diagnostic + last-chance CE finder + Stage 3 gate. Returns:
 
-        Inventory-countermodel ENUMERATION never gates the prover — that gate
-        was retired (see feedback_precheck_removed). What this still does:
-          • enumerate p-vectors that satisfy Inventory's per-map arithmetic
-            yet violate the conclusion, and print a diagnostic about them;
-          • run plantri exhaustive decision on those candidates — if any is
-            realized, that IS a verified CE → write it and skip Stage 3.
-        Anything else (no countermodels, or countermodels none realized)
-        proceeds to Stage 3 unconditionally; the prover may still derive the
-        conclusion from Mathlib first principles rather than Inventory alone.
+          "proceed"      — no Inventory countermodel within bounds (or the
+                           check itself errored): formalization is plausible;
+          "refuted"      — a countermodel was REALIZED by plantri: verified CE
+                           written, conjecture is false, Stage 3 skipped;
+          "not_entailed" — countermodels exist and none was realized: the
+                           conclusion is not entailed by Inventory's
+                           arithmetic content, so Stage 3 cannot close it
+                           without new axioms (Mathlib lacks the realizability
+                           theory). Caller skips the prover and the conjecture
+                           stays unsolved.
+
+        History: an LP-based precheck gate was retired 2026-06-15
+        (feedback_precheck_removed) and this enumeration stayed
+        diagnostic-only. Gating was reinstated 2026-07-05 (user decision):
+        C193-class conjectures — no CE, not Inventory-entailed — spent hours
+        in Stage 3 with no possible payoff. Force-formalizing one is still
+        possible via the `python -m formalize` CLI, which bypasses this gate.
         """
         from agent.orchestrator.tools.ce_enumerator import (
             enumerate_ce_candidates, inventory_countermodels,
@@ -1213,20 +1223,20 @@ class Orchestrator:
             countermodels = inventory_countermodels(candidates)
         except Exception as exc:
             print(f"[Entailment pre-check] error: {exc} — proceeding with prover")
-            return True
+            return "proceed"
 
         if not countermodels:
             print("[Entailment pre-check] PASS — no Inventory countermodel within "
                   "bounds; formalization is plausible.")
-            return True
+            return "proceed"
 
         print(f"\n[Entailment pre-check] note — conclusion is NOT entailed by Inventory.lean alone")
         print(f"  {len(countermodels)} p-vector(s) within bounds satisfy every Inventory "
               f"axiom (arithmetic content) yet violate the conclusion, e.g.:")
         for cm in countermodels[:3]:
             print(f"    {cm.p_vec}  (f2={cm.f2})")
-        print("  Inventory alone is insufficient — the prover may still close the goal "
-              "from Mathlib first principles.")
+        print("  Inventory alone is insufficient — attempting to realize a countermodel "
+              "as a verified CE before deciding.")
 
         # ── Last-chance plantri decision of the countermodels ─────────────────
         # Same realizability budget as Stage 2. If ANY of these candidates is
@@ -1236,11 +1246,12 @@ class Orchestrator:
         if ce_info is not None:
             _write_ce_json(conjecture, ce_info, self._ce_dir)
             print("  Conjecture REFUTED by plantri exhaustive decision — skipping Stage 3.")
-            return False
+            return "refuted"
 
-        print("  No CE realized from countermodels. Proceeding to Stage 3 — the prover "
-              "may still close the goal from Mathlib first principles.")
-        return True
+        print("  No CE realized from countermodels. Conclusion is not entailed by "
+              "Inventory's arithmetic content — Stage 3 SKIPPED, conjecture kept "
+              "unsolved (closing it needs axioms beyond Inventory, cf. C193).")
+        return "not_entailed"
 
     def _decide_countermodels_with_plantri(
         self, conjecture: ParsedConjecture, countermodels: list
@@ -1553,18 +1564,28 @@ class Orchestrator:
         return None
 
     def _run_prover(self, conjecture: ParsedConjecture) -> str:
-        """Run Stage 3 (prover). Returns 'proved', 'failed' or 'skipped_entailment'.
+        """Run Stage 3 (prover). Returns 'proved', 'failed',
+        'skipped_entailment' (refuted by the precheck's plantri decision) or
+        'skipped_not_entailed' (not Inventory-entailed → prover skipped, the
+        conjecture stays unsolved — user decision 2026-07-05).
         (zero-sorry policy: a 'partial' prover result is NOT proved).
 
         Entailment precheck stays here (it's a CE-finding step that may refute
         the conjecture and skip the prover entirely).  Everything else is
         delegated to ``agent.prover.runner.formalize_conjecture`` so the
-        ``python -m formalize`` CLI and Stage 3 share one prover entry point.
+        ``python -m formalize`` CLI and Stage 3 share one prover entry point
+        (the CLI bypasses the gate, so a force-formalize is always available).
         """
         from agent.prover.runner import formalize_conjecture
 
-        if not self._entailment_precheck(conjecture):
+        verdict = self._entailment_precheck(conjecture)
+        if verdict == "refuted":
             return "skipped_entailment"
+        if verdict == "not_entailed":
+            print(f"[Stage 3] SKIPPED for {conjecture.conjecture_id} — conclusion "
+                  "not entailed by Inventory alone and no countermodel realized; "
+                  "kept unsolved, moving to next conjecture.")
+            return "skipped_not_entailed"
 
         return formalize_conjecture(conjecture, self.config, tag="[Stage 3]")
 

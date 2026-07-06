@@ -678,9 +678,13 @@ def upsert_conjectures(specs: Iterable[ConjectureSpec], dest: Optional[str] = No
 # (`refuted` = has CE, `proven` = has Lean proof) move out of unsolved.
 # `new` and `prover_failed` both mean "still undecided": a prover_failed
 # conjecture might be true — the prover just couldn't close it.
+# `not_entailed` (2026-07-05): CE search exhausted AND the conclusion is not
+# entailed by Inventory's arithmetic content — Stage 3 was skipped, not run.
+# Closing one needs axioms beyond Inventory (C193-class); stays unsolved.
 _STATUS_BUCKET = {
     "new": "unsolved",
     "prover_failed": "unsolved",
+    "not_entailed": "unsolved",
     "refuted": "failed",
     "proven": "proved",
 }
@@ -695,8 +699,8 @@ def set_conjecture_status(
     """Update a conjecture's status in conjectures.json and move it to the
     bucket that matches the terminal outcome. Returns False if not found.
 
-    Buckets: ``unsolved`` (new / prover_failed), ``failed`` (refuted CE
-    exists), ``proved`` (Lean proof exists)."""
+    Buckets: ``unsolved`` (new / prover_failed / not_entailed), ``failed``
+    (refuted CE exists), ``proved`` (Lean proof exists)."""
     data = _load_raw_dataset(dest)
     entry, src = None, None
     for key in _BUCKETS:
@@ -745,7 +749,8 @@ def mark_conjecture_as_solved(name: str, dest: Optional[str] = None) -> None:
 # Every terminal outcome the pipeline produces leaves an artifact on disk:
 #   CE found     → output/conjecture_with_ce/<Cx>/<Cx>.json
 #   Lean proof   → output/conjecture_without_ce/<cx>/<cx>.lean  (or legacy flat)
-#   prover stuck → output/conjecture_without_ce/<Cx>.json  (evolution-loop record)
+# (prover-stuck has no artifact — the evolution loop writes that status
+# straight into conjectures.json)
 # but not every entry point that produces them also updates conjectures.json
 # (a direct `formalize` run updates nothing). Reconcile folds the on-disk
 # truth back into the dataset; it is idempotent and cheap, so both run.py and
@@ -777,9 +782,7 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
 
     Precedence: a verified CE beats a proof file (both present for one
     conjecture means something is deeply wrong — warned loudly, refuted
-    wins because the CE is machine-checked data, not LLM output). The
-    evolution loop's `prover_failed` records only apply to entries that
-    have no terminal outcome."""
+    wins because the CE is machine-checked data, not LLM output)."""
     root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
     ce_dir = os.path.join(root, "output", "conjecture_with_ce")
     no_ce_dir = os.path.join(root, "output", "conjecture_without_ce")
@@ -862,34 +865,6 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
             detail["violation"] = payload["violation_detail"]
         ces[num] = detail
 
-    # Collect evolution-loop prover_failed records (top-level {Cx}.json).
-    # A record contradicted by hard evidence (a proof file or a CE artifact
-    # that arrived later) is STALE — delete it so the directory listing and
-    # the prover-stuck signal stay truthful.
-    stuck: Dict[int, str] = {}
-    for jf in sorted(_glob.glob(os.path.join(no_ce_dir, "*.json"))):
-        num = _entry_num(os.path.splitext(os.path.basename(jf))[0])
-        if num is None:
-            continue
-        try:
-            payload = json.load(open(jf))
-        except Exception:
-            continue
-        if payload.get("status") != "prover_failed":
-            continue
-        if num in proofs or num in ces:
-            try:
-                os.remove(jf)
-                if verbose:
-                    evidence = "proof" if num in proofs else "CE"
-                    print(f"[reconcile] removed stale prover_failed record "
-                          f"{os.path.basename(jf)} (superseded by {evidence})",
-                          flush=True)
-            except Exception:
-                pass
-            continue
-        stuck[num] = payload.get("outcome") or "failed"
-
     changes: Dict[str, str] = {}
 
     def _apply(num: int, status: str, detail: Optional[Dict[str, Any]]) -> None:
@@ -936,11 +911,6 @@ def reconcile_from_artifacts(dest: Optional[str] = None,
         if verbose:
             print(f"[reconcile] DEMOTED {entry.get('name') or num}: was in "
                   f"'proved' without a qualifying proof artifact", flush=True)
-    for num, outcome in stuck.items():
-        if num in by_num and num not in ces and num not in proofs:
-            bucket, entry = by_num[num]
-            if bucket == "unsolved" and entry.get("status") in (None, "new"):
-                _apply(num, "prover_failed", {"outcome": outcome})
 
     if changes:
         _write_raw_dataset(data, dest)

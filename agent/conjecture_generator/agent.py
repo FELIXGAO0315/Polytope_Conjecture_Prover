@@ -1272,13 +1272,74 @@ class ConjectureGenerator:
         except Exception:
             return None
 
+    # Hypothesis atoms this DSL emits: `p_3 = 0`, `p_4 <= 2`, `f_2>=_17`
+    # (underscore threshold form), `sum_pk_k>=7 >= 3` (the variable name
+    # itself contains `>=7`, so it must be matched before the operator).
+    _HYP_ATOM_RE = re.compile(
+        r"^\s*(?P<var>sum_pk_k>=\d+|f_2|p_\d+)\s*"
+        r"(?P<op>>=|<=|=)\s*_?(?P<val>\d+)\s*$")
+
+    @staticmethod
+    def _hyp_conclusion_form(formula: str) -> Optional[tuple]:
+        """Parse a formula into (hypothesis atoms, normalized conclusion) for
+        the implication check: atoms are (var, op, int) triples, conclusion a
+        whitespace-stripped string. Returns None (candidate exempt) when any
+        hypothesis atom fails to parse — no verdict without full coverage."""
+        try:
+            conj = ParsedConjecture.from_conjecture_spec(
+                ConjectureSpec(name="_semdup_probe", formula=formula))
+            atoms = []
+            for h in conj.hypotheses:
+                h = str(h).strip()
+                if h == "is_simple":
+                    continue
+                m = ConjectureGenerator._HYP_ATOM_RE.match(h)
+                if m is None:
+                    return None
+                atoms.append((m.group("var"), m.group("op"),
+                              int(m.group("val"))))
+            concl = re.sub(r"\s+", "", str(conj.conclusion or ""))
+            if not concl:
+                return None
+            return tuple(atoms), concl
+        except Exception:
+            return None
+
+    @staticmethod
+    def _atom_implies(a: tuple, b: tuple) -> bool:
+        """True iff hypothesis atom `a` implies atom `b`."""
+        (va, oa, na), (vb, ob, nb) = a, b
+        if va != vb:
+            return False
+        if oa == "=":
+            return ((ob == "=" and na == nb) or (ob == "<=" and na <= nb)
+                    or (ob == ">=" and na >= nb))
+        if oa == "<=" and ob == "<=":
+            return na <= nb
+        if oa == ">=" and ob == ">=":
+            return na >= nb
+        return False
+
+    @classmethod
+    def _hyps_imply(cls, stronger: tuple, weaker: tuple) -> bool:
+        """conjunction(stronger) ⇒ conjunction(weaker), checked atom-wise:
+        every atom of `weaker` must be implied by some atom of `stronger`."""
+        return all(any(cls._atom_implies(s, w) for s in stronger)
+                   for w in weaker)
+
     def _drop_semantic_dupes(
         self,
         accepted: list[tuple[str, str]],
         alive_specs: list,
     ) -> tuple[list[tuple[str, str]], list[dict]]:
         """Drop candidates whose attack surface duplicates an ALIVE registered
-        conjecture (unsolved + proved) or an earlier candidate in this batch.
+        conjecture (unsolved + proved) or an earlier candidate in this batch,
+        and candidates outright IMPLIED by an alive one — same conclusion
+        with hypotheses at least as restrictive (C195 ⇒ C214 lesson,
+        2026-07-06): the restricted variant carries zero content while its
+        parent is alive, and only earns existence if the parent is later
+        refuted by a CE outside the restriction — the mutation engine's job,
+        not the generator's.
 
         Refuted entries are deliberately NOT compared against: a duplicate of
         a refuted formula dies in Stage 0 for the cost of one witness replay,
@@ -1286,13 +1347,34 @@ class ConjectureGenerator:
         signature computation across ~190 refuted entries would dominate the
         filter's cost for no protection."""
         sigs: dict[tuple, str] = {}
+        forms: list[tuple[str, tuple, str]] = []   # (name, atoms, conclusion)
         for spec in alive_specs:
             sig = self._semantic_signature(spec.formula)
             if sig is not None and sig not in sigs:
                 sigs[sig] = spec.name
+            form = self._hyp_conclusion_form(spec.formula)
+            if form is not None:
+                forms.append((spec.name, form[0], form[1]))
         kept: list[tuple[str, str]] = []
         dropped: list[dict] = []
         for formula, source in accepted:
+            cand_form = self._hyp_conclusion_form(formula)
+            implied_by = None
+            if cand_form is not None:
+                cand_atoms, cand_concl = cand_form
+                for name, atoms, concl in forms:
+                    if concl == cand_concl and self._hyps_imply(cand_atoms,
+                                                                atoms):
+                        implied_by = name
+                        break
+            if implied_by is not None:
+                dropped.append({
+                    "formula": formula, "source": source,
+                    "reason": (f"implied_by {implied_by}: same conclusion, "
+                               f"hypotheses at least as restrictive — "
+                               f"redundant while {implied_by} is alive"),
+                })
+                continue
             sig = self._semantic_signature(formula)
             if sig is not None and sig in sigs:
                 dropped.append({
@@ -1305,11 +1387,14 @@ class ConjectureGenerator:
                 continue
             if sig is not None:
                 sigs[sig] = f"this batch: {formula[:60]}"
+            if cand_form is not None:
+                forms.append((f"this batch: {formula[:60]}",
+                              cand_form[0], cand_form[1]))
             kept.append((formula, source))
         if dropped:
             print(f"[conjecture generator] semantic-dup filter dropped "
-                  f"{len(dropped)} candidate(s) (same attack surface as an "
-                  f"alive conjecture)", flush=True)
+                  f"{len(dropped)} candidate(s) (duplicate attack surface or "
+                  f"implied by an alive conjecture)", flush=True)
         return kept, dropped
 
     # ── LLM reviewer ──────────────────────────────────────────────────────────

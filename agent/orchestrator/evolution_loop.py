@@ -32,8 +32,6 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 from agent.conjectures import (
@@ -47,47 +45,6 @@ from agent.orchestrator.orchestrator import (
     _resolve_lean_output,
 )
 from agent.orchestrator.tools.conjecture_parser import ParsedConjecture
-
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-
-def _write_no_ce_record(
-    spec: ConjectureSpec,
-    parsed: ParsedConjecture,
-    status: str,
-    outcome: str | None = None,
-    proof_path: Path | str | None = None,
-) -> Path | None:
-    """Persist every conjecture that SURVIVED CE search (proven or
-    prover_failed) to output/conjecture_without_ce/{Cx}.json so a single
-    `ls` of the directory shows the prover outcome at a glance.
-
-    Lives at the top level next to the .lean proof files (if any). The
-    `status` field is the discriminator — `proven` for theorems the prover
-    closed, `prover_failed` for ones it couldn't.
-    """
-    target_dir = _PROJECT_ROOT / "output" / "conjecture_without_ce"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    short_id = parsed.conjecture_id or spec.name
-    payload = {
-        "name": spec.name,
-        "short_id": short_id,
-        "formula": spec.formula,
-        "hypotheses": list(parsed.hypotheses),
-        "conclusion": parsed.conclusion,
-        "status": status,
-        "outcome": outcome,
-        "proof": str(proof_path) if proof_path else None,
-        "recorded_at": datetime.now(timezone.utc).isoformat(),
-    }
-    path = target_dir / f"{short_id}.json"
-    try:
-        path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
-        return path
-    except Exception as exc:
-        print(f"[Evolution] warning: could not write no-CE record "
-              f"for {spec.name}: {exc}", flush=True)
-        return None
 
 
 def _pv_jsonable(pv) -> Optional[dict]:
@@ -199,23 +156,23 @@ class EvolutionLoop:
                 return self._record_refuted(spec, pv, "refuted by plantri "
                                             "decision in entailment precheck")
 
+        if outcome == "skipped_not_entailed":
+            # Not entailed by Inventory's arithmetic content and no
+            # countermodel realized: the prover was skipped (user decision
+            # 2026-07-05, C193-class). Stays in the unsolved bucket; no
+            # prover_failed record — the prover never ran.
+            set_conjecture_status(spec.name, "not_entailed",
+                                  detail={"outcome": outcome})
+            return "not_entailed"
+
         if outcome == "proved":
             proof = _resolve_lean_output(c, self.orch._no_ce_dir)
             set_conjecture_status(spec.name, "proven",
                                   detail={"proof": str(proof) if proof else None})
-            record_path = _write_no_ce_record(spec, c, status="proven",
-                                              outcome=outcome, proof_path=proof)
-            if record_path is not None:
-                print(f"[Evolution] proven record → {record_path}", flush=True)
             return "proven"
 
         set_conjecture_status(spec.name, "prover_failed",
                               detail={"outcome": outcome})
-        record_path = _write_no_ce_record(spec, c, status="prover_failed",
-                                          outcome=outcome)
-        if record_path is not None:
-            print(f"[Evolution] prover_failed record → {record_path}",
-                  flush=True)
         return "prover_failed"
 
     def _record_refuted(self, spec: ConjectureSpec, pv, violation: str) -> str:

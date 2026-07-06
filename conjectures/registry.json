@@ -1303,5 +1303,131 @@
     "attempts_without_ce": 0,
     "ce_found_count": 0,
     "potentially_valid": false
+  },
+  "C202": {
+    "name": "C202",
+    "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_34)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C203": {
+    "name": "C203",
+    "formula": "if ((is_simple) and (p_5 <= 2) and (f_2>=_35)), then p6 <= (((2.5 * sum_pk_after_p6) + -5))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C204": {
+    "name": "C204",
+    "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_22) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C205": {
+    "name": "C205",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_27)), then p6 >= (p3)",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C206": {
+    "name": "C206",
+    "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_28)), then p6 >= (((1.833333333 * sum_pk_after_p6) + -3.666666667))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C207": {
+    "name": "C207",
+    "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_30)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C208": {
+    "name": "C208",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_34)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C209": {
+    "name": "C209",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C210": {
+    "name": "C210",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_27)), then p6 >= (p3)",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C211": {
+    "name": "C211",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_27) and (sum_pk_k>=7 >= 3)), then p6 >= (p3)",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C212": {
+    "name": "C212",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_28) and (sum_pk_k>=7 >= 5)), then p6 >= ((1.5 * p3))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C213": {
+    "name": "C213",
+    "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_24) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C215": {
+    "name": "C215",
+    "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_7)), then p6 >= (((-0.6666666667 * sum_pk_after_p6) + 4))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
+  },
+  "C216": {
+    "name": "C216",
+    "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-0.5 * p5) + 6))",
+    "status": "unsolved",
+    "created_at": 1783265039,
+    "attempts_without_ce": 0,
+    "ce_found_count": 0,
+    "potentially_valid": false
   }
 }

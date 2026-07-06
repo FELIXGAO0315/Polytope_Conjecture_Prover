@@ -1,0 +1,557 @@
+{
+  "run_timestamp": "20260705_232359",
+  "generated_at": "2026-07-05T15:23:59.811617+00:00",
+  "dataset_rows": 1604,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C202",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_34)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3"
+    },
+    {
+      "name": "C203",
+      "formula": "if ((is_simple) and (p_5 <= 2) and (f_2>=_35)), then p6 <= (((2.5 * sum_pk_after_p6) + -5))",
+      "source": "graffiti3"
+    },
+    {
+      "name": "C204",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_22) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+      "source": "graffiti3:strat:p5_eq_0"
+    },
+    {
+      "name": "C205",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_27)), then p6 >= (p3)",
+      "source": "graffiti3:strat:p3_le_2"
+    },
+    {
+      "name": "C206",
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_28)), then p6 >= (((1.833333333 * sum_pk_after_p6) + -3.666666667))",
+      "source": "graffiti3:strat:p3_le_2"
+    },
+    {
+      "name": "C207",
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_30)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_le_2"
+    },
+    {
+      "name": "C208",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_34)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_le_2"
+    },
+    {
+      "name": "C209",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_le_2"
+    },
+    {
+      "name": "C210",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_27)), then p6 >= (p3)",
+      "source": "graffiti3:cell:p3<=2&p4<=2"
+    },
+    {
+      "name": "C211",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_27) and (sum_pk_k>=7 >= 3)), then p6 >= (p3)",
+      "source": "graffiti3:cell:p3<=2&s7>=3"
+    },
+    {
+      "name": "C212",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_28) and (sum_pk_k>=7 >= 5)), then p6 >= ((1.5 * p3))",
+      "source": "mutate:repair-f2"
+    },
+    {
+      "name": "C213",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_24) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "mutate:repair-f2"
+    },
+    {
+      "name": "C214",
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_7)), then p6 >= (((-1 * sum_pk_after_p6) + 2))",
+      "source": "miner:p5=0&p3<=2:sum_pk_after_p6"
+    },
+    {
+      "name": "C215",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_7)), then p6 >= (((-0.6666666667 * sum_pk_after_p6) + 4))",
+      "source": "miner:p4=0&p5=0:sum_pk_after_p6"
+    },
+    {
+      "name": "C216",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-0.5 * p5) + 6))",
+      "source": "miner:p3<=2&p4<=2:p5"
+    }
+  ],
+  "rejected": [
+    {
+      "raw": "Conjecture(0 = p_6 | (((is_simple) ∧ (p3_eq_0_and_p4_eq_0)) ∧ (sum_pk_k>=7_at_least_10)))",
+      "source": "graffiti3",
+      "reason": "render_failed"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= (((2.571428571 * sum_pk_after_p6) + -5.142857143))",
+      "source": "graffiti3",
+      "reason": "contradicted by verified p-vector {4: 46, 46: 2} (p6=0.0 > RHS=-0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 6)), then p6 <= ((((0.5714285714 * p4) + (0.7142857143 * sum_pk_after_p6)) + -0.4285714286))",
+      "source": "graffiti3",
+      "reason": "contradicted by verified p-vector {4: 10, 6: 11, 7: 8} (p6=11.0 > RHS=11.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 9)), then p6 >= ((0.5454545455 * p4))",
+      "source": "graffiti3",
+      "reason": "contradicted by verified p-vector {4: 11, 6: 6, 7: 10} (p6=6.0 < RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 11)), then p6 >= ((0.6666666667 * p4))",
+      "source": "graffiti3",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 < RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_19)), then p6 >= (((0.1666666667 * sum_pk_after_p6) + -0.3333333333))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "contradicted by verified p-vector {4: 17, 17: 2} (p6=0.0 < RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_21)), then p6 >= (((0.75 * sum_pk_after_p6) + -1.5))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "contradicted by verified p-vector {4: 10, 6: 3, 7: 8} (p6=3.0 < RHS=4.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 4)), then p6 <= ((((0.25 * p4) + sum_pk_after_p6) + 0.5))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "contradicted by verified p-vector {4: 10, 6: 8, 7: 1, 8: 2, 9: 1} (p6=8.0 > RHS=7.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_12)), then p6 >= ((((0.3 * p5) + (-0.2 * sum_pk_after_p6)) + 1.2))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 6, 5: 1, 7: 5, 8: 1} (p6=0.0 < RHS=0.3000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_13)), then p6 >= ((((0.375 * p5) + (-0.25 * sum_pk_after_p6)) + 1.5))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 6, 5: 1, 7: 5, 8: 1} (p6=0.0 < RHS=0.3750 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_15)), then p6 >= (((-0.25 * sum_pk_after_p6) + 2.25))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 6, 5: 2, 7: 6, 8: 1} (p6=0.0 < RHS=0.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_15)), then p6 >= ((((-0.2727272727 * p5) + (-0.1818181818 * sum_pk_after_p6)) + 2.181818182))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 20, 10: 12} (p6=0.0 < RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (sum_pk_k>=7 >= 11)), then p6 <= (((0.2222222222 * p5) + 1))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 28, 5: 9, 6: 3, 7: 3, 9: 2, 10: 1, 15: 1, 16: 1, 19: 1, 22: 1, 26: 1} (p6=3.0 > RHS=3.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((((-0.4166666667 * p5) + (-0.08333333333 * sum_pk_after_p6)) + 2))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 8, 5: 2, 7: 14} (p6=0.0 > RHS=-0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_21) and (sum_pk_k>=7 >= 11)), then p6 >= (((0.4285714286 * p5) + -0.8571428571))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 8, 5: 2, 7: 10, 8: 2} (p6=0.0 < RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_22) and (sum_pk_k>=7 >= 11)), then p6 <= ((0.3333333333 * p5))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "contradicted by verified p-vector {3: 28, 5: 9, 6: 3, 7: 3, 9: 2, 10: 1, 15: 1, 16: 1, 19: 1, 22: 1, 26: 1} (p6=3.0 > RHS=3.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (f_2>=_16)), then p6 >= (p4)",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 2, 6: 1, 7: 4, 8: 3} (p6=1.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_19) and (sum_pk_k>=7 >= 3)), then p6 >= ((0.09090909091 * p4))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {4: 11, 6: 1, 7: 6, 8: 2} (p6=1.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_21) and (sum_pk_k>=7 >= 3)), then p6 >= ((0.5454545455 * p4))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {4: 11, 6: 6, 7: 10} (p6=6.0 < RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 9)), then p6 >= ((0.5454545455 * p4))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {4: 11, 6: 6, 7: 10} (p6=6.0 < RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 11)), then p6 >= ((0.6666666667 * p4))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 < RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_28) and (sum_pk_k>=7 >= 3)), then p6 >= ((0.6666666667 * p4))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 < RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_19)), then p6 >= (((0.1666666667 * sum_pk_after_p6) + -0.3333333333))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "contradicted by verified p-vector {4: 17, 17: 2} (p6=0.0 < RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_21)), then p6 >= (((0.75 * sum_pk_after_p6) + -1.5))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "contradicted by verified p-vector {4: 10, 6: 3, 7: 8} (p6=3.0 < RHS=4.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "duplicate"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (sum_pk_k>=7 >= 4)), then p6 <= ((((0.25 * p4) + sum_pk_after_p6) + 0.5))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "contradicted by verified p-vector {4: 10, 6: 8, 7: 1, 8: 2, 9: 1} (p6=8.0 > RHS=7.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 11)), then p6 <= ((((-2.413793103 * p3) + (0.6896551724 * p4)) + -0.6896551724))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.8333333333 * p5) + (-0.8333333333 * sum_pk_after_p6)))",
+      "source": "graffiti3:cell:p3<=2&p4<=2",
+      "reason": "contradicted by verified p-vector {5: 22, 6: 15, 8: 2, 9: 2} (p6=15.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (sum_pk_k>=7 >= 3)), then p6 <= ((((-2.285714286 * p3) + (0.7142857143 * p5)) + -0.7142857143))",
+      "source": "graffiti3:cell:p3<=2&p4<=2",
+      "reason": "contradicted by verified p-vector {3: 2, 5: 13, 6: 4, 7: 7} (p6=4.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.7142857143 * p5) + -0.7142857143))",
+      "source": "graffiti3:cell:p3<=2&p4<=2",
+      "reason": "contradicted by verified p-vector {3: 2, 4: 2, 5: 5, 6: 3, 7: 3} (p6=3.0 > RHS=2.8571 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_21) and (sum_pk_k>=7 >= 3)), then p6 >= (((-1 * p5) + 2))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 11, 5: 1, 7: 7, 8: 2} (p6=0.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 9)), then p6 >= (((-1 * p5) + 2))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 11, 5: 1, 7: 7, 8: 2} (p6=0.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.8333333333 * p5) + (-0.8333333333 * sum_pk_after_p6)))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {5: 22, 6: 15, 8: 2, 9: 2} (p6=15.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 3)), then p6 <= ((((-2.285714286 * p3) + (0.7142857143 * p5)) + -0.7142857143))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {3: 2, 5: 13, 6: 4, 7: 7} (p6=4.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 5)), then p6 <= ((((-1 * p5) + (1.857142857 * sum_pk_after_p6)) + -2.285714286))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_21) and (sum_pk_k>=7 >= 3)), then p6 >= ((((-0.75 * p3) + (-0.25 * sum_pk_after_p6)) + 2.25))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 11, 5: 2, 7: 4, 8: 4} (p6=0.0 < RHS=0.2500 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.7142857143 * p5) + -0.7142857143))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {3: 2, 4: 2, 5: 5, 6: 3, 7: 3} (p6=3.0 > RHS=2.8571 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 5)), then p6 <= ((((0.1666666667 * p5) + (1.857142857 * sum_pk_after_p6)) + -2.285714286))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 4)), then p6 <= ((((-1 * p5) + (1.5 * sum_pk_after_p6)) + 2))",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "contradicted by verified p-vector {4: 7, 5: 2, 6: 7, 7: 4} (p6=7.0 > RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.5 * p4) + (0.5 * sum_pk_after_p6) + 4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 23, 6: 11, 8: 1, 9: 1, 12: 1} (p6=11.0 > RHS=5.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0)), then p6 >= (((0.5 * p5) + -6))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 14, 7: 2} (p6=0.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0)), then p6 >= (((0.5 * p3) + -4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 40, 9: 6, 10: 15, 16: 3} (p6=0.0 < RHS=16.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (sum_pk_k>=7 >= 1)), then p6 <= (((0.5 * sum_pk_after_p6) + p4 + 6))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 23, 6: 11, 8: 1, 9: 1, 12: 1} (p6=11.0 > RHS=7.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_7)), then p6 >= (((-0.5 * sum_pk_after_p6) + (0.5 * p5) + 2))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 5: 2, 6: 1, 7: 2} (p6=1.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2)), then p6 >= (((-0.5 * sum_pk_after_p6) + 2))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_23) and (sum_pk_k>=7 >= 1)), then p6 <= (((0.5 * sum_pk_after_p6) + (0.5 * p4)))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 7, 6: 14, 7: 2} (p6=14.0 > RHS=4.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 1)), then p6 <= (((0.5 * sum_pk_after_p6) + p5))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 14, 6: 21, 7: 2} (p6=21.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (f_2>=_40)), then p6 >= ((((0.6 * p4) + (-0.06666666667 * sum_pk_after_p6)) + 0.3333333333))",
+      "source": "graffiti3",
+      "reason": "lp_overfit: denom > 6 in -0.06666666667 ≈ -1/15"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (sum_pk_k>=7 >= 9)), then p6 <= ((((-1.526315789 * p3) + (0.7368421053 * p4)) + -2.105263158))",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "lp_overfit: denom > 6 in -1.526315789 ≈ -29/19, 0.7368421053 ≈ 14/19, -2.105263158 ≈ -40/19"
+    },
+    {
+      "formula": "if ((is_simple)), then p6 >= (0)",
+      "source": "graffiti3",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0)), then p6 >= (0)",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0)), then p6 >= (0)",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0)), then p6 >= (0)",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_12)), then p6 >= (0)",
+      "source": "graffiti3:strat:p3=0_p4=0",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2)), then p6 >= (0)",
+      "source": "graffiti3:strat:p3_le_2",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2)), then p6 >= (0)",
+      "source": "graffiti3:cell:p3<=2&p4<=2",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_12)), then p6 >= (0)",
+      "source": "graffiti3:cell:p3=0&p4<=2",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_11) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "graffiti3:cell:p3<=2&s7>=3",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2)), then p6 >= (((-1 * p3) + (-1 * p4)))",
+      "source": "llm",
+      "reason": "vacuous_rhs: hypothesis forces sup(RHS) = -0 ≤ 0, and p6 ≥ 0 always — bound excludes nothing"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2)), then p6 >= (((-1 * p4) + (-1 * sum_pk_after_p6)))",
+      "source": "llm",
+      "reason": "vacuous_rhs: hypothesis forces sup(RHS) = -0 ≤ 0, and p6 ≥ 0 always — bound excludes nothing"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_17)), then p6 >= (((-3 * sum_pk_after_p6) + 5))",
+      "source": "miner:p3=0:sum_pk_after_p6",
+      "reason": "semantic_duplicate of C193: same hypotheses + identical arithmetic CE-candidate set — different coefficients, same attack surface"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+      "source": "graffiti3",
+      "reason": "llm_review_drop: no verified p-vector satisfies hypothesis (p3<=2 & s7>=10 unattested)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (sum_pk_k>=7 >= 6)), then p6 <= (((2 * sum_pk_after_p6) + -8))",
+      "source": "graffiti3",
+      "reason": "llm_review_drop: not sharp on any verified p-vector"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_41) and (sum_pk_k>=7 >= 6)), then p6 <= ((p4 + 7))",
+      "source": "graffiti3",
+      "reason": "llm_review_drop: not sharp on any verified vector meeting hypothesis"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((p4 + 1))",
+      "source": "graffiti3",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_28)), then p6 >= (((1.833333333 * sum_pk_after_p6) + -3.666666667))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "llm_review_drop: near-duplicate of #17 (more restrictive hypothesis, same RHS)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_30)), then p6 >= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "llm_review_drop: near-duplicate of #18 (p3=0 vs p3<=2, same RHS)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_34)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "llm_review_drop: near-duplicate of #19"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= (((2 * sum_pk_after_p6) + -4))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "llm_review_drop: near-duplicate of #20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+      "source": "graffiti3:strat:p3_eq_0",
+      "reason": "llm_review_drop: no verified vector satisfies hypothesis"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= (((-0.5 * p5) + 1))",
+      "source": "graffiti3:strat:p4_eq_0",
+      "reason": "llm_review_drop: not sharp on any verified vector"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= (((0.5 * p4) + 1))",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (sum_pk_k>=7 >= 11)), then p6 <= (1)",
+      "source": "graffiti3:strat:p5_eq_0",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_27) and (sum_pk_k>=7 >= 6)), then p6 >= ((1.5 * p3))",
+      "source": "graffiti3:cell:p3<=2&p4<=2",
+      "reason": "llm_review_drop: matches refuted shape exactly (CE {3:2,5:18,6:2,8:3,9:2} still violates)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * p4) + 9)) - 3)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: repair of refuted shape but not sharp on any verified vector"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_25)), then p6 >= ((((-1 * p4) + 9)) + 4)",
+      "source": "mutate:repair-f2",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * sum_pk_after_p6) + 2)) - 1)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (((-1 * sum_pk_after_p6) + 2))",
+      "source": "mutate:repair-f2",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * sum_pk_after_p6) + 2)) - 1)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (((-1 * sum_pk_after_p6) + 2))",
+      "source": "mutate:repair-f2",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * sum_pk_after_p6) + 2)) - 1)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_18)), then p6 >= (((-1 * sum_pk_after_p6) + 2))",
+      "source": "mutate:repair-f2",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_27) and (sum_pk_k>=7 >= 5)), then p6 >= (((1.5 * p3)) - 1)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: not sharp on any verified vector"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_23) and (sum_pk_k>=7 >= 1)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 14)",
+      "source": "mutate:repair-const",
+      "reason": "llm_review_drop: not sharp; loose +14 constant"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_7)), then p6 >= (((-1 * sum_pk_after_p6) + 2))",
+      "source": "miner:p3=0&p5=0:sum_pk_after_p6",
+      "reason": "llm_review_drop: near-duplicate of #36 (strictly stronger hypothesis, same RHS)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-2 * sum_pk_after_p6) + 4))",
+      "source": "miner:p4=0&p3<=2:sum_pk_after_p6",
+      "reason": "llm_review_drop: not sharp on any verified vector"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + 9))",
+      "source": "miner:p3=0&p5<=2:p4",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (f_2>=_7)), then p6 >= (((-1 * sum_pk_after_p6) + 4))",
+      "source": "miner:p5=0&p4<=2:sum_pk_after_p6",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_17)), then p6 >= (((-1 * p5) + 16))",
+      "source": "miner:p3=0&p4=0:p5",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 25))",
+      "source": "miner:p3=0&p5<=2:p4",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))",
+      "source": "miner:p3=0&p5=0:p4",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))",
+      "source": "miner:p5=0&p3<=2:p4",
+      "reason": "llm_review_drop: not sharp"
+    },
+    {
+      "formula": "if (is_simple), then p6 <= ((f_2 + (-1 * p3) + (-1 * p4) + (-1 * p5)))",
+      "source": "llm",
+      "reason": "llm_review_drop: RHS uses f_2 which is not an allowed variable (only p3,p4,p5,sum_pk_after_p6)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + (-1 * sum_pk_after_p6) + 2))",
+      "source": "llm",
+      "reason": "llm_review_drop: not sharp on any verified vector"
+    }
+  ]
+}
