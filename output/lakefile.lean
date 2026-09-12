@@ -21,4 +21,9 @@ require polib from "../polib"
 
 @[default_target]
 lean_lib Output where
-  roots := #[`Output]
+  roots := #[
+    `conjecture_without_ce.c104.c104,
+    `conjecture_without_ce.c124.c124,
+    `conjecture_without_ce.c201.c201,
+    `conjecture_without_ce.c215.c215
+  ]

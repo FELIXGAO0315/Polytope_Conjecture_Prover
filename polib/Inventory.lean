@@ -33,7 +33,8 @@
 --   (0 = 2), so False — and hence any conjecture — was derivable with
 --   zero sorry. The ONLY sources of an `IsMap` token are (a) hypotheses
 --   of the theorem being proved and (b) the existential witnesses of
---   `equality_family`. Fabricated instances can never satisfy it.
+--   `equality_family`, which is guarded to produce only maps with m ≥ 6.
+--   Fabricated instances can never satisfy it.
 -- ════════════════════════════════════════════════════════════════════════
 import Mathlib
 
@@ -149,18 +150,23 @@ lemma quad_occ_cancellation {g : ℤ} (M : SimplyCon3ConnectedMap g) (hM : IsMap
     ∑ k ∈ (Finset.Ico 5 (M.m + 1)).erase 6, ((k : ℤ) / 2) * (M.p_i k : ℤ) := by
   sorry
 
-/-- For every n there is a REALIZABLE map of genus g with max face size n+3
-    achieving the p₆ equality case. The `IsMap` conjunct is essential: it is
-    the only introduction route for `IsMap`, and it makes the statement carry
-    real geometric content (existence of bare data satisfying the linear
-    equations alone is trivially provable and was the former formulation). -/
+/-- There is an infinite REALIZABLE family in genus g achieving the p₆ equality
+    case, with max face sizes unbounded below by `n+6`. This deliberately does
+    not prescribe `m = n+c`: the equality equation is not faithful for the
+    small exceptional maps (m = 3, 4, 5), and the former `m = n+3` version
+    conflicted with `p_range`. The `IsMap` conjunct is essential: it is the only
+    introduction route for `IsMap`, and it makes the statement carry real
+    geometric content (existence of bare data satisfying the linear equations
+    alone is trivially provable and was the former formulation). -/
 lemma equality_family {g : ℤ} :
-    ∀ n : ℕ, ∃ (M_n : SimplyCon3ConnectedMap g),
-      IsMap M_n ∧
-      M_n.m = n + 3 ∧
-      3 * (M_n.p_i 6 : ℤ) =
-        12 * (1 - g) - (2 * (M_n.p_i 4 : ℤ) + 3 * (M_n.p_i 5 : ℤ)) +
-        ∑ k ∈ Finset.Ico 7 (M_n.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M_n.p_i k : ℤ) := by
+    ∃ (f : ℕ → SimplyCon3ConnectedMap g), Function.Injective f ∧
+      ∀ n : ℕ,
+        IsMap (f n) ∧
+        n + 6 ≤ (f n).m ∧
+        3 * ((f n).p_i 6 : ℤ) =
+          12 * (1 - g) - (2 * ((f n).p_i 4 : ℤ) + 3 * ((f n).p_i 5 : ℤ)) +
+          ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
+            (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ) := by
   sorry
 
 -- ════════════════════════════════════════════════════════════════════════
@@ -219,12 +225,9 @@ lemma Juc_EqualityConstruction : ∃ (f : ℕ → SimplyCon3ConnectedMap 0),
         ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
           (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ) := by
   classical
-  choose f hIs hm hp6 using equality_family (g := 0)
-  refine ⟨f, fun a b hab => ?_, fun n => ⟨hIs n, ?_⟩⟩
-  · have hmm : (f a).m = (f b).m := congrArg SimplyCon3ConnectedMap.m hab
-    rw [hm a, hm b] at hmm
-    omega
-  · have h := hp6 n
+  obtain ⟨f, hInjective, hf⟩ := equality_family (g := 0)
+  refine ⟨f, hInjective, fun n => ⟨(hf n).1, ?_⟩⟩
+  · have h := (hf n).2.2
     linarith [h]
 
 -- §3.2  Arithmetic helpers (proved)

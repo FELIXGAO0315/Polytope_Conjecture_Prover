@@ -105,14 +105,16 @@ lemma quad_occ_cancellation {g : ℤ} (maps : SimplyCon3ConnectedMap g) (hM : Is
     ∑ k ∈ (Finset.Ico 4 (maps.m + 1)).erase 6, maps.total_occ k ≤
     ∑ k ∈ (Finset.Ico 5 (maps.m + 1)).erase 6, ((k : ℤ) / 2) * (maps.p_i k : ℤ) := by sorry
 
-/-- For every n : ℕ, there exists a REALIZABLE map of genus g (with IsMap token
-    and max face size n+3) achieving the p₆ equality case. NOTE: takes only `n`,
-    no `maps` argument. -/
+/-- There is an infinite REALIZABLE family in genus g achieving the p₆ equality
+    case, with max face sizes unbounded below by n+6. NOTE: takes no `maps`
+    argument. -/
 lemma equality_family {g : ℤ} :
-    ∀ n : ℕ, ∃ (M_n : SimplyCon3ConnectedMap g),
-      IsMap M_n ∧
-      M_n.m = n + 3 ∧
-      3 * (M_n.p_i 6 : ℤ) =
-        12 * (1 - g) - (2 * (M_n.p_i 4 : ℤ) + 3 * (M_n.p_i 5 : ℤ)) +
-        ∑ k ∈ Finset.Ico 7 (M_n.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M_n.p_i k : ℤ) := by sorry
+    ∃ (f : ℕ → SimplyCon3ConnectedMap g), Function.Injective f ∧
+      ∀ n : ℕ,
+        IsMap (f n) ∧
+        n + 6 ≤ (f n).m ∧
+        3 * ((f n).p_i 6 : ℤ) =
+          12 * (1 - g) - (2 * ((f n).p_i 4 : ℤ) + 3 * ((f n).p_i 5 : ℤ)) +
+          ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
+            (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ) := by sorry
 """

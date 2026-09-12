@@ -1386,7 +1386,7 @@ These are the **only** permitted `sorry` in the file. They axiomatize geometric 
 | `p_range` | $p_k = 0$ for $k > m$ |
 | `occupation_conservation` | $\sum_{k \geq 4} \text{occ}(k) = 3p_3$ |
 | `occupation_bound` | $0 \leq \text{occ}(k) \leq \lfloor k/2 \rfloor \cdot p_k$ |
-| `equality_family` | existence of infinite equality family |
+| `equality_family` | existence of an injective infinite equality family with $m \ge n+6$ |
 
 Derived in §2 (proved, **not** an axiom):
 
@@ -1395,6 +1395,8 @@ Derived in §2 (proved, **not** an axiom):
 | `kgon_occupation_bound` | $\text{occ}(k) \leq \lfloor k/2 \rfloor \cdot p_k$ — proved from `occupation_bound` |
 
 > **Soundness fix (2026-06)**: the former `kgon_occupation_bound` and `quad_occ_reduction` quantified over arbitrary `Finset ℕ` instead of the map's occupation data and were refutable inside Lean (e.g. occ = {0,1,2}, k = 4 gives 3 ≤ 2), making the axiom base inconsistent. `kgon_occupation_bound` is restated on `total_occ` and proved; `quad_occ_reduction` ("an $r$-gon adjacent to a quad occupies $\leq \lfloor r/2 \rfloor - 1$") is **removed** — its faithful statement needs face-adjacency data the structure does not carry (the same Mathlib gap that blocks `Juc_InequalityPart`).
+
+> **Equality-family guard**: `equality_family` now states an injective infinite family whose witnesses satisfy `m ≥ n + 6`; it no longer prescribes `m = n + c` for every `n`. The earlier `n + 3` form admitted small exceptional cases; combined with `p_range`, the `n = 0`, `g = 0` witness forced the equality equation into `0 = 12`.
 
 ### §3 — Jučovič Theorem (sphere, g = 0)
 
