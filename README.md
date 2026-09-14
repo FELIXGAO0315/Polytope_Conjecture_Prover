@@ -18,7 +18,7 @@ python -m run project
 
 ## What's New in v3.5 plus (2026-07-04)
 
-### 🎉 C201 proved — the third real theorem
+### 🎉 C201 proved; C215 brings the current total to four
 
 `python -m formalize C201` went end-to-end: 7 nodes, zero `sorry`, root
 theorem compiles. C201 (`p4=0 ∧ p5=0 ∧ Σ₇₊ ≥ 1 ⟹ p6 ≥ −Σ₇₊ + 2`) closes
@@ -29,6 +29,10 @@ single-big-face case. Lesson recorded: that lemma is stronger than the
 occupation section suggests — check its reach BEFORE declaring a survivor
 unprovable (the pre-run analysis here predicted a missing axiom; the prover
 found the route on its own).
+
+C215 is also now a complete Lean artifact: with `p4 = p5 = 0` and
+`f2 ≥ 7`, it proves `3·p6 + 2·Σ₇₊ ≥ 12` (equivalently
+`p6 ≥ -2/3·Σ₇₊ + 4`).
 
 ### The first genuine open conjectures: C193, C195, C198
 
@@ -65,8 +69,10 @@ a missing-theorem issue.
   arithmetic CE candidates coincide exactly). See the new generator
   filter below.
 
-Current standing: **proved 3** (C104, C124, C201), **refuted 190** (all
-witness-verified), **open 3** (C193, C195, C198 — each with its missing
+Current standing: **proved 4** (C104, C124, C201, C215), **refuted 204**
+(witness-verified; 206 CE artifact directories total, excluding C21 and
+C22 because their `witness_graph` is empty/missing), **open 3** among
+numbered C-series conjectures (C193, C195, C198 — each with its missing
 lemma documented).
 
 ### Soundness fix: a failed formalization can no longer be recorded "proven"
@@ -89,7 +95,7 @@ in its own header. Fixes (`agent/conjectures.py`):
   the single source of truth in BOTH directions.
 - **Update (2026-07-04, same day)**: step 8 now writes **no `.lean`
   artifact at all** on a failed run — `output/conjecture_without_ce/`
-  holds complete proofs only (currently exactly c104, c124, c201).
+  holds complete proofs only (currently exactly c104, c124, c201, c215).
   Nothing is lost: a failed run's proved sub-lemmas persist in
   `Polib.lean` for the future re-run. The pre-existing partial artifacts
   (c1, c193, c195) were deleted and their stale `status_detail.partial`
@@ -106,8 +112,9 @@ signature** — (sorted hypothesis atoms, frozenset of its
 `enumerate_ce_candidates` p-vectors under pinned bounds) — and is dropped
 when it matches an ALIVE conjecture (unsolved + proved) or an earlier
 candidate in the batch. Refuted entries are deliberately not compared:
-their duplicates die in Stage 0 for one witness replay, and ~190 extra
-signatures would dominate the filter's cost. Conservative by design:
+their duplicates die in Stage 0 for one witness replay, and 204 extra
+witness-verified refutation signatures would dominate the filter's cost.
+Conservative by design:
 parse failure, empty candidate set, or truncation at the 400 cap exempts
 the candidate (two tight bounds must not merge on the empty set).
 
@@ -220,10 +227,11 @@ generation.
 ### Signals are derived, never stored (hints.json deleted)
 
 The old side-channel hint store rotted the moment a prover run bypassed the
-evolution loop — 3 Lean-proved theorems and 100+ refutations never reached
-the generator. Now every prompt signal (**proved / refuted / prover-stuck /
-survivor**) is derived fresh from `conjectures.json` + `registry.json` +
-on-disk artifacts at generation time (`tools/signals.py`), and
+evolution loop — 4 Lean-proved theorems and 204 witness-verified
+refutations now reach the generator. Every prompt signal (**proved /
+refuted / prover-stuck / survivor**) is derived fresh from
+`conjectures.json` + `registry.json` + on-disk artifacts at generation time
+(`tools/signals.py`), and
 `reconcile_from_artifacts()` (agent/conjectures.py) folds on-disk outcomes
 (CE JSON, proof `.lean`, evolution-loop records) back into
 `conjectures.json` from **every** entry point — `run.py`, `formalize`,
@@ -428,8 +436,8 @@ python -m formalize 104               # 'C' prefix optional
 
 **Stage 0 — cross-conjecture witness pool replay (new stage, decisive, microseconds–seconds)**
 
-- Every CE the pipeline has ever found is reused as a generic refuter for new conjectures. Before any expensive search, Stage 0 runs two sub-phases against every new conjecture:
-  - **(a) Sibling-witness replay** (`_replay_witness_pool`): every `output/conjecture_with_ce/C*/C*.json` carries a `witness_graph` edge list; we re-evaluate hypotheses + conclusion on its p-vector, and on hit re-verify the saved graph via the full 5-check `PVectorCheckAgent` (no shortcut — a stale or tampered file cannot bypass verification). Own folder excluded.
+- Every witness-verified CE the pipeline has found is reused as a generic refuter for new conjectures. Before any expensive search, Stage 0 runs two sub-phases against every new conjecture:
+  - **(a) Sibling-witness replay** (`_replay_witness_pool`): each counted CE record under `output/conjecture_with_ce/C*/C*.json` must carry a non-empty `witness_graph` edge list; we re-evaluate hypotheses + conclusion on its p-vector, and on hit re-verify the saved graph via the full 5-check `PVectorCheckAgent` (no shortcut — a stale or tampered file cannot bypass verification). Own folder excluded. The current disk count is 204 witness-verified refutations out of 206 CE directories; C21 and C22 have empty/missing `witness_graph` data and are excluded from this replay/count.
   - **(b) plantri-harvested pool replay** (`_replay_plantri_pool`): ~24-25k verified-realizable p-vectors collected by `agent/conjecture_generator/tools/plantri_harvest.py` (f₂ ≤ 28). Filter is arithmetic-only (microseconds per entry); plantri rebuilds the witness graph on hits (~1-10 s each).
 - **Post-batch re-sweep** (`_witness_pool_resweep`): the pool grew during the run, so a CE found late may refute a conjecture that failed early. After every worker finishes, Stage 0 (a) re-runs over the still-undecided survivors. High ROI in practice — C23 / C28 / C37 were all caught by exactly this mechanism on 2026-06-28.
 - **Stages renumbered**: 0 = witness pool replay, 1 = random walk, 2 = unified CE search (plantri screen + 4 tracks), 3 = Lean prover. Stage 0 + Stage 1 are pure compute (no API), so they front-load every cheap refutation before any LLM/RL/Hopper budget is spent.
@@ -549,7 +557,7 @@ python -m formalize 104               # 'C' prefix optional
 **Rigor — the validator is now 5 checks**
 
 - **Check 5 — Final ce validation check** (fully independent, zero shared code with Checks 1–4): re-evaluates hypotheses + conclusion with a from-scratch AST-whitelist evaluator working directly off the raw statement (it does not trust `pvec_eval` *or* the upstream hypothesis splitter — a `pvec_eval` hypothesis bug minted the retracted C3 f₂=8 CE), and re-validates the witness graph with networkx instead of graphcalc: 3-regular + planar + 3-connected (Steinitz ⇒ simple 3-polytope) + the p-vector re-derived by tracing every face of the planar embedding must match the candidate exactly.
-- **CE artifacts are folders with visualization**: `output/conjecture_with_ce/C{id}/` contains `C{id}.json` (now persisting the full verified `witness_graph` edge list — every CE is independently re-checkable forever) plus an automatically rendered `C{id}_witness.png` planar drawing, where every interior region is an actual face of the polytope. Re-render anytime: `python agent/orchestrator/tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json --labels`.
+- **CE artifacts are folders with visualization**: `output/conjecture_with_ce/C{id}/` contains `C{id}.json` (for counted witness-verified refutations, this persists the full non-empty verified `witness_graph` edge list, so the CE is independently re-checkable) plus an automatically rendered `C{id}_witness.png` planar drawing, where every interior region is an actual face of the polytope. Current count: 206 CE directories, of which 204 have complete witness graphs and pass the five-check witness-verified standard; C21 and C22 are retained as records but excluded from the witness-verified refutation count. Re-render anytime: `python agent/orchestrator/tools/draw_ce_witness.py output/conjecture_with_ce/C5/C5.json --labels`.
 
 **Quieter logs**: Stage 2 prints `[10/40] … [40/40]` milestones instead of two lines per candidate; Hopper reports every 1000 steps instead of every 100.
 
