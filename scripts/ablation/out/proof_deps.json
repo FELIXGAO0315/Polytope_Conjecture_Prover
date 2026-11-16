@@ -1,0 +1,95 @@
+{
+ "C104": {
+  "root": "C104",
+  "declared": [
+   "C104"
+  ],
+  "root_uses_local_helpers": [],
+  "declared_but_unused_by_root": [],
+  "inventory_symbols_used_by_root_closure": [
+   "Barnette_P6Bound",
+   "IsMap",
+   "Juc_EulerFormula",
+   "Juc_InequalityPart",
+   "p_range"
+  ],
+  "inventory_used_that_are_sorried_base": [
+   "Barnette_P6Bound",
+   "p_range"
+  ]
+ },
+ "C124": {
+  "root": "C124",
+  "declared": [
+   "C124_SumSplit",
+   "C124"
+  ],
+  "root_uses_local_helpers": [],
+  "declared_but_unused_by_root": [
+   "C124_SumSplit"
+  ],
+  "inventory_symbols_used_by_root_closure": [
+   "IsMap",
+   "p_range"
+  ],
+  "inventory_used_that_are_sorried_base": [
+   "p_range"
+  ]
+ },
+ "C201": {
+  "root": "C201",
+  "declared": [
+   "C201_DSEquality",
+   "C201_WeightedSumGeSumPk",
+   "C201_FaceCountSplit",
+   "C193_CaseLargeS",
+   "C201_P3LowerBound",
+   "C201_CaseS1",
+   "C201_CaseS1_helper",
+   "C201"
+  ],
+  "root_uses_local_helpers": [
+   "C201_CaseS1_helper"
+  ],
+  "declared_but_unused_by_root": [
+   "C201_DSEquality",
+   "C201_WeightedSumGeSumPk",
+   "C201_FaceCountSplit",
+   "C193_CaseLargeS",
+   "C201_P3LowerBound",
+   "C201_CaseS1"
+  ],
+  "inventory_symbols_used_by_root_closure": [
+   "IsMap",
+   "P6InequalityPart"
+  ],
+  "inventory_used_that_are_sorried_base": []
+ },
+ "C215": {
+  "root": "C215",
+  "declared": [
+   "C215_DSRelation",
+   "C215_FaceDecomp",
+   "C201_WeightedSumGeSumPk",
+   "C215_P3LowerBound",
+   "C215_ArithIdentity",
+   "C215_SumPkGeBound",
+   "C215"
+  ],
+  "root_uses_local_helpers": [],
+  "declared_but_unused_by_root": [
+   "C215_DSRelation",
+   "C215_FaceDecomp",
+   "C201_WeightedSumGeSumPk",
+   "C215_P3LowerBound",
+   "C215_ArithIdentity",
+   "C215_SumPkGeBound"
+  ],
+  "inventory_symbols_used_by_root_closure": [
+   "IsMap",
+   "Juc_EulerFormula",
+   "Juc_InequalityPart"
+  ],
+  "inventory_used_that_are_sorried_base": []
+ }
+}

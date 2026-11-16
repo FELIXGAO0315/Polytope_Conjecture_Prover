@@ -1,0 +1,51 @@
+{
+ "p3_p6": {
+  "3": [
+   "non_realizable"
+  ],
+  "6": [
+   "realizable"
+  ],
+  "17": [
+   "non_realizable"
+  ],
+  "18": [
+   "realizable"
+  ],
+  "19": [
+   "non_realizable"
+  ],
+  "20": [
+   "realizable"
+  ]
+ },
+ "p4_p6": {
+  "1": [
+   "non_realizable"
+  ],
+  "25": [
+   "realizable"
+  ],
+  "26": [
+   "realizable"
+  ],
+  "27": [
+   "realizable"
+  ]
+ },
+ "p5_p6": {
+  "1": [
+   "non_realizable"
+  ],
+  "2": [
+   "realizable"
+  ],
+  "15": [
+   "realizable"
+  ],
+  "21": [
+   "realizable",
+   "timeout"
+  ]
+ }
+}

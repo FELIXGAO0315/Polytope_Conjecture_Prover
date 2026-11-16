@@ -1,0 +1,79 @@
+######## SEED 1 ########
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C239: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((((-0.5 * p5) + 6)) - 0.5)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C240: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (((-0.5 * p5) + 6))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C241: if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_24) and (sum_pk_k>=7 >= 1)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 15)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C243: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_28) and (sum_pk_k>=7 >= 5)), then p6 >= (((1.5 * p3)) - 2)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C245: if ((is_simple) and (p_3 <= 2) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 36)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C247: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_34)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 33)
+[conjecture generator] WARNING degenerate IRIS (TRL=6.13e-05 < 1e-04) C249: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * p4) + 9)) - 3)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C250: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_25)), then p6 >= ((((-1 * p4) + 9)) + 4)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C251: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + 9))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C254: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 25))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C255: if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C256: if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-2 * p5) + 23))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C237: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + 9))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C240: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 25))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C241: if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C242: if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-2 * p5) + 23))
+[safety] registry checksum unchanged — OK
+[ARM A  feedback ON]  wall=307.8s
+  accepted conjectures      : 41
+  distinct hypothesis cells : 40
+  mean IRIS-T               : 0.488
+  mean IRIS-TRL             : 0.0249
+  fully-tight (T>=0.999)    : 1
+  high-TRL (>=1e-2)         : 26
+  degenerate (TRL<1e-4)     : 12
+  source composition        : {'graffiti3': 22, 'mutate': 12, 'miner': 7}
+[ARM B  feedback OFF]  wall=173.1s
+  accepted conjectures      : 27
+  distinct hypothesis cells : 26
+  mean IRIS-T               : 0.551
+  mean IRIS-TRL             : 0.0294
+  fully-tight (T>=0.999)    : 0
+  high-TRL (>=1e-2)         : 20
+  degenerate (TRL<1e-4)     : 4
+  source composition        : {'graffiti3': 20, 'miner': 7}
+[delta] hypothesis cells reached ONLY with feedback: 14
+wrote /home/felix_gao/Polytope_Conjecture_Prover/scripts/ablation/out/e4_feedback_ablation_seed1.json
+######## SEED 2 ########
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C239: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((((-0.5 * p5) + 6)) - 0.5)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C240: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (((-0.5 * p5) + 6))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C241: if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_24) and (sum_pk_k>=7 >= 1)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 15)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C243: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_28) and (sum_pk_k>=7 >= 5)), then p6 >= (((1.5 * p3)) - 2)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C245: if ((is_simple) and (p_3 <= 2) and (f_2>=_48) and (sum_pk_k>=7 >= 1)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 36)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C247: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_34)), then p6 <= ((((2 * sum_pk_after_p6) + -4)) + 33)
+[conjecture generator] WARNING degenerate IRIS (TRL=6.13e-05 < 1e-04) C249: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((((-1 * p4) + 9)) - 3)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C250: if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_25)), then p6 >= ((((-1 * p4) + 9)) + 4)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C251: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + 9))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C254: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 25))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C255: if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C256: if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-2 * p5) + 23))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C237: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-1 * p4) + 9))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C240: if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 25))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C241: if ((is_simple) and (p_5 = 0) and (p_3 <= 2) and (f_2>=_17)), then p6 >= (((-3 * p4) + 29))
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C242: if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_17)), then p6 >= (((-2 * p5) + 23))
+[safety] registry checksum unchanged — OK
+[ARM A  feedback ON]  wall=307.5s
+  accepted conjectures      : 41
+  distinct hypothesis cells : 40
+  mean IRIS-T               : 0.488
+  mean IRIS-TRL             : 0.0249
+  fully-tight (T>=0.999)    : 1
+  high-TRL (>=1e-2)         : 26
+  degenerate (TRL<1e-4)     : 12
+  source composition        : {'graffiti3': 22, 'mutate': 12, 'miner': 7}
+[ARM B  feedback OFF]  wall=169.8s
+  accepted conjectures      : 27
+  distinct hypothesis cells : 26
+  mean IRIS-T               : 0.551
+  mean IRIS-TRL             : 0.0294
+  fully-tight (T>=0.999)    : 0
+  high-TRL (>=1e-2)         : 20
+  degenerate (TRL<1e-4)     : 4
+  source composition        : {'graffiti3': 20, 'miner': 7}
+[delta] hypothesis cells reached ONLY with feedback: 14
+wrote /home/felix_gao/Polytope_Conjecture_Prover/scripts/ablation/out/e4_feedback_ablation_seed2.json
+######## REGISTRY DIFF ########
+REGISTRY UNCHANGED
+ALL_DONE_E4_SEEDS

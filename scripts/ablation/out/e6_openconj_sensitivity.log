@@ -1,0 +1,9 @@
+========== C193  (f2<=45) ==========
+144 candidates with f2 <= 45 (jobs=8, timeout 15s each)
+Summary: 144 decided/attempted — 117 non-realizable, 27 timeout
+(done C193)
+========== C198  (f2<=45) ==========
+78 candidates with f2 <= 45 (jobs=8, timeout 15s each)
+Summary: 78 decided/attempted — 72 non-realizable, 6 timeout
+(done C198)
+ALL_DONE

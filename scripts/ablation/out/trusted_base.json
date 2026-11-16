@@ -1,0 +1,33 @@
+{
+ "C104": [
+  "Barnette_P6Bound",
+  "euler_formula",
+  "handshake",
+  "occupation_bound",
+  "occupation_conservation",
+  "p_range",
+  "quad_occ_cancellation",
+  "regularity"
+ ],
+ "C201": [
+  "euler_formula",
+  "handshake",
+  "occupation_bound",
+  "occupation_conservation",
+  "p_range",
+  "quad_occ_cancellation",
+  "regularity"
+ ],
+ "C215": [
+  "euler_formula",
+  "handshake",
+  "occupation_bound",
+  "occupation_conservation",
+  "p_range",
+  "quad_occ_cancellation",
+  "regularity"
+ ],
+ "C124": [
+  "p_range"
+ ]
+}

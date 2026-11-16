@@ -1,0 +1,30 @@
+=== Q1 BASELINE TEST: can an exhaustive f2<=36 screen refute these 25 false bounds? ===
+  auto_20260618_214419_72 (witness f2=38): CAUGHT in box
+  auto_20260618_214419_73 (witness f2=38): region empty <=36
+  C157 (witness f2=40): region empty <=36
+  C158 (witness f2=40): region empty <=36
+  C159 (witness f2=40): region empty <=36
+  C160 (witness f2=40): region empty <=36
+  C161 (witness f2=40): region empty <=36
+  C169 (witness f2=40): region empty <=36
+  C171 (witness f2=40): region empty <=36
+  C172 (witness f2=40): region empty <=36
+  C173 (witness f2=40): region empty <=36
+  C141 (witness f2=42): region empty <=36
+  C165 (witness f2=45): region empty <=36
+  C162 (witness f2=46): region empty <=36
+  C143 (witness f2=47): region empty <=36
+  C170 (witness f2=47): region empty <=36
+  auto_20260627_163213_87 (witness f2=47): region empty <=36
+  C209 (witness f2=48): region empty <=36
+  C131 (witness f2=49): region empty <=36
+  C126 (witness f2=51): region empty <=36
+  C163 (witness f2=55): region empty <=36
+  C164 (witness f2=55): region empty <=36
+  auto_20260627_163213_77 (witness f2=55): region empty <=36
+  C140 (witness f2=66): region empty <=36
+  auto_20260618_214419_69 (witness f2=72): region empty <=36
+
+SUMMARY 25: FOOLED(0 CE in box)=0, region-empty<=36=24, CAUGHT=1, err=0
+=> an f2<=36 enumeration fails to refute 24/25; their counterexamples exist only at f2=0-72
+Q1_DONE

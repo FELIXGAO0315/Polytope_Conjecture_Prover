@@ -1,0 +1,207 @@
+cid,found_by,track_category,is_replay,replay_from,qualifying_png,has_witness_graph,f2,p_vector,found_at_round,n_other_candidates_not_checked
+C10,plantri ce finder,plantri_exhaustive_screen,False,,True,True,19,"[1, 1, 13, 3, 0, 0, 0, 0, 0, 1]",6,0
+C100,plantri_pool_replay,plantri_pool_replay,True,,True,True,12,"[5, 0, 2, 1, 3, 1]",0,0
+C101,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
+C102,witness_pool_replay (from C72),cross_conjecture_witness_replay,True,C72,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C103,witness_pool_replay (from C100),cross_conjecture_witness_replay,True,C100,True,True,12,"[5, 0, 2, 1, 3, 1]",0,0
+C105,witness_pool_replay (from C102),cross_conjecture_witness_replay,True,C102,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C106,plantri_pool_replay,plantri_pool_replay,True,,True,True,16,"[4, 3, 0, 3, 6]",0,0
+C107,witness_pool_replay (from C102),cross_conjecture_witness_replay,True,C102,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C108,plantri_pool_replay,plantri_pool_replay,True,,True,True,14,"[5, 1, 0, 3, 5]",0,0
+C109,witness_pool_replay (from C102),cross_conjecture_witness_replay,True,C102,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C11,plantri ce finder,plantri_exhaustive_screen,False,,True,True,18,"[2, 0, 13, 2, 0, 0, 0, 0, 0, 0, 1]",10,0
+C110,witness_pool_replay (from C98),cross_conjecture_witness_replay,True,C98,True,True,22,"[0, 10, 0, 7, 2, 3]",0,0
+C111,witness_pool_replay (from C102),cross_conjecture_witness_replay,True,C102,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C112,witness_pool_replay (from C73),cross_conjecture_witness_replay,True,C73,True,True,46,"[0, 0, 14, 30, 2]",0,0
+C113,witness_pool_replay (from C50),cross_conjecture_witness_replay,True,C50,True,True,17,"[2, 1, 12, 1, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C114,plantri ce finder,plantri_exhaustive_screen,False,,True,True,19,"[1, 0, 15, 1, 0, 0, 2]",1,0
+C115,llm ce finder,llm_constructor,False,,True,True,26,"[2, 0, 13, 4, 7]",2,4
+C116,plantri_pool_replay,plantri_pool_replay,True,,True,True,16,"[2, 0, 10, 1, 2, 1]",0,0
+C117,witness_pool_replay (from C92),cross_conjecture_witness_replay,True,C92,True,True,20,"[0, 11, 0, 1, 6, 2]",0,0
+C118,plantri_pool_replay,plantri_pool_replay,True,,True,True,22,"[0, 11, 2, 0, 6, 3]",0,0
+C119,witness_pool_replay (from C75),cross_conjecture_witness_replay,True,C75,True,True,29,"[0, 0, 20, 1, 8]",0,0
+C12,plantri ce finder,plantri_exhaustive_screen,False,,True,True,26,"[0, 0, 19, 6, 0, 0, 0, 0, 0, 0, 1]",26,0
+C120,witness_pool_replay (from C119),cross_conjecture_witness_replay,True,C119,True,True,29,"[0, 0, 20, 1, 8]",0,0
+C121,witness_pool_replay (from C112),cross_conjecture_witness_replay,True,C112,True,True,46,"[0, 0, 14, 30, 2]",0,0
+C122,witness_pool_replay (from C52),cross_conjecture_witness_replay,True,C52,True,True,19,"[1, 7, 1, 7, 0, 3]",0,0
+C123,witness_pool_replay (from C10),cross_conjecture_witness_replay,True,C10,True,True,19,"[1, 1, 13, 3, 0, 0, 0, 0, 0, 1]",0,0
+C125,plantri ce finder,plantri_exhaustive_screen,False,,True,True,31,"[0, 6, 0, 25]",1,0
+C126,rl ce finder,rl_policy,False,,True,True,51,"[25, 2, 4, 9, 1, 1, 2, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1]",108,0
+C127,witness_pool_replay (from C125),cross_conjecture_witness_replay,True,C125,True,True,31,"[0, 6, 0, 25]",0,0
+C128,llm ce finder,llm_constructor,False,,True,True,27,"[0, 11, 0, 6, 10]",1,4
+C129,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[2, 0, 12, 1, 0, 0, 2]",1,0
+C13,plantri ce finder,plantri_exhaustive_screen,False,,True,True,18,"[1, 1, 12, 3, 0, 0, 0, 0, 1]",6,0
+C130,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[1, 0, 12, 1, 3]",1,0
+C131,rl ce finder,rl_policy,False,,True,True,49,"[24, 1, 7, 7, 2, 0, 1, 1, 0, 2, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]",73,0
+C132,hopper ce finder,hopper,False,,True,True,23,"[2, 16, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]",592,0
+C133,plantri_pool_replay,plantri_pool_replay,True,,True,True,22,"[0, 10, 0, 9, 1, 0, 1, 1]",0,0
+C134,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[5, 1, 0, 6, 5]",1,0
+C135,llm ce finder,llm_constructor,False,,True,True,22,"[7, 0, 0, 6, 9]",1,4
+C136,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[1, 1, 13, 0, 0, 0, 2]",2,0
+C137,plantri_pool_replay,plantri_pool_replay,True,,True,True,13,"[5, 0, 2, 1, 5]",0,0
+C138,plantri ce finder,plantri_exhaustive_screen,False,,True,True,32,"[0, 6, 0, 26]",1,0
+C139,plantri ce finder,plantri_exhaustive_screen,False,,True,True,33,"[2, 2, 2, 27]",1,0
+C14,plantri ce finder,plantri_exhaustive_screen,False,,True,True,27,"[0, 0, 19, 7, 0, 0, 0, 0, 0, 0, 1]",27,0
+C140,rl ce finder,rl_policy,False,,True,True,66,"[25, 11, 3, 18, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1]",126,0
+C141,rl ce finder,rl_policy,False,,True,True,42,"[15, 7, 2, 8, 2, 2, 0, 0, 2, 0, 2, 1, 0, 0, 1]",12,0
+C142,llm ce finder,llm_constructor,False,,True,True,31,"[0, 13, 2, 0, 16]",2,2
+C143,llm ce finder,llm_constructor,False,,True,True,47,"[0, 0, 13, 33, 1]",1,4
+C144,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[8, 0, 2, 5, 0, 0, 0, 0, 0, 0, 2]",1,0
+C145,plantri ce finder,plantri_exhaustive_screen,False,,True,True,26,"[4, 2, 0, 16, 4]",1,0
+C146,plantri ce finder,plantri_exhaustive_screen,False,,True,True,24,"[2, 0, 20, 0, 0, 0, 0, 0, 0, 0, 2]",8,0
+C147,llm ce finder,llm_constructor,False,,True,True,27,"[2, 0, 14, 3, 8]",11,3
+C148,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[2, 0, 10, 1, 4]",1,0
+C149,witness_pool_replay (from C146),cross_conjecture_witness_replay,True,C146,True,True,24,"[2, 0, 20, 0, 0, 0, 0, 0, 0, 0, 2]",0,0
+C15,plantri ce finder,plantri_exhaustive_screen,False,,True,True,19,"[0, 0, 14, 4, 0, 1]",19,0
+C150,witness_pool_replay (from C146),cross_conjecture_witness_replay,True,C146,True,True,24,"[2, 0, 20, 0, 0, 0, 0, 0, 0, 0, 2]",0,0
+C151,witness_pool_replay (from C146),cross_conjecture_witness_replay,True,C146,True,True,24,"[2, 0, 20, 0, 0, 0, 0, 0, 0, 0, 2]",0,0
+C152,witness_pool_replay (from C142),cross_conjecture_witness_replay,True,C142,True,True,31,"[0, 13, 2, 0, 16]",0,0
+C153,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[9, 0, 2, 1, 1, 0, 0, 4]",2,0
+C154,witness_pool_replay (from C146),cross_conjecture_witness_replay,True,C146,True,True,24,"[2, 0, 20, 0, 0, 0, 0, 0, 0, 0, 2]",0,0
+C155,plantri ce finder,plantri_exhaustive_screen,False,,True,True,33,"[0, 6, 0, 27]",1,0
+C156,plantri ce finder,plantri_exhaustive_screen,False,,True,True,34,"[3, 1, 1, 29]",1,0
+C157,llm ce finder,llm_constructor,False,,True,True,40,"[0, 0, 21, 10, 9]",1,4
+C158,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C159,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C16,plantri ce finder,plantri_exhaustive_screen,False,,True,True,21,"[1, 0, 14, 5, 0, 0, 0, 0, 1]",2,0
+C160,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C161,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C162,llm ce finder,llm_constructor,False,,True,True,46,"[4, 0, 5, 32, 5]",1,4
+C163,rl ce finder,rl_policy,False,,True,True,55,"[20, 11, 11, 0, 1, 2, 3, 0, 1, 1, 1, 0, 2, 0, 0, 0, 0, 0, 1, 1]",37,0
+C164,witness_pool_replay (from C163),cross_conjecture_witness_replay,True,C163,True,True,55,"[20, 11, 11, 0, 1, 2, 3, 0, 1, 1, 1, 0, 2, 0, 0, 0, 0, 0, 1, 1]",0,0
+C165,rl ce finder,rl_policy,False,,True,True,45,"[18, 7, 2, 5, 4, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",124,0
+C166,llm ce finder,llm_constructor,False,,True,True,21,"[8, 0, 0, 1, 12]",1,4
+C167,llm ce finder,llm_constructor,False,,True,True,29,"[0, 10, 0, 11, 8]",1,4
+C168,llm ce finder,llm_constructor,False,,True,True,34,"[0, 14, 2, 0, 18]",1,2
+C169,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C17,plantri ce finder,plantri_exhaustive_screen,False,,True,True,28,"[0, 0, 20, 7, 0, 0, 0, 0, 0, 0, 0, 1]",28,0
+C170,llm ce finder,llm_constructor,False,,True,True,47,"[0, 0, 14, 31, 2]",1,4
+C171,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C172,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C173,witness_pool_replay (from C157),cross_conjecture_witness_replay,True,C157,True,True,40,"[0, 0, 21, 10, 9]",0,0
+C174,witness_pool_replay (from C167),cross_conjecture_witness_replay,True,C167,True,True,29,"[0, 10, 0, 11, 8]",0,0
+C175,llm ce finder,llm_constructor,False,,True,True,25,"[2, 1, 13, 0, 9]",6,3
+C176,llm ce finder,llm_constructor,False,,True,True,27,"[2, 3, 10, 2, 10]",8,3
+C177,witness_pool_replay (from C175),cross_conjecture_witness_replay,True,C175,True,True,25,"[2, 1, 13, 0, 9]",0,0
+C178,witness_pool_replay (from C175),cross_conjecture_witness_replay,True,C175,True,True,25,"[2, 1, 13, 0, 9]",0,0
+C179,witness_pool_replay (from C175),cross_conjecture_witness_replay,True,C175,True,True,25,"[2, 1, 13, 0, 9]",0,0
+C18,plantri ce finder,plantri_exhaustive_screen,False,,True,True,29,"[0, 0, 20, 8, 0, 0, 0, 0, 0, 0, 0, 1]",29,0
+C180,witness_pool_replay (from C175),cross_conjecture_witness_replay,True,C175,True,True,25,"[2, 1, 13, 0, 9]",0,0
+C181,witness_pool_replay (from C167),cross_conjecture_witness_replay,True,C167,True,True,29,"[0, 10, 0, 11, 8]",0,0
+C182,plantri ce finder,plantri_exhaustive_screen,False,,True,True,23,"[0, 7, 0, 14, 2]",1,0
+C183,plantri ce finder,plantri_exhaustive_screen,False,,True,True,27,"[2, 0, 18, 2, 0, 3, 2]",1,0
+C184,llm ce finder,llm_constructor,False,,True,True,20,"[7, 0, 2, 0, 11]",2,4
+C185,witness_pool_replay (from C184),cross_conjecture_witness_replay,True,C184,True,True,20,"[7, 0, 2, 0, 11]",0,0
+C186,witness_pool_replay (from C168),cross_conjecture_witness_replay,True,C168,True,True,34,"[0, 14, 2, 0, 18]",0,0
+C187,witness_pool_replay (from C168),cross_conjecture_witness_replay,True,C168,True,True,34,"[0, 14, 2, 0, 18]",0,0
+C188,llm ce finder,llm_constructor,False,,True,True,26,"[2, 0, 15, 0, 9]",4,4
+C189,witness_pool_replay (from C167),cross_conjecture_witness_replay,True,C167,True,True,29,"[0, 10, 0, 11, 8]",0,0
+C19,plantri ce finder,plantri_exhaustive_screen,False,,True,True,30,"[0, 0, 21, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1]",30,0
+C190,witness_pool_replay (from C184),cross_conjecture_witness_replay,True,C184,True,True,20,"[7, 0, 2, 0, 11]",0,0
+C191,witness_pool_replay (from C184),cross_conjecture_witness_replay,True,C184,True,True,20,"[7, 0, 2, 0, 11]",0,0
+C192,witness_pool_replay (from C168),cross_conjecture_witness_replay,True,C168,True,True,34,"[0, 14, 2, 0, 18]",0,0
+C194,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[2, 2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",12,0
+C196,witness_pool_replay (from C194),cross_conjecture_witness_replay,True,C194,True,True,17,"[2, 2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C197,witness_pool_replay (from C194),cross_conjecture_witness_replay,True,C194,True,True,17,"[2, 2, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C2,plantri ce finder,plantri_exhaustive_screen,False,,True,True,22,"[1, 0, 16, 4, 0, 0, 0, 0, 0, 0, 1]",2,0
+C20,plantri ce finder,plantri_exhaustive_screen,False,,True,True,31,"[0, 0, 21, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1]",31,0
+C200,llm ce finder,llm_constructor,False,,True,True,18,"[2, 6, 2, 0, 8]",3,4
+C202,plantri ce finder,plantri_exhaustive_screen,False,,True,True,34,"[4, 1, 0, 27, 2]",1,0
+C203,plantri ce finder,plantri_exhaustive_screen,False,,True,True,35,"[2, 2, 2, 29]",1,0
+C204,rl ce finder,rl_policy,False,,True,True,35,"[15, 5, 0, 5, 4, 1, 1, 0, 0, 0, 1, 0, 3]",103,0
+C205,llm ce finder,llm_constructor,False,,True,True,29,"[2, 0, 16, 1, 10]",8,1
+C206,llm ce finder,llm_constructor,False,,True,True,30,"[2, 8, 0, 10, 10]",1,4
+C207,witness_pool_replay (from C206),cross_conjecture_witness_replay,True,C206,True,True,30,"[2, 8, 0, 10, 10]",0,0
+C208,witness_pool_replay (from C203),cross_conjecture_witness_replay,True,C203,True,True,35,"[2, 2, 2, 29]",0,0
+C209,llm ce finder,llm_constructor,False,,True,True,48,"[0, 0, 13, 34, 1]",1,4
+C21,plantri ce finder,plantri_exhaustive_screen,False,,False,False,33,"[0, 0, 23, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C210,witness_pool_replay (from C205),cross_conjecture_witness_replay,True,C205,True,True,29,"[2, 0, 16, 1, 10]",0,0
+C211,witness_pool_replay (from C205),cross_conjecture_witness_replay,True,C205,True,True,29,"[2, 0, 16, 1, 10]",0,0
+C212,witness_pool_replay (from C205),cross_conjecture_witness_replay,True,C205,True,True,29,"[2, 0, 16, 1, 10]",0,0
+C213,plantri ce finder,plantri_exhaustive_screen,False,,True,True,24,"[0, 7, 0, 15, 2]",1,0
+C216,pvector_walk,eberhard_lattice_walk,False,,True,True,17,"[1, 1, 11, 0, 4]",10014,0
+C22,plantri ce finder,plantri_exhaustive_screen,False,,False,False,33,"[0, 0, 12, 21]",1,0
+C23,witness_pool_replay (from C24),cross_conjecture_witness_replay,True,C24,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C24,rl ce finder,rl_policy,False,,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",385,0
+C25,plantri ce finder,plantri_exhaustive_screen,False,,True,True,38,"[3, 0, 4, 30, 1]",1,0
+C26,plantri ce finder,plantri_exhaustive_screen,False,,True,True,42,"[3, 0, 4, 34, 1]",1,0
+C27,rl ce finder,rl_policy,False,,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",52,0
+C28,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C29,rl ce finder,rl_policy,False,,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",110,0
+C3,plantri ce finder,plantri_exhaustive_screen,False,,True,True,13,"[0, 2, 9, 1, 1]",3,0
+C30,plantri ce finder,plantri_exhaustive_screen,False,,True,True,22,"[4, 0, 0, 18]",1,0
+C31,plantri ce finder,plantri_exhaustive_screen,False,,True,True,24,"[4, 0, 0, 20]",1,0
+C32,plantri ce finder,plantri_exhaustive_screen,False,,True,True,21,"[3, 0, 3, 15]",2,0
+C33,pvector_walk,eberhard_lattice_walk,False,,True,True,24,"[9, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]",14,0
+C34,plantri ce finder,plantri_exhaustive_screen,False,,True,True,20,"[9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 1, 1]",1,0
+C35,plantri ce finder,plantri_exhaustive_screen,False,,True,True,13,"[1, 0, 9, 3]",1,0
+C36,plantri ce finder,plantri_exhaustive_screen,False,,True,True,10,"[4, 0, 0, 6]",2,0
+C37,witness_pool_replay (from C45),cross_conjecture_witness_replay,True,C45,True,True,61,"[33, 6, 6, 3, 2, 1, 0, 2, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C38,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C39,plantri ce finder,plantri_exhaustive_screen,False,,True,True,16,"[0, 4, 9, 0, 1, 2]",1,0
+C4,plantri ce finder,plantri_exhaustive_screen,False,,True,True,21,"[1, 0, 15, 4, 0, 0, 0, 0, 0, 1]",2,0
+C40,rl ce finder,rl_policy,False,,True,True,70,"[35, 4, 11, 10, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1]",251,0
+C41,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C42,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C43,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C44,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C45,rl ce finder,rl_policy,False,,True,True,61,"[33, 6, 6, 3, 2, 1, 0, 2, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]",99,0
+C46,rl ce finder,rl_policy,False,,True,True,61,"[32, 3, 7, 10, 0, 0, 1, 0, 2, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1]",152,0
+C47,rl ce finder,rl_policy,False,,True,True,73,"[32, 8, 18, 5, 0, 0, 0, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 1]",156,0
+C48,plantri ce finder,plantri_exhaustive_screen,False,,True,True,5,"[2, 3]",1,0
+C49,plantri ce finder,plantri_exhaustive_screen,False,,True,True,14,"[5, 1, 6, 0, 0, 0, 0, 0, 1, 1]",11,0
+C5,plantri ce finder,plantri_exhaustive_screen,False,,True,True,24,"[2, 0, 16, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]",10,0
+C50,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[2, 1, 12, 1, 0, 0, 0, 0, 0, 0, 0, 1]",15,0
+C51,pvector_walk,eberhard_lattice_walk,False,,True,True,18,"[5, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]",12,0
+C52,plantri ce finder,plantri_exhaustive_screen,False,,True,True,19,"[1, 7, 1, 7, 0, 3]",1,0
+C53,rl ce finder,rl_policy,False,,True,True,49,"[22, 2, 15, 4, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1]",312,0
+C54,rl ce finder,rl_policy,False,,True,True,54,"[26, 4, 12, 5, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1]",509,0
+C55,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C56,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C57,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C58,plantri ce finder,plantri_exhaustive_screen,False,,True,True,31,"[0, 3, 19, 1, 3, 5]",1,0
+C59,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C6,plantri ce finder,plantri_exhaustive_screen,False,,True,True,23,"[1, 0, 16, 5, 0, 0, 0, 0, 0, 0, 1]",2,0
+C60,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C61,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C62,rl ce finder,rl_policy,False,,True,True,55,"[14, 17, 10, 0, 3, 3, 2, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]",57,0
+C63,witness_pool_replay (from C62),cross_conjecture_witness_replay,True,C62,True,True,55,"[14, 17, 10, 0, 3, 3, 2, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]",0,0
+C64,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C65,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C66,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
+C67,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C68,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C69,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C7,plantri ce finder,plantri_exhaustive_screen,False,,True,True,20,"[1, 1, 14, 3, 0, 0, 0, 0, 0, 0, 1]",6,0
+C70,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C71,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C72,plantri ce finder,plantri_exhaustive_screen,False,,True,True,21,"[5, 0, 0, 13, 3]",1,0
+C73,llm ce finder,llm_constructor,False,,True,True,46,"[0, 0, 14, 30, 2]",1,4
+C74,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C75,llm ce finder,llm_constructor,False,,True,True,29,"[0, 0, 20, 1, 8]",1,4
+C76,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
+C77,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
+C78,witness_pool_replay (from C23),cross_conjecture_witness_replay,True,C23,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C79,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C8,plantri ce finder,plantri_exhaustive_screen,False,,True,True,25,"[0, 0, 18, 6, 0, 0, 0, 0, 0, 1]",25,0
+C80,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C81,witness_pool_replay (from C72),cross_conjecture_witness_replay,True,C72,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C82,witness_pool_replay (from C72),cross_conjecture_witness_replay,True,C72,True,True,21,"[5, 0, 0, 13, 3]",0,0
+C83,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C84,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C85,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C86,plantri ce finder,plantri_exhaustive_screen,False,,True,True,30,"[3, 3, 0, 21, 3]",1,0
+C87,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
+C88,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C89,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C9,plantri ce finder,plantri_exhaustive_screen,False,,True,True,16,"[2, 1, 11, 1, 0, 0, 0, 0, 0, 0, 1]",15,0
+C90,witness_pool_replay (from C27),cross_conjecture_witness_replay,True,C27,True,True,64,"[22, 17, 2, 15, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1]",0,0
+C91,plantri_pool_replay,plantri_pool_replay,True,,True,True,15,"[5, 2, 0, 1, 7]",0,0
+C92,plantri_pool_replay,plantri_pool_replay,True,,True,True,20,"[0, 11, 0, 1, 6, 2]",0,0
+C93,witness_pool_replay (from C75),cross_conjecture_witness_replay,True,C75,True,True,29,"[0, 0, 20, 1, 8]",0,0
+C94,witness_pool_replay (from C73),cross_conjecture_witness_replay,True,C73,True,True,46,"[0, 0, 14, 30, 2]",0,0
+C95,llm ce finder,llm_constructor,False,,True,True,24,"[0, 2, 15, 0, 7]",1,4
+C96,plantri ce finder,plantri_exhaustive_screen,False,,True,True,32,"[0, 7, 1, 21, 3]",1,0
+C97,witness_pool_replay (from C73),cross_conjecture_witness_replay,True,C73,True,True,46,"[0, 0, 14, 30, 2]",0,0
+C98,plantri_pool_replay,plantri_pool_replay,True,,True,True,22,"[0, 10, 0, 7, 2, 3]",0,0
+C99,witness_pool_replay (from C29),cross_conjecture_witness_replay,True,C29,True,True,51,"[28, 0, 9, 3, 3, 0, 2, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1]",0,0
