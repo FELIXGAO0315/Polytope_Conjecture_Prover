@@ -304,26 +304,9 @@ lemma Juc_EulerFormula (M : SimplyCon3ConnectedMap 0) (hM : IsMap M) :
 -- as the g = 0 instance of P6InequalityPart — see §4.3 below (file order:
 -- the general proof uses P6EdgeCountEquation, defined in §4.1).
 
-/-- [jucovic] Jučovič theorem (sphere, g = 0): full statement with inequality + existence.
-    SORRY (accepted, paper statement): the inequality conjunct has no m ≥ 6
-    hypothesis; the m < 6 edge case needs the exceptional-map classification
-    (tetrahedron / 3-prism / Figure 1b) that the structure cannot express.
-    For m ≥ 6 it follows from Juc_InequalityPart (§4.3). -/
-theorem JucovicTheorem (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
-    (h1 : ∑ k ∈ Finset.Ico 3 (M.m + 1), M.p_i k ≥ 7) :
-    (3 * (M.p_i 6 : ℤ) ≥
-      12 - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
-      ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ)) ∧
-    (∃ (f : ℕ → SimplyCon3ConnectedMap 0), Function.Injective f ∧
-      ∀ n, IsMap (f n) ∧
-        3 * ((f n).p_i 6 : ℤ) =
-          12 - 2 * ((f n).p_i 4 : ℤ) - 3 * ((f n).p_i 5 : ℤ) +
-          ∑ k ∈ Finset.Ico 7 ((f n).m + 1),
-            (((k : ℤ) + 1) / 2 - 6) * ((f n).p_i k : ℤ)) := by
-  constructor
-  · -- Inequality part: sorry (see Juc_InequalityPart)
-    sorry
-  · exact Juc_EqualityConstruction
+-- [removed in revision-iclr27] theorem `JucovicTheorem` — unreferenced packaged
+-- statement (sorry-marked, m < 6 edge case). No proof file depends on it; the
+-- proofs use Juc_InequalityPart / Juc_EqualityConstruction / Juc_EulerFormula.
 
 -- ════════════════════════════════════════════════════════════════════════
 -- §4  FROM p6.tex  —  p₆ INEQUALITY FOR GENERAL GENUS g
@@ -442,22 +425,9 @@ lemma Barnette_P6Bound (M : SimplyCon3ConnectedMap 0) (hM : IsMap M)
       2 * ∑ k ∈ Finset.Ico 7 (M.m + 1), (M.p_i k : ℤ) := by
   sorry
 
-/-- [p6] Main theorem — p₆ genus-g inequality (full statement).
-    SORRY (accepted, paper statement): same m < 6 edge case as JucovicTheorem
-    for the first conjunct; Set.Infinite assembly from equality_family for the
-    second. For m ≥ 6 the first conjunct follows from P6InequalityPart. -/
-theorem P6GenusG (g : ℤ) (M : SimplyCon3ConnectedMap g) (hM : IsMap M)
-    (h1 : ∑ i ∈ Finset.Ico 3 (M.m + 1), M.p_i i > 7) :
-    (3 * (M.p_i 6 : ℤ) ≥
-      12 * (1 - g) - 2 * (M.p_i 4 : ℤ) - 3 * (M.p_i 5 : ℤ) +
-      ∑ k ∈ Finset.Ico 7 (M.m + 1), (((k : ℤ) + 1) / 2 - 6) * (M.p_i k : ℤ)) ∧
-    (∀ g' : ℤ, Set.Infinite
-      {m : SimplyCon3ConnectedMap g' | IsMap m ∧
-        3 * m.p_i 6 = 12 * (1 - g') - 2 * m.p_i 4 - 3 * m.p_i 5 +
-        ∑ k ∈ Finset.Ico 7 (m.m + 1), (((k : ℤ) + 1) / 2 - 6) * (m.p_i k : ℤ)}) := by
-  exact ⟨sorry, fun _ => sorry⟩
-  -- First part: sorry — depends on P6InequalityPart
-  -- Second part: sorry — Set.Infinite from equality_family not yet assembled
+-- [removed in revision-iclr27] theorem `P6GenusG` — unreferenced packaged
+-- statement (two sorries: m < 6 edge case + Set.Infinite assembly). No proof
+-- file depends on it; the proofs use P6InequalityPart / P6EdgeCountEquation.
 
 -- ════════════════════════════════════════════════════════════════════════
 -- §5  FROM Euler_inductive.tex  —  EULER'S FORMULA (proved constituents)
