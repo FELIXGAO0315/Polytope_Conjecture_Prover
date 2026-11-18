@@ -146,21 +146,30 @@ PROPOSE_TAIL_NEW = '''        except Exception as exc:
                 out.append(canonicalize_formula(f.strip()))
             else:
                 invalids.append(f)
-        if (not isinstance(data, dict)) or ("conjectures" not in data):
-            # [llm_direct] empty / truncated / unparseable response -> zeros the
-            # generation. Treat as a crash (rerun seed); NOT shortfall.
+        n_valid_raw = len(out)
+        if (not isinstance(data, dict)) or ("conjectures" not in data) or (n_valid_raw == 0):
+            # [llm_direct] parse failure / truncation / zero valid formulas -> the
+            # generation is zeroed. Treat as a crash (rerun seed); NOT shortfall.
             _llmd_log({"status": "empty_or_truncated",
                        "n_requested": self.llm_propose_n,
-                       "n_returned": len(raw), "n_valid": len(out),
-                       "hints_empty": bool(_hints_empty)})
-            raise RuntimeError("llm_direct empty/truncated propose response")
+                       "n_returned": len(raw), "n_valid_raw": n_valid_raw,
+                       "n_invalid": len(invalids), "hints_empty": bool(_hints_empty)})
+            raise RuntimeError("llm_direct empty/truncated/zero-valid propose response")
+        # [llm_direct] enforce the candidate cap: the LLM may return a few more
+        # than requested; never let more than n_requested candidates reach the
+        # gates (keeps candidates-evaluated <= the closed-arm count).
+        if n_valid_raw > self.llm_propose_n:
+            out = out[:self.llm_propose_n]
         _llmd_log({"status": "ok", "n_requested": self.llm_propose_n,
-                   "n_returned": len(raw), "n_valid": len(out),
-                   "n_invalid": len(invalids), "hints_empty": bool(_hints_empty),
-                   "shortfall": max(0, self.llm_propose_n - len(out)),
+                   "n_returned": len(raw), "n_valid_raw": n_valid_raw,
+                   "n_entered": len(out), "n_invalid": len(invalids),
+                   "hints_empty": bool(_hints_empty),
+                   "shortfall": max(0, self.llm_propose_n - n_valid_raw),
+                   "overflow_trimmed": max(0, n_valid_raw - self.llm_propose_n),
                    "invalid_samples": [str(x)[:120] for x in invalids[:5]]})
         print(f"[conjecture generator] LLM proposed {len(out)} candidate(s) "
-              f"(requested {self.llm_propose_n}, invalid {len(invalids)})",
+              f"(requested {self.llm_propose_n}, returned {len(raw)}, "
+              f"valid {n_valid_raw}, entered {len(out)}, invalid {len(invalids)})",
               flush=True)
         return out'''
 

@@ -87,8 +87,11 @@ def main():
             per_gen = []
             for g, r in enumerate(ok, start=1):
                 per_gen.append({"gen": g, "cap_requested": r.get("n_requested"),
-                                "n_returned": r.get("n_returned"), "n_valid": r.get("n_valid"),
+                                "n_returned": r.get("n_returned"),
+                                "n_valid_raw": r.get("n_valid_raw"),
+                                "n_entered": r.get("n_entered"),
                                 "n_invalid": r.get("n_invalid"), "shortfall": r.get("shortfall"),
+                                "overflow_trimmed": r.get("overflow_trimmed"),
                                 "hints_empty": r.get("hints_empty")})
             entry.update({
                 "wall_s": wall_s(arm),
