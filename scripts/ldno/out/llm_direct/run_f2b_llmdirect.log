@@ -1,0 +1,26 @@
+[run_llmdirect 15:38:04] killing leftover experiment processes (if any) …
+[run_llmdirect 15:38:06] remaining python processes on box:
+189 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+[run_llmdirect 15:38:06] START 5 seeds, concurrency=2, K=2, downstream=B, deadline=23:00:00
+[run_llmdirect 15:38:06] WAVE: seeds 41 7 (concurrency=2)
+[run_llmdirect 15:38:06] seed 41: attempt 1/3 — fresh setup
+[run_llmdirect 15:38:06] seed 7: attempt 1/3 — fresh setup
+[run_llmdirect 15:38:06] seed 7: launch driver (deadline budget 26514s)
+[run_llmdirect 15:38:06] seed 41: launch driver (deadline budget 26514s)
+[run_llmdirect 15:51:54] seed 7: ARM COMPLETE (attempt 1, rc=0)
+[run_llmdirect 15:52:20] seed 41: ARM COMPLETE (attempt 1, rc=0)
+[run_llmdirect 15:52:20] wave done
+[run_llmdirect 15:52:20] WAVE: seeds 123 2024 (concurrency=2)
+[run_llmdirect 15:52:20] seed 123: attempt 1/3 — fresh setup
+[run_llmdirect 15:52:20] seed 2024: attempt 1/3 — fresh setup
+[run_llmdirect 15:52:20] seed 123: launch driver (deadline budget 25660s)
+[run_llmdirect 15:52:20] seed 2024: launch driver (deadline budget 25660s)
+[run_llmdirect 16:15:54] seed 2024: ARM COMPLETE (attempt 1, rc=0)
+[run_llmdirect 16:21:24] seed 123: ARM COMPLETE (attempt 1, rc=0)
+[run_llmdirect 16:21:24] wave done
+[run_llmdirect 16:21:24] WAVE: seeds 99 (concurrency=1)
+[run_llmdirect 16:21:24] seed 99: attempt 1/3 — fresh setup
+[run_llmdirect 16:21:24] seed 99: launch driver (deadline budget 23916s)
+[run_llmdirect 16:26:59] seed 99: ARM COMPLETE (attempt 1, rc=0)
+[run_llmdirect 16:26:59] wave done
+[run_llmdirect 16:26:59] F2b-llm_direct RUNNER COMPLETE

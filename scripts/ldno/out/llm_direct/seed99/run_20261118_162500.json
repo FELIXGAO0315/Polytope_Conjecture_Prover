@@ -1,0 +1,597 @@
+{
+  "run_timestamp": "20261118_162500",
+  "generated_at": "2026-11-18T21:25:00.414019+00:00",
+  "dataset_rows": 1597,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C221",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0)), then p6 <= ((p3 + sum_pk_after_p6 + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C222",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 <= 20)), then p6 <= ((p3 + sum_pk_after_p6 + 30))",
+      "source": "llm"
+    },
+    {
+      "name": "C223",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0)), then p6 <= ((p4 + sum_pk_after_p6 + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C224",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2)), then p6 <= ((sum_pk_after_p6 + 100))",
+      "source": "llm"
+    },
+    {
+      "name": "C225",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 20)), then p6 <= ((sum_pk_after_p6 + 200))",
+      "source": "llm"
+    },
+    {
+      "name": "C226",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2)), then p6 <= ((p5 + sum_pk_after_p6 + 150))",
+      "source": "llm"
+    },
+    {
+      "name": "C227",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2)), then p6 <= ((p4 + sum_pk_after_p6 + 150))",
+      "source": "llm"
+    },
+    {
+      "name": "C228",
+      "formula": "if ((is_simple) and (p_4 <= 2) and (p_5 <= 2)), then p6 <= ((p3 + sum_pk_after_p6 + 150))",
+      "source": "llm"
+    },
+    {
+      "name": "C229",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 <= 10)), then p6 <= ((sum_pk_after_p6 + 30))",
+      "source": "llm"
+    },
+    {
+      "name": "C230",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (p_4 <= 10)), then p6 <= ((sum_pk_after_p6 + 30))",
+      "source": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "formula": "if ((is_simple)), then p6 <= ((p3 + p4 + p5 + sum_pk_after_p6 + 100))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 12, 6: 113} (p6=113.0 > RHS=112.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0)), then p6 <= ((p5 + sum_pk_after_p6 + 50))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 12, 6: 113} (p6=113.0 > RHS=62.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_200)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (sum_pk_k>=7 >= 30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 1) and (p_4 <= 1) and (p_5 <= 1)), then p6 <= ((sum_pk_after_p6 + 80))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (p_4 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 1) and (p_4 <= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_80) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 2)), then p6 <= ((sum_pk_after_p6 + 50))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 1)), then p6 <= ((sum_pk_after_p6 + 40))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 1) and (p_4 <= 1) and (p_5 <= 1) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 12)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 >= 4)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (p_4 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 >= 12)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 >= 4)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 >= 8)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_100)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (sum_pk_k>=7 >= 20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 <= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 >= 4)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 >= 8)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 >= 4)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 >= 12)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_80)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_40)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 15)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (f_2>=_50)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_3 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 6)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (p_4 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (p_4 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (sum_pk_k>=7 >= 20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 20)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_30) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_50) and (sum_pk_k>=7 >= 10)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 = 12)), then p6 <= ((sum_pk_after_p6 + 150))",
+      "source": "llm",
+      "reason": "implied_by this batch: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 12)): same conclusion, hypotheses at least as restrictive — redundant while this batch: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 12)) is alive"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 12)), then p6 <= ((sum_pk_after_p6 + 150))",
+      "source": "llm",
+      "reason": "llm_review_drop: Near-duplicate of candidate 6 with same shape, weaker constants."
+    }
+  ]
+}

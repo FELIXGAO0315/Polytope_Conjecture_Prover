@@ -1,0 +1,652 @@
+{
+  "run_timestamp": "20261118_161040",
+  "generated_at": "2026-11-18T21:10:40.356134+00:00",
+  "dataset_rows": 1596,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C251",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_50)), then p6 >= ((0.5 * p5) + -6)",
+      "source": "llm"
+    },
+    {
+      "name": "C252",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_80)), then p6 >= (p5 + sum_pk_after_p6 + -12)",
+      "source": "llm"
+    },
+    {
+      "name": "C253",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 = 12)), then p6 >= (sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C254",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 1) and (f_2>=_20)), then p6 >= (p5)",
+      "source": "llm"
+    },
+    {
+      "name": "C255",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_25) and (sum_pk_k>=7 >= 4)), then p6 >= (p5)",
+      "source": "llm"
+    },
+    {
+      "name": "C256",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_30) and (sum_pk_k>=7 >= 3)), then p6 >= (p5)",
+      "source": "llm"
+    },
+    {
+      "name": "C257",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_40)), then p6 >= (p5)",
+      "source": "llm"
+    },
+    {
+      "name": "C258",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_50)), then p6 >= ((2 * p5))",
+      "source": "llm"
+    },
+    {
+      "name": "C259",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_50)), then p6 >= (p5 + -14)",
+      "source": "llm"
+    },
+    {
+      "name": "C260",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 20)), then p6 >= (sum_pk_after_p6 + -8)",
+      "source": "llm"
+    },
+    {
+      "name": "C261",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_50) and (sum_pk_k>=7 >= 2)), then p6 >= (p5 + -12)",
+      "source": "llm"
+    },
+    {
+      "name": "C262",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_80)), then p6 >= (p5 + -12)",
+      "source": "llm"
+    },
+    {
+      "name": "C263",
+      "formula": "if ((is_simple) and (f_2>=_30)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 30))",
+      "source": "llm"
+    },
+    {
+      "name": "C264",
+      "formula": "if ((is_simple) and (f_2>=_40)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 40))",
+      "source": "llm"
+    },
+    {
+      "name": "C265",
+      "formula": "if ((is_simple) and (f_2>=_50)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C266",
+      "formula": "if ((is_simple) and (f_2>=_80)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 80))",
+      "source": "llm"
+    },
+    {
+      "name": "C267",
+      "formula": "if ((is_simple) and (f_2>=_100)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 100))",
+      "source": "llm"
+    },
+    {
+      "name": "C268",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_40)), then p6 >= (((-1 * p5) + (-1 * sum_pk_after_p6) + 40))",
+      "source": "llm"
+    },
+    {
+      "name": "C269",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_60)), then p6 >= (((-1 * p5) + (-1 * sum_pk_after_p6) + 60))",
+      "source": "llm"
+    },
+    {
+      "name": "C270",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_80)), then p6 >= (((-1 * p5) + (-1 * sum_pk_after_p6) + 80))",
+      "source": "llm"
+    },
+    {
+      "name": "C271",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_30)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * sum_pk_after_p6) + 30))",
+      "source": "llm"
+    },
+    {
+      "name": "C272",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_50)), then p6 >= (((-1 * p3) + (-1 * p4) + (-1 * sum_pk_after_p6) + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C273",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_50)), then p6 >= (((-1 * p3) + (-1 * p5) + (-1 * sum_pk_after_p6) + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C274",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_50)), then p6 >= (((-1 * p4) + (-1 * p5) + (-1 * sum_pk_after_p6) + 50))",
+      "source": "llm"
+    },
+    {
+      "name": "C275",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_30)), then p6 >= (((-1 * p5) + (-1 * sum_pk_after_p6) + 26))",
+      "source": "llm"
+    },
+    {
+      "name": "C276",
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 <= 2) and (f_2>=_30)), then p6 >= (((-1 * p4) + (-1 * sum_pk_after_p6) + 26))",
+      "source": "llm"
+    },
+    {
+      "name": "C277",
+      "formula": "if ((is_simple) and (p_4 <= 2) and (p_5 <= 2) and (f_2>=_30)), then p6 >= (((-1 * p3) + (-1 * sum_pk_after_p6) + 26))",
+      "source": "llm"
+    },
+    {
+      "name": "C278",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_30)), then p6 <= ((0.3333333333 * p3) + -2)",
+      "source": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 1, 6: 1, 7: 1, 8: 2, 9: 1} (p6=1.0 > RHS=0.6667 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_20) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 2, 6: 2, 7: 10} (p6=2.0 > RHS=1.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_30) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 2, 4: 8, 6: 10, 7: 10} (p6=10.0 > RHS=5.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_40) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_50) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 = 0)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 6, 6: 8} (p6=8.0 > RHS=3.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 1)), then p6 <= ((0.6666666667 * p4) + 1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 6, 6: 8} (p6=8.0 > RHS=5.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_3 <= 2)), then p6 <= ((0.6666666667 * p4) + 2)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 6, 6: 8} (p6=8.0 > RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 2)), then p6 <= (p4 + p3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 6} (p6=6.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 <= 1)), then p6 <= (p3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 6} (p6=6.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (p_4 = 0)), then p6 <= (p3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 6} (p6=6.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_20)), then p6 >= (p5 + -12)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 20, 6: 2, 9: 1, 11: 1} (p6=2.0 < RHS=8.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_30)), then p6 >= (p5 + -12)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 36, 9: 2, 12: 3} (p6=0.0 < RHS=24.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 12)), then p6 >= (p5 + -12)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 14, 7: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0)), then p6 <= ((0.5 * p4) + -3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 6, 6: 8} (p6=8.0 > RHS=0.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 1)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0)), then p6 <= ((0.3333333333 * p3))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 1)), then p6 <= ((0.3333333333 * p3))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.3333333333 * p3))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_15)), then p6 <= ((0.3333333333 * p3))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 9, 6: 9, 13: 1, 14: 1} (p6=9.0 > RHS=3.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 <= ((0.3333333333 * p3) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 9, 6: 9, 13: 1, 14: 1} (p6=9.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 1) and (f_2>=_30)), then p6 >= (p5 + 1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 40, 9: 6, 10: 15, 16: 3} (p6=0.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_80)), then p6 >= ((3 * p5))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (p_5 = 0)), then p6 <= (p3 + 2)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 8} (p6=8.0 > RHS=6.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (p_5 <= 2)), then p6 <= (p3 + p4 + p5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 6} (p6=6.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 1) and (p_5 <= 1)), then p6 <= (p3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 6: 6} (p6=6.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 >= 4)), then p6 <= ((0.3333333333 * p3) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 <= ((0.6666666667 * p4) + p5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 5, 4: 1, 6: 3, 7: 5} (p6=3.0 > RHS=0.6667 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 6)), then p6 <= ((0.6666666667 * p4) + p5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 4: 3, 6: 3, 7: 6} (p6=3.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 7)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 2, 6: 2, 7: 10} (p6=2.0 > RHS=1.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 9)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 2, 6: 2, 7: 10} (p6=2.0 > RHS=1.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 1) and (sum_pk_k>=7 >= 5)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 5, 4: 1, 6: 3, 7: 5} (p6=3.0 > RHS=0.6667 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 1) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 2, 6: 2, 7: 10} (p6=2.0 > RHS=1.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 = 0) and (p_5 = 0)), then p6 <= (p3)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 1) and (p_5 = 0)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 6, 6: 8} (p6=8.0 > RHS=4.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 1) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.5 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=15.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= ((0.6666666667 * p4))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 2, 4: 4, 6: 3, 7: 2} (p6=3.0 > RHS=2.6667 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (p_5 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 <= 2) and (f_2>=_30)), then p6 >= (p5 + -14)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 1, 5: 34, 7: 4, 8: 10} (p6=0.0 < RHS=20.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_80) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_40) and (sum_pk_k>=7 >= 1)), then p6 >= (sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 36, 9: 2, 12: 3} (p6=0.0 < RHS=5.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_50) and (sum_pk_k>=7 >= 2)), then p6 >= (sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_30)), then p6 >= (sum_pk_after_p6 + -5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 3)), then p6 >= (sum_pk_after_p6 + -5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 5)), then p6 >= (sum_pk_after_p6 + -5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 2)), then p6 <= (((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=0.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= (((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=-0.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 4)), then p6 <= (((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 4: 1, 6: 1, 7: 1, 8: 2, 9: 1} (p6=1.0 > RHS=0.3333 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 5)), then p6 <= (((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -2)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 8, 8: 6} (p6=0.0 > RHS=-1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 <= (((0.6666666667 * p4) + (-2 * p5) + (0.1666666667 * sum_pk_after_p6)))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 5, 5: 2, 6: 1, 7: 5} (p6=1.0 > RHS=-3.1667 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 1) and (sum_pk_k>=7 >= 5)), then p6 <= (((0.6666666667 * p4) + (-2 * p5) + (0.1666666667 * sum_pk_after_p6)))",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 5, 4: 1, 6: 3, 7: 5} (p6=3.0 > RHS=1.5000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 6)), then p6 <= (((0.6666666667 * p4) + (-2 * p5) + (0.1666666667 * sum_pk_after_p6)) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 4, 4: 3, 6: 3, 7: 6} (p6=3.0 > RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 10)), then p6 <= (((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=19.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_80)), then p6 >= (sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 78, 78: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 1) and (p_4 <= 1) and (p_5 <= 1) and (f_2>=_30)), then p6 >= (((-1 * sum_pk_after_p6) + 27))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2) and (f_2>=_50)), then p6 >= (((-1 * sum_pk_after_p6) + 44))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2) and (f_2>=_80)), then p6 >= (((-1 * sum_pk_after_p6) + 74))",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 <= ((0.5 * p4) + -2)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=13.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_40)), then p6 <= ((0.5 * p4) + -3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=12.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (f_2>=_60)), then p6 <= ((0.5 * p4) + -3)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {4: 30, 6: 20, 10: 12} (p6=20.0 > RHS=12.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 3)), then p6 <= ((0.3333333333 * p3) + -1)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {3: 6, 6: 2, 8: 3} (p6=2.0 > RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 1)), then p6 >= (sum_pk_after_p6 + -6)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=1.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (sum_pk_after_p6 + -5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 4)), then p6 >= (sum_pk_after_p6 + -5)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=2.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 6)), then p6 >= (sum_pk_after_p6 + -4)",
+      "source": "llm",
+      "reason": "contradicted by verified p-vector {5: 29, 7: 3, 8: 2, 11: 2} (p6=0.0 < RHS=3.0000 (violation))"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 12)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 1)), then p6 >= (p5 + -1)",
+      "source": "llm",
+      "reason": "vacuous_rhs: hypothesis forces sup(RHS) = 0 ≤ 0, and p6 ≥ 0 always — bound excludes nothing"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_30)), then p6 >= ((3 * p5) + -6)",
+      "source": "llm",
+      "reason": "vacuous_rhs: hypothesis forces sup(RHS) = 0 ≤ 0, and p6 ≥ 0 always — bound excludes nothing"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_5 <= 2) and (f_2>=_30)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_20) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_30) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_50) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_60) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 13)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 >= 14)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_30) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_40) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (sum_pk_k>=7 >= 5)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_40) and (sum_pk_k>=7 >= 2)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_60) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (sum_pk_k>=7 >= 1)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 <= 2) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 3)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (p_5 <= 2) and (f_2>=_30)), then p6 >= (((-1 * sum_pk_after_p6) + 24))",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p-vector satisfies all four hypotheses; untested and unsharp."
+    }
+  ]
+}

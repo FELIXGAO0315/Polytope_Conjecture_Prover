@@ -1,0 +1,647 @@
+{
+  "run_timestamp": "20261118_154520",
+  "generated_at": "2026-11-18T20:45:21.413793+00:00",
+  "dataset_rows": 1596,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C217",
+      "formula": "if ((is_simple) and (f_2>=_4)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 4)",
+      "source": "llm"
+    },
+    {
+      "name": "C218",
+      "formula": "if ((is_simple) and (f_2>=_5)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 5)",
+      "source": "llm"
+    },
+    {
+      "name": "C219",
+      "formula": "if ((is_simple) and (f_2>=_6)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm"
+    },
+    {
+      "name": "C220",
+      "formula": "if ((is_simple) and (f_2>=_7)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 7)",
+      "source": "llm"
+    },
+    {
+      "name": "C221",
+      "formula": "if ((is_simple) and (f_2>=_8)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm"
+    },
+    {
+      "name": "C222",
+      "formula": "if ((is_simple) and (f_2>=_9)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 9)",
+      "source": "llm"
+    },
+    {
+      "name": "C223",
+      "formula": "if ((is_simple) and (f_2>=_10)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm"
+    },
+    {
+      "name": "C224",
+      "formula": "if ((is_simple) and (f_2>=_11)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 11)",
+      "source": "llm"
+    },
+    {
+      "name": "C225",
+      "formula": "if ((is_simple) and (f_2>=_12)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm"
+    },
+    {
+      "name": "C226",
+      "formula": "if ((is_simple) and (f_2>=_13)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 13)",
+      "source": "llm"
+    },
+    {
+      "name": "C227",
+      "formula": "if ((is_simple) and (f_2>=_14)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm"
+    },
+    {
+      "name": "C228",
+      "formula": "if ((is_simple) and (f_2>=_15)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 15)",
+      "source": "llm"
+    },
+    {
+      "name": "C229",
+      "formula": "if ((is_simple) and (f_2>=_16)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm"
+    },
+    {
+      "name": "C230",
+      "formula": "if ((is_simple) and (f_2>=_18)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm"
+    },
+    {
+      "name": "C231",
+      "formula": "if ((is_simple) and (f_2>=_41)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 41)",
+      "source": "llm"
+    },
+    {
+      "name": "C232",
+      "formula": "if ((is_simple) and (f_2>=_64)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 64)",
+      "source": "llm"
+    },
+    {
+      "name": "C233",
+      "formula": "if ((is_simple) and (f_2>=_125)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 125)",
+      "source": "llm"
+    },
+    {
+      "name": "C234",
+      "formula": "if ((is_simple) and (f_2>=_127)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 127)",
+      "source": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "formula": "if ((is_simple) and (f_2>=_128)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 128)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_129)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 129)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_130)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 130)",
+      "source": "llm",
+      "reason": "hypotheses match no verified polytope (vacuous or unparsable)"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_17)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 17)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p-vector with f_2=17"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_19)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 19)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p-vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_20)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_21)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 21)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_22)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 22)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_23)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 23)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_24)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_25)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 25)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_26)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 26)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_27)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 27)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_28)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 28)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_29)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 29)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_30)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 30)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_31)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 31)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_32)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 32)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_33)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 33)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_34)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 34)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_35)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 35)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_36)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 36)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_37)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 37)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_38)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 38)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_39)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 39)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_40)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 40)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_42)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 42)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_43)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 43)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_44)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 44)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_45)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 45)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_46)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 46)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_47)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 47)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_48)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 48)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_49)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 49)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_50)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 50)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_51)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 51)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_52)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 52)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_53)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 53)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_54)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 54)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_55)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 55)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_56)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 56)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_57)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 57)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_58)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 58)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_59)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 59)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_60)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 60)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_61)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 61)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_62)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 62)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_63)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 63)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_65)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 65)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_66)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 66)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_67)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 67)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_68)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 68)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_69)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 69)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_70)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 70)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_71)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 71)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_72)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 72)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_73)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 73)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_74)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 74)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_75)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 75)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_76)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 76)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_77)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 77)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_78)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 78)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_79)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 79)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_80)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 80)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_81)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 81)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_82)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 82)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_83)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 83)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_84)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 84)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_85)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 85)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_86)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 86)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_87)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 87)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_88)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 88)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_89)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 89)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_90)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 90)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_91)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 91)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_92)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 92)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_93)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 93)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_94)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 94)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_95)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 95)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_96)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 96)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_97)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 97)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_98)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 98)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_99)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 99)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_100)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 100)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_101)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 101)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_102)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 102)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_103)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 103)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_104)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 104)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_105)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 105)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_106)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 106)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_107)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 107)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_108)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 108)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_109)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 109)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_110)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 110)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_111)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 111)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_112)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 112)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_113)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 113)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_114)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 114)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_115)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 115)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_116)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 116)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_117)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 117)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_118)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 118)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_119)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 119)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_120)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 120)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_121)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 121)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_122)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 122)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_123)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 123)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_124)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 124)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_126)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 126)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector hits threshold"
+    }
+  ]
+}

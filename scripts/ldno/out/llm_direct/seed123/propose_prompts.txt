@@ -1,0 +1,252 @@
+
+
+===== PROPOSE PROMPT (n_requested=113) =====
+Propose 113 new p6-bound conjectures for simple convex 3-polytopes.
+
+You DECIDE which structural shapes to target. Use the two blocks below to
+spot where the registry is thin and where the pool actually has data.
+
+━━━ VERIFIED POOL STRUCTURAL COMPOSITION (1596 polytopes) ━━━━━━━━━━━━━━━━
+How many polytopes live in each classical sub-class. A thin sub-class makes
+LP-style bounds easy to fit but cheap to refute; a thick one means there's
+real territory worth a conditional bound.
+  (p_3 = 0)                       1022/1596  triangle-free
+  (p_4 = 0)                        612/1596  quadrilateral-free
+  (p_5 = 0)                        263/1596  pentagon-free
+  (p_3 = 0) ∧ (p_4 = 0)            530/1596  fullerene-shaped (5-/6-gons + tail)
+  (p_4 = 0) ∧ (p_5 = 0)             20/1596  triangles + tail only
+  (p_3 ≤ 2)                       1471/1596  few triangles
+  (p_4 ≤ 2)                        866/1596  few quadrilaterals
+  (p_5 ≤ 2)                        543/1596  few pentagons
+  sum_pk_k≥7 ≥ 1                  1329/1596  has at least one big face
+  sum_pk_k≥7 ≥ 5                   319/1596  heavy 7+ tail
+  (f_2 ≥ 30)                       259/1596  medium polytope
+  (f_2 ≥ 50)                        93/1596  large polytope
+  (f_2 ≥ 80)                        49/1596  very large polytope
+
+━━━ REGISTRY COVERAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+How many existing conjectures touch each hypothesis shape. "UNTOUCHED" rows
+are wide-open territory, "thin" rows are under-explored, "saturated" rows
+are already crowded — avoid duplicating those.
+  TOTAL in registry: 214 conjectures
+  (is_simple) only                    0  ← UNTOUCHED
+  (f_2 ≥ N)                         160  ← saturated
+  (sum_pk_k≥7 ≥ j)                  119  ← saturated
+  (p_3 = 0)                          24
+  (p_4 = 0)                          23
+  (p_5 = 0)                          31  ← saturated
+  (p_3 = 0) ∧ (p_4 = 0)               1  ← thin
+  (p_3 = 0) ∧ (p_5 = 0)               6
+  (p_4 = 0) ∧ (p_5 = 0)               2  ← thin
+  (p_3 ≤ N) (small N)                46  ← saturated
+  (p_4 ≤ N)                          21
+  (p_5 ≤ N)                          40  ← saturated
+
+━━━ HIGH-TRL TEMPLATES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Already registered, sorted by IRIS-TRL desc. High TRL = tight + diverse +
+spread; structurally mimic those, never duplicate.
+  - [T=0.80 R=0.75 L=1.00 TRL=0.6000] if ((is_simple) and (p_5 = 0) and (f_2>=_26) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.80 R=0.75 L=1.00 TRL=0.6000] if ((is_simple) and (p_5 = 0) and (f_2>=_26) and (sum_pk_k>=7 >= 5)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.83 R=0.60 L=1.00 TRL=0.5000] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (f_2>=_27) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (f_2>=_22) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.60 R=0.67 L=1.00 TRL=0.4000] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 11)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.62 R=0.60 L=1.00 TRL=0.3750] if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (sum_pk_k>=7 >= 5)), then p6 <= (p4)
+  - [T=0.50 R=0.67 L=0.91 TRL=0.3040] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.38 R=0.67 L=0.98 TRL=0.2456] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((3 * p5))
+  - [T=0.67 R=0.50 L=0.71 TRL=0.2365] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.67 R=0.50 L=0.71 TRL=0.2365] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_18) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.22 R=1.00 L=1.00 TRL=0.2222] if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 9)), then p6 >= (-2.857142857*p4 + -0.2857142857*sum_pk_after_p6 + 6.857142857)
+  - [T=0.21 R=1.00 L=0.92 TRL=0.1979] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 7)), then p6 <= ((((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -2))
+  - [T=0.38 R=0.50 L=0.95 TRL=0.1780] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_12)), then p6 >= (p5)
+  - [T=0.17 R=1.00 L=0.86 TRL=0.1437] if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)
+  - [T=0.15 R=1.00 L=0.93 TRL=0.1427] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 8)), then p6 <= (((((0.6666666667 * p4) + (-2 * p5)) + (0.1666666667 * sum_pk_after_p6)) + -2))
+  - [T=0.20 R=1.00 L=0.59 TRL=0.1175] if ((is_simple) and (f_2>=_41) and (sum_pk_k>=7 >= 8)), then p6 >= (((-0.1666666667 * sum_pk_after_p6) + 2.333333333))
+  - [T=0.23 R=0.50 L=0.99 TRL=0.1138] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 6)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.15 R=0.75 L=0.96 TRL=0.1104] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 8)), then p6 <= (((0.6666666667 * p4) + (-2.333333333 * p5)))
+
+━━━ PROVED — Lean-verified theorems (strongest signal) ━━━━━━━━━━━━━━━━━━━━━━
+Machine-checked truths. Extend them: sharper constants, neighbouring strata,
+generalised or weakened hypotheses of the same bound family.
+  (none yet)
+
+━━━ REFUTED (gatekeeper — same shape + shifted constants still counts) ━━━━━━
+  (none yet)
+
+━━━ CE-SURVIVED BUT UNPROVED (probably true; prover lacks tools) ━━━━━━━━━━━━
+Beat every counterexample search, but the Lean prover could not close them
+from the current axiom Inventory. Their hypothesis families are fertile —
+propose variants with SIMPLER RHS shapes a counting/Euler argument reaches.
+  (none yet)
+
+━━━ SURVIVORS (un-refuted after many CE attempts) ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  (none yet)
+
+━━━ FOCUS CELLS (uncovered hypothesis territory this round) ━━━━━━━━━━━━━━━━━
+  (none — every cell with data already has conjectures)
+
+━━━ VERIFIED P-VECTORS (mentally test every proposal) ━━━━━━━━━━━━━━━━━━━━━━━
+  - {3:4}  | f_2=4 | sum_pk_k>=7=0
+  - {3:2, 4:3}  | f_2=5 | sum_pk_k>=7=0
+  - {4:6}  | f_2=6 | sum_pk_k>=7=0
+  - {3:3, 5:3, 6:1}  | f_2=7 | sum_pk_k>=7=0
+  - {3:3, 4:1, 5:2, 6:1, 7:1}  | f_2=8 | sum_pk_k>=7=1
+  - {4:3, 5:6}  | f_2=9 | sum_pk_k>=7=0
+  - {4:8, 8:2}  | f_2=10 | sum_pk_k>=7=2
+  - {3:6, 6:2, 8:3}  | f_2=11 | sum_pk_k>=7=3
+  - {5:12}  | f_2=12 | sum_pk_k>=7=0
+  - {4:11, 11:2}  | f_2=13 | sum_pk_k>=7=2
+  - {3:8, 8:6}  | f_2=14 | sum_pk_k>=7=6
+  - {4:8, 5:3, 6:1, 7:2, 11:1}  | f_2=15 | sum_pk_k>=7=3
+  - {5:12, 6:4}  | f_2=16 | sum_pk_k>=7=0
+  - {5:12, 6:6}  | f_2=18 | sum_pk_k>=7=0
+  - {3:40, 9:6, 10:15, 16:3}  | f_2=64 | sum_pk_k>=7=24
+  - {4:125, 125:2}  | f_2=127 | sum_pk_k>=7=2
+  - {5:36, 9:2, 12:3}  | f_2=41 | sum_pk_k>=7=5
+  - {5:12, 6:113}  | f_2=125 | sum_pk_k>=7=0
+
+━━━ TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Split your proposals across three modes:
+  1. EXPLORE — target the FOCUS CELLS and other under-covered regions in the
+     coverage table; combine hypothesis atoms into shapes the table doesn't
+     list.
+  2. SHARPEN — take a PROVED bound and propose a strictly stronger sibling
+     (tighter constant, or one hypothesis atom removed).
+  3. REPAIR — take a recent REFUTED bound and move it just past its
+     counterexample (shift the constant, or add the hypothesis atom the CE
+     fails). A repaired bound must clear every CE listed for that shape.
+Each proposal is re-checked against 1596 verified p-vectors; RHS
+coefficients with denominators > 6 are auto-rejected. Output JSON only:
+{
+  "conjectures": [
+    "if ((is_simple) and ...), then p6 >= (...)",
+    ...
+  ]
+}
+
+
+===== PROPOSE PROMPT (n_requested=128) =====
+Propose 128 new p6-bound conjectures for simple convex 3-polytopes.
+
+You DECIDE which structural shapes to target. Use the two blocks below to
+spot where the registry is thin and where the pool actually has data.
+
+━━━ VERIFIED POOL STRUCTURAL COMPOSITION (1596 polytopes) ━━━━━━━━━━━━━━━━
+How many polytopes live in each classical sub-class. A thin sub-class makes
+LP-style bounds easy to fit but cheap to refute; a thick one means there's
+real territory worth a conditional bound.
+  (p_3 = 0)                       1022/1596  triangle-free
+  (p_4 = 0)                        612/1596  quadrilateral-free
+  (p_5 = 0)                        263/1596  pentagon-free
+  (p_3 = 0) ∧ (p_4 = 0)            530/1596  fullerene-shaped (5-/6-gons + tail)
+  (p_4 = 0) ∧ (p_5 = 0)             20/1596  triangles + tail only
+  (p_3 ≤ 2)                       1471/1596  few triangles
+  (p_4 ≤ 2)                        866/1596  few quadrilaterals
+  (p_5 ≤ 2)                        543/1596  few pentagons
+  sum_pk_k≥7 ≥ 1                  1329/1596  has at least one big face
+  sum_pk_k≥7 ≥ 5                   319/1596  heavy 7+ tail
+  (f_2 ≥ 30)                       259/1596  medium polytope
+  (f_2 ≥ 50)                        93/1596  large polytope
+  (f_2 ≥ 80)                        49/1596  very large polytope
+
+━━━ REGISTRY COVERAGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+How many existing conjectures touch each hypothesis shape. "UNTOUCHED" rows
+are wide-open territory, "thin" rows are under-explored, "saturated" rows
+are already crowded — avoid duplicating those.
+  TOTAL in registry: 248 conjectures
+  (is_simple) only                    0  ← UNTOUCHED
+  (f_2 ≥ N)                         194  ← saturated
+  (sum_pk_k≥7 ≥ j)                  119  ← saturated
+  (p_3 = 0)                          33  ← saturated
+  (p_4 = 0)                          33  ← saturated
+  (p_5 = 0)                          37  ← saturated
+  (p_3 = 0) ∧ (p_4 = 0)               4
+  (p_3 = 0) ∧ (p_5 = 0)               6
+  (p_4 = 0) ∧ (p_5 = 0)               4
+  (p_3 ≤ N) (small N)                46  ← saturated
+  (p_4 ≤ N)                          21
+  (p_5 ≤ N)                          40  ← saturated
+
+━━━ HIGH-TRL TEMPLATES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Already registered, sorted by IRIS-TRL desc. High TRL = tight + diverse +
+spread; structurally mimic those, never duplicate.
+  - [T=0.80 R=0.75 L=1.00 TRL=0.6000] if ((is_simple) and (p_5 = 0) and (f_2>=_26) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.80 R=0.75 L=1.00 TRL=0.6000] if ((is_simple) and (p_5 = 0) and (f_2>=_26) and (sum_pk_k>=7 >= 5)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.83 R=0.60 L=1.00 TRL=0.5000] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (f_2>=_27) and (sum_pk_k>=7 >= 4)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.75 R=0.67 L=0.96 TRL=0.4789] if ((is_simple) and (p_5 = 0) and (f_2>=_22) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.60 R=0.67 L=1.00 TRL=0.4000] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 11)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.62 R=0.60 L=1.00 TRL=0.3750] if ((is_simple) and (p_5 = 0) and (p_4 <= 2) and (sum_pk_k>=7 >= 5)), then p6 <= (p4)
+  - [T=0.50 R=0.67 L=0.91 TRL=0.3040] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 10)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.38 R=0.67 L=0.98 TRL=0.2456] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17)), then p6 >= ((3 * p5))
+  - [T=0.67 R=0.50 L=0.71 TRL=0.2365] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_17) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.67 R=0.50 L=0.71 TRL=0.2365] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_18) and (sum_pk_k>=7 >= 5)), then p6 >= (p5)
+  - [T=0.22 R=1.00 L=1.00 TRL=0.2222] if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 9)), then p6 >= (-2.857142857*p4 + -0.2857142857*sum_pk_after_p6 + 6.857142857)
+  - [T=0.21 R=1.00 L=0.92 TRL=0.1979] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 7)), then p6 <= ((((0.6666666667 * p4) + (0.1666666667 * sum_pk_after_p6)) + -2))
+  - [T=0.38 R=0.50 L=0.95 TRL=0.1780] if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (f_2>=_12)), then p6 >= (p5)
+  - [T=0.17 R=1.00 L=0.86 TRL=0.1437] if (((is_simple)  and  (f_2>=_40))  and  (sum_pk_k>=7 >= 8)), then p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)
+  - [T=0.15 R=1.00 L=0.93 TRL=0.1427] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 8)), then p6 <= (((((0.6666666667 * p4) + (-2 * p5)) + (0.1666666667 * sum_pk_after_p6)) + -2))
+  - [T=0.20 R=1.00 L=0.59 TRL=0.1175] if ((is_simple) and (f_2>=_41) and (sum_pk_k>=7 >= 8)), then p6 >= (((-0.1666666667 * sum_pk_after_p6) + 2.333333333))
+  - [T=0.23 R=0.50 L=0.99 TRL=0.1138] if ((is_simple) and (p_5 = 0) and (sum_pk_k>=7 >= 6)), then p6 <= ((0.6666666667 * p4))
+  - [T=0.15 R=0.75 L=0.96 TRL=0.1104] if ((is_simple) and (p_5 <= 2) and (sum_pk_k>=7 >= 8)), then p6 <= (((0.6666666667 * p4) + (-2.333333333 * p5)))
+
+━━━ PROVED — Lean-verified theorems (strongest signal) ━━━━━━━━━━━━━━━━━━━━━━
+Machine-checked truths. Extend them: sharper constants, neighbouring strata,
+generalised or weakened hypotheses of the same bound family.
+  (none yet)
+
+━━━ REFUTED (gatekeeper — same shape + shifted constants still counts) ━━━━━━
+  (none yet)
+
+━━━ CE-SURVIVED BUT UNPROVED (probably true; prover lacks tools) ━━━━━━━━━━━━
+Beat every counterexample search, but the Lean prover could not close them
+from the current axiom Inventory. Their hypothesis families are fertile —
+propose variants with SIMPLER RHS shapes a counting/Euler argument reaches.
+  (none yet)
+
+━━━ SURVIVORS (un-refuted after many CE attempts) ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  (none yet)
+
+━━━ FOCUS CELLS (uncovered hypothesis territory this round) ━━━━━━━━━━━━━━━━━
+  (none — every cell with data already has conjectures)
+
+━━━ VERIFIED P-VECTORS (mentally test every proposal) ━━━━━━━━━━━━━━━━━━━━━━━
+  - {3:4}  | f_2=4 | sum_pk_k>=7=0
+  - {3:2, 4:3}  | f_2=5 | sum_pk_k>=7=0
+  - {4:6}  | f_2=6 | sum_pk_k>=7=0
+  - {3:3, 5:3, 6:1}  | f_2=7 | sum_pk_k>=7=0
+  - {3:3, 4:1, 5:2, 6:1, 7:1}  | f_2=8 | sum_pk_k>=7=1
+  - {4:3, 5:6}  | f_2=9 | sum_pk_k>=7=0
+  - {4:8, 8:2}  | f_2=10 | sum_pk_k>=7=2
+  - {3:6, 6:2, 8:3}  | f_2=11 | sum_pk_k>=7=3
+  - {5:12}  | f_2=12 | sum_pk_k>=7=0
+  - {4:11, 11:2}  | f_2=13 | sum_pk_k>=7=2
+  - {3:8, 8:6}  | f_2=14 | sum_pk_k>=7=6
+  - {4:8, 5:3, 6:1, 7:2, 11:1}  | f_2=15 | sum_pk_k>=7=3
+  - {5:12, 6:4}  | f_2=16 | sum_pk_k>=7=0
+  - {5:12, 6:6}  | f_2=18 | sum_pk_k>=7=0
+  - {3:40, 9:6, 10:15, 16:3}  | f_2=64 | sum_pk_k>=7=24
+  - {4:125, 125:2}  | f_2=127 | sum_pk_k>=7=2
+  - {5:36, 9:2, 12:3}  | f_2=41 | sum_pk_k>=7=5
+  - {5:12, 6:113}  | f_2=125 | sum_pk_k>=7=0
+
+━━━ TASK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Split your proposals across three modes:
+  1. EXPLORE — target the FOCUS CELLS and other under-covered regions in the
+     coverage table; combine hypothesis atoms into shapes the table doesn't
+     list.
+  2. SHARPEN — take a PROVED bound and propose a strictly stronger sibling
+     (tighter constant, or one hypothesis atom removed).
+  3. REPAIR — take a recent REFUTED bound and move it just past its
+     counterexample (shift the constant, or add the hypothesis atom the CE
+     fails). A repaired bound must clear every CE listed for that shape.
+Each proposal is re-checked against 1596 verified p-vectors; RHS
+coefficients with denominators > 6 are auto-rejected. Output JSON only:
+{
+  "conjectures": [
+    "if ((is_simple) and ...), then p6 >= (...)",
+    ...
+  ]
+}

@@ -1,0 +1,567 @@
+{
+  "run_timestamp": "20261118_155648",
+  "generated_at": "2026-11-18T20:56:49.724764+00:00",
+  "dataset_rows": 1596,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C217",
+      "formula": "if ((is_simple) and (f_2>=_4)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 4)",
+      "source": "llm"
+    },
+    {
+      "name": "C218",
+      "formula": "if ((is_simple) and (f_2>=_5)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 5)",
+      "source": "llm"
+    },
+    {
+      "name": "C219",
+      "formula": "if ((is_simple) and (f_2>=_6)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm"
+    },
+    {
+      "name": "C220",
+      "formula": "if ((is_simple) and (f_2>=_7)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 7)",
+      "source": "llm"
+    },
+    {
+      "name": "C221",
+      "formula": "if ((is_simple) and (f_2>=_8)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm"
+    },
+    {
+      "name": "C222",
+      "formula": "if ((is_simple) and (f_2>=_9)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 9)",
+      "source": "llm"
+    },
+    {
+      "name": "C223",
+      "formula": "if ((is_simple) and (f_2>=_10)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm"
+    },
+    {
+      "name": "C224",
+      "formula": "if ((is_simple) and (f_2>=_11)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 11)",
+      "source": "llm"
+    },
+    {
+      "name": "C225",
+      "formula": "if ((is_simple) and (f_2>=_12)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm"
+    },
+    {
+      "name": "C226",
+      "formula": "if ((is_simple) and (f_2>=_13)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 13)",
+      "source": "llm"
+    },
+    {
+      "name": "C227",
+      "formula": "if ((is_simple) and (f_2>=_14)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm"
+    },
+    {
+      "name": "C228",
+      "formula": "if ((is_simple) and (f_2>=_15)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 15)",
+      "source": "llm"
+    },
+    {
+      "name": "C229",
+      "formula": "if ((is_simple) and (f_2>=_16)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm"
+    },
+    {
+      "name": "C230",
+      "formula": "if ((is_simple) and (f_2>=_18)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm"
+    },
+    {
+      "name": "C231",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_6)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm"
+    },
+    {
+      "name": "C232",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_9)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 9)",
+      "source": "llm"
+    },
+    {
+      "name": "C233",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_10)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm"
+    },
+    {
+      "name": "C234",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_12)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm"
+    },
+    {
+      "name": "C235",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_16)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm"
+    },
+    {
+      "name": "C236",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_18)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm"
+    },
+    {
+      "name": "C237",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_7)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 7)",
+      "source": "llm"
+    },
+    {
+      "name": "C238",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_12)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm"
+    },
+    {
+      "name": "C239",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_14)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm"
+    },
+    {
+      "name": "C240",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_16)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm"
+    },
+    {
+      "name": "C241",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_18)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm"
+    },
+    {
+      "name": "C242",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_4)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 4)",
+      "source": "llm"
+    },
+    {
+      "name": "C243",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_6)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm"
+    },
+    {
+      "name": "C244",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_10)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm"
+    },
+    {
+      "name": "C245",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_14)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm"
+    },
+    {
+      "name": "C246",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_12)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm"
+    },
+    {
+      "name": "C247",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_16)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm"
+    },
+    {
+      "name": "C248",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_18)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm"
+    },
+    {
+      "name": "C249",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_4)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 4)",
+      "source": "llm"
+    },
+    {
+      "name": "C250",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_14)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "formula": "if ((is_simple)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0)), then p6 >= (0)",
+      "source": "llm",
+      "reason": "trivial_rhs: p6 >= 0.0 is always true"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_17)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 17)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=17; not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_19)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 19)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=19 vector"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_20)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_22)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 22)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_24)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_26)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 26)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=26"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_28)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 28)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_30)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 30)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_32)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 32)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=32"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_35)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 35)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=35"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_38)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 38)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=38"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_40)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 40)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=40"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_42)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 42)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=42"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_45)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 45)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=45"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_50)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 50)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=50"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_55)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 55)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified f_2=55"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_5)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 5)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 vector with f_2=5"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_7)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 7)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=7"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_8)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_14)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=14"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_20)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_22)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 22)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_24)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_26)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 26)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=26"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_28)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 28)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_30)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 30)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_34)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 34)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=34"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_38)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 38)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=38"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_42)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 42)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=42"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_48)), then p6 >= (-1*p4 + -1*p5 + -1*sum_pk_after_p6 + 48)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=0 f_2=48"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_6)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=6"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_8)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_9)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 9)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=9"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_10)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=10"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_20)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_22)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 22)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_24)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_27)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 27)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=27"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_30)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 30)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_33)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 33)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=33"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_36)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 36)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=36"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_40)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 40)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=40"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_44)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 44)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=44"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_50)), then p6 >= (-1*p3 + -1*p5 + -1*sum_pk_after_p6 + 50)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=0 f_2=50"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_8)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_12)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=12"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_16)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=16"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_18)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 18)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=18"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_20)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_22)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 22)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_24)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_26)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 26)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=26"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_28)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 28)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_30)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 30)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_33)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 33)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=33"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_36)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 36)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=36"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_40)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 40)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=40"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_45)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 45)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=45"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_50)), then p6 >= (-1*p3 + -1*p4 + -1*sum_pk_after_p6 + 50)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p5=0 f_2=50"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_13)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 13)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=13"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_14)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 14)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=14"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_20)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_24)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 24)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_28)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 28)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_32)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 32)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=32"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_40)), then p6 >= (-1*p5 + -1*sum_pk_after_p6 + 40)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p3=p4=0 f_2=40"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_5)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 5)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=5"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_6)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=6"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_7)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 7)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=7"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_8)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 8)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_10)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 10)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=10"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_12)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 12)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=12"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_16)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 16)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=16"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_20)), then p6 >= (-1*p3 + -1*sum_pk_after_p6 + 20)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p4=p5=0 f_2=20"
+    }
+  ]
+}

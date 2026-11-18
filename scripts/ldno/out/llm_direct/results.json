@@ -1,0 +1,885 @@
+{
+ "seeds": [
+  41,
+  7,
+  123,
+  2024,
+  99
+ ],
+ "seeds_completed": [
+  41,
+  7,
+  123,
+  2024,
+  99
+ ],
+ "comparison_source_commit": "314ed95 (F2b results; closed/open NOT rerun)",
+ "metric_defs_and_baseline": "2999a6c (F2b prereg)",
+ "per_seed_llm_direct": {
+  "41": {
+   "completed": true,
+   "wall_s": 850.5,
+   "novel_cells": 10,
+   "distinct_accepted_cells": 18,
+   "accepted": 18,
+   "refuted": 0,
+   "survivors": 18,
+   "candidates_evaluated": 240,
+   "llm_review_drops": 117,
+   "by_source": {
+    "graffiti3_full": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "graffiti3_stratified": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "dynamic_cells": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "mutation_engine": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "support_miner": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "llm_coproposer": {
+     "proposed_eval": 240,
+     "accepted": 18,
+     "rejected": 222
+    }
+   },
+   "refuted_by_tier": {},
+   "novel_cells_list": [
+    "(f_2>=_11)",
+    "(f_2>=_12)",
+    "(f_2>=_125)",
+    "(f_2>=_127)",
+    "(f_2>=_15)",
+    "(f_2>=_4)",
+    "(f_2>=_41)",
+    "(f_2>=_64)",
+    "(f_2>=_7)",
+    "(f_2>=_8)"
+   ],
+   "invalid_llm_outputs": 0,
+   "shortfall_total": 0,
+   "propose_per_gen": [
+    {
+     "gen": 1,
+     "cap_requested": 113,
+     "n_returned": 115,
+     "n_valid_raw": 115,
+     "n_entered": 113,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 2,
+     "hints_empty": true
+    },
+    {
+     "gen": 2,
+     "cap_requested": 127,
+     "n_returned": 127,
+     "n_valid_raw": 127,
+     "n_entered": 127,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 0,
+     "hints_empty": true
+    }
+   ],
+   "infra_failures_in_this_run": 0,
+   "self_checks": {
+    "graffiti3_full_candidates": 0,
+    "graffiti3_stratified_candidates": 0,
+    "dynamic_cells_candidates": 0,
+    "mutation_engine_candidates": 0,
+    "support_miner_candidates": 0,
+    "llm_candidates": 240,
+    "nonllm_sources_all_zero": true,
+    "all_hints_empty": true,
+    "cap_matched_closed_per_gen": true,
+    "cap_expected": {
+     "1": 113,
+     "2": 127
+    }
+   }
+  },
+  "7": {
+   "completed": true,
+   "wall_s": 824.8,
+   "novel_cells": 17,
+   "distinct_accepted_cells": 20,
+   "accepted": 21,
+   "refuted": 5,
+   "survivors": 16,
+   "candidates_evaluated": 241,
+   "llm_review_drops": 5,
+   "by_source": {
+    "graffiti3_full": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "graffiti3_stratified": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "dynamic_cells": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "mutation_engine": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "support_miner": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "llm_coproposer": {
+     "proposed_eval": 241,
+     "accepted": 21,
+     "rejected": 220
+    }
+   },
+   "refuted_by_tier": {
+    "plantri_screen": 5
+   },
+   "novel_cells_list": [
+    "(f_2>=_100) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_40) & (p_3 = 0) & (p_5 = 0)",
+    "(f_2>=_40) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_60) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_80) & (p_4 = 0)",
+    "(p_3 <= 10) & (p_4 = 0) & (p_5 = 0)",
+    "(p_3 = 0) & (p_4 <= 20) & (p_5 = 0)",
+    "(p_3 = 0) & (p_4 = 0) & (p_5 <= 20)",
+    "(p_3 = 0) & (p_4 = 0) & (p_5 = 12)",
+    "(p_3 = 0) & (p_5 = 0)",
+    "(p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+    "(p_3 = 1) & (p_4 = 0)",
+    "(p_3 = 1) & (p_5 = 0)",
+    "(p_3 = 2) & (p_5 = 0)",
+    "(p_4 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+    "(p_4 = 1) & (p_5 = 0)",
+    "(p_4 = 2) & (p_5 = 0)"
+   ],
+   "invalid_llm_outputs": 0,
+   "shortfall_total": 0,
+   "propose_per_gen": [
+    {
+     "gen": 1,
+     "cap_requested": 113,
+     "n_returned": 115,
+     "n_valid_raw": 115,
+     "n_entered": 113,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 2,
+     "hints_empty": true
+    },
+    {
+     "gen": 2,
+     "cap_requested": 128,
+     "n_returned": 129,
+     "n_valid_raw": 129,
+     "n_entered": 128,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 1,
+     "hints_empty": true
+    }
+   ],
+   "infra_failures_in_this_run": 0,
+   "self_checks": {
+    "graffiti3_full_candidates": 0,
+    "graffiti3_stratified_candidates": 0,
+    "dynamic_cells_candidates": 0,
+    "mutation_engine_candidates": 0,
+    "support_miner_candidates": 0,
+    "llm_candidates": 241,
+    "nonllm_sources_all_zero": true,
+    "all_hints_empty": true,
+    "cap_matched_closed_per_gen": true,
+    "cap_expected": {
+     "1": 113,
+     "2": 128
+    }
+   }
+  },
+  "123": {
+   "completed": true,
+   "wall_s": 1740.3,
+   "novel_cells": 51,
+   "distinct_accepted_cells": 61,
+   "accepted": 62,
+   "refuted": 0,
+   "survivors": 62,
+   "candidates_evaluated": 239,
+   "llm_review_drops": 75,
+   "by_source": {
+    "graffiti3_full": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "graffiti3_stratified": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "dynamic_cells": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "mutation_engine": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "support_miner": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "llm_coproposer": {
+     "proposed_eval": 239,
+     "accepted": 62,
+     "rejected": 177
+    }
+   },
+   "refuted_by_tier": {},
+   "novel_cells_list": [
+    "(f_2>=_10) & (p_3 = 0)",
+    "(f_2>=_10) & (p_5 = 0)",
+    "(f_2>=_100)",
+    "(f_2>=_11)",
+    "(f_2>=_12)",
+    "(f_2>=_12) & (p_3 = 0)",
+    "(f_2>=_12) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_12) & (p_4 = 0)",
+    "(f_2>=_14) & (p_4 = 0)",
+    "(f_2>=_14) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_14) & (p_5 = 0)",
+    "(f_2>=_15)",
+    "(f_2>=_16) & (p_3 = 0)",
+    "(f_2>=_16) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_16) & (p_4 = 0)",
+    "(f_2>=_18) & (p_3 = 0)",
+    "(f_2>=_18) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_18) & (p_4 = 0)",
+    "(f_2>=_20) & (p_4 = 0) & (p_5 <= 1)",
+    "(f_2>=_25) & (p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 4)",
+    "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2)",
+    "(f_2>=_30) & (p_3 <= 2) & (p_5 <= 2)",
+    "(f_2>=_30) & (p_4 <= 2) & (p_5 <= 2)",
+    "(f_2>=_30) & (p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 3)",
+    "(f_2>=_30) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_30) & (p_5 = 0)",
+    "(f_2>=_4)",
+    "(f_2>=_4) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_4) & (p_5 = 0)",
+    "(f_2>=_40) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_40) & (p_4 = 0) & (p_5 <= 2)",
+    "(f_2>=_50)",
+    "(f_2>=_50) & (p_3 = 0)",
+    "(f_2>=_50) & (p_3 = 0) & (p_4 <= 2)",
+    "(f_2>=_50) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_50) & (p_4 = 0)",
+    "(f_2>=_50) & (p_4 = 0) & (p_5 <= 2)",
+    "(f_2>=_50) & (p_4 = 0) & (sum_pk_k>=7 >= 2)",
+    "(f_2>=_50) & (p_5 = 0)",
+    "(f_2>=_6) & (p_3 = 0)",
+    "(f_2>=_6) & (p_5 = 0)",
+    "(f_2>=_60) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_7)",
+    "(f_2>=_7) & (p_4 = 0)",
+    "(f_2>=_8)",
+    "(f_2>=_80)",
+    "(f_2>=_80) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_80) & (p_4 = 0)",
+    "(f_2>=_9) & (p_3 = 0)",
+    "(p_3 = 0) & (p_4 = 0) & (p_5 <= 20)",
+    "(p_3 = 0) & (p_4 = 0) & (p_5 = 12)"
+   ],
+   "invalid_llm_outputs": 0,
+   "shortfall_total": 2,
+   "propose_per_gen": [
+    {
+     "gen": 1,
+     "cap_requested": 113,
+     "n_returned": 111,
+     "n_valid_raw": 111,
+     "n_entered": 111,
+     "n_invalid": 0,
+     "shortfall": 2,
+     "overflow_trimmed": 0,
+     "hints_empty": true
+    },
+    {
+     "gen": 2,
+     "cap_requested": 128,
+     "n_returned": 129,
+     "n_valid_raw": 129,
+     "n_entered": 128,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 1,
+     "hints_empty": true
+    }
+   ],
+   "infra_failures_in_this_run": 0,
+   "self_checks": {
+    "graffiti3_full_candidates": 0,
+    "graffiti3_stratified_candidates": 0,
+    "dynamic_cells_candidates": 0,
+    "mutation_engine_candidates": 0,
+    "support_miner_candidates": 0,
+    "llm_candidates": 239,
+    "nonllm_sources_all_zero": true,
+    "all_hints_empty": true,
+    "cap_matched_closed_per_gen": true,
+    "cap_expected": {
+     "1": 113,
+     "2": 128
+    }
+   }
+  },
+  "2024": {
+   "completed": true,
+   "wall_s": 1409.7,
+   "novel_cells": 36,
+   "distinct_accepted_cells": 47,
+   "accepted": 47,
+   "refuted": 1,
+   "survivors": 46,
+   "candidates_evaluated": 241,
+   "llm_review_drops": 96,
+   "by_source": {
+    "graffiti3_full": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "graffiti3_stratified": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "dynamic_cells": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "mutation_engine": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "support_miner": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "llm_coproposer": {
+     "proposed_eval": 241,
+     "accepted": 47,
+     "rejected": 194
+    }
+   },
+   "refuted_by_tier": {
+    "plantri_screen": 1
+   },
+   "novel_cells_list": [
+    "(f_2>=_10) & (p_3 = 0)",
+    "(f_2>=_10) & (p_5 = 0)",
+    "(f_2>=_11)",
+    "(f_2>=_11) & (p_5 = 0)",
+    "(f_2>=_12)",
+    "(f_2>=_12) & (p_3 = 0)",
+    "(f_2>=_12) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_12) & (p_4 = 0)",
+    "(f_2>=_13) & (p_3 = 0)",
+    "(f_2>=_13) & (p_5 = 0)",
+    "(f_2>=_14) & (p_4 = 0)",
+    "(f_2>=_15)",
+    "(f_2>=_16) & (p_3 = 0)",
+    "(f_2>=_16) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_16) & (p_4 = 0)",
+    "(f_2>=_18) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_18) & (p_4 = 0)",
+    "(f_2>=_20) & (p_3 = 0) & (p_4 = 0) & (p_5 = 12)",
+    "(f_2>=_4) & (p_4 = 0)",
+    "(f_2>=_4) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_4) & (p_5 = 0)",
+    "(f_2>=_40) & (p_3 = 0) & (p_5 = 0)",
+    "(f_2>=_41)",
+    "(f_2>=_5) & (p_5 = 0)",
+    "(f_2>=_50) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_50) & (sum_pk_k>=7 >= 3)",
+    "(f_2>=_6) & (p_3 = 0)",
+    "(f_2>=_6) & (p_5 = 0)",
+    "(f_2>=_7)",
+    "(f_2>=_7) & (p_4 = 0)",
+    "(f_2>=_8)",
+    "(f_2>=_80) & (p_3 = 0) & (p_4 = 0) & (p_5 = 12)",
+    "(f_2>=_9) & (p_3 = 0)",
+    "(p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+    "(p_3 = 0) & (sum_pk_k>=7 >= 5)",
+    "(p_4 <= 2) & (sum_pk_k>=7 >= 5)"
+   ],
+   "invalid_llm_outputs": 0,
+   "shortfall_total": 0,
+   "propose_per_gen": [
+    {
+     "gen": 1,
+     "cap_requested": 113,
+     "n_returned": 114,
+     "n_valid_raw": 114,
+     "n_entered": 113,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 1,
+     "hints_empty": true
+    },
+    {
+     "gen": 2,
+     "cap_requested": 128,
+     "n_returned": 128,
+     "n_valid_raw": 128,
+     "n_entered": 128,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 0,
+     "hints_empty": true
+    }
+   ],
+   "infra_failures_in_this_run": 0,
+   "self_checks": {
+    "graffiti3_full_candidates": 0,
+    "graffiti3_stratified_candidates": 0,
+    "dynamic_cells_candidates": 0,
+    "mutation_engine_candidates": 0,
+    "support_miner_candidates": 0,
+    "llm_candidates": 241,
+    "nonllm_sources_all_zero": true,
+    "all_hints_empty": true,
+    "cap_matched_closed_per_gen": true,
+    "cap_expected": {
+     "1": 113,
+     "2": 128
+    }
+   }
+  },
+  "99": {
+   "completed": true,
+   "wall_s": 332.1,
+   "novel_cells": 14,
+   "distinct_accepted_cells": 14,
+   "accepted": 14,
+   "refuted": 1,
+   "survivors": 13,
+   "candidates_evaluated": 230,
+   "llm_review_drops": 3,
+   "by_source": {
+    "graffiti3_full": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "graffiti3_stratified": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "dynamic_cells": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "mutation_engine": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "support_miner": {
+     "proposed_eval": 0,
+     "accepted": 0,
+     "rejected": 0
+    },
+    "llm_coproposer": {
+     "proposed_eval": 230,
+     "accepted": 14,
+     "rejected": 216
+    }
+   },
+   "refuted_by_tier": {
+    "plantri_screen": 1
+   },
+   "novel_cells_list": [
+    "(f_2>=_30) & (p_4 = 0) & (p_5 = 0)",
+    "(f_2>=_50) & (p_3 = 0) & (p_4 = 0)",
+    "(f_2>=_80) & (p_3 = 0) & (p_4 = 0)",
+    "(p_3 <= 10) & (p_4 = 0) & (p_5 = 0)",
+    "(p_3 <= 2) & (p_4 <= 2)",
+    "(p_3 <= 2) & (p_4 <= 2) & (p_5 <= 2)",
+    "(p_3 <= 2) & (p_5 <= 2)",
+    "(p_3 <= 20) & (p_4 = 0) & (p_5 = 0)",
+    "(p_3 = 0) & (p_4 <= 10) & (p_5 = 0)",
+    "(p_3 = 0) & (p_4 = 0) & (p_5 <= 20)",
+    "(p_3 = 0) & (p_4 >= 12) & (p_5 = 0)",
+    "(p_3 = 0) & (p_5 = 0)",
+    "(p_4 <= 2) & (p_5 <= 2)",
+    "(p_4 = 0) & (p_5 = 0)"
+   ],
+   "invalid_llm_outputs": 0,
+   "shortfall_total": 0,
+   "propose_per_gen": [
+    {
+     "gen": 1,
+     "cap_requested": 113,
+     "n_returned": 115,
+     "n_valid_raw": 115,
+     "n_entered": 113,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 2,
+     "hints_empty": true
+    },
+    {
+     "gen": 2,
+     "cap_requested": 117,
+     "n_returned": 120,
+     "n_valid_raw": 120,
+     "n_entered": 117,
+     "n_invalid": 0,
+     "shortfall": 0,
+     "overflow_trimmed": 3,
+     "hints_empty": true
+    }
+   ],
+   "infra_failures_in_this_run": 0,
+   "self_checks": {
+    "graffiti3_full_candidates": 0,
+    "graffiti3_stratified_candidates": 0,
+    "dynamic_cells_candidates": 0,
+    "mutation_engine_candidates": 0,
+    "support_miner_candidates": 0,
+    "llm_candidates": 230,
+    "nonllm_sources_all_zero": true,
+    "all_hints_empty": true,
+    "cap_matched_closed_per_gen": true,
+    "cap_expected": {
+     "1": 113,
+     "2": 117
+    }
+   }
+  }
+ },
+ "table": [
+  {
+   "seed": 41,
+   "closed": {
+    "novel_cells": 45,
+    "distinct_accepted_cells": 60,
+    "accepted": 66,
+    "refuted": 7,
+    "candidates_evaluated": 240,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "open": {
+    "novel_cells": 26,
+    "distinct_accepted_cells": 31,
+    "accepted": 32,
+    "refuted": 3,
+    "candidates_evaluated": 162,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "llm_direct": {
+    "novel_cells": 10,
+    "distinct_accepted_cells": 18,
+    "accepted": 18,
+    "refuted": 0,
+    "candidates_evaluated": 240,
+    "invalid_llm_outputs": 0,
+    "wall_s": 850.5
+   }
+  },
+  {
+   "seed": 7,
+   "closed": {
+    "novel_cells": 50,
+    "distinct_accepted_cells": 63,
+    "accepted": 67,
+    "refuted": 8,
+    "candidates_evaluated": 241,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "open": {
+    "novel_cells": 30,
+    "distinct_accepted_cells": 35,
+    "accepted": 38,
+    "refuted": 3,
+    "candidates_evaluated": 167,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "llm_direct": {
+    "novel_cells": 17,
+    "distinct_accepted_cells": 20,
+    "accepted": 21,
+    "refuted": 5,
+    "candidates_evaluated": 241,
+    "invalid_llm_outputs": 0,
+    "wall_s": 824.8
+   }
+  },
+  {
+   "seed": 123,
+   "closed": {
+    "novel_cells": 51,
+    "distinct_accepted_cells": 65,
+    "accepted": 70,
+    "refuted": 8,
+    "candidates_evaluated": 241,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "open": {
+    "novel_cells": 34,
+    "distinct_accepted_cells": 39,
+    "accepted": 42,
+    "refuted": 5,
+    "candidates_evaluated": 167,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "llm_direct": {
+    "novel_cells": 51,
+    "distinct_accepted_cells": 61,
+    "accepted": 62,
+    "refuted": 0,
+    "candidates_evaluated": 239,
+    "invalid_llm_outputs": 0,
+    "wall_s": 1740.3
+   }
+  },
+  {
+   "seed": 2024,
+   "closed": {
+    "novel_cells": 35,
+    "distinct_accepted_cells": 47,
+    "accepted": 49,
+    "refuted": 6,
+    "candidates_evaluated": 241,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "open": {
+    "novel_cells": 31,
+    "distinct_accepted_cells": 36,
+    "accepted": 39,
+    "refuted": 3,
+    "candidates_evaluated": 167,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "llm_direct": {
+    "novel_cells": 36,
+    "distinct_accepted_cells": 47,
+    "accepted": 47,
+    "refuted": 1,
+    "candidates_evaluated": 241,
+    "invalid_llm_outputs": 0,
+    "wall_s": 1409.7
+   }
+  },
+  {
+   "seed": 99,
+   "closed": {
+    "novel_cells": 26,
+    "distinct_accepted_cells": 38,
+    "accepted": 40,
+    "refuted": 7,
+    "candidates_evaluated": 230,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "open": {
+    "novel_cells": 28,
+    "distinct_accepted_cells": 33,
+    "accepted": 36,
+    "refuted": 3,
+    "candidates_evaluated": 167,
+    "invalid_llm_outputs": null,
+    "wall_s": null
+   },
+   "llm_direct": {
+    "novel_cells": 14,
+    "distinct_accepted_cells": 14,
+    "accepted": 14,
+    "refuted": 1,
+    "candidates_evaluated": 230,
+    "invalid_llm_outputs": 0,
+    "wall_s": 332.1
+   }
+  }
+ ],
+ "means": {
+  "novel_cells": {
+   "closed": {
+    "mean": 41.4,
+    "sd": 9.5624,
+    "n": 5
+   },
+   "open": {
+    "mean": 29.8,
+    "sd": 2.7129,
+    "n": 5
+   },
+   "llm_direct": {
+    "mean": 25.6,
+    "sd": 15.5255,
+    "n": 5
+   }
+  },
+  "distinct_accepted_cells": {
+   "closed": {
+    "mean": 54.6,
+    "sd": 10.4038,
+    "n": 5
+   },
+   "open": {
+    "mean": 34.8,
+    "sd": 2.7129,
+    "n": 5
+   },
+   "llm_direct": {
+    "mean": 32,
+    "sd": 18.6011,
+    "n": 5
+   }
+  },
+  "accepted": {
+   "closed": {
+    "mean": 58.4,
+    "sd": 11.7745,
+    "n": 5
+   },
+   "open": {
+    "mean": 37.4,
+    "sd": 3.3226,
+    "n": 5
+   },
+   "llm_direct": {
+    "mean": 32.4,
+    "sd": 18.7894,
+    "n": 5
+   }
+  },
+  "refuted": {
+   "closed": {
+    "mean": 7.2,
+    "sd": 0.7483,
+    "n": 5
+   },
+   "open": {
+    "mean": 3.4,
+    "sd": 0.8,
+    "n": 5
+   },
+   "llm_direct": {
+    "mean": 1.4,
+    "sd": 1.8547,
+    "n": 5
+   }
+  },
+  "candidates_evaluated": {
+   "closed": {
+    "mean": 238.6,
+    "sd": 4.3174,
+    "n": 5
+   },
+   "open": {
+    "mean": 166,
+    "sd": 2.0,
+    "n": 5
+   },
+   "llm_direct": {
+    "mean": 238.2,
+    "sd": 4.1665,
+    "n": 5
+   }
+  },
+  "invalid_llm_outputs": {
+   "llm_direct": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   }
+  },
+  "wall_s": {
+   "llm_direct": {
+    "mean": 1031.48,
+    "sd": 491.951,
+    "n": 5
+   }
+  }
+ },
+ "decision_rule": {
+  "n_seeds_completed": 5,
+  "rule": "closed beats llm_direct iff novel cells(closed) > novel cells(llm_direct) in >= 3 of 5 seeds",
+  "closed_wins": 3,
+  "closed_beats_llm_direct": true,
+  "sign_count": {
+   "closed>llm_direct": 3,
+   "closed=llm_direct": 1,
+   "closed<llm_direct": 1
+  },
+  "per_seed_novel": {
+   "41": {
+    "closed": 45,
+    "llm_direct": 10,
+    "diff_closed_minus_ld": 35
+   },
+   "7": {
+    "closed": 50,
+    "llm_direct": 17,
+    "diff_closed_minus_ld": 33
+   },
+   "123": {
+    "closed": 51,
+    "llm_direct": 51,
+    "diff_closed_minus_ld": 0
+   },
+   "2024": {
+    "closed": 35,
+    "llm_direct": 36,
+    "diff_closed_minus_ld": -1
+   },
+   "99": {
+    "closed": 26,
+    "llm_direct": 14,
+    "diff_closed_minus_ld": 12
+   }
+  }
+ }
+}

@@ -1,0 +1,652 @@
+{
+  "run_timestamp": "20261118_160407",
+  "generated_at": "2026-11-18T21:04:08.019319+00:00",
+  "dataset_rows": 1597,
+  "g3_mode": "fast",
+  "linear_only": true,
+  "llm_enabled": true,
+  "accepted": [
+    {
+      "name": "C227",
+      "formula": "if ((is_simple)), then p6 >= (4 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C228",
+      "formula": "if ((is_simple) and (f_2>=_5)), then p6 >= (5 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C229",
+      "formula": "if ((is_simple) and (f_2>=_6)), then p6 >= (6 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C230",
+      "formula": "if ((is_simple) and (f_2>=_7)), then p6 >= (7 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C231",
+      "formula": "if ((is_simple) and (f_2>=_8)), then p6 >= (8 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C232",
+      "formula": "if ((is_simple) and (f_2>=_9)), then p6 >= (9 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C233",
+      "formula": "if ((is_simple) and (f_2>=_10)), then p6 >= (10 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C234",
+      "formula": "if ((is_simple) and (f_2>=_11)), then p6 >= (11 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C235",
+      "formula": "if ((is_simple) and (f_2>=_12)), then p6 >= (12 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C236",
+      "formula": "if ((is_simple) and (f_2>=_13)), then p6 >= (13 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C237",
+      "formula": "if ((is_simple) and (f_2>=_14)), then p6 >= (14 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C238",
+      "formula": "if ((is_simple) and (f_2>=_15)), then p6 >= (15 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C239",
+      "formula": "if ((is_simple) and (f_2>=_16)), then p6 >= (16 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C240",
+      "formula": "if ((is_simple) and (f_2>=_18)), then p6 >= (18 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C241",
+      "formula": "if ((is_simple) and (f_2>=_41)), then p6 >= (41 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C242",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_6)), then p6 >= (6 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C243",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_9)), then p6 >= (9 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C244",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_10)), then p6 >= (10 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C245",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_12)), then p6 >= (12 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C246",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_13)), then p6 >= (13 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C247",
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_16)), then p6 >= (16 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C248",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_4)), then p6 >= (4 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C249",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_7)), then p6 >= (7 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C250",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_12)), then p6 >= (12 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C251",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_14)), then p6 >= (14 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C252",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_16)), then p6 >= (16 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C253",
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_18)), then p6 >= (18 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C254",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_4)), then p6 >= (4 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C255",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_5)), then p6 >= (5 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C256",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_6)), then p6 >= (6 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C257",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_10)), then p6 >= (10 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C258",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_11)), then p6 >= (11 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C259",
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_13)), then p6 >= (13 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C260",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_12)), then p6 >= (12 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C261",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_16)), then p6 >= (16 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C262",
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_18)), then p6 >= (18 - p5 - sum_pk_after_p6)",
+      "source": "llm"
+    },
+    {
+      "name": "C263",
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_4)), then p6 >= (4 - p3 - sum_pk_after_p6)",
+      "source": "llm"
+    }
+  ],
+  "rejected": [
+    {
+      "formula": "if ((is_simple) and (f_2>=_17)), then p6 >= (17 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=17; not sharp"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_19)), then p6 >= (19 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_20)), then p6 >= (20 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_21)), then p6 >= (21 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=21"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_22)), then p6 >= (22 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_23)), then p6 >= (23 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=23"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_24)), then p6 >= (24 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_25)), then p6 >= (25 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=25"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_26)), then p6 >= (26 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=26"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_27)), then p6 >= (27 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=27"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_28)), then p6 >= (28 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_29)), then p6 >= (29 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=29"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_30)), then p6 >= (30 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_31)), then p6 >= (31 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=31"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_32)), then p6 >= (32 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=32"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_33)), then p6 >= (33 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=33"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_34)), then p6 >= (34 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=34"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_35)), then p6 >= (35 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=35"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_36)), then p6 >= (36 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=36"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_37)), then p6 >= (37 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=37"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_38)), then p6 >= (38 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=38"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_39)), then p6 >= (39 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=39"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_40)), then p6 >= (40 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=40"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_42)), then p6 >= (42 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=42"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_43)), then p6 >= (43 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=43"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_44)), then p6 >= (44 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=44"
+    },
+    {
+      "formula": "if ((is_simple) and (f_2>=_45)), then p6 >= (45 - p3 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified vector with f_2=45"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_4)), then p6 >= (4 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p_3=0 vector with f_2=4"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_5)), then p6 >= (5 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no verified p_3=0 vector with f_2=5"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_7)), then p6 >= (7 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=7"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_8)), then p6 >= (8 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_11)), then p6 >= (11 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=11"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_14)), then p6 >= (14 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=14"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_15)), then p6 >= (15 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=15"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_17)), then p6 >= (17 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=17"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_18)), then p6 >= (18 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: f_2=18 p_3=0 exists; wait keep"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_19)), then p6 >= (19 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_20)), then p6 >= (20 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_21)), then p6 >= (21 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=21"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_22)), then p6 >= (22 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_23)), then p6 >= (23 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=23"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_24)), then p6 >= (24 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_25)), then p6 >= (25 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=25"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_26)), then p6 >= (26 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=26"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_27)), then p6 >= (27 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=27"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_28)), then p6 >= (28 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=28"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_29)), then p6 >= (29 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=29"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (f_2>=_30)), then p6 >= (30 - p4 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=0 vector with f_2=30"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_5)), then p6 >= (5 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=5"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_6)), then p6 >= (6 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=6"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_8)), then p6 >= (8 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_9)), then p6 >= (9 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=9"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_10)), then p6 >= (10 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=10"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_11)), then p6 >= (11 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=11"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_13)), then p6 >= (13 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=13"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_15)), then p6 >= (15 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=15"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_17)), then p6 >= (17 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=17"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_19)), then p6 >= (19 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_20)), then p6 >= (20 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_21)), then p6 >= (21 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=21"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_22)), then p6 >= (22 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_23)), then p6 >= (23 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=23"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_24)), then p6 >= (24 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (f_2>=_25)), then p6 >= (25 - p3 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=0 vector with f_2=25"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_7)), then p6 >= (7 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=7"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_8)), then p6 >= (8 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_9)), then p6 >= (9 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=9"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_12)), then p6 >= (12 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=12"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_14)), then p6 >= (14 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=14"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_15)), then p6 >= (15 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=15"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_16)), then p6 >= (16 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=16"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_17)), then p6 >= (17 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=17"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_18)), then p6 >= (18 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=18"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_19)), then p6 >= (19 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (p_5 = 0) and (f_2>=_20)), then p6 >= (20 - p3 - p4 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_5=0 vector with f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_13)), then p6 >= (13 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=13"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_14)), then p6 >= (14 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=14"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_15)), then p6 >= (15 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=15"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_17)), then p6 >= (17 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=17"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_19)), then p6 >= (19 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=19"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_20)), then p6 >= (20 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=20"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_21)), then p6 >= (21 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=21"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_22)), then p6 >= (22 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=22"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_23)), then p6 >= (23 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=23"
+    },
+    {
+      "formula": "if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_24)), then p6 >= (24 - p5 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_3=p_4=0 vector with f_2=24"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_5)), then p6 >= (5 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=5"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_6)), then p6 >= (6 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=6"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_7)), then p6 >= (7 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=7"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_8)), then p6 >= (8 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=8"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_9)), then p6 >= (9 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=9"
+    },
+    {
+      "formula": "if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_10)), then p6 >= (10 - p3 - sum_pk_after_p6)",
+      "source": "llm",
+      "reason": "llm_review_drop: no p_4=p_5=0 vector with f_2=10"
+    }
+  ]
+}

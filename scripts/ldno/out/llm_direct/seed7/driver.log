@@ -1,0 +1,324 @@
+
+======================================================================
+[llm_direct] Generation 1/2 (seed=7, llm_propose_n cap=113, downstream=B)
+======================================================================
+[conjecture generator] start generating…
+[conjecture generator] dataset augmented with 1166 pipeline-verified p-vector(s) → 1607 rows
+[conjecture generator] dropping 11 row(s) with invalid p_vector
+[conjecture generator] discovery table: 1596 rows, 63 hypothesis column(s)
+[conjecture generator] pool gate armed with 25465 verified p-vector(s) (full pool)
+[conjecture generator] Graffiti3 full-table pass: 0 raw conjecture(s)
+[conjecture generator] signals: 0 proved, 0 refuted, 0 prover-stuck, 0 survivor(s)
+[conjecture generator] calling LLM propose (claude-opus-4-7, effort=low, ≤60s, no retry)…
+[conjecture generator] LLM proposed 113 candidate(s) (requested 113, returned 115, valid 115, entered 113, invalid 0)
+[conjecture generator] pool gate: 37 kept, 76 dropped
+[conjecture generator] trivial-RHS guard dropped 22 candidate(s)
+[ce_enumerator] hypothesis requires f_2 >= 50 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 100 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[conjecture generator] semantic-dup filter dropped 2 candidate(s) (duplicate attack surface or implied by an alive conjecture)
+[conjecture generator] calling LLM review on 13 candidate(s) (claude-opus-4-7, effort=low, ≤180s, no retry)…
+[conjecture generator] LLM review dropped 1 candidate(s)
+[conjecture generator] accepted 12, rejected 101
+[conjecture generator] IRIS scored 12/12 on 1596 verified p-vector(s)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C217: if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (p_3 <= 10)), then p6 <= (sum_pk_after_p6 + 20)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C218: if ((is_simple) and (p_3 = 0) and (p_5 = 0)), then p6 <= ((1/2 * p4) + sum_pk_after_p6 + 50)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C219: if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (p_4 <= 20)), then p6 <= (sum_pk_after_p6 + 30)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C220: if ((is_simple) and (p_3 = 1) and (p_4 = 0)), then p6 >= ((1/2 * p5) + -8)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C221: if ((is_simple) and (p_3 = 1) and (p_5 = 0)), then p6 >= ((1/3 * p4) + -8)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C222: if ((is_simple) and (p_3 = 2) and (p_5 = 0)), then p6 >= ((1/3 * p4) + -8)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C223: if ((is_simple) and (p_4 = 1) and (p_5 = 0)), then p6 >= ((1/2 * p3) + -8)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C224: if ((is_simple) and (p_4 = 2) and (p_5 = 0)), then p6 >= ((1/2 * p3) + -8)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C225: if ((is_simple)), then p6 <= (p3 + p4 + p5 + sum_pk_after_p6 + 200)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C226: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 <= 20)), then p6 <= (sum_pk_after_p6 + 150)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C227: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 = 12)), then p6 <= (sum_pk_after_p6 + 200)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C228: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_100)), then p6 >= (p5 + -16)
+[conjecture generator] conjectures stored with status=new (12)
+[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed7/llm_direct/output/conjecture_generator/run_20261118_153926.json
+[llm_direct] gen1 generation wall=77.9s
+[llm_direct] gen1: 12 new conjecture(s) -> downstream
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C217 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 144 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 2 of them directly; 142 have too many faces to enumerate exhaustively.
+
+[Plantri ce finding] plantri: CE found❗ (plantri_single): {3: 4, 6: 22}
+
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=26  V=48  E=72  (Euler: 48-72+26=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 0 [p4=0]  |  ✓ p_5 = 0 [p5=0]  |  ✓ p_3 <= 10 [p3=4]
+[Check p-vector] ✓ Conclusion violated: p6=22.0 > RHS=20.0000 (violation)  |  p6=22.0,  RHS=20.0,  violation margin=2.0000
+[Check p-vector] ✓ Realizability: [witness] explicit graph verified as simple 3-polytope by graphcalc; p-vector matches candidate exactly
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [22 <= (0 + 20)] | witness re-validated by networkx: 3-regular, planar, 3-connected, all 26 faces traced — p-vector matches (V=48, E=72, F=26)
+[Plantri ce finding] plantri: 5 checks passed, CE is valid √
+[Output] json and graph were saved → C217
+[llm_direct] gen1 C217: REFUTED by plantri ce finder  (17.9s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C218 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C218: SURVIVOR  (14.0s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C219 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C219: SURVIVOR  (14.2s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C220 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=32  V=60  E=90  (Euler: 60-90+32=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_3 = 1 [p3=1]  |  ✓ p_4 = 0 [p4=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=5.0000 (violation)  |  p6=0.0,  RHS=5.0,  violation margin=-5.0000
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= ((1/2 * 26) + -8)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 329 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 79 of them directly; 250 have too many faces to enumerate exhaustively.
+[Plantri ce finding] plantri: exhaustive enumeration finished (249s): 15 candidate(s) proven non-realizable; 314 remain undecided → constructor double check.
+[llm_direct] gen1 C220: SURVIVOR  (263.3s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C221 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=272  V=540  E=810  (Euler: 540-810+272=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_3 = 1 [p3=1]  |  ✓ p_5 = 0 [p5=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=57.3333 (violation)  |  p6=0.0,  RHS=57.3333,  violation margin=-57.3333
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= ((1/3 * 196) + -8)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C221: SURVIVOR  (14.8s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C222 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=396  V=788  E=1182  (Euler: 788-1182+396=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_3 = 2 [p3=2]  |  ✓ p_5 = 0 [p5=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=77.3333 (violation)  |  p6=0.0,  RHS=77.3333,  violation margin=-77.3333
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= ((1/3 * 256) + -8)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C222: SURVIVOR  (14.3s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C223 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=341  V=678  E=1017  (Euler: 678-1017+341=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 1 [p4=1]  |  ✓ p_5 = 0 [p5=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=99.5000 (violation)  |  p6=0.0,  RHS=99.5,  violation margin=-99.5000
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= ((1/2 * 215) + -8)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C223: SURVIVOR  (11.3s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C224 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=272  V=540  E=810  (Euler: 540-810+272=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 2 [p4=2]  |  ✓ p_5 = 0 [p5=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=75.5000 (violation)  |  p6=0.0,  RHS=75.5,  violation margin=-75.5000
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= ((1/2 * 167) + -8)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C224: SURVIVOR  (14.5s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C225 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C225: SURVIVOR  (15.7s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C226 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C226: SURVIVOR  (13.6s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C227 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen1 C227: SURVIVOR  (13.8s)
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C228 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 100 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen1 C228: SURVIVOR  (13.8s)
+[llm_direct] gen1 downstream done: 1 refuted, 11 survivors
+
+======================================================================
+[llm_direct] Generation 2/2 (seed=7, llm_propose_n cap=128, downstream=B)
+======================================================================
+[conjecture generator] start generating…
+[conjecture generator] dataset augmented with 1167 pipeline-verified p-vector(s) → 1608 rows
+[conjecture generator] dropping 11 row(s) with invalid p_vector
+[conjecture generator] discovery table: 1597 rows, 63 hypothesis column(s)
+[conjecture generator] pool gate armed with 25466 verified p-vector(s) (full pool)
+[conjecture generator] Graffiti3 full-table pass: 0 raw conjecture(s)
+[conjecture generator] signals: 0 proved, 0 refuted, 0 prover-stuck, 0 survivor(s)
+[conjecture generator] calling LLM propose (claude-opus-4-7, effort=low, ≤60s, no retry)…
+[conjecture generator] LLM proposed 128 candidate(s) (requested 128, returned 129, valid 129, entered 128, invalid 0)
+[pvec_eval] WARNING: unrecognised hypothesis 'sum_pk_k>=7 = 0' — treating as NOT satisfied (fail-closed). If this hypothesis is legitimate, add a pattern for it in pvec_eval._compile_hypothesis.
+[conjecture generator] pool gate: 38 kept, 90 dropped
+[conjecture generator] trivial-RHS guard dropped 25 candidate(s)
+[ce_enumerator] hypothesis requires sum_pk_k>=7 >= 10 but CE_ENUM_NLARGE_HARDCAP=5 caps the iteration — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 60 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 100 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 80 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 40 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 40 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[conjecture generator] calling LLM review on 13 candidate(s) (claude-opus-4-7, effort=low, ≤180s, no retry)…
+[conjecture generator] LLM review dropped 4 candidate(s)
+[conjecture generator] accepted 9, rejected 119
+[conjecture generator] IRIS scored 9/9 on 1597 verified p-vector(s)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C229: if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 5)), then p6 <= (((1/2) * sum_pk_after_p6) + p3)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C230: if ((is_simple) and (f_2>=_60) and (p_3 = 0) and (p_4 = 0)), then p6 >= (((1/2) * p5) + -4)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C231: if ((is_simple) and (f_2>=_100) and (p_3 = 0) and (p_4 = 0)), then p6 >= (p5 + -10)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C232: if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 1)), then p6 <= ((2 * p3) + sum_pk_after_p6)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C233: if ((is_simple) and (p_3 = 0) and (p_5 = 0) and (sum_pk_k>=7 >= 1)), then p6 <= ((2 * p4) + sum_pk_after_p6)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C234: if ((is_simple) and (f_2>=_80) and (p_4 = 0)), then p6 >= (((1/2) * p5) + ((1/6) * p3) + -6)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C235: if ((is_simple) and (p_4 = 0) and (p_5 <= 2) and (sum_pk_k>=7 >= 3)), then p6 <= ((2 * p3) + sum_pk_after_p6)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C236: if ((is_simple) and (f_2>=_40) and (p_4 = 0) and (p_5 = 0)), then p6 <= ((2 * p3) + sum_pk_after_p6)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C237: if ((is_simple) and (f_2>=_40) and (p_3 = 0) and (p_5 = 0)), then p6 <= ((2 * p4) + sum_pk_after_p6)
+[conjecture generator] conjectures stored with status=new (9)
+[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed7/llm_direct/output/conjecture_generator/run_20261118_154944.json
+[llm_direct] gen2 generation wall=195.8s
+[llm_direct] gen2: 9 new conjecture(s) -> downstream
+[Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C229 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 400 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 101 of them directly; 299 have too many faces to enumerate exhaustively.
+
+[Plantri ce finding] plantri: CE found❗ (plantri_single): {3: 6, 6: 9, 7: 4, 8: 1}
+
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=20  V=36  E=54  (Euler: 36-54+20=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 0 [p4=0]  |  ✓ p_5 = 0 [p5=0]  |  ✓ sum_pk_k>=7 >= 5
+[Check p-vector] ✓ Conclusion violated: p6=9.0 > RHS=8.5000 (violation)  |  p6=9.0,  RHS=8.5,  violation margin=0.5000
+[Check p-vector] ✓ Realizability: [witness] explicit graph verified as simple 3-polytope by graphcalc; p-vector matches candidate exactly
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [9 <= (((1/2) * 5) + 6)] | witness re-validated by networkx: 3-regular, planar, 3-connected, all 20 faces traced — p-vector matches (V=36, E=54, F=20)
+[Plantri ce finding] plantri: 5 checks passed, CE is valid √
+[Output] json and graph were saved → C229
+[llm_direct] gen2 C229: REFUTED by plantri ce finder  (14.1s)
+[Stage 0] Witness pool replay — re-checking 208 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C230 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 60 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C230: SURVIVOR  (13.6s)
+[Stage 0] Witness pool replay — re-checking 208 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C231 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 100 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C231: SURVIVOR  (13.6s)
+[Stage 0] Witness pool replay — re-checking 208 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C232 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 256 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 41 of them directly; 215 have too many faces to enumerate exhaustively.
+
+[Plantri ce finding] plantri: CE found❗ (plantri_single): {3: 5, 6: 12, 9: 1}
+
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=18  V=32  E=48  (Euler: 32-48+18=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 0 [p4=0]  |  ✓ p_5 = 0 [p5=0]  |  ✓ sum_pk_k>=7 >= 1
+[Check p-vector] ✓ Conclusion violated: p6=12.0 > RHS=11.0000 (violation)  |  p6=12.0,  RHS=11.0,  violation margin=1.0000
+[Check p-vector] ✓ Realizability: [witness] explicit graph verified as simple 3-polytope by graphcalc; p-vector matches candidate exactly
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [12 <= ((2 * 5) + 1)] | witness re-validated by networkx: 3-regular, planar, 3-connected, all 18 faces traced — p-vector matches (V=32, E=48, F=18)
+[Plantri ce finding] plantri: 5 checks passed, CE is valid √
+[Output] json and graph were saved → C232
+[llm_direct] gen2 C232: REFUTED by plantri ce finder  (13.8s)
+[Stage 0] Witness pool replay — re-checking 209 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C233 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 85 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 4 of them directly; 81 have too many faces to enumerate exhaustively.
+
+[Plantri ce finding] plantri: CE found❗ (plantri_single): {4: 7, 6: 16, 8: 1}
+
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=24  V=44  E=66  (Euler: 44-66+24=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_3 = 0 [p3=0]  |  ✓ p_5 = 0 [p5=0]  |  ✓ sum_pk_k>=7 >= 1
+[Check p-vector] ✓ Conclusion violated: p6=16.0 > RHS=15.0000 (violation)  |  p6=16.0,  RHS=15.0,  violation margin=1.0000
+[Check p-vector] ✓ Realizability: [witness] explicit graph verified as simple 3-polytope by graphcalc; p-vector matches candidate exactly
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [16 <= ((2 * 7) + 1)] | witness re-validated by networkx: 3-regular, planar, 3-connected, all 24 faces traced — p-vector matches (V=44, E=66, F=24)
+[Plantri ce finding] plantri: 5 checks passed, CE is valid √
+[Output] json and graph were saved → C233
+[llm_direct] gen2 C233: REFUTED by plantri ce finder  (22.7s)
+[Stage 0] Witness pool replay — re-checking 210 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C234 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=106  V=208  E=312  (Euler: 208-312+106=2)
+[Check p-vector] ✓ Hypotheses: ✓ f_2>=_80 [f2=106]  |  ✓ p_4 = 0 [p4=0]
+[Check p-vector] ✓ Conclusion violated: p6=0.0 < RHS=11.8333 (violation)  |  p6=0.0,  RHS=11.8333,  violation margin=-11.8333
+[Check p-vector] ✗ Realizability: [Tier 4 Constructor] all construction strategies exhausted (last attempt: construction_failed_within_timeout, timeout=30s) — realizability UNPROVEN; CE rejected (no witness graph)
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [0 >= (((1/2) * 17) + ((1/6) * 56) + -6)] | no witness graph exported by the realizability tier — graph re-validation skipped
+[Plantri ce finding] f_2 >= 80 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C234: SURVIVOR  (11.1s)
+[Stage 0] Witness pool replay — re-checking 210 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C235 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] plantri: 400 candidate p-vector(s) satisfy the arithmetic constraints. Exhaustive enumeration can decide 25 of them directly; 375 have too many faces to enumerate exhaustively.
+
+[Plantri ce finding] plantri: CE found❗ (plantri_single): {3: 5, 6: 14, 7: 3}
+
+[Check p-vector] ✓ Dehn-Sommerville + Euler: DS=12 ✓  f2=22  V=40  E=60  (Euler: 40-60+22=2)
+[Check p-vector] ✓ Hypotheses: ✓ p_4 = 0 [p4=0]  |  ✓ p_5 <= 2 [p5=0]  |  ✓ sum_pk_k>=7 >= 3
+[Check p-vector] ✓ Conclusion violated: p6=14.0 > RHS=13.0000 (violation)  |  p6=14.0,  RHS=13.0,  violation margin=1.0000
+[Check p-vector] ✓ Realizability: [witness] explicit graph verified as simple 3-polytope by graphcalc; p-vector matches candidate exactly
+[Check p-vector] ✓ Final ce validation check: independent re-eval (statement): hypotheses TRUE, conclusion FALSE [14 <= ((2 * 5) + 3)] | witness re-validated by networkx: 3-regular, planar, 3-connected, all 22 faces traced — p-vector matches (V=40, E=60, F=22)
+[Plantri ce finding] plantri: 5 checks passed, CE is valid √
+[Output] json and graph were saved → C235
+[llm_direct] gen2 C235: REFUTED by plantri ce finder  (13.9s)
+[Stage 0] Witness pool replay — re-checking 211 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C236 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 40 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C236: SURVIVOR  (13.5s)
+[Stage 0] Witness pool replay — re-checking 211 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C237 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 40 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C237: SURVIVOR  (13.5s)
+[llm_direct] gen2 downstream done: 4 refuted, 5 survivors
+
+[llm_direct] ARM COMPLETE K=2 total_wall=824.8s

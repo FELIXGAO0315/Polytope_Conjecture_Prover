@@ -1,0 +1,290 @@
+
+======================================================================
+[llm_direct] Generation 1/2 (seed=41, llm_propose_n cap=113, downstream=B)
+======================================================================
+[conjecture generator] start generating…
+[conjecture generator] dataset augmented with 1166 pipeline-verified p-vector(s) → 1607 rows
+[conjecture generator] dropping 11 row(s) with invalid p_vector
+[conjecture generator] discovery table: 1596 rows, 63 hypothesis column(s)
+[conjecture generator] pool gate armed with 25465 verified p-vector(s) (full pool)
+[conjecture generator] Graffiti3 full-table pass: 0 raw conjecture(s)
+[conjecture generator] signals: 0 proved, 0 refuted, 0 prover-stuck, 0 survivor(s)
+[conjecture generator] calling LLM propose (claude-opus-4-7, effort=low, ≤60s, no retry)…
+[conjecture generator] LLM proposed 113 candidate(s) (requested 113, returned 115, valid 115, entered 113, invalid 0)
+[conjecture generator] pool gate: 18 kept, 95 dropped
+[conjecture generator] trivial-RHS guard dropped 6 candidate(s)
+[ce_enumerator] hypothesis requires f_2 >= 50 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 80 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 60 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires sum_pk_k>=7 >= 7 but CE_ENUM_NLARGE_HARDCAP=5 caps the iteration — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires sum_pk_k>=7 >= 10 but CE_ENUM_NLARGE_HARDCAP=5 caps the iteration — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 100 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[conjecture generator] semantic-dup filter dropped 1 candidate(s) (duplicate attack surface or implied by an alive conjecture)
+[conjecture generator] calling LLM review on 11 candidate(s) (claude-opus-4-7, effort=low, ≤180s, no retry)…
+[conjecture generator] LLM review dropped 11 candidate(s)
+[conjecture generator] accepted 0, rejected 113
+[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154132.json
+[llm_direct] gen1 generation wall=203.4s
+[llm_direct] gen1: 0 new conjecture(s) -> downstream
+[llm_direct] gen1 downstream done: 0 refuted, 0 survivors
+
+======================================================================
+[llm_direct] Generation 2/2 (seed=41, llm_propose_n cap=127, downstream=B)
+======================================================================
+[conjecture generator] start generating…
+[conjecture generator] dataset augmented with 1166 pipeline-verified p-vector(s) → 1607 rows
+[conjecture generator] dropping 11 row(s) with invalid p_vector
+[conjecture generator] discovery table: 1596 rows, 63 hypothesis column(s)
+[conjecture generator] pool gate armed with 25465 verified p-vector(s) (full pool)
+[conjecture generator] Graffiti3 full-table pass: 0 raw conjecture(s)
+[conjecture generator] signals: 0 proved, 0 refuted, 0 prover-stuck, 0 survivor(s)
+[conjecture generator] calling LLM propose (claude-opus-4-7, effort=low, ≤60s, no retry)…
+[conjecture generator] LLM proposed 127 candidate(s) (requested 127, returned 127, valid 127, entered 127, invalid 0)
+[conjecture generator] pool gate: 124 kept, 3 dropped
+[ce_enumerator] hypothesis requires f_2 >= 37 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 38 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 39 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 40 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 41 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 42 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 43 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 44 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 45 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 46 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 47 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 48 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 49 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 50 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 51 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 52 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 53 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 54 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 55 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 56 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 57 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 58 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 59 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 60 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 61 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 62 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 63 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 64 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 65 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 66 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 67 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 68 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 69 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 70 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 71 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 72 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 73 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 74 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 75 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 76 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 77 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 78 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 79 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 80 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 81 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 82 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 83 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 84 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 85 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 86 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 87 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 88 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 89 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 90 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 91 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 92 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 93 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 94 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 95 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 96 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 97 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 98 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 99 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 100 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 101 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 102 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 103 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 104 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 105 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 106 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 107 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 108 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 109 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 110 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 111 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 112 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 113 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 114 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 115 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 116 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 117 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 118 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 119 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 120 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 121 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 122 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 123 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 124 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 125 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 126 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[ce_enumerator] hypothesis requires f_2 >= 127 but plantri exhaustive reach is f_2 <= 36 — exhaustive method ineffective, deferring to constructor + LLM/RL/Hopper tracks
+[conjecture generator] calling LLM review on 124 candidate(s) (claude-opus-4-7, effort=low, ≤180s, no retry)…
+[conjecture generator] LLM review dropped 106 candidate(s)
+[conjecture generator] accepted 18, rejected 109
+[conjecture generator] IRIS scored 18/18 on 1596 verified p-vector(s)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C217: if ((is_simple) and (f_2>=_4)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 4)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C218: if ((is_simple) and (f_2>=_5)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 5)
+[conjecture generator] WARNING degenerate IRIS (TRL=3.55e-05 < 1e-04) C219: if ((is_simple) and (f_2>=_6)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 6)
+[conjecture generator] WARNING degenerate IRIS (TRL=6.52e-05 < 1e-04) C220: if ((is_simple) and (f_2>=_7)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 7)
+[conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C234: if ((is_simple) and (f_2>=_127)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 127)
+[conjecture generator] conjectures stored with status=new (18)
+[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154520.json
+[llm_direct] gen2 generation wall=229.0s
+[llm_direct] gen2: 18 new conjecture(s) -> downstream
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C217 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C217: SURVIVOR  (24.4s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C218 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C218: SURVIVOR  (24.0s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C219 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C219: SURVIVOR  (24.3s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C220 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C220: SURVIVOR  (22.7s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C221 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C221: SURVIVOR  (22.6s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C222 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C222: SURVIVOR  (22.6s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C223 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C223: SURVIVOR  (24.2s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C224 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C224: SURVIVOR  (24.0s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C225 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C225: SURVIVOR  (24.1s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C226 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C226: SURVIVOR  (23.8s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C227 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C227: SURVIVOR  (22.8s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C228 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C228: SURVIVOR  (23.0s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C229 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C229: SURVIVOR  (22.5s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C230 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] Start working ...
+[Plantri ce finding] No arithmetic CE candidate exists within bounds — conjecture is arithmetically tight in this region.
+[llm_direct] gen2 C230: SURVIVOR  (23.0s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C231 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 41 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C231: SURVIVOR  (27.8s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C232 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 64 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C232: SURVIVOR  (22.0s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C233 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 125 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C233: SURVIVOR  (20.7s)
+[Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
+[Stage 0] No sibling witness refutes C234 — proceeding to plantri pool replay.
+[Stage 0] Plantri pool replay — scanning 25190 verified-realizable p-vector(s) ...
+[Stage 0] No pool p-vector satisfies hypotheses + violates conclusion — proceeding to Stage 1.
+[Stage 1] Starting random walk to find counterexamples...
+[Plantri ce finding] f_2 >= 127 > plantri reach (36) — exhaustive infeasible → constructor
+[llm_direct] gen2 C234: SURVIVOR  (19.5s)
+[llm_direct] gen2 downstream done: 0 refuted, 18 survivors
+
+[llm_direct] ARM COMPLETE K=2 total_wall=850.5s
