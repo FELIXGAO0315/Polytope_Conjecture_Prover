@@ -1,0 +1,25 @@
+{
+ "_provenance": "closed-arm per_run.evaluated (accepted+rejected = pre-gate proposal count) from scripts/out/ldno/f2b/results.json @ commit 314ed95; see f2b prereg @ 2999a6c for metric defs + novelty baseline.",
+ "caps": {
+  "41": {
+   "1": 113,
+   "2": 127
+  },
+  "7": {
+   "1": 113,
+   "2": 128
+  },
+  "123": {
+   "1": 113,
+   "2": 128
+  },
+  "2024": {
+   "1": 113,
+   "2": 128
+  },
+  "99": {
+   "1": 113,
+   "2": 117
+  }
+ }
+}

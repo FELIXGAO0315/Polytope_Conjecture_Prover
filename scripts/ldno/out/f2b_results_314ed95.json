@@ -1,0 +1,2087 @@
+{
+ "seeds": [
+  41,
+  7,
+  123,
+  2024,
+  99
+ ],
+ "seeds_in_aggregate": [
+  41,
+  7,
+  123,
+  2024,
+  99
+ ],
+ "seed_status": {
+  "41": {
+   "closed_completed": true,
+   "open_completed": true,
+   "counts_in_aggregate": true
+  },
+  "7": {
+   "closed_completed": true,
+   "open_completed": true,
+   "counts_in_aggregate": true
+  },
+  "123": {
+   "closed_completed": true,
+   "open_completed": true,
+   "counts_in_aggregate": true
+  },
+  "2024": {
+   "closed_completed": true,
+   "open_completed": true,
+   "counts_in_aggregate": true
+  },
+  "99": {
+   "closed_completed": true,
+   "open_completed": true,
+   "counts_in_aggregate": true
+  }
+ },
+ "per_seed_metrics": {
+  "41": {
+   "closed": {
+    "arm": "closed",
+    "accepted_conjectures": 66,
+    "proposed_candidates_total": 240,
+    "primary__novel_hypothesis_cells_vs_frozen": 45,
+    "novel_cells_list": [
+     "(f_2>=_10) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_22) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_25) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_28) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_28) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_49) & (p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (p_4 = 0) & (sum_pk_k>=7 >= 1)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 <= 2) & (sum_pk_k>=7 >= 3)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 60,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 14,
+      "rejected": 75
+     },
+     "dynamic_cells": {
+      "proposed_eval": 49,
+      "accepted": 4,
+      "rejected": 45
+     },
+     "mutation_engine": {
+      "proposed_eval": 24,
+      "accepted": 19,
+      "rejected": 5
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 7,
+      "rejected": 17
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 5,
+     "lattice_stage1": 1,
+     "witness_pool_replay": 1
+    },
+    "sec__refuted_count": 7,
+    "sec__refuted_fraction": 0.1061,
+    "sec__survivors": 59,
+    "sec__llm_review_drops": 9,
+    "sec__validator_checklevel": {
+     "total_validations": 13686,
+     "passed": 7,
+     "rejections_by_first_fail_check": {
+      "2": 12167,
+      "3": 1500,
+      "4": 12
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_131701.json",
+      "accepted": 41,
+      "evaluated": 113
+     },
+     {
+      "file": "run_20261117_133530.json",
+      "accepted": 25,
+      "evaluated": 127
+     }
+    ],
+    "n_new_ce_dirs": 7
+   },
+   "open": {
+    "arm": "open",
+    "accepted_conjectures": 32,
+    "proposed_candidates_total": 162,
+    "primary__novel_hypothesis_cells_vs_frozen": 26,
+    "novel_cells_list": [
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_22) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(p_3 = 0) & (p_4 = 0) & (sum_pk_k>=7 >= 5)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 6)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 31,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 28,
+      "accepted": 7,
+      "rejected": 21
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 86,
+      "accepted": 14,
+      "rejected": 72
+     },
+     "dynamic_cells": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "mutation_engine": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 8,
+      "rejected": 16
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 3,
+      "rejected": 21
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 2,
+     "lattice_stage1": 1
+    },
+    "sec__refuted_count": 3,
+    "sec__refuted_fraction": 0.0938,
+    "sec__survivors": 29,
+    "sec__llm_review_drops": 11,
+    "sec__validator_checklevel": {
+     "total_validations": 6588,
+     "passed": 3,
+     "rejections_by_first_fail_check": {
+      "2": 6075,
+      "3": 505,
+      "4": 5
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_131435.json",
+      "accepted": 29,
+      "evaluated": 82
+     },
+     {
+      "file": "run_20261117_132708.json",
+      "accepted": 3,
+      "evaluated": 80
+     }
+    ],
+    "n_new_ce_dirs": 3
+   }
+  },
+  "7": {
+   "closed": {
+    "arm": "closed",
+    "accepted_conjectures": 67,
+    "proposed_candidates_total": 241,
+    "primary__novel_hypothesis_cells_vs_frozen": 50,
+    "novel_cells_list": [
+     "(f_2>=_10) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_22) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_23) & (p_3 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_25) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_28) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_28) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_49) & (p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 <= 2) & (p_5 <= 2)",
+     "(p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(p_3 = 0) & (p_4 = 0) & (sum_pk_k>=7 >= 1)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 1)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 63,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 15,
+      "rejected": 74
+     },
+     "dynamic_cells": {
+      "proposed_eval": 50,
+      "accepted": 5,
+      "rejected": 45
+     },
+     "mutation_engine": {
+      "proposed_eval": 24,
+      "accepted": 24,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 1,
+      "rejected": 23
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 6,
+     "lattice_stage1": 1,
+     "witness_pool_replay": 1
+    },
+    "sec__refuted_count": 8,
+    "sec__refuted_fraction": 0.1194,
+    "sec__survivors": 59,
+    "sec__llm_review_drops": 2,
+    "sec__validator_checklevel": {
+     "total_validations": 13926,
+     "passed": 8,
+     "rejections_by_first_fail_check": {
+      "2": 12455,
+      "3": 1446,
+      "4": 17
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_131625.json",
+      "accepted": 40,
+      "evaluated": 113
+     },
+     {
+      "file": "run_20261117_133434.json",
+      "accepted": 27,
+      "evaluated": 128
+     }
+    ],
+    "n_new_ce_dirs": 8
+   },
+   "open": {
+    "arm": "open",
+    "accepted_conjectures": 38,
+    "proposed_candidates_total": 167,
+    "primary__novel_hypothesis_cells_vs_frozen": 30,
+    "novel_cells_list": [
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (p_4 = 0) & (p_5 <= 12)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 35,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 14,
+      "rejected": 75
+     },
+     "dynamic_cells": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "mutation_engine": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 2,
+      "rejected": 22
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 2,
+     "lattice_stage1": 1
+    },
+    "sec__refuted_count": 3,
+    "sec__refuted_fraction": 0.0789,
+    "sec__survivors": 35,
+    "sec__llm_review_drops": 3,
+    "sec__validator_checklevel": {
+     "total_validations": 7818,
+     "passed": 3,
+     "rejections_by_first_fail_check": {
+      "2": 7080,
+      "3": 729,
+      "4": 6
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_131358.json",
+      "accepted": 27,
+      "evaluated": 82
+     },
+     {
+      "file": "run_20261117_132547.json",
+      "accepted": 11,
+      "evaluated": 85
+     }
+    ],
+    "n_new_ce_dirs": 3
+   }
+  },
+  "123": {
+   "closed": {
+    "arm": "closed",
+    "accepted_conjectures": 70,
+    "proposed_candidates_total": 241,
+    "primary__novel_hypothesis_cells_vs_frozen": 51,
+    "novel_cells_list": [
+     "(f_2>=_10) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_22) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_23) & (p_3 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_25) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_28) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_28) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_49) & (p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 <= 2) & (p_5 <= 2)",
+     "(p_3 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(p_3 = 0) & (p_4 = 0) & (sum_pk_k>=7 >= 5)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 65,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 15,
+      "rejected": 74
+     },
+     "dynamic_cells": {
+      "proposed_eval": 50,
+      "accepted": 5,
+      "rejected": 45
+     },
+     "mutation_engine": {
+      "proposed_eval": 24,
+      "accepted": 24,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 4,
+      "rejected": 20
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 6,
+     "lattice_stage1": 2
+    },
+    "sec__refuted_count": 8,
+    "sec__refuted_fraction": 0.1143,
+    "sec__survivors": 62,
+    "sec__llm_review_drops": 3,
+    "sec__validator_checklevel": {
+     "total_validations": 14643,
+     "passed": 8,
+     "rejections_by_first_fail_check": {
+      "2": 13139,
+      "3": 1482,
+      "4": 14
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_135020.json",
+      "accepted": 40,
+      "evaluated": 113
+     },
+     {
+      "file": "run_20261117_141445.json",
+      "accepted": 30,
+      "evaluated": 128
+     }
+    ],
+    "n_new_ce_dirs": 8
+   },
+   "open": {
+    "arm": "open",
+    "accepted_conjectures": 42,
+    "proposed_candidates_total": 167,
+    "primary__novel_hypothesis_cells_vs_frozen": 34,
+    "novel_cells_list": [
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_50) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_50) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 <= 2) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(p_3 = 0) & (p_4 <= 2) & (sum_pk_k>=7 >= 3)",
+     "(p_3 = 0) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 39,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 15,
+      "rejected": 74
+     },
+     "dynamic_cells": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "mutation_engine": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 5,
+      "rejected": 19
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 5
+    },
+    "sec__refuted_count": 5,
+    "sec__refuted_fraction": 0.119,
+    "sec__survivors": 37,
+    "sec__llm_review_drops": 2,
+    "sec__validator_checklevel": {
+     "total_validations": 8654,
+     "passed": 5,
+     "rejections_by_first_fail_check": {
+      "2": 7816,
+      "3": 824,
+      "4": 9
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_134813.json",
+      "accepted": 27,
+      "evaluated": 82
+     },
+     {
+      "file": "run_20261117_140726.json",
+      "accepted": 15,
+      "evaluated": 85
+     }
+    ],
+    "n_new_ce_dirs": 5
+   }
+  },
+  "2024": {
+   "closed": {
+    "arm": "closed",
+    "accepted_conjectures": 49,
+    "proposed_candidates_total": 241,
+    "primary__novel_hypothesis_cells_vs_frozen": 35,
+    "novel_cells_list": [
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_22) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_25) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_28) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_28) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_30) & (p_3 <= 2) & (p_4 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_49) & (p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 47,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 6,
+      "rejected": 24
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 14,
+      "rejected": 75
+     },
+     "dynamic_cells": {
+      "proposed_eval": 50,
+      "accepted": 3,
+      "rejected": 47
+     },
+     "mutation_engine": {
+      "proposed_eval": 24,
+      "accepted": 17,
+      "rejected": 7
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 8,
+      "rejected": 16
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 1,
+      "rejected": 23
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 4,
+     "lattice_stage1": 1,
+     "witness_pool_replay": 1
+    },
+    "sec__refuted_count": 6,
+    "sec__refuted_fraction": 0.1224,
+    "sec__survivors": 43,
+    "sec__llm_review_drops": 22,
+    "sec__validator_checklevel": {
+     "total_validations": 10093,
+     "passed": 6,
+     "rejections_by_first_fail_check": {
+      "2": 9212,
+      "3": 862,
+      "4": 13
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_135004.json",
+      "accepted": 40,
+      "evaluated": 113
+     },
+     {
+      "file": "run_20261117_141536.json",
+      "accepted": 9,
+      "evaluated": 128
+     }
+    ],
+    "n_new_ce_dirs": 6
+   },
+   "open": {
+    "arm": "open",
+    "accepted_conjectures": 39,
+    "proposed_candidates_total": 167,
+    "primary__novel_hypothesis_cells_vs_frozen": 31,
+    "novel_cells_list": [
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_20) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_30) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (p_4 <= 2) & (sum_pk_k>=7 >= 3)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 36,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 15,
+      "rejected": 74
+     },
+     "dynamic_cells": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "mutation_engine": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 2,
+      "rejected": 22
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 3
+    },
+    "sec__refuted_count": 3,
+    "sec__refuted_fraction": 0.0769,
+    "sec__survivors": 36,
+    "sec__llm_review_drops": 2,
+    "sec__validator_checklevel": {
+     "total_validations": 8025,
+     "passed": 3,
+     "rejections_by_first_fail_check": {
+      "2": 7256,
+      "3": 760,
+      "4": 6
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_134733.json",
+      "accepted": 27,
+      "evaluated": 82
+     },
+     {
+      "file": "run_20261117_140501.json",
+      "accepted": 12,
+      "evaluated": 85
+     }
+    ],
+    "n_new_ce_dirs": 3
+   }
+  },
+  "99": {
+   "closed": {
+    "arm": "closed",
+    "accepted_conjectures": 40,
+    "proposed_candidates_total": 230,
+    "primary__novel_hypothesis_cells_vs_frozen": 26,
+    "novel_cells_list": [
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_12) & (p_4 <= 2) & (p_5 <= 2) & (sum_pk_k>=7 >= 11)",
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_25) & (p_3 = 0) & (p_5 = 0) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_49) & (p_3 <= 2) & (sum_pk_k>=7 >= 1)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 38,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 5,
+      "rejected": 25
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 12,
+      "rejected": 77
+     },
+     "dynamic_cells": {
+      "proposed_eval": 39,
+      "accepted": 2,
+      "rejected": 37
+     },
+     "mutation_engine": {
+      "proposed_eval": 24,
+      "accepted": 12,
+      "rejected": 12
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 8,
+      "rejected": 16
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 1,
+      "rejected": 23
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 4,
+     "lattice_stage1": 2,
+     "witness_pool_replay": 1
+    },
+    "sec__refuted_count": 7,
+    "sec__refuted_fraction": 0.175,
+    "sec__survivors": 33,
+    "sec__llm_review_drops": 32,
+    "sec__validator_checklevel": {
+     "total_validations": 8222,
+     "passed": 7,
+     "rejections_by_first_fail_check": {
+      "2": 7511,
+      "3": 696,
+      "4": 8
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_142820.json",
+      "accepted": 37,
+      "evaluated": 113
+     },
+     {
+      "file": "run_20261117_144326.json",
+      "accepted": 3,
+      "evaluated": 117
+     }
+    ],
+    "n_new_ce_dirs": 7
+   },
+   "open": {
+    "arm": "open",
+    "accepted_conjectures": 36,
+    "proposed_candidates_total": 167,
+    "primary__novel_hypothesis_cells_vs_frozen": 28,
+    "novel_cells_list": [
+     "(f_2>=_17) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_4 = 0)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_17) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_19) & (p_5 = 0) & (sum_pk_k>=7 >= 5)",
+     "(f_2>=_30) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_31) & (p_3 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(f_2>=_34) & (p_3 = 0) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_35) & (p_5 = 0)",
+     "(f_2>=_36) & (p_5 <= 2)",
+     "(f_2>=_41) & (sum_pk_k>=7 >= 6)",
+     "(f_2>=_48) & (p_3 <= 2) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_48) & (p_3 = 0) & (sum_pk_k>=7 >= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_4 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_3 <= 2) & (p_5 = 0)",
+     "(f_2>=_7) & (p_3 = 0) & (p_5 = 0)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 <= 2)",
+     "(f_2>=_7) & (p_4 <= 2) & (p_5 = 0)",
+     "(p_3 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 10)",
+     "(p_4 <= 2) & (p_5 = 0) & (sum_pk_k>=7 >= 11)",
+     "(p_4 = 0) & (p_5 <= 2) & (sum_pk_k>=7 >= 10)",
+     "(p_5 = 0) & (sum_pk_k>=7 >= 5)"
+    ],
+    "sec__distinct_hypothesis_cells_accepted": 33,
+    "sec__candidates_by_source": {
+     "graffiti3_full": {
+      "proposed_eval": 30,
+      "accepted": 7,
+      "rejected": 23
+     },
+     "graffiti3_stratified": {
+      "proposed_eval": 89,
+      "accepted": 14,
+      "rejected": 75
+     },
+     "dynamic_cells": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "mutation_engine": {
+      "proposed_eval": 0,
+      "accepted": 0,
+      "rejected": 0
+     },
+     "support_miner": {
+      "proposed_eval": 24,
+      "accepted": 15,
+      "rejected": 9
+     },
+     "llm_coproposer": {
+      "proposed_eval": 24,
+      "accepted": 0,
+      "rejected": 24
+     }
+    },
+    "sec__refuted_by_tier": {
+     "plantri_screen": 3
+    },
+    "sec__refuted_count": 3,
+    "sec__refuted_fraction": 0.0833,
+    "sec__survivors": 33,
+    "sec__llm_review_drops": 2,
+    "sec__validator_checklevel": {
+     "total_validations": 7402,
+     "passed": 3,
+     "rejections_by_first_fail_check": {
+      "2": 6685,
+      "3": 710,
+      "4": 4
+     }
+    },
+    "per_run": [
+     {
+      "file": "run_20261117_142547.json",
+      "accepted": 26,
+      "evaluated": 82
+     },
+     {
+      "file": "run_20261117_143617.json",
+      "accepted": 10,
+      "evaluated": 85
+     }
+    ],
+    "n_new_ce_dirs": 3
+   }
+  }
+ },
+ "aggregate": {
+  "primary__novel_hypothesis_cells_vs_frozen": {
+   "label": "PRIMARY novel cells vs frozen",
+   "closed_per_seed": {
+    "41": 45,
+    "7": 50,
+    "123": 51,
+    "2024": 35,
+    "99": 26
+   },
+   "open_per_seed": {
+    "41": 26,
+    "7": 30,
+    "123": 34,
+    "2024": 31,
+    "99": 28
+   },
+   "closed_mean_sd": {
+    "mean": 41.4,
+    "sd": 9.5624,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 29.8,
+    "sd": 2.7129,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 19,
+    "7": 20,
+    "123": 17,
+    "2024": 4,
+    "99": -2
+   },
+   "paired_diff_mean_sd": {
+    "mean": 11.6,
+    "sd": 8.9129,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 4,
+    "closed=open": 0,
+    "closed<open": 1
+   }
+  },
+  "sec__distinct_hypothesis_cells_accepted": {
+   "label": "distinct accepted cells",
+   "closed_per_seed": {
+    "41": 60,
+    "7": 63,
+    "123": 65,
+    "2024": 47,
+    "99": 38
+   },
+   "open_per_seed": {
+    "41": 31,
+    "7": 35,
+    "123": 39,
+    "2024": 36,
+    "99": 33
+   },
+   "closed_mean_sd": {
+    "mean": 54.6,
+    "sd": 10.4038,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 34.8,
+    "sd": 2.7129,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 29,
+    "7": 28,
+    "123": 26,
+    "2024": 11,
+    "99": 5
+   },
+   "paired_diff_mean_sd": {
+    "mean": 19.8,
+    "sd": 9.8671,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "accepted_conjectures": {
+   "label": "accepted conjectures",
+   "closed_per_seed": {
+    "41": 66,
+    "7": 67,
+    "123": 70,
+    "2024": 49,
+    "99": 40
+   },
+   "open_per_seed": {
+    "41": 32,
+    "7": 38,
+    "123": 42,
+    "2024": 39,
+    "99": 36
+   },
+   "closed_mean_sd": {
+    "mean": 58.4,
+    "sd": 11.7745,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 37.4,
+    "sd": 3.3226,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 34,
+    "7": 29,
+    "123": 28,
+    "2024": 10,
+    "99": 4
+   },
+   "paired_diff_mean_sd": {
+    "mean": 21,
+    "sd": 11.7644,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "proposed_candidates_total": {
+   "label": "proposed candidates",
+   "closed_per_seed": {
+    "41": 240,
+    "7": 241,
+    "123": 241,
+    "2024": 241,
+    "99": 230
+   },
+   "open_per_seed": {
+    "41": 162,
+    "7": 167,
+    "123": 167,
+    "2024": 167,
+    "99": 167
+   },
+   "closed_mean_sd": {
+    "mean": 238.6,
+    "sd": 4.3174,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 166,
+    "sd": 2.0,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 78,
+    "7": 74,
+    "123": 74,
+    "2024": 74,
+    "99": 63
+   },
+   "paired_diff_mean_sd": {
+    "mean": 72.6,
+    "sd": 5.0438,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "sec__refuted_count": {
+   "label": "refuted count",
+   "closed_per_seed": {
+    "41": 7,
+    "7": 8,
+    "123": 8,
+    "2024": 6,
+    "99": 7
+   },
+   "open_per_seed": {
+    "41": 3,
+    "7": 3,
+    "123": 5,
+    "2024": 3,
+    "99": 3
+   },
+   "closed_mean_sd": {
+    "mean": 7.2,
+    "sd": 0.7483,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 3.4,
+    "sd": 0.8,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 4,
+    "7": 5,
+    "123": 3,
+    "2024": 3,
+    "99": 4
+   },
+   "paired_diff_mean_sd": {
+    "mean": 3.8,
+    "sd": 0.7483,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "sec__refuted_fraction": {
+   "label": "refuted fraction",
+   "closed_per_seed": {
+    "41": 0.1061,
+    "7": 0.1194,
+    "123": 0.1143,
+    "2024": 0.1224,
+    "99": 0.175
+   },
+   "open_per_seed": {
+    "41": 0.0938,
+    "7": 0.0789,
+    "123": 0.119,
+    "2024": 0.0769,
+    "99": 0.0833
+   },
+   "closed_mean_sd": {
+    "mean": 0.1274,
+    "sd": 0.0244,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 0.0904,
+    "sd": 0.0155,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 0.012300000000000005,
+    "7": 0.04050000000000001,
+    "123": -0.004699999999999996,
+    "2024": 0.0455,
+    "99": 0.09169999999999999
+   },
+   "paired_diff_mean_sd": {
+    "mean": 0.0371,
+    "sd": 0.0329,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 4,
+    "closed=open": 0,
+    "closed<open": 1
+   }
+  },
+  "sec__survivors": {
+   "label": "survivors",
+   "closed_per_seed": {
+    "41": 59,
+    "7": 59,
+    "123": 62,
+    "2024": 43,
+    "99": 33
+   },
+   "open_per_seed": {
+    "41": 29,
+    "7": 35,
+    "123": 37,
+    "2024": 36,
+    "99": 33
+   },
+   "closed_mean_sd": {
+    "mean": 51.2,
+    "sd": 11.2854,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 34,
+    "sd": 2.8284,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": 30,
+    "7": 24,
+    "123": 25,
+    "2024": 7,
+    "99": 0
+   },
+   "paired_diff_mean_sd": {
+    "mean": 17.2,
+    "sd": 11.5827,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 4,
+    "closed=open": 1,
+    "closed<open": 0
+   }
+  },
+  "sec__llm_review_drops": {
+   "label": "LLM-review drops",
+   "closed_per_seed": {
+    "41": 9,
+    "7": 2,
+    "123": 3,
+    "2024": 22,
+    "99": 32
+   },
+   "open_per_seed": {
+    "41": 11,
+    "7": 3,
+    "123": 2,
+    "2024": 2,
+    "99": 2
+   },
+   "closed_mean_sd": {
+    "mean": 13.6,
+    "sd": 11.6379,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 4,
+    "sd": 3.5214,
+    "n": 5
+   },
+   "paired_diff_closed_minus_open": {
+    "41": -2,
+    "7": -1,
+    "123": 1,
+    "2024": 20,
+    "99": 30
+   },
+   "paired_diff_mean_sd": {
+    "mean": 9.6,
+    "sd": 13.0015,
+    "n": 5
+   },
+   "sign_count_closed_vs_open": {
+    "closed>open": 3,
+    "closed=open": 0,
+    "closed<open": 2
+   }
+  }
+ },
+ "aggregate_by_source_accepted": {
+  "graffiti3_full": {
+   "closed_accepted_per_seed": {
+    "41": 7,
+    "7": 7,
+    "123": 7,
+    "2024": 6,
+    "99": 5
+   },
+   "open_accepted_per_seed": {
+    "41": 7,
+    "7": 7,
+    "123": 7,
+    "2024": 7,
+    "99": 7
+   },
+   "closed_evaluated_per_seed": {
+    "41": 30,
+    "7": 30,
+    "123": 30,
+    "2024": 30,
+    "99": 30
+   },
+   "open_evaluated_per_seed": {
+    "41": 28,
+    "7": 30,
+    "123": 30,
+    "2024": 30,
+    "99": 30
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 6.4,
+    "sd": 0.8,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 7,
+    "sd": 0.0,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 30,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 29.6,
+    "sd": 0.8,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": -0.6,
+    "sd": 0.8,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 0,
+    "closed=open": 3,
+    "closed<open": 2
+   }
+  },
+  "graffiti3_stratified": {
+   "closed_accepted_per_seed": {
+    "41": 14,
+    "7": 15,
+    "123": 15,
+    "2024": 14,
+    "99": 12
+   },
+   "open_accepted_per_seed": {
+    "41": 14,
+    "7": 14,
+    "123": 15,
+    "2024": 15,
+    "99": 14
+   },
+   "closed_evaluated_per_seed": {
+    "41": 89,
+    "7": 89,
+    "123": 89,
+    "2024": 89,
+    "99": 89
+   },
+   "open_evaluated_per_seed": {
+    "41": 86,
+    "7": 89,
+    "123": 89,
+    "2024": 89,
+    "99": 89
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 14,
+    "sd": 1.0954,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 14.4,
+    "sd": 0.4899,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 89,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 88.4,
+    "sd": 1.2,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": -0.4,
+    "sd": 1.0198,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 1,
+    "closed=open": 2,
+    "closed<open": 2
+   }
+  },
+  "dynamic_cells": {
+   "closed_accepted_per_seed": {
+    "41": 4,
+    "7": 5,
+    "123": 5,
+    "2024": 3,
+    "99": 2
+   },
+   "open_accepted_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_evaluated_per_seed": {
+    "41": 49,
+    "7": 50,
+    "123": 50,
+    "2024": 50,
+    "99": 39
+   },
+   "open_evaluated_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 3.8,
+    "sd": 1.1662,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 47.6,
+    "sd": 4.3174,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": 3.8,
+    "sd": 1.1662,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "mutation_engine": {
+   "closed_accepted_per_seed": {
+    "41": 19,
+    "7": 24,
+    "123": 24,
+    "2024": 17,
+    "99": 12
+   },
+   "open_accepted_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_evaluated_per_seed": {
+    "41": 24,
+    "7": 24,
+    "123": 24,
+    "2024": 24,
+    "99": 24
+   },
+   "open_evaluated_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 19.2,
+    "sd": 4.5343,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 24,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": 19.2,
+    "sd": 4.5343,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 5,
+    "closed=open": 0,
+    "closed<open": 0
+   }
+  },
+  "support_miner": {
+   "closed_accepted_per_seed": {
+    "41": 15,
+    "7": 15,
+    "123": 15,
+    "2024": 8,
+    "99": 8
+   },
+   "open_accepted_per_seed": {
+    "41": 8,
+    "7": 15,
+    "123": 15,
+    "2024": 15,
+    "99": 15
+   },
+   "closed_evaluated_per_seed": {
+    "41": 24,
+    "7": 24,
+    "123": 24,
+    "2024": 24,
+    "99": 24
+   },
+   "open_evaluated_per_seed": {
+    "41": 24,
+    "7": 24,
+    "123": 24,
+    "2024": 24,
+    "99": 24
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 12.2,
+    "sd": 3.4293,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 13.6,
+    "sd": 2.8,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 24,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 24,
+    "sd": 0.0,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": -1.4,
+    "sd": 5.2383,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 1,
+    "closed=open": 2,
+    "closed<open": 2
+   }
+  },
+  "llm_coproposer": {
+   "closed_accepted_per_seed": {
+    "41": 7,
+    "7": 1,
+    "123": 4,
+    "2024": 1,
+    "99": 1
+   },
+   "open_accepted_per_seed": {
+    "41": 3,
+    "7": 2,
+    "123": 5,
+    "2024": 2,
+    "99": 0
+   },
+   "closed_evaluated_per_seed": {
+    "41": 24,
+    "7": 24,
+    "123": 24,
+    "2024": 24,
+    "99": 24
+   },
+   "open_evaluated_per_seed": {
+    "41": 24,
+    "7": 24,
+    "123": 24,
+    "2024": 24,
+    "99": 24
+   },
+   "closed_accepted_mean_sd": {
+    "mean": 2.8,
+    "sd": 2.4,
+    "n": 5
+   },
+   "open_accepted_mean_sd": {
+    "mean": 2.4,
+    "sd": 1.6248,
+    "n": 5
+   },
+   "closed_evaluated_mean_sd": {
+    "mean": 24,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_evaluated_mean_sd": {
+    "mean": 24,
+    "sd": 0.0,
+    "n": 5
+   },
+   "accepted_diff_mean_sd": {
+    "mean": 0.4,
+    "sd": 1.9596,
+    "n": 5
+   },
+   "accepted_sign": {
+    "closed>open": 2,
+    "closed=open": 0,
+    "closed<open": 3
+   }
+  }
+ },
+ "aggregate_refuted_by_tier": {
+  "witness_pool_replay": {
+   "closed_per_seed": {
+    "41": 1,
+    "7": 1,
+    "123": 0,
+    "2024": 1,
+    "99": 1
+   },
+   "open_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_mean_sd": {
+    "mean": 0.8,
+    "sd": 0.4,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   }
+  },
+  "plantri_pool_replay": {
+   "closed_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "open_per_seed": {
+    "41": 0,
+    "7": 0,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 0,
+    "sd": 0.0,
+    "n": 5
+   }
+  },
+  "lattice_stage1": {
+   "closed_per_seed": {
+    "41": 1,
+    "7": 1,
+    "123": 2,
+    "2024": 1,
+    "99": 2
+   },
+   "open_per_seed": {
+    "41": 1,
+    "7": 1,
+    "123": 0,
+    "2024": 0,
+    "99": 0
+   },
+   "closed_mean_sd": {
+    "mean": 1.4,
+    "sd": 0.4899,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 0.4,
+    "sd": 0.4899,
+    "n": 5
+   }
+  },
+  "plantri_screen": {
+   "closed_per_seed": {
+    "41": 5,
+    "7": 6,
+    "123": 6,
+    "2024": 4,
+    "99": 4
+   },
+   "open_per_seed": {
+    "41": 2,
+    "7": 2,
+    "123": 5,
+    "2024": 3,
+    "99": 3
+   },
+   "closed_mean_sd": {
+    "mean": 5,
+    "sd": 0.8944,
+    "n": 5
+   },
+   "open_mean_sd": {
+    "mean": 3,
+    "sd": 1.0954,
+    "n": 5
+   }
+  }
+ },
+ "aggregate_validator_total": {
+  "closed_per_seed": {
+   "41": 13686,
+   "7": 13926,
+   "123": 14643,
+   "2024": 10093,
+   "99": 8222
+  },
+  "open_per_seed": {
+   "41": 6588,
+   "7": 7818,
+   "123": 8654,
+   "2024": 8025,
+   "99": 7402
+  },
+  "closed_mean_sd": {
+   "mean": 12114,
+   "sd": 2505.2934,
+   "n": 5
+  },
+  "open_mean_sd": {
+   "mean": 7697.4,
+   "sd": 686.2914,
+   "n": 5
+  }
+ },
+ "_run_meta": {
+  "finished_ny": "2026-11-17 14:44:05 America/New_York",
+  "hard_stop_ny": "2026-11-17 21:00 (not reached; all 10 arms finished ~6h early)",
+  "downstream": "B (deterministic: witness replay -> plantri-pool replay -> Eberhard lattice -> plantri screen; no RL/LLM/Hopper)",
+  "all_seeds_both_arms_completed": true,
+  "free_cores_at_launch": 16,
+  "load_at_launch": 0.46,
+  "competing_experiments": "none",
+  "wall_times_s": {
+   "41": {
+    "closed": 2017.5,
+    "open": 1173.6
+   },
+   "7": {
+    "closed": 1989.2,
+    "open": 1219.6
+   },
+   "123": {
+    "closed": 2333.7,
+    "open": 1823.6
+   },
+   "2024": {
+    "closed": 2132.7,
+    "open": 1559.4
+   },
+   "99": {
+    "closed": 1379.2,
+    "open": 1052.7
+   }
+  },
+  "batch_schedule": "2 seeds (<=4 arms) per batch; each seed's 2 arms start together; 13:08->14:44"
+ },
+ "_smoke_test_seed41_gen1_limit0": {
+  "note": "generation-stage-only; proposed==evaluated under limit=0; validator checklog empty during generation (populates only in downstream CE verification).",
+  "closed": {
+   "graffiti3_full": {
+    "eval": 14,
+    "acc": 4
+   },
+   "graffiti3_stratified": {
+    "eval": 44,
+    "acc": 13
+   },
+   "dynamic_cells": {
+    "eval": 19,
+    "acc": 2
+   },
+   "mutation_engine": {
+    "eval": 12,
+    "acc": 12
+   },
+   "support_miner": {
+    "eval": 12,
+    "acc": 5
+   },
+   "llm_coproposer": {
+    "eval": 12,
+    "acc": 1
+   },
+   "total_eval": 113,
+   "total_acc": 37
+  },
+  "open": {
+   "graffiti3_full": {
+    "eval": 14,
+    "acc": 5
+   },
+   "graffiti3_stratified": {
+    "eval": 44,
+    "acc": 10
+   },
+   "dynamic_cells": {
+    "eval": 0,
+    "acc": 0,
+    "status": "correctly withheld"
+   },
+   "mutation_engine": {
+    "eval": 0,
+    "acc": 0,
+    "status": "correctly withheld"
+   },
+   "support_miner": {
+    "eval": 12,
+    "acc": 7
+   },
+   "llm_coproposer": {
+    "eval": 12,
+    "acc": 0
+   },
+   "total_eval": 82,
+   "total_acc": 22
+  },
+  "verdict": "PASS \u2014 Graffiti3 full+stratified, support miner, LLM reached evaluation in BOTH arms; dynamic cells + mutation engine reached in CLOSED only (withheld in open). No source that should evaluate was missing."
+ },
+ "_runtime_estimate_step1c": {
+  "accepted_per_gen_smoke": {
+   "closed": 37,
+   "open": 22
+  },
+  "gen_wall_s_smoke": {
+   "closed": 432,
+   "open": 313
+  },
+  "per_conj_downstream_s": {
+   "B": 15.4,
+   "A_refuted_fast": 89,
+   "A_survivor_blended": 190
+  },
+  "optionB": "~33min/seed(arms parallel); 5 seeds in 3 batches ~1.7h; sequential ~2.8h \u2014 FITS",
+  "optionA": "~4.15h/seed, A-arm needs 6-8 cores => 1 seed at a time on 16 cores => ~20.7h; even all-refute-fast lower bound ~10.3h \u2014 EXCEEDS 7.9h remaining",
+  "decision": "B"
+ },
+ "_deviations": [
+  "None material. Seeds vary via PYTHONHASHSEED + CE_CONSTRUCT_SEED + uncontrolled LLM API stochasticity (propose/review); documented in prereg.",
+  "Downstream B realized by a harness driver (f2b_driver._downstream_B) that calls ONLY existing agent functions (orchestrator._run_ce_search lines 976-1026, minus parallel tracks); no agent code modified. Confirmed in prereg.",
+  "Validator check-level log is empty for generation-only smoke (expected); populated during the real run's downstream CE verification."
+ ]
+}
