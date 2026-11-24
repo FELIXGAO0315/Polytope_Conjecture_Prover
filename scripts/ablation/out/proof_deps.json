@@ -15,6 +15,7 @@
   ],
   "inventory_used_that_are_sorried_base": [
    "Barnette_P6Bound",
+   "Juc_EulerFormula",
    "p_range"
   ]
  },
@@ -90,6 +91,8 @@
    "Juc_EulerFormula",
    "Juc_InequalityPart"
   ],
-  "inventory_used_that_are_sorried_base": []
+  "inventory_used_that_are_sorried_base": [
+   "Juc_EulerFormula"
+  ]
  }
 }

@@ -1,0 +1,375 @@
+{
+ "group": "stochastic41_leaveoneout",
+ "RL_EP": 200,
+ "results": [
+  {
+   "name": "C115",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C230)",
+   "track": "witness_pool_replay",
+   "sec": 0.2,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C126",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 280.5,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C128",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 286.6,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C131",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 284.2,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C132",
+   "refuted": true,
+   "found_by": "hopper ce finder",
+   "track": "hopper",
+   "sec": 70.1,
+   "err": "",
+   "orig_track": "hopper"
+  },
+  {
+   "name": "C135",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 117.7,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C140",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 114.7,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C141",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 117.9,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C142",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 122.0,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C143",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.8,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C147",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C115)",
+   "track": "witness_pool_replay",
+   "sec": 0.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C157",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.9,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C162",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 118.8,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C163",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.9,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C165",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 113.4,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C166",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.7,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C167",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 124.7,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C168",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 121.7,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C170",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 111.4,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C175",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C115)",
+   "track": "witness_pool_replay",
+   "sec": 0.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C176",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C115)",
+   "track": "witness_pool_replay",
+   "sec": 0.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C184",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 1066.4,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C188",
+   "refuted": true,
+   "found_by": "plantri ce finder",
+   "track": "plantri",
+   "sec": 84.9,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C200",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C241)",
+   "track": "witness_pool_replay",
+   "sec": 0.2,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C204",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 189.4,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C205",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C115)",
+   "track": "witness_pool_replay",
+   "sec": 0.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C206",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.9,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C209",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.2,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C24",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 151.0,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C27",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 115.6,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C29",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 110.8,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C40",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 110.4,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C45",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 113.1,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C46",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.8,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C47",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 111.9,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C53",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 1891.2,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C54",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 484.1,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C62",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 110.9,
+   "err": "",
+   "orig_track": "rl_policy"
+  },
+  {
+   "name": "C73",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 115.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C75",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.6,
+   "err": "",
+   "orig_track": "llm_constructor"
+  },
+  {
+   "name": "C95",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 112.1,
+   "err": "",
+   "orig_track": "llm_constructor"
+  }
+ ]
+}

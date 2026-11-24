@@ -1,0 +1,222 @@
+{
+ "group": "nofeedback_baseline",
+ "RL_EP": 200,
+ "results": [
+  {
+   "name": "C217",
+   "refuted": true,
+   "found_by": "plantri ce finder",
+   "track": "plantri",
+   "sec": 11.0,
+   "err": ""
+  },
+  {
+   "name": "C218",
+   "refuted": true,
+   "found_by": "plantri ce finder",
+   "track": "plantri",
+   "sec": 11.1,
+   "err": ""
+  },
+  {
+   "name": "C219",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 119.1,
+   "err": ""
+  },
+  {
+   "name": "C220",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 117.0,
+   "err": ""
+  },
+  {
+   "name": "C221",
+   "refuted": true,
+   "found_by": "plantri ce finder",
+   "track": "plantri",
+   "sec": 27.8,
+   "err": ""
+  },
+  {
+   "name": "C222",
+   "refuted": true,
+   "found_by": "rl ce finder",
+   "track": "rl",
+   "sec": 34.8,
+   "err": ""
+  },
+  {
+   "name": "C223",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 123.7,
+   "err": ""
+  },
+  {
+   "name": "C224",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 120.8,
+   "err": ""
+  },
+  {
+   "name": "C225",
+   "refuted": true,
+   "found_by": "witness_pool_replay (from C218)",
+   "track": "witness_pool_replay",
+   "sec": 0.1,
+   "err": ""
+  },
+  {
+   "name": "C226",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 118.9,
+   "err": ""
+  },
+  {
+   "name": "C227",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 115.0,
+   "err": ""
+  },
+  {
+   "name": "C228",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 115.2,
+   "err": ""
+  },
+  {
+   "name": "C229",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 114.2,
+   "err": ""
+  },
+  {
+   "name": "C230",
+   "refuted": true,
+   "found_by": "plantri ce finder",
+   "track": "plantri",
+   "sec": 582.1,
+   "err": ""
+  },
+  {
+   "name": "C231",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 126.5,
+   "err": ""
+  },
+  {
+   "name": "C232",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 128.5,
+   "err": ""
+  },
+  {
+   "name": "C233",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 133.2,
+   "err": ""
+  },
+  {
+   "name": "C234",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 135.0,
+   "err": ""
+  },
+  {
+   "name": "C235",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 136.4,
+   "err": ""
+  },
+  {
+   "name": "C236",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 138.6,
+   "err": ""
+  },
+  {
+   "name": "C237",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 219.4,
+   "err": ""
+  },
+  {
+   "name": "C238",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 953.3,
+   "err": ""
+  },
+  {
+   "name": "C239",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 233.6,
+   "err": ""
+  },
+  {
+   "name": "C240",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 236.1,
+   "err": ""
+  },
+  {
+   "name": "C241",
+   "refuted": true,
+   "found_by": "pvector_walk",
+   "track": "pvector_walk",
+   "sec": 4.4,
+   "err": ""
+  },
+  {
+   "name": "C242",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 241.1,
+   "err": ""
+  },
+  {
+   "name": "C243",
+   "refuted": false,
+   "found_by": null,
+   "track": null,
+   "sec": 62.7,
+   "err": ""
+  }
+ ]
+}

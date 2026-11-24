@@ -1,0 +1,1017 @@
+[
+ {
+  "name": "C115",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "(is_simple)",
+   "(p_3 <= 2)",
+   "(f_2>=_25)"
+  ],
+  "conclusion": "p6 >= ((2.5 * p3))",
+  "p_vector": [
+   2,
+   0,
+   13,
+   4,
+   7
+  ]
+ },
+ {
+  "name": "C126",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "f_2>=_21",
+   "sum_pk_k>=7 >= 6"
+  ],
+  "conclusion": "p6 <= (((2 * p4) + 4))",
+  "p_vector": [
+   25,
+   2,
+   4,
+   9,
+   1,
+   1,
+   2,
+   1,
+   1,
+   0,
+   1,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C128",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "p_5 <= 2",
+   "f_2>=_27"
+  ],
+  "conclusion": "p6 >= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   11,
+   0,
+   6,
+   10
+  ]
+ },
+ {
+  "name": "C131",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "f_2>=_27",
+   "sum_pk_k>=7 >= 7"
+  ],
+  "conclusion": "p6 <= ((((2 * p4) + (0.5 * sum_pk_after_p6)) + -0.5))",
+  "p_vector": [
+   24,
+   1,
+   7,
+   7,
+   2,
+   0,
+   1,
+   1,
+   0,
+   2,
+   1,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C132",
+  "orig_track": "hopper",
+  "hypotheses": [
+   "p_3 <= 2",
+   "p_5 <= 2",
+   "f_2>=_23"
+  ],
+  "conclusion": "p6 >= (((0.75 * sum_pk_after_p6) + -1.5))",
+  "p_vector": [
+   2,
+   16,
+   2,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C135",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "sum_pk_k>=7 >= 9"
+  ],
+  "conclusion": "p6 <= ((((1.666666667 * p4) + (0.3333333333 * sum_pk_after_p6)) + 2))",
+  "p_vector": [
+   7,
+   0,
+   0,
+   6,
+   9
+  ]
+ },
+ {
+  "name": "C140",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "f_2>=_47",
+   "sum_pk_k>=7 >= 1"
+  ],
+  "conclusion": "p6 <= (((2.5 * sum_pk_after_p6) + -5))",
+  "p_vector": [
+   25,
+   11,
+   3,
+   18,
+   1,
+   1,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C141",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "p_5 <= 2",
+   "sum_pk_k>=7 >= 10"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   15,
+   7,
+   2,
+   8,
+   2,
+   2,
+   0,
+   0,
+   2,
+   0,
+   2,
+   1,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C142",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "p_5 <= 2",
+   "f_2>=_28"
+  ],
+  "conclusion": "p6 >= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   13,
+   2,
+   0,
+   16
+  ]
+ },
+ {
+  "name": "C143",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "f_2>=_47",
+   "sum_pk_k>=7 >= 1"
+  ],
+  "conclusion": "p6 <= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   0,
+   13,
+   33,
+   1
+  ]
+ },
+ {
+  "name": "C147",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "f_2>=_26"
+  ],
+  "conclusion": "p6 >= ((2 * p3))",
+  "p_vector": [
+   2,
+   0,
+   14,
+   3,
+   8
+  ]
+ },
+ {
+  "name": "C157",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "sum_pk_k>=7 >= 9"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   0,
+   0,
+   21,
+   10,
+   9
+  ]
+ },
+ {
+  "name": "C162",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "f_2>=_41",
+   "sum_pk_k>=7 >= 5"
+  ],
+  "conclusion": "p6 <= ((p4 + 7))",
+  "p_vector": [
+   4,
+   0,
+   5,
+   32,
+   5
+  ]
+ },
+ {
+  "name": "C163",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "f_2>=_47",
+   "sum_pk_k>=7 >= 3"
+  ],
+  "conclusion": "p6 >= (((-0.1666666667 * sum_pk_after_p6) + 2.333333333))",
+  "p_vector": [
+   20,
+   11,
+   11,
+   0,
+   1,
+   2,
+   3,
+   0,
+   1,
+   1,
+   1,
+   0,
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   1
+  ]
+ },
+ {
+  "name": "C165",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "p_5 <= 2",
+   "sum_pk_k>=7 >= 11"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   18,
+   7,
+   2,
+   5,
+   4,
+   2,
+   2,
+   0,
+   0,
+   2,
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C166",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_5 = 0",
+   "sum_pk_k>=7 >= 10"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   8,
+   0,
+   0,
+   1,
+   12
+  ]
+ },
+ {
+  "name": "C167",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "p_5 = 0",
+   "f_2>=_28"
+  ],
+  "conclusion": "p6 >= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   10,
+   0,
+   11,
+   8
+  ]
+ },
+ {
+  "name": "C168",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "p_5 <= 2",
+   "f_2>=_32"
+  ],
+  "conclusion": "p6 >= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   14,
+   2,
+   0,
+   18
+  ]
+ },
+ {
+  "name": "C170",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 = 0",
+   "f_2>=_47",
+   "sum_pk_k>=7 >= 2"
+  ],
+  "conclusion": "p6 <= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   0,
+   14,
+   31,
+   2
+  ]
+ },
+ {
+  "name": "C175",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "f_2>=_25"
+  ],
+  "conclusion": "p6 >= (p3)",
+  "p_vector": [
+   2,
+   1,
+   13,
+   0,
+   9
+  ]
+ },
+ {
+  "name": "C176",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "f_2>=_27"
+  ],
+  "conclusion": "p6 >= ((1.5 * p3))",
+  "p_vector": [
+   2,
+   3,
+   10,
+   2,
+   10
+  ]
+ },
+ {
+  "name": "C184",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_4 = 0",
+   "p_5 <= 2",
+   "f_2>=_17",
+   "sum_pk_k>=7 >= 5"
+  ],
+  "conclusion": "p6 >= ((p5) - 1)",
+  "p_vector": [
+   7,
+   0,
+   2,
+   0,
+   11
+  ]
+ },
+ {
+  "name": "C188",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_4 = 0",
+   "p_3 <= 2",
+   "f_2>=_25"
+  ],
+  "conclusion": "p6 >= ((0.5 * p3))",
+  "p_vector": [
+   2,
+   0,
+   15,
+   0,
+   9
+  ]
+ },
+ {
+  "name": "C200",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "p_5 <= 2",
+   "f_2>=_17"
+  ],
+  "conclusion": "p6 >= (((-1 * p4) + 9))",
+  "p_vector": [
+   2,
+   6,
+   2,
+   0,
+   8
+  ]
+ },
+ {
+  "name": "C204",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "p_5 = 0",
+   "f_2>=_22",
+   "sum_pk_k>=7 >= 10"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   15,
+   5,
+   0,
+   5,
+   4,
+   1,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   3
+  ]
+ },
+ {
+  "name": "C205",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "f_2>=_27"
+  ],
+  "conclusion": "p6 >= (p3)",
+  "p_vector": [
+   2,
+   0,
+   16,
+   1,
+   10
+  ]
+ },
+ {
+  "name": "C206",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_5 = 0",
+   "p_3 <= 2",
+   "f_2>=_28"
+  ],
+  "conclusion": "p6 >= (((1.833333333 * sum_pk_after_p6) + -3.666666667))",
+  "p_vector": [
+   2,
+   8,
+   0,
+   10,
+   10
+  ]
+ },
+ {
+  "name": "C209",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "p_3 <= 2",
+   "f_2>=_48",
+   "sum_pk_k>=7 >= 1"
+  ],
+  "conclusion": "p6 <= (((2 * sum_pk_after_p6) + -4))",
+  "p_vector": [
+   0,
+   0,
+   13,
+   34,
+   1
+  ]
+ },
+ {
+  "name": "C24",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "(is_simple)",
+   "(f_2>=_34)"
+  ],
+  "conclusion": "p6 >= (0.7857142857*p3 + -3.142857143*sum_pk_after_p6 + 6.285714286)",
+  "p_vector": [
+   26,
+   2,
+   18,
+   1,
+   0,
+   0,
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   1,
+   0,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C27",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_43))",
+   "(sum_pk_k>=7 >= 1)"
+  ],
+  "conclusion": "p6 <= (2.333333333*sum_pk_after_p6 + -4.666666667)",
+  "p_vector": [
+   22,
+   17,
+   2,
+   15,
+   0,
+   1,
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C29",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_38))",
+   "(sum_pk_k>=7 >= 6)"
+  ],
+  "conclusion": "p6 >= (-3.25*p4 + 0.25*p3 + -0.625*sum_pk_after_p6 + 5)",
+  "p_vector": [
+   28,
+   0,
+   9,
+   3,
+   3,
+   0,
+   2,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1,
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C40",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_48))",
+   "(sum_pk_k>=7 >= 7)"
+  ],
+  "conclusion": "p6 >= (1.25*p3 + -3*sum_pk_after_p6 + -3.25)",
+  "p_vector": [
+   35,
+   4,
+   11,
+   10,
+   1,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   2,
+   2,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C45",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "(is_simple)",
+   "(f_2>=_40)"
+  ],
+  "conclusion": "p6 >= (0.6341463415*p3 + -0.487804878*p5 + -1.170731707*sum_pk_after_p6 + 0.5609756098)",
+  "p_vector": [
+   33,
+   6,
+   6,
+   3,
+   2,
+   1,
+   0,
+   2,
+   3,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   3,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C46",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_43))",
+   "(sum_pk_k>=7 >= 7)"
+  ],
+  "conclusion": "p6 >= (1.5*p3 + -4*sum_pk_after_p6 + -1.5)",
+  "p_vector": [
+   32,
+   3,
+   7,
+   10,
+   0,
+   0,
+   1,
+   0,
+   2,
+   1,
+   0,
+   0,
+   0,
+   0,
+   2,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   1,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C47",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_49))",
+   "(sum_pk_k>=7 >= 3)"
+  ],
+  "conclusion": "p6 >= (0.08333333333*p4 + 0.9166666667*p3 + -2*sum_pk_after_p6 + -4.25)",
+  "p_vector": [
+   32,
+   8,
+   18,
+   5,
+   0,
+   0,
+   0,
+   1,
+   1,
+   2,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   2,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C53",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "(is_simple)",
+   "(f_2>=_30)"
+  ],
+  "conclusion": "p6 >= (1*p3 + -4*sum_pk_after_p6 + 7)",
+  "p_vector": [
+   22,
+   2,
+   15,
+   4,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   1,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C54",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_30))",
+   "(sum_pk_k>=7 >= 1)"
+  ],
+  "conclusion": "p6 >= (0.8*p3 + -2.6*sum_pk_after_p6 + 3)",
+  "p_vector": [
+   26,
+   4,
+   12,
+   5,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   1,
+   0,
+   0,
+   1,
+   0,
+   1,
+   0,
+   0,
+   0,
+   2,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C62",
+  "orig_track": "rl_policy",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_39))",
+   "(sum_pk_k>=7 >= 9)"
+  ],
+  "conclusion": "p6 >= (0.6896551724*p4 + -0.7586206897*p3 + -0.6896551724)",
+  "p_vector": [
+   14,
+   17,
+   10,
+   0,
+   3,
+   3,
+   2,
+   1,
+   0,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1
+  ]
+ },
+ {
+  "name": "C73",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "((is_simple)",
+   "(f_2>=_38))",
+   "(sum_pk_k>=7 >= 2)"
+  ],
+  "conclusion": "p6 <= (((2.5 * sum_pk_after_p6) + 5))",
+  "p_vector": [
+   0,
+   0,
+   14,
+   30,
+   2
+  ]
+ },
+ {
+  "name": "C75",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "(is_simple)",
+   "(p_3 = 0)",
+   "(sum_pk_k>=7 >= 8)"
+  ],
+  "conclusion": "p6 <= ((0.6666666667 * p4))",
+  "p_vector": [
+   0,
+   0,
+   20,
+   1,
+   8
+  ]
+ },
+ {
+  "name": "C95",
+  "orig_track": "llm_constructor",
+  "hypotheses": [
+   "(is_simple)",
+   "(p_3 = 0)",
+   "(p_4 <= 2)",
+   "(sum_pk_k>=7 >= 7)"
+  ],
+  "conclusion": "p6 <= (((-2 * p4) + 2))",
+  "p_vector": [
+   0,
+   2,
+   15,
+   0,
+   7
+  ]
+ }
+]

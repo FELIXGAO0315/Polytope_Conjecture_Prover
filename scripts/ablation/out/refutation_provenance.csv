@@ -33,7 +33,7 @@ C129,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[2, 0, 12,
 C13,plantri ce finder,plantri_exhaustive_screen,False,,True,True,18,"[1, 1, 12, 3, 0, 0, 0, 0, 1]",6,0
 C130,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[1, 0, 12, 1, 3]",1,0
 C131,rl ce finder,rl_policy,False,,True,True,49,"[24, 1, 7, 7, 2, 0, 1, 1, 0, 2, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]",73,0
-C132,hopper ce finder,hopper,False,,True,True,23,"[2, 16, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]",592,0
+C132,hopper ce finder,hopper,False,,True,True,23,"[2, 16, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1]",960,0
 C133,plantri_pool_replay,plantri_pool_replay,True,,True,True,22,"[0, 10, 0, 9, 1, 0, 1, 1]",0,0
 C134,plantri ce finder,plantri_exhaustive_screen,False,,True,True,17,"[5, 1, 0, 6, 5]",1,0
 C135,llm ce finder,llm_constructor,False,,True,True,22,"[7, 0, 0, 6, 9]",1,4
@@ -121,7 +121,10 @@ C212,witness_pool_replay (from C205),cross_conjecture_witness_replay,True,C205,T
 C213,plantri ce finder,plantri_exhaustive_screen,False,,True,True,24,"[0, 7, 0, 15, 2]",1,0
 C216,pvector_walk,eberhard_lattice_walk,False,,True,True,17,"[1, 1, 11, 0, 4]",10014,0
 C22,plantri ce finder,plantri_exhaustive_screen,False,,False,False,33,"[0, 0, 12, 21]",1,0
+C222,rl ce finder,rl_policy,False,,True,True,64,"[32, 3, 4, 11, 1, 4, 0, 0, 3, 0, 0, 1, 0, 1, 1, 2, 0, 0, 0, 0, 1]",134,0
 C23,witness_pool_replay (from C24),cross_conjecture_witness_replay,True,C24,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",0,0
+C237,rl ce finder,rl_policy,False,,True,True,39,"[22, 0, 2, 4, 1, 2, 1, 2, 0, 2, 1, 1, 0, 0, 0, 0, 1]",97,0
+C238,rl ce finder,rl_policy,False,,True,True,30,"[13, 2, 2, 2, 5, 1, 1, 0, 2, 1, 1]",169,0
 C24,rl ce finder,rl_policy,False,,True,True,55,"[26, 2, 18, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]",385,0
 C25,plantri ce finder,plantri_exhaustive_screen,False,,True,True,38,"[3, 0, 4, 30, 1]",1,0
 C26,plantri ce finder,plantri_exhaustive_screen,False,,True,True,42,"[3, 0, 4, 34, 1]",1,0

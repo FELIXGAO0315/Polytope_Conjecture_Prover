@@ -1,0 +1,8668 @@
+[
+  {
+    "id": "rc-000001",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 10,
+      "6": 1,
+      "7": 1,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000002",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 10,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000003",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 11,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000004",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 11,
+      "7": 4
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000005",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 12,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000006",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 12,
+      "6": 3,
+      "11": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000007",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 13,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000008",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 13,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000009",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 13,
+      "6": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000010",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 13,
+      "6": 3,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000011",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 13,
+      "9": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000012",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 14,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000013",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 14,
+      "6": 3,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000014",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 16,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000015",
+    "p_vector": {
+      "3": 1,
+      "4": 1,
+      "5": 7
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000016",
+    "p_vector": {
+      "3": 1,
+      "4": 2,
+      "5": 10,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000017",
+    "p_vector": {
+      "3": 1,
+      "4": 2,
+      "5": 11,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000018",
+    "p_vector": {
+      "3": 1,
+      "4": 2,
+      "5": 12,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000019",
+    "p_vector": {
+      "3": 1,
+      "4": 2,
+      "5": 12,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000020",
+    "p_vector": {
+      "3": 1,
+      "4": 2,
+      "5": 13,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000021",
+    "p_vector": {
+      "3": 1,
+      "4": 3,
+      "5": 12,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000022",
+    "p_vector": {
+      "3": 1,
+      "4": 7,
+      "5": 1,
+      "6": 7,
+      "8": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000023",
+    "p_vector": {
+      "3": 1,
+      "5": 10,
+      "6": 1,
+      "7": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000024",
+    "p_vector": {
+      "3": 1,
+      "5": 12,
+      "6": 1,
+      "7": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000025",
+    "p_vector": {
+      "3": 1,
+      "5": 12,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000026",
+    "p_vector": {
+      "3": 1,
+      "5": 13,
+      "6": 1,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000027",
+    "p_vector": {
+      "3": 1,
+      "5": 13,
+      "6": 3,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000028",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000029",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000030",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "6": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000031",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "6": 3,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000032",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "6": 5,
+      "11": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000033",
+    "p_vector": {
+      "3": 1,
+      "5": 14,
+      "8": 1,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000034",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000035",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000036",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "6": 1,
+      "9": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000037",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "6": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000038",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "6": 3,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000039",
+    "p_vector": {
+      "3": 1,
+      "5": 15,
+      "6": 4,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000040",
+    "p_vector": {
+      "3": 1,
+      "5": 16,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000041",
+    "p_vector": {
+      "3": 1,
+      "5": 16,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000042",
+    "p_vector": {
+      "3": 1,
+      "5": 16,
+      "6": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000043",
+    "p_vector": {
+      "3": 1,
+      "5": 16,
+      "6": 4,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000044",
+    "p_vector": {
+      "3": 1,
+      "5": 16,
+      "6": 5,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000045",
+    "p_vector": {
+      "3": 1,
+      "5": 17,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000046",
+    "p_vector": {
+      "3": 1,
+      "5": 17,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000047",
+    "p_vector": {
+      "3": 1,
+      "5": 17,
+      "6": 4,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000048",
+    "p_vector": {
+      "3": 1,
+      "5": 18,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000049",
+    "p_vector": {
+      "3": 1,
+      "5": 18,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000050",
+    "p_vector": {
+      "3": 1,
+      "5": 19,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000051",
+    "p_vector": {
+      "3": 1,
+      "5": 19,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000052",
+    "p_vector": {
+      "3": 1,
+      "5": 20,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000053",
+    "p_vector": {
+      "3": 1,
+      "5": 20,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000054",
+    "p_vector": {
+      "3": 1,
+      "5": 21,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000055",
+    "p_vector": {
+      "3": 1,
+      "5": 21,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000056",
+    "p_vector": {
+      "3": 1,
+      "5": 21,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000057",
+    "p_vector": {
+      "3": 1,
+      "5": 22,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000058",
+    "p_vector": {
+      "3": 1,
+      "5": 22,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000059",
+    "p_vector": {
+      "3": 1,
+      "5": 23,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000060",
+    "p_vector": {
+      "3": 1,
+      "5": 9
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000061",
+    "p_vector": {
+      "3": 1,
+      "5": 9,
+      "6": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000062",
+    "p_vector": {
+      "3": 10,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000063",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 5,
+      "6": 2,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000064",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 6,
+      "6": 1,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000065",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 6,
+      "6": 2,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000066",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 6,
+      "6": 2,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000067",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 7,
+      "6": 1,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000068",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 7,
+      "6": 2,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000069",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 8,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000070",
+    "p_vector": {
+      "3": 10,
+      "4": 1,
+      "5": 8,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000071",
+    "p_vector": {
+      "3": 10,
+      "4": 2,
+      "5": 4,
+      "6": 2,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000072",
+    "p_vector": {
+      "3": 10,
+      "4": 2,
+      "5": 5,
+      "6": 2,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000073",
+    "p_vector": {
+      "3": 10,
+      "4": 2,
+      "5": 6,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000074",
+    "p_vector": {
+      "3": 10,
+      "4": 2,
+      "5": 6,
+      "6": 2,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000075",
+    "p_vector": {
+      "3": 10,
+      "4": 3,
+      "5": 2,
+      "6": 3,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000076",
+    "p_vector": {
+      "3": 10,
+      "4": 3,
+      "5": 4,
+      "6": 2,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000077",
+    "p_vector": {
+      "3": 10,
+      "4": 4,
+      "5": 2,
+      "6": 3,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000078",
+    "p_vector": {
+      "3": 10,
+      "5": 10,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000079",
+    "p_vector": {
+      "3": 10,
+      "5": 10,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000080",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "10": 5
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000081",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "10": 1,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000082",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "10": 2,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000083",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "10": 3,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000084",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "10": 1,
+      "11": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000085",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "10": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000086",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "10": 2,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000087",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000088",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "11": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000089",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000090",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "11": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000091",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "12": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000092",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000093",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 2,
+      "11": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000094",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 2,
+      "12": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000095",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "8": 2,
+      "13": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000096",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000097",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000098",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "10": 2,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000099",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000100",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 2,
+      "10": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000101",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 2,
+      "11": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000102",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 2,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000103",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 1,
+      "9": 3,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000104",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "10": 1,
+      "11": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000105",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "10": 1,
+      "12": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000106",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "10": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000107",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "10": 2,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000108",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "11": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000109",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "11": 2,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000110",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000111",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "8": 1,
+      "12": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000112",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "8": 1,
+      "13": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000113",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "8": 1,
+      "14": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000114",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "9": 1,
+      "11": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000115",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "9": 1,
+      "12": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000116",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 2,
+      "9": 1,
+      "13": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000117",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 3,
+      "13": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000118",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "7": 3,
+      "14": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000119",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "10": 2,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000120",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "10": 3,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000121",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000122",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "10": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000123",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000124",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 2,
+      "10": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000125",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 2,
+      "11": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000126",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 2,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000127",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 1,
+      "9": 3,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000128",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "10": 1,
+      "11": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000129",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000130",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "10": 2,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000131",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000132",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "9": 1,
+      "10": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000133",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "9": 1,
+      "11": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000134",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "9": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000135",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 2,
+      "9": 2,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000136",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 3,
+      "10": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000137",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 3,
+      "11": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000138",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 3,
+      "12": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000139",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "8": 3,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000140",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 1,
+      "10": 3,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000141",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 2,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000142",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 2,
+      "10": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000143",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 3,
+      "10": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000144",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 3,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000145",
+    "p_vector": {
+      "3": 10,
+      "5": 2,
+      "9": 4,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000146",
+    "p_vector": {
+      "3": 10,
+      "5": 6,
+      "6": 2,
+      "17": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000147",
+    "p_vector": {
+      "3": 10,
+      "5": 6,
+      "6": 2,
+      "18": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000148",
+    "p_vector": {
+      "3": 10,
+      "5": 7,
+      "6": 1,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000149",
+    "p_vector": {
+      "3": 10,
+      "5": 7,
+      "6": 2,
+      "17": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000150",
+    "p_vector": {
+      "3": 10,
+      "5": 7,
+      "6": 2,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000151",
+    "p_vector": {
+      "3": 10,
+      "5": 8,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000152",
+    "p_vector": {
+      "3": 10,
+      "5": 8,
+      "6": 1,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000153",
+    "p_vector": {
+      "3": 10,
+      "5": 8,
+      "6": 1,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000154",
+    "p_vector": {
+      "3": 10,
+      "5": 9,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000155",
+    "p_vector": {
+      "3": 10,
+      "5": 9,
+      "6": 1,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000156",
+    "p_vector": {
+      "3": 10,
+      "6": 1,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000157",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 2,
+      "6": 4,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000158",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 3,
+      "6": 3,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000159",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 3,
+      "6": 4,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000160",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 3,
+      "6": 4,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000161",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 4,
+      "6": 3,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000162",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 5,
+      "6": 2,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000163",
+    "p_vector": {
+      "3": 11,
+      "4": 1,
+      "5": 5,
+      "6": 3,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000164",
+    "p_vector": {
+      "3": 11,
+      "4": 2,
+      "5": 1,
+      "6": 4,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000165",
+    "p_vector": {
+      "3": 11,
+      "4": 2,
+      "5": 2,
+      "6": 4,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000166",
+    "p_vector": {
+      "3": 11,
+      "4": 2,
+      "5": 3,
+      "6": 3,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000167",
+    "p_vector": {
+      "3": 11,
+      "4": 2,
+      "5": 3,
+      "6": 4,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000168",
+    "p_vector": {
+      "3": 11,
+      "4": 3,
+      "5": 1,
+      "6": 4,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000169",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "10": 2,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000170",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "10": 3,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000171",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "10": 4,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000172",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000173",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "10": 1,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000174",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "10": 2,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000175",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "11": 2,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000176",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "11": 3,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000177",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "10": 1,
+      "14": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000178",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "11": 1,
+      "13": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000179",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "12": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000180",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "8": 1,
+      "12": 2,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000181",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "10": 1,
+      "13": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000182",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "11": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000183",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "9": 1,
+      "12": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000184",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 1,
+      "9": 2,
+      "14": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000185",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 2,
+      "11": 1,
+      "14": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000186",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 2,
+      "12": 1,
+      "13": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000187",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "7": 2,
+      "13": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000188",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "10": 1,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000189",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "10": 1,
+      "11": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000190",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "10": 2,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000191",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "11": 3,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000192",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "10": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000193",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "11": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000194",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 1,
+      "9": 1,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000195",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 2,
+      "11": 1,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000196",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "8": 2,
+      "12": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000197",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 1,
+      "10": 1,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000198",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 1,
+      "10": 2,
+      "11": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000199",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 1,
+      "10": 2,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000200",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 1,
+      "11": 4
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000201",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 2,
+      "10": 1,
+      "12": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000202",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 2,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000203",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 2,
+      "11": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000204",
+    "p_vector": {
+      "3": 11,
+      "5": 2,
+      "9": 3,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000205",
+    "p_vector": {
+      "3": 11,
+      "5": 3,
+      "6": 4,
+      "17": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000206",
+    "p_vector": {
+      "3": 11,
+      "5": 3,
+      "6": 4,
+      "18": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000207",
+    "p_vector": {
+      "3": 11,
+      "5": 4,
+      "6": 3,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000208",
+    "p_vector": {
+      "3": 11,
+      "5": 5,
+      "6": 2,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000209",
+    "p_vector": {
+      "3": 11,
+      "5": 5,
+      "6": 3,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000210",
+    "p_vector": {
+      "3": 11,
+      "5": 5,
+      "6": 3,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000211",
+    "p_vector": {
+      "3": 11,
+      "5": 6,
+      "6": 2,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000212",
+    "p_vector": {
+      "3": 11,
+      "5": 6,
+      "6": 3,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000213",
+    "p_vector": {
+      "3": 11,
+      "5": 6,
+      "9": 1,
+      "14": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000214",
+    "p_vector": {
+      "3": 11,
+      "5": 7,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000215",
+    "p_vector": {
+      "3": 11,
+      "5": 7,
+      "6": 2,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000216",
+    "p_vector": {
+      "3": 11,
+      "5": 7,
+      "6": 3,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000217",
+    "p_vector": {
+      "3": 12,
+      "4": 1,
+      "5": 1,
+      "6": 5,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000218",
+    "p_vector": {
+      "3": 12,
+      "4": 1,
+      "5": 2,
+      "6": 4,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000219",
+    "p_vector": {
+      "3": 12,
+      "4": 1,
+      "5": 2,
+      "6": 5,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000220",
+    "p_vector": {
+      "3": 12,
+      "4": 1,
+      "6": 5,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000221",
+    "p_vector": {
+      "3": 12,
+      "4": 2,
+      "13": 4
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000222",
+    "p_vector": {
+      "3": 12,
+      "4": 2,
+      "6": 5,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000223",
+    "p_vector": {
+      "3": 12,
+      "5": 1,
+      "6": 5,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000224",
+    "p_vector": {
+      "3": 12,
+      "5": 2,
+      "6": 4,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000225",
+    "p_vector": {
+      "3": 12,
+      "5": 2,
+      "6": 5,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000226",
+    "p_vector": {
+      "3": 12,
+      "5": 2,
+      "6": 5,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000227",
+    "p_vector": {
+      "3": 12,
+      "5": 3,
+      "15": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000228",
+    "p_vector": {
+      "3": 12,
+      "5": 3,
+      "6": 4,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000229",
+    "p_vector": {
+      "3": 12,
+      "5": 3,
+      "6": 5,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000230",
+    "p_vector": {
+      "3": 12,
+      "5": 4,
+      "6": 3,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000231",
+    "p_vector": {
+      "3": 12,
+      "5": 4,
+      "6": 4,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000232",
+    "p_vector": {
+      "3": 12,
+      "5": 4,
+      "6": 5,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000233",
+    "p_vector": {
+      "3": 13,
+      "4": 3,
+      "5": 1,
+      "14": 2,
+      "15": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000234",
+    "p_vector": {
+      "3": 13,
+      "5": 1,
+      "6": 5,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000235",
+    "p_vector": {
+      "3": 13,
+      "5": 1,
+      "6": 6,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000236",
+    "p_vector": {
+      "3": 13,
+      "6": 6,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000237",
+    "p_vector": {
+      "3": 13,
+      "6": 7,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000238",
+    "p_vector": {
+      "3": 14,
+      "5": 6,
+      "15": 4
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000239",
+    "p_vector": {
+      "3": 14,
+      "8": 2,
+      "14": 1,
+      "15": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000240",
+    "p_vector": {
+      "3": 15,
+      "5": 2,
+      "14": 1,
+      "15": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000241",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 11,
+      "6": 1,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000242",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 12,
+      "6": 1,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000243",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 13,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000244",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 13,
+      "7": 9
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000245",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 15,
+      "6": 5,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000246",
+    "p_vector": {
+      "3": 2,
+      "4": 1,
+      "5": 16,
+      "6": 4,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000247",
+    "p_vector": {
+      "3": 2,
+      "4": 2,
+      "5": 12,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000248",
+    "p_vector": {
+      "3": 2,
+      "4": 2,
+      "5": 14,
+      "6": 5,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000249",
+    "p_vector": {
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 17
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000250",
+    "p_vector": {
+      "3": 2,
+      "4": 6,
+      "5": 2,
+      "7": 6,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000251",
+    "p_vector": {
+      "3": 2,
+      "4": 6,
+      "5": 2,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000252",
+    "p_vector": {
+      "3": 2,
+      "4": 7,
+      "5": 2,
+      "7": 10
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000253",
+    "p_vector": {
+      "3": 2,
+      "4": 7,
+      "5": 2,
+      "7": 8,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000254",
+    "p_vector": {
+      "3": 2,
+      "4": 8,
+      "5": 2,
+      "7": 12
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000255",
+    "p_vector": {
+      "3": 2,
+      "5": 10,
+      "6": 1,
+      "7": 2,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000256",
+    "p_vector": {
+      "3": 2,
+      "5": 10,
+      "6": 1,
+      "7": 4
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000257",
+    "p_vector": {
+      "3": 2,
+      "5": 11,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000258",
+    "p_vector": {
+      "3": 2,
+      "5": 12,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000259",
+    "p_vector": {
+      "3": 2,
+      "5": 12,
+      "6": 1,
+      "9": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000260",
+    "p_vector": {
+      "3": 2,
+      "5": 13,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000261",
+    "p_vector": {
+      "3": 2,
+      "5": 13,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000262",
+    "p_vector": {
+      "3": 2,
+      "5": 13,
+      "6": 2,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000263",
+    "p_vector": {
+      "3": 2,
+      "5": 13,
+      "6": 3,
+      "7": 7
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000264",
+    "p_vector": {
+      "3": 2,
+      "5": 13,
+      "6": 4,
+      "7": 7
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000265",
+    "p_vector": {
+      "3": 2,
+      "5": 14,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000266",
+    "p_vector": {
+      "3": 2,
+      "5": 14,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000267",
+    "p_vector": {
+      "3": 2,
+      "5": 14,
+      "6": 2,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000268",
+    "p_vector": {
+      "3": 2,
+      "5": 15,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000269",
+    "p_vector": {
+      "3": 2,
+      "5": 15,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000270",
+    "p_vector": {
+      "3": 2,
+      "5": 15,
+      "7": 9
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000271",
+    "p_vector": {
+      "3": 2,
+      "5": 16,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000272",
+    "p_vector": {
+      "3": 2,
+      "5": 16,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000273",
+    "p_vector": {
+      "3": 2,
+      "5": 16,
+      "6": 5,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000274",
+    "p_vector": {
+      "3": 2,
+      "5": 16,
+      "6": 6,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000275",
+    "p_vector": {
+      "3": 2,
+      "5": 17,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000276",
+    "p_vector": {
+      "3": 2,
+      "5": 17,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000277",
+    "p_vector": {
+      "3": 2,
+      "5": 17,
+      "6": 4,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000278",
+    "p_vector": {
+      "3": 2,
+      "5": 18,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000279",
+    "p_vector": {
+      "3": 2,
+      "5": 18,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000280",
+    "p_vector": {
+      "3": 2,
+      "5": 18,
+      "6": 3,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000281",
+    "p_vector": {
+      "3": 2,
+      "5": 18,
+      "6": 5,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000282",
+    "p_vector": {
+      "3": 2,
+      "5": 19,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000283",
+    "p_vector": {
+      "3": 2,
+      "5": 19,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000284",
+    "p_vector": {
+      "3": 2,
+      "5": 20,
+      "13": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000285",
+    "p_vector": {
+      "3": 2,
+      "5": 20,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000286",
+    "p_vector": {
+      "3": 2,
+      "5": 20,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000287",
+    "p_vector": {
+      "3": 2,
+      "5": 6,
+      "6": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000288",
+    "p_vector": {
+      "3": 3,
+      "4": 1,
+      "5": 1,
+      "6": 18
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000289",
+    "p_vector": {
+      "3": 3,
+      "5": 12,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000290",
+    "p_vector": {
+      "3": 3,
+      "5": 13,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000291",
+    "p_vector": {
+      "3": 3,
+      "5": 13,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000292",
+    "p_vector": {
+      "3": 3,
+      "5": 14,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000293",
+    "p_vector": {
+      "3": 3,
+      "5": 14,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000294",
+    "p_vector": {
+      "3": 3,
+      "5": 15,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000295",
+    "p_vector": {
+      "3": 3,
+      "5": 15,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000296",
+    "p_vector": {
+      "3": 3,
+      "5": 15,
+      "6": 5,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000297",
+    "p_vector": {
+      "3": 3,
+      "5": 16,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000298",
+    "p_vector": {
+      "3": 3,
+      "5": 16,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000299",
+    "p_vector": {
+      "3": 3,
+      "5": 17,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000300",
+    "p_vector": {
+      "3": 3,
+      "5": 17,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000301",
+    "p_vector": {
+      "3": 3,
+      "5": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000302",
+    "p_vector": {
+      "3": 3,
+      "5": 3,
+      "6": 15
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000303",
+    "p_vector": {
+      "3": 3,
+      "5": 3,
+      "6": 17
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000304",
+    "p_vector": {
+      "3": 3,
+      "5": 4,
+      "7": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000305",
+    "p_vector": {
+      "3": 3,
+      "5": 5,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000306",
+    "p_vector": {
+      "3": 3,
+      "5": 6,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000307",
+    "p_vector": {
+      "3": 3,
+      "5": 7,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000308",
+    "p_vector": {
+      "3": 3,
+      "5": 8,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000309",
+    "p_vector": {
+      "3": 4,
+      "4": 2,
+      "6": 16,
+      "7": 4
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000310",
+    "p_vector": {
+      "3": 4,
+      "4": 3,
+      "6": 3,
+      "7": 6
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000311",
+    "p_vector": {
+      "3": 4,
+      "5": 2,
+      "7": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000312",
+    "p_vector": {
+      "3": 4,
+      "6": 17
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000313",
+    "p_vector": {
+      "3": 4,
+      "6": 18
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000314",
+    "p_vector": {
+      "3": 4,
+      "6": 19
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000315",
+    "p_vector": {
+      "3": 4,
+      "6": 20
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000316",
+    "p_vector": {
+      "3": 4,
+      "6": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000317",
+    "p_vector": {
+      "3": 4,
+      "6": 6
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000318",
+    "p_vector": {
+      "3": 5,
+      "4": 1,
+      "5": 6,
+      "11": 1,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000319",
+    "p_vector": {
+      "3": 5,
+      "4": 1,
+      "6": 3,
+      "7": 5
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000320",
+    "p_vector": {
+      "3": 5,
+      "4": 1,
+      "6": 6,
+      "7": 5
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000321",
+    "p_vector": {
+      "3": 5,
+      "4": 2,
+      "6": 1,
+      "7": 7
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000322",
+    "p_vector": {
+      "3": 5,
+      "4": 4,
+      "5": 7,
+      "15": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000323",
+    "p_vector": {
+      "3": 5,
+      "5": 1,
+      "7": 2,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000324",
+    "p_vector": {
+      "3": 5,
+      "5": 2,
+      "6": 1,
+      "7": 3,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000325",
+    "p_vector": {
+      "3": 5,
+      "5": 2,
+      "6": 1,
+      "7": 5
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000326",
+    "p_vector": {
+      "3": 5,
+      "5": 2,
+      "7": 1,
+      "8": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000327",
+    "p_vector": {
+      "3": 5,
+      "5": 2,
+      "7": 2,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000328",
+    "p_vector": {
+      "3": 5,
+      "5": 7,
+      "10": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000329",
+    "p_vector": {
+      "3": 5,
+      "5": 7,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000330",
+    "p_vector": {
+      "3": 5,
+      "6": 1,
+      "7": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000331",
+    "p_vector": {
+      "3": 5,
+      "6": 13,
+      "7": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000332",
+    "p_vector": {
+      "3": 5,
+      "6": 2,
+      "7": 1,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000333",
+    "p_vector": {
+      "3": 5,
+      "7": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000334",
+    "p_vector": {
+      "3": 6,
+      "4": 1,
+      "5": 4,
+      "6": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000335",
+    "p_vector": {
+      "3": 6,
+      "4": 1,
+      "6": 2,
+      "10": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000336",
+    "p_vector": {
+      "3": 6,
+      "4": 2,
+      "6": 2,
+      "7": 10
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000337",
+    "p_vector": {
+      "3": 6,
+      "5": 2,
+      "6": 1,
+      "10": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000338",
+    "p_vector": {
+      "3": 6,
+      "5": 4,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000339",
+    "p_vector": {
+      "3": 6,
+      "5": 5,
+      "6": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000340",
+    "p_vector": {
+      "3": 6,
+      "5": 6,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000341",
+    "p_vector": {
+      "3": 6,
+      "6": 1,
+      "8": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000342",
+    "p_vector": {
+      "3": 6,
+      "6": 2,
+      "9": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000343",
+    "p_vector": {
+      "3": 6,
+      "7": 2,
+      "8": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000344",
+    "p_vector": {
+      "3": 6,
+      "7": 4,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000345",
+    "p_vector": {
+      "3": 6,
+      "8": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000346",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 1,
+      "10": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000347",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 1,
+      "8": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000348",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000349",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 2,
+      "10": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000350",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 2,
+      "7": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000351",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 2,
+      "8": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000352",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 2,
+      "9": 1,
+      "10": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000353",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 2,
+      "9": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000354",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "5": 3,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000355",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "6": 1,
+      "7": 11
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000356",
+    "p_vector": {
+      "3": 7,
+      "4": 1,
+      "9": 1,
+      "10": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000357",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "10": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000358",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "5": 1,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000359",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "5": 1,
+      "10": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000360",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "5": 1,
+      "8": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000361",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "5": 1,
+      "9": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000362",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "5": 2,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000363",
+    "p_vector": {
+      "3": 7,
+      "4": 2,
+      "9": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000364",
+    "p_vector": {
+      "3": 7,
+      "4": 3,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000365",
+    "p_vector": {
+      "3": 7,
+      "4": 3,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000366",
+    "p_vector": {
+      "3": 7,
+      "4": 3,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000367",
+    "p_vector": {
+      "3": 7,
+      "5": 1,
+      "8": 1,
+      "10": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000368",
+    "p_vector": {
+      "3": 7,
+      "5": 1,
+      "9": 2,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000369",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "7": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000370",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "7": 11
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000371",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "7": 7,
+      "8": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000372",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "7": 8,
+      "9": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000373",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "8": 1,
+      "10": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000374",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "9": 1,
+      "10": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000375",
+    "p_vector": {
+      "3": 7,
+      "5": 2,
+      "9": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000376",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "10": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000377",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "6": 2,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000378",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "7": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000379",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "8": 1,
+      "10": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000380",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "8": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000381",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "9": 1,
+      "10": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000382",
+    "p_vector": {
+      "3": 7,
+      "5": 3,
+      "9": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000383",
+    "p_vector": {
+      "3": 7,
+      "5": 4,
+      "10": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000384",
+    "p_vector": {
+      "3": 7,
+      "5": 4,
+      "7": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000385",
+    "p_vector": {
+      "3": 7,
+      "5": 4,
+      "8": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000386",
+    "p_vector": {
+      "3": 7,
+      "5": 4,
+      "9": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000387",
+    "p_vector": {
+      "3": 7,
+      "5": 5,
+      "13": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000388",
+    "p_vector": {
+      "3": 7,
+      "5": 7,
+      "13": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000389",
+    "p_vector": {
+      "3": 7,
+      "6": 6,
+      "7": 9
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000390",
+    "p_vector": {
+      "3": 7,
+      "7": 1,
+      "8": 4
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000391",
+    "p_vector": {
+      "3": 7,
+      "9": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000392",
+    "p_vector": {
+      "3": 8,
+      "10": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000393",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000394",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000395",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000396",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000397",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000398",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000399",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 1,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000400",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 2,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000401",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "5": 2,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000402",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "6": 1,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000403",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "6": 1,
+      "10": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000404",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "6": 1,
+      "8": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000405",
+    "p_vector": {
+      "3": 8,
+      "4": 1,
+      "6": 1,
+      "9": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000406",
+    "p_vector": {
+      "3": 8,
+      "4": 2,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000407",
+    "p_vector": {
+      "3": 8,
+      "4": 2,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000408",
+    "p_vector": {
+      "3": 8,
+      "4": 2,
+      "5": 1,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000409",
+    "p_vector": {
+      "3": 8,
+      "4": 2,
+      "6": 1,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000410",
+    "p_vector": {
+      "3": 8,
+      "4": 2,
+      "6": 1,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000411",
+    "p_vector": {
+      "3": 8,
+      "4": 3,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000412",
+    "p_vector": {
+      "3": 8,
+      "4": 4,
+      "5": 6,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000413",
+    "p_vector": {
+      "3": 8,
+      "4": 5,
+      "5": 6,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000414",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "10": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000415",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "6": 1,
+      "10": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000416",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000417",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "6": 1,
+      "8": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000418",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "6": 1,
+      "9": 1,
+      "10": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000419",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "6": 1,
+      "9": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000420",
+    "p_vector": {
+      "3": 8,
+      "5": 1,
+      "9": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000421",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000422",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "10": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000423",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "6": 1,
+      "10": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000424",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "6": 1,
+      "10": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000425",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "6": 1,
+      "8": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000426",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "6": 1,
+      "9": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000427",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "6": 5,
+      "13": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000428",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "7": 10,
+      "8": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000429",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "7": 14
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000430",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "8": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000431",
+    "p_vector": {
+      "3": 8,
+      "5": 2,
+      "9": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000432",
+    "p_vector": {
+      "3": 8,
+      "5": 3,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000433",
+    "p_vector": {
+      "3": 8,
+      "5": 3,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000434",
+    "p_vector": {
+      "3": 8,
+      "5": 3,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000435",
+    "p_vector": {
+      "3": 8,
+      "6": 1,
+      "10": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000436",
+    "p_vector": {
+      "3": 8,
+      "6": 1,
+      "7": 10,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000437",
+    "p_vector": {
+      "3": 8,
+      "6": 1,
+      "7": 12
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000438",
+    "p_vector": {
+      "3": 8,
+      "6": 1,
+      "8": 1,
+      "11": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000439",
+    "p_vector": {
+      "3": 8,
+      "6": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000440",
+    "p_vector": {
+      "3": 9,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000441",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000442",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 1,
+      "12": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000443",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 10,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000444",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 11,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000445",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 7,
+      "6": 1,
+      "17": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000446",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 7,
+      "6": 1,
+      "18": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000447",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 8,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000448",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 9,
+      "14": 1,
+      "15": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000449",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 9,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000450",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "5": 9,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000451",
+    "p_vector": {
+      "3": 9,
+      "4": 1,
+      "6": 1,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000452",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 6,
+      "6": 1,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000453",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 7,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000454",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 7,
+      "6": 1,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000455",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 7,
+      "6": 1,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000456",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 8,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000457",
+    "p_vector": {
+      "3": 9,
+      "4": 2,
+      "5": 9,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000458",
+    "p_vector": {
+      "3": 9,
+      "4": 3,
+      "5": 5,
+      "6": 1,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000459",
+    "p_vector": {
+      "3": 9,
+      "4": 3,
+      "5": 6,
+      "6": 1,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000460",
+    "p_vector": {
+      "3": 9,
+      "4": 3,
+      "5": 7,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000461",
+    "p_vector": {
+      "3": 9,
+      "4": 3,
+      "5": 7,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000462",
+    "p_vector": {
+      "3": 9,
+      "4": 4,
+      "5": 5,
+      "6": 1,
+      "20": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000463",
+    "p_vector": {
+      "3": 9,
+      "5": 1,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000464",
+    "p_vector": {
+      "3": 9,
+      "5": 1,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000465",
+    "p_vector": {
+      "3": 9,
+      "5": 1,
+      "6": 1,
+      "10": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000466",
+    "p_vector": {
+      "3": 9,
+      "5": 1,
+      "6": 1,
+      "11": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000467",
+    "p_vector": {
+      "3": 9,
+      "5": 10,
+      "17": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000468",
+    "p_vector": {
+      "3": 9,
+      "5": 10,
+      "18": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000469",
+    "p_vector": {
+      "3": 9,
+      "5": 11,
+      "18": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000470",
+    "p_vector": {
+      "3": 9,
+      "5": 11,
+      "19": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000471",
+    "p_vector": {
+      "3": 9,
+      "5": 12,
+      "15": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000472",
+    "p_vector": {
+      "3": 9,
+      "5": 12,
+      "19": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000473",
+    "p_vector": {
+      "3": 9,
+      "5": 2,
+      "11": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000474",
+    "p_vector": {
+      "3": 9,
+      "5": 2,
+      "6": 1,
+      "7": 1,
+      "10": 4
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000475",
+    "p_vector": {
+      "3": 9,
+      "5": 9,
+      "17": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000476",
+    "p_vector": {
+      "3": 9,
+      "5": 9,
+      "18": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000477",
+    "p_vector": {
+      "3": 9,
+      "6": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000478",
+    "p_vector": {
+      "3": 9,
+      "6": 1,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000479",
+    "p_vector": {
+      "3": 9,
+      "6": 1,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000480",
+    "p_vector": {
+      "3": 9,
+      "6": 2,
+      "10": 1,
+      "11": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000481",
+    "p_vector": {
+      "3": 9,
+      "6": 2,
+      "11": 3
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000482",
+    "p_vector": {
+      "3": 9,
+      "6": 2,
+      "9": 1,
+      "12": 2
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000483",
+    "p_vector": {
+      "3": 9,
+      "6": 9,
+      "13": 1,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000484",
+    "p_vector": {
+      "4": 1,
+      "5": 11,
+      "7": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000485",
+    "p_vector": {
+      "4": 1,
+      "5": 13,
+      "6": 1,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000486",
+    "p_vector": {
+      "4": 1,
+      "5": 13,
+      "6": 3,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000487",
+    "p_vector": {
+      "4": 1,
+      "5": 14,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000488",
+    "p_vector": {
+      "4": 1,
+      "5": 14,
+      "6": 1,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000489",
+    "p_vector": {
+      "4": 1,
+      "5": 14,
+      "6": 2,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000490",
+    "p_vector": {
+      "4": 1,
+      "5": 14,
+      "6": 3,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000491",
+    "p_vector": {
+      "4": 1,
+      "5": 15,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000492",
+    "p_vector": {
+      "4": 1,
+      "5": 15,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000493",
+    "p_vector": {
+      "4": 1,
+      "5": 15,
+      "6": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000494",
+    "p_vector": {
+      "4": 1,
+      "5": 15,
+      "6": 3,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000495",
+    "p_vector": {
+      "4": 1,
+      "5": 16,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000496",
+    "p_vector": {
+      "4": 1,
+      "5": 16,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000497",
+    "p_vector": {
+      "4": 1,
+      "5": 16,
+      "6": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000498",
+    "p_vector": {
+      "4": 1,
+      "5": 17,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000499",
+    "p_vector": {
+      "4": 1,
+      "5": 17,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000500",
+    "p_vector": {
+      "4": 1,
+      "5": 18,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000501",
+    "p_vector": {
+      "4": 1,
+      "5": 18,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000502",
+    "p_vector": {
+      "4": 1,
+      "5": 19,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000503",
+    "p_vector": {
+      "4": 1,
+      "5": 19,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000504",
+    "p_vector": {
+      "4": 1,
+      "5": 20,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000505",
+    "p_vector": {
+      "4": 1,
+      "5": 20,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000506",
+    "p_vector": {
+      "4": 1,
+      "5": 21,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000507",
+    "p_vector": {
+      "4": 1,
+      "5": 21,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000508",
+    "p_vector": {
+      "4": 1,
+      "5": 22,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000509",
+    "p_vector": {
+      "4": 1,
+      "5": 23,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000510",
+    "p_vector": {
+      "4": 1,
+      "5": 24,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000511",
+    "p_vector": {
+      "4": 10,
+      "6": 7,
+      "7": 2,
+      "8": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000512",
+    "p_vector": {
+      "4": 10,
+      "6": 7,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000513",
+    "p_vector": {
+      "4": 10,
+      "6": 9,
+      "7": 1,
+      "9": 1,
+      "10": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000514",
+    "p_vector": {
+      "4": 11,
+      "5": 2,
+      "7": 6,
+      "8": 3
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000515",
+    "p_vector": {
+      "4": 11,
+      "6": 1,
+      "7": 6,
+      "8": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000516",
+    "p_vector": {
+      "4": 2,
+      "5": 12,
+      "6": 1,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000517",
+    "p_vector": {
+      "4": 2,
+      "5": 12,
+      "6": 3,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000518",
+    "p_vector": {
+      "4": 2,
+      "5": 13,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000519",
+    "p_vector": {
+      "4": 2,
+      "5": 13,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000520",
+    "p_vector": {
+      "4": 2,
+      "5": 13,
+      "6": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000521",
+    "p_vector": {
+      "4": 2,
+      "5": 13,
+      "6": 3,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000522",
+    "p_vector": {
+      "4": 2,
+      "5": 14,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000523",
+    "p_vector": {
+      "4": 2,
+      "5": 14,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000524",
+    "p_vector": {
+      "4": 2,
+      "5": 14,
+      "6": 3,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000525",
+    "p_vector": {
+      "4": 2,
+      "5": 15,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000526",
+    "p_vector": {
+      "4": 2,
+      "5": 15,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000527",
+    "p_vector": {
+      "4": 2,
+      "5": 15,
+      "7": 7
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000528",
+    "p_vector": {
+      "4": 2,
+      "5": 16,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000529",
+    "p_vector": {
+      "4": 2,
+      "5": 16,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000530",
+    "p_vector": {
+      "4": 2,
+      "5": 17,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000531",
+    "p_vector": {
+      "4": 2,
+      "5": 17,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000532",
+    "p_vector": {
+      "4": 2,
+      "5": 18,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000533",
+    "p_vector": {
+      "4": 2,
+      "5": 18,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000534",
+    "p_vector": {
+      "4": 2,
+      "5": 19,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000535",
+    "p_vector": {
+      "4": 2,
+      "5": 19,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000536",
+    "p_vector": {
+      "4": 2,
+      "5": 20,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000537",
+    "p_vector": {
+      "4": 2,
+      "5": 20,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000538",
+    "p_vector": {
+      "4": 2,
+      "5": 21,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000539",
+    "p_vector": {
+      "4": 2,
+      "5": 22,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000540",
+    "p_vector": {
+      "4": 2,
+      "5": 9,
+      "6": 1,
+      "7": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000541",
+    "p_vector": {
+      "4": 3,
+      "5": 11,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000542",
+    "p_vector": {
+      "4": 3,
+      "5": 12,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000543",
+    "p_vector": {
+      "4": 3,
+      "5": 12,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000544",
+    "p_vector": {
+      "4": 3,
+      "5": 12,
+      "6": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000545",
+    "p_vector": {
+      "4": 3,
+      "5": 12,
+      "6": 3,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000546",
+    "p_vector": {
+      "4": 3,
+      "5": 13,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000547",
+    "p_vector": {
+      "4": 3,
+      "5": 13,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000548",
+    "p_vector": {
+      "4": 3,
+      "5": 14,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000549",
+    "p_vector": {
+      "4": 3,
+      "5": 14,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000550",
+    "p_vector": {
+      "4": 3,
+      "5": 15,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000551",
+    "p_vector": {
+      "4": 3,
+      "5": 15,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000552",
+    "p_vector": {
+      "4": 3,
+      "5": 16,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000553",
+    "p_vector": {
+      "4": 3,
+      "5": 16,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000554",
+    "p_vector": {
+      "4": 3,
+      "5": 17,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000555",
+    "p_vector": {
+      "4": 3,
+      "5": 17,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000556",
+    "p_vector": {
+      "4": 3,
+      "5": 18,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000557",
+    "p_vector": {
+      "4": 3,
+      "5": 18,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000558",
+    "p_vector": {
+      "4": 3,
+      "5": 19,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000559",
+    "p_vector": {
+      "4": 3,
+      "5": 19,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000560",
+    "p_vector": {
+      "4": 3,
+      "5": 20,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000561",
+    "p_vector": {
+      "4": 4,
+      "5": 10,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000562",
+    "p_vector": {
+      "4": 4,
+      "5": 11,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000563",
+    "p_vector": {
+      "4": 4,
+      "5": 12,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000564",
+    "p_vector": {
+      "4": 4,
+      "5": 12,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000565",
+    "p_vector": {
+      "4": 4,
+      "5": 13,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000566",
+    "p_vector": {
+      "4": 4,
+      "5": 13,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000567",
+    "p_vector": {
+      "4": 4,
+      "5": 14,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000568",
+    "p_vector": {
+      "4": 4,
+      "5": 14,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000569",
+    "p_vector": {
+      "4": 4,
+      "5": 14,
+      "6": 5,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000570",
+    "p_vector": {
+      "4": 4,
+      "5": 15,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000571",
+    "p_vector": {
+      "4": 4,
+      "5": 15,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000572",
+    "p_vector": {
+      "4": 4,
+      "5": 15,
+      "6": 4,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000573",
+    "p_vector": {
+      "4": 4,
+      "5": 16,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000574",
+    "p_vector": {
+      "4": 4,
+      "5": 16,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000575",
+    "p_vector": {
+      "4": 4,
+      "5": 17,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000576",
+    "p_vector": {
+      "4": 4,
+      "5": 17,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000577",
+    "p_vector": {
+      "4": 4,
+      "5": 18,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000578",
+    "p_vector": {
+      "4": 4,
+      "5": 18,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000579",
+    "p_vector": {
+      "4": 4,
+      "5": 8,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000580",
+    "p_vector": {
+      "4": 4,
+      "5": 9,
+      "7": 1,
+      "8": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000581",
+    "p_vector": {
+      "4": 5,
+      "5": 10,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000582",
+    "p_vector": {
+      "4": 5,
+      "5": 11,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000583",
+    "p_vector": {
+      "4": 5,
+      "5": 11,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000584",
+    "p_vector": {
+      "4": 5,
+      "5": 12,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000585",
+    "p_vector": {
+      "4": 5,
+      "5": 12,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000586",
+    "p_vector": {
+      "4": 5,
+      "5": 13,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000587",
+    "p_vector": {
+      "4": 5,
+      "5": 13,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000588",
+    "p_vector": {
+      "4": 5,
+      "5": 13,
+      "6": 5,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000589",
+    "p_vector": {
+      "4": 5,
+      "5": 14,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000590",
+    "p_vector": {
+      "4": 5,
+      "5": 14,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000591",
+    "p_vector": {
+      "4": 5,
+      "5": 15,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000592",
+    "p_vector": {
+      "4": 5,
+      "5": 15,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000593",
+    "p_vector": {
+      "4": 5,
+      "5": 16,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000594",
+    "p_vector": {
+      "4": 5,
+      "5": 16,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000595",
+    "p_vector": {
+      "4": 6,
+      "5": 10,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000596",
+    "p_vector": {
+      "4": 6,
+      "5": 10,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000597",
+    "p_vector": {
+      "4": 6,
+      "5": 11,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000598",
+    "p_vector": {
+      "4": 6,
+      "5": 11,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000599",
+    "p_vector": {
+      "4": 6,
+      "5": 12,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000600",
+    "p_vector": {
+      "4": 6,
+      "5": 12,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000601",
+    "p_vector": {
+      "4": 6,
+      "5": 13,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000602",
+    "p_vector": {
+      "4": 6,
+      "5": 13,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000603",
+    "p_vector": {
+      "4": 6,
+      "5": 14,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000604",
+    "p_vector": {
+      "4": 6,
+      "5": 14,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000605",
+    "p_vector": {
+      "4": 6,
+      "5": 9,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000606",
+    "p_vector": {
+      "4": 6,
+      "6": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000607",
+    "p_vector": {
+      "4": 7,
+      "5": 10,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000608",
+    "p_vector": {
+      "4": 7,
+      "5": 11,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000609",
+    "p_vector": {
+      "4": 7,
+      "5": 12,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000610",
+    "p_vector": {
+      "4": 7,
+      "5": 8,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000611",
+    "p_vector": {
+      "4": 7,
+      "5": 9,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000612",
+    "p_vector": {
+      "4": 7,
+      "6": 14,
+      "7": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000613",
+    "p_vector": {
+      "4": 7,
+      "6": 15,
+      "7": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000614",
+    "p_vector": {
+      "4": 9,
+      "5": 2,
+      "6": 7,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000615",
+    "p_vector": {
+      "5": 11,
+      "6": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": false,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000616",
+    "p_vector": {
+      "5": 12,
+      "6": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000617",
+    "p_vector": {
+      "5": 12,
+      "6": 15
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000618",
+    "p_vector": {
+      "5": 12,
+      "6": 2
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000619",
+    "p_vector": {
+      "5": 13,
+      "6": 1,
+      "7": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000620",
+    "p_vector": {
+      "5": 13,
+      "7": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000621",
+    "p_vector": {
+      "5": 14,
+      "6": 1,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000622",
+    "p_vector": {
+      "5": 14,
+      "6": 3,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000623",
+    "p_vector": {
+      "5": 14,
+      "6": 4,
+      "8": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000624",
+    "p_vector": {
+      "5": 14,
+      "8": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000625",
+    "p_vector": {
+      "5": 15,
+      "6": 1,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000626",
+    "p_vector": {
+      "5": 15,
+      "6": 2,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000627",
+    "p_vector": {
+      "5": 15,
+      "6": 3,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000628",
+    "p_vector": {
+      "5": 15,
+      "6": 5,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000629",
+    "p_vector": {
+      "5": 15,
+      "9": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000630",
+    "p_vector": {
+      "5": 16,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000631",
+    "p_vector": {
+      "5": 16,
+      "6": 1,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000632",
+    "p_vector": {
+      "5": 16,
+      "6": 2,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000633",
+    "p_vector": {
+      "5": 16,
+      "6": 3,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000634",
+    "p_vector": {
+      "5": 16,
+      "6": 4,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000635",
+    "p_vector": {
+      "5": 16,
+      "6": 5,
+      "10": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000636",
+    "p_vector": {
+      "5": 17,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000637",
+    "p_vector": {
+      "5": 17,
+      "6": 1,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000638",
+    "p_vector": {
+      "5": 17,
+      "6": 2,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000639",
+    "p_vector": {
+      "5": 17,
+      "6": 3,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000640",
+    "p_vector": {
+      "5": 17,
+      "6": 4,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000641",
+    "p_vector": {
+      "5": 17,
+      "6": 5,
+      "11": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000642",
+    "p_vector": {
+      "5": 18,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000643",
+    "p_vector": {
+      "5": 18,
+      "6": 1,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000644",
+    "p_vector": {
+      "5": 18,
+      "6": 2,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000645",
+    "p_vector": {
+      "5": 18,
+      "6": 3,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000646",
+    "p_vector": {
+      "5": 18,
+      "6": 4,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000647",
+    "p_vector": {
+      "5": 18,
+      "6": 5,
+      "12": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000648",
+    "p_vector": {
+      "5": 18,
+      "6": 6,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000649",
+    "p_vector": {
+      "5": 18,
+      "6": 8,
+      "12": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000650",
+    "p_vector": {
+      "5": 19,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000651",
+    "p_vector": {
+      "5": 19,
+      "6": 1,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000652",
+    "p_vector": {
+      "5": 19,
+      "6": 2,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000653",
+    "p_vector": {
+      "5": 19,
+      "6": 3,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000654",
+    "p_vector": {
+      "5": 19,
+      "6": 3,
+      "7": 7
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000655",
+    "p_vector": {
+      "5": 19,
+      "6": 4,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000656",
+    "p_vector": {
+      "5": 19,
+      "6": 5,
+      "13": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000657",
+    "p_vector": {
+      "5": 19,
+      "6": 6,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000658",
+    "p_vector": {
+      "5": 19,
+      "6": 7,
+      "13": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000659",
+    "p_vector": {
+      "5": 20,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000660",
+    "p_vector": {
+      "5": 20,
+      "6": 1,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000661",
+    "p_vector": {
+      "5": 20,
+      "6": 1,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000662",
+    "p_vector": {
+      "5": 20,
+      "6": 2,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000663",
+    "p_vector": {
+      "5": 20,
+      "6": 2,
+      "7": 8
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000664",
+    "p_vector": {
+      "5": 20,
+      "6": 3,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000665",
+    "p_vector": {
+      "5": 20,
+      "6": 4,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000666",
+    "p_vector": {
+      "5": 20,
+      "6": 5,
+      "14": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000667",
+    "p_vector": {
+      "5": 20,
+      "6": 6,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000668",
+    "p_vector": {
+      "5": 20,
+      "6": 7,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000669",
+    "p_vector": {
+      "5": 20,
+      "6": 8,
+      "14": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000670",
+    "p_vector": {
+      "5": 21,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000671",
+    "p_vector": {
+      "5": 21,
+      "6": 1,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000672",
+    "p_vector": {
+      "5": 21,
+      "6": 2,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000673",
+    "p_vector": {
+      "5": 21,
+      "6": 3,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000674",
+    "p_vector": {
+      "5": 21,
+      "6": 4,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000675",
+    "p_vector": {
+      "5": 21,
+      "6": 5,
+      "15": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000676",
+    "p_vector": {
+      "5": 21,
+      "6": 6,
+      "15": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000677",
+    "p_vector": {
+      "5": 21,
+      "6": 7,
+      "15": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000678",
+    "p_vector": {
+      "5": 21,
+      "6": 8,
+      "15": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000679",
+    "p_vector": {
+      "5": 21,
+      "6": 9,
+      "15": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000680",
+    "p_vector": {
+      "5": 22,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000681",
+    "p_vector": {
+      "5": 22,
+      "6": 1,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000682",
+    "p_vector": {
+      "5": 22,
+      "6": 2,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000683",
+    "p_vector": {
+      "5": 22,
+      "6": 3,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000684",
+    "p_vector": {
+      "5": 22,
+      "6": 4,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000685",
+    "p_vector": {
+      "5": 22,
+      "6": 5,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000686",
+    "p_vector": {
+      "5": 22,
+      "6": 7,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000687",
+    "p_vector": {
+      "5": 22,
+      "6": 8,
+      "16": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000688",
+    "p_vector": {
+      "5": 22,
+      "6": 9,
+      "16": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000689",
+    "p_vector": {
+      "5": 23,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000690",
+    "p_vector": {
+      "5": 23,
+      "6": 1,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000691",
+    "p_vector": {
+      "5": 23,
+      "6": 2,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000692",
+    "p_vector": {
+      "5": 23,
+      "6": 3,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000693",
+    "p_vector": {
+      "5": 23,
+      "6": 4,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000694",
+    "p_vector": {
+      "5": 23,
+      "6": 5,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000695",
+    "p_vector": {
+      "5": 23,
+      "6": 6,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000696",
+    "p_vector": {
+      "5": 23,
+      "6": 7,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000697",
+    "p_vector": {
+      "5": 23,
+      "6": 8,
+      "17": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000698",
+    "p_vector": {
+      "5": 23,
+      "6": 9,
+      "17": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000699",
+    "p_vector": {
+      "5": 24,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000700",
+    "p_vector": {
+      "5": 24,
+      "6": 1,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000701",
+    "p_vector": {
+      "5": 24,
+      "6": 2,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000702",
+    "p_vector": {
+      "5": 24,
+      "6": 3,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000703",
+    "p_vector": {
+      "5": 24,
+      "6": 4,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000704",
+    "p_vector": {
+      "5": 24,
+      "6": 5,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000705",
+    "p_vector": {
+      "5": 24,
+      "6": 7,
+      "18": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000706",
+    "p_vector": {
+      "5": 24,
+      "6": 8,
+      "18": 1
+    },
+    "label": "realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000707",
+    "p_vector": {
+      "5": 25,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000708",
+    "p_vector": {
+      "5": 25,
+      "6": 1,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000709",
+    "p_vector": {
+      "5": 25,
+      "6": 2,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000710",
+    "p_vector": {
+      "5": 25,
+      "6": 3,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000711",
+    "p_vector": {
+      "5": 25,
+      "6": 4,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000712",
+    "p_vector": {
+      "5": 25,
+      "6": 5,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000713",
+    "p_vector": {
+      "5": 25,
+      "6": 6,
+      "19": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000714",
+    "p_vector": {
+      "5": 26,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000715",
+    "p_vector": {
+      "5": 26,
+      "6": 1,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000716",
+    "p_vector": {
+      "5": 26,
+      "6": 2,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000717",
+    "p_vector": {
+      "5": 26,
+      "6": 3,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000718",
+    "p_vector": {
+      "5": 26,
+      "6": 4,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  },
+  {
+    "id": "rc-000719",
+    "p_vector": {
+      "5": 26,
+      "6": 5,
+      "20": 1
+    },
+    "label": "non_realizable",
+    "euler_feasible": true,
+    "family": "pvector_realizability"
+  }
+]

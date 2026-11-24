@@ -36,6 +36,3 @@ lake-manifest.json
 
 # Temp compilation scratch dir
 polib/Polib/_Temp/
-
-# local-only rebuttal text/strategy — never commit (double-blind)
-scripts/rebuttal_y6yz/

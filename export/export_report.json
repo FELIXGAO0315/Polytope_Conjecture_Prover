@@ -1,0 +1,56 @@
+{
+  "buckets_read": {
+    "unsolved": 4,
+    "failed": 206,
+    "proved": 4
+  },
+  "counterexamples": {
+    "reverify_attempted": 206,
+    "reverify_failed": 3,
+    "float_artifacts": 1,
+    "exported": 203
+  },
+  "proofs": {
+    "exported": 4
+  },
+  "realizability": {
+    "realizable": 110,
+    "non_realizable": 609,
+    "emitted": 719,
+    "euler_infeasible": 1,
+    "excluded_timeout": 164,
+    "excluded_construction_failed": 2616,
+    "excluded_conflict_with_witness": 0
+  },
+  "drops": {
+    "empty_witness_graph": 2,
+    "float_artifact": 1
+  },
+  "float_artifacts": [
+    {
+      "id": "C48",
+      "formula_raw": "if ((is_simple)  and  (f_2>=_5)), then p6 >= (0.9285714286*p3 + -2.263392857*sum_pk_after_p6 + -1.857142857)",
+      "p_vector": {
+        "3": 2,
+        "4": 3
+      },
+      "relation": "ge",
+      "p6": 0,
+      "float_rhs": 2e-10,
+      "exact_rhs": "0"
+    }
+  ],
+  "closed_loop_float_note": "The pipeline's own counterexample checker (agent/orchestrator/tools/pvec_eval.py) evaluates the DSL's ROUNDED-DECIMAL coefficients literally (each decimal is wrapped in Fraction(<decimal>) — exact on the decimal, but NOT recovered to its intended small-denominator rational). On boundary cases this manufactures a spurious tiny RHS and accepts a non-counterexample. This export instead recovers each coefficient via Fraction(str).limit_denominator(1000) and requires a STRICT violation under exact arithmetic. The following conjectures are currently marked 'refuted' in conjectures.json but do NOT hold as counterexamples under exact arithmetic — they must be re-adjudicated in the original pipeline: C48",
+  "coefficient_conversion_failures": [],
+  "realizability_conflicts": [],
+  "conflict_derivation_summary": {},
+  "duplicates": [],
+  "reverify_failure_rate": 0.0097,
+  "reverify_stop_triggered": false,
+  "labels": {
+    "true": 4,
+    "false": 203,
+    "total": 207
+  },
+  "reverify_failure_rate_excludes": "float_artifact (reported separately)"
+}
