@@ -135,7 +135,7 @@ print(f"\n[delta] hypothesis cells reached ONLY with feedback: {len(only_feedbac
 for c in sorted(only_feedback_cells)[:12]:
     print(f"    + {c}")
 
-outp = os.path.join(ROOT, f"scripts/ablation/out/e4_feedback_ablation_seed{SEED}.json")
+outp = os.path.join(ROOT, f"supplement_experiment/ablation/out/e4_feedback_ablation_seed{SEED}.json")
 json.dump({"seed": SEED, "armA": armA, "armB": armB, "summaryA": sA, "summaryB": sB,
            "only_feedback_cells": sorted(only_feedback_cells)},
           open(outp, "w"), indent=1)

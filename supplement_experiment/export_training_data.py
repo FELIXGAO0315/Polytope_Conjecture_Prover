@@ -746,7 +746,7 @@ def main(argv=None) -> int:
     ap.add_argument("--ce-dir", default=os.path.join(_REPO_ROOT, "output", "conjecture_with_ce"))
     ap.add_argument("--no-ce-dir", default=os.path.join(_REPO_ROOT, "output", "conjecture_without_ce"))
     ap.add_argument("--realizability", default=os.path.join(_REPO_ROOT, "output", "realizability_cache.json"))
-    ap.add_argument("--out", default=os.path.join(_REPO_ROOT, "export"))
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(_THIS), "export"))
     args = ap.parse_args(argv)
 
     report = export(args.conjectures, args.ce_dir, args.no_ce_dir,

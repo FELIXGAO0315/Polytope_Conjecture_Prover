@@ -5,7 +5,7 @@ status write) inside one isolated llm_direct arm workspace (cwd == arm dir).
 Same shape as the F2b driver (f2b_driver.py), with exactly two differences:
   1. llm_propose_n is set PER GENERATION to the closed arm's pre-gate evaluated
      candidate count for the same seed+generation (the cap, read from
-     scripts/llm_direct_baseline/f2b_caps.json, which is derived from the committed F2b results
+     supplement_experiment/llm_direct_baseline/f2b_caps.json, which is derived from the committed F2b results
      at 314ed95). The LLM is the only source (sources turned off in setup), so
      this caps the candidate budget at what the closed arm evaluated.
   2. An infra failure in the single propose call (API error / rate-limit /

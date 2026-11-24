@@ -45,20 +45,20 @@ if __name__ == "__main__":
         return res
 
     # ---- RUN 1: no-feedback baseline (formula-based) ----
-    g=json.load(open("scripts/ablation/out/e7_groups.json"))
+    g=json.load(open("supplement_experiment/ablation/out/e7_groups.json"))
     nf=[]
     for r in g["nofeedback"]:
         try: pc=ParsedConjecture.from_conjecture_spec(SimpleNamespace(name=r["name"],formula=r["formula"]))
         except Exception: continue
         nf.append({"name":r["name"],"pc":pc})
-    r1=run_group("nofeedback_baseline", nf, "scripts/ablation/out/e8_nofeedback_downstream.json")
+    r1=run_group("nofeedback_baseline", nf, "supplement_experiment/ablation/out/e8_nofeedback_downstream.json")
 
     # ---- RUN 2: leave-one-out on 41 stochastic CEs (hyp+concl direct) ----
-    st=json.load(open("scripts/ablation/out/e8_stochastic41.json"))
+    st=json.load(open("supplement_experiment/ablation/out/e8_stochastic41.json"))
     lo=[{"name":x["name"],"orig_track":x["orig_track"],
          "pc":ParsedConjecture(conjecture_id=x["name"],statement_latex="",hypotheses=x["hypotheses"],conclusion=x["conclusion"])}
         for x in st]
-    r2=run_group("stochastic41_leaveoneout", lo, "scripts/ablation/out/e8_leaveoneout.json")
+    r2=run_group("stochastic41_leaveoneout", lo, "supplement_experiment/ablation/out/e8_leaveoneout.json")
 
     # ---- leave-one-out summary: of each orig track's CEs, how many recovered by a LOCAL track w/o LLM ----
     print("\n===== LEAVE-ONE-OUT SUMMARY (no-LLM recovery of stochastic CEs) =====", flush=True)

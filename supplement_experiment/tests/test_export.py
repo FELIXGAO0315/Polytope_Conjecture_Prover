@@ -1,4 +1,4 @@
-"""End-to-end tests for scripts/export_training_data.py.
+"""End-to-end tests for supplement_experiment/export_training_data.py.
 
 Uses REAL repository artifacts:
   * C9   — a genuine, plantri-found counterexample (label="false")
@@ -14,10 +14,12 @@ import json
 import os
 import sys
 
-_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# this file lives at supplement_experiment/tests/test_export.py
+_SUPPLEMENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_REPO_ROOT = os.path.dirname(_SUPPLEMENT)
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
-sys.path.insert(0, os.path.join(_REPO_ROOT, "scripts"))
+sys.path.insert(0, _SUPPLEMENT)          # export_training_data.py now lives here
 
 import export_training_data as ex   # noqa: E402
 

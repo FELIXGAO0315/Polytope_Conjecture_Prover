@@ -5,7 +5,7 @@ import json, glob, os, csv
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "scripts/ablation/out")
+OUT = os.path.join(ROOT, "supplement_experiment/ablation/out")
 
 # --- generator gate over the 9 recorded run files ---
 runs = sorted(glob.glob(os.path.join(ROOT, "output/conjecture_generator/run_*.json")))

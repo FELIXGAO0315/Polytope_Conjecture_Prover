@@ -4,7 +4,7 @@ READ-ONLY. No pipeline imports. Reads data files directly."""
 import json, glob, os, csv, collections
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "scripts/ablation/out")
+OUT = os.path.join(ROOT, "supplement_experiment/ablation/out")
 os.makedirs(OUT, exist_ok=True)
 
 conj = json.load(open(os.path.join(ROOT, "conjectures/conjectures.json")))

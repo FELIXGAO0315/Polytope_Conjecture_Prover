@@ -11,7 +11,7 @@ import json, glob, os, csv
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "scripts/ablation/out")
+OUT = os.path.join(ROOT, "supplement_experiment/ablation/out")
 F2_M5, F2_AD, KMAX_ENUM, NLARGE_ENUM = 36, 26, 20, 2
 
 recs = {}

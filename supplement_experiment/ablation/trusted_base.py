@@ -12,7 +12,7 @@ from collections import deque
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 INV = os.path.join(ROOT, "polib/Inventory.lean")
-DEPS = os.path.join(ROOT, "scripts/ablation/out/proof_deps.json")
+DEPS = os.path.join(ROOT, "supplement_experiment/ablation/out/proof_deps.json")
 
 src = open(INV).read()
 nc = re.sub(r'/-.*?-/', '', src, flags=re.S)
@@ -70,6 +70,6 @@ for cid in ["C104", "C201", "C215", "C124"]:
     print(f"   => TRANSITIVE sorry-base trusted assumptions: {sorted(sorried)}  (count {len(sorried)})")
     print()
 
-out = os.path.join(ROOT, "scripts/ablation/out/trusted_base.json")
+out = os.path.join(ROOT, "supplement_experiment/ablation/out/trusted_base.json")
 json.dump({cid: sb for cid, sb in rows}, open(out, "w"), indent=1)
 print(f"wrote {out}")

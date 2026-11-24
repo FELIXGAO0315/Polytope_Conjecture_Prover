@@ -5,7 +5,7 @@ import json, glob, os, csv
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "scripts/ablation/out")
+OUT = os.path.join(ROOT, "supplement_experiment/ablation/out")
 
 cache = json.load(open(os.path.join(ROOT, "output/realizability_cache.json")))
 

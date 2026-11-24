@@ -18,10 +18,10 @@ if __name__ == "__main__":
 
     SANDBOX = pathlib.Path("/tmp/claude-1000/-home-felix-gao-Polytope-Conjecture-Prover/9b1d48ec-d071-473f-9dad-ef162f74b3eb/scratchpad/ce_sandbox")
     SANDBOX.mkdir(parents=True, exist_ok=True)
-    groups = json.load(open("scripts/ablation/out/e7_groups.json"))
+    groups = json.load(open("supplement_experiment/ablation/out/e7_groups.json"))
     conjs = groups["feedback_unique"]            # 14
     RL_EP = int(os.environ.get("E7_RL_EP","200"))
-    RESULT = "scripts/ablation/out/e7_downstream_feedback_unique.json"
+    RESULT = "supplement_experiment/ablation/out/e7_downstream_feedback_unique.json"
 
     orch = Orchestrator()
     orch._ce_dir = SANDBOX                        # sandbox CE writes + replay reads

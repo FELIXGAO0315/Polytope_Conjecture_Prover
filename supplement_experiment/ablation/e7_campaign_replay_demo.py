@@ -39,7 +39,7 @@ def replay_refute(pc):
             return src
     return None
 
-d=json.load(open("scripts/ablation/out/e4_feedback_ablation.json"))
+d=json.load(open("supplement_experiment/ablation/out/e4_feedback_ablation.json"))
 def run_arm(name, rows):
     seen=set(); refuted=0; details=[]; t0=time.time()
     for r in rows:
@@ -63,4 +63,4 @@ print("\n"+"="*70)
 print(f"RESULT  A(feedback): {rA}/{nA} refuted by prior pool   |   B(no-feedback): {rB}/{nB}")
 print(f"        feedback's downstream delta: +{rA-rB} refutations, +{nA-nB} conjectures")
 json.dump({"armA":{"n":nA,"refuted":rA},"armB":{"n":nB,"refuted":rB}},
-          open("scripts/ablation/out/e7_campaign_replay_demo.json","w"),indent=1)
+          open("supplement_experiment/ablation/out/e7_campaign_replay_demo.json","w"),indent=1)

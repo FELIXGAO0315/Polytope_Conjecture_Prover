@@ -12,7 +12,7 @@ identical to the F2b open-loop ablation. The result will be reported whatever it
 ## Code under test
 
 - **Arm code commit (the exact code that will be run):** `1131a269` on `revision-iclr27`
-  (`scripts/llm_direct_baseline/f2b_llmdirect_{setup,driver,smoke,metrics}.py`, `run_f2b_llmdirect.sh`,
+  (`supplement_experiment/llm_direct_baseline/f2b_llmdirect_{setup,driver,smoke,metrics}.py`, `run_f2b_llmdirect.sh`,
   `f2b_caps.json`, plus `f2_metrics.py` / `f2b_metrics.py` copied verbatim from the F2b
   harness).
 - **Pipeline snapshot:** `/tmp/llm_direct_snap_a1eab93`, verified byte-identical (`diff -r` exit 0,
@@ -21,8 +21,8 @@ identical to the F2b open-loop ablation. The result will be reported whatever it
   ancestor of `revision-iclr27`).
 - **Unchanged metric definitions and novelty baseline** are inherited from the F2b
   pre-registration `2999a6c` (on `analysis/revision-baseline`), copied into the repo at
-  `scripts/llm_direct_baseline/out/f2b_prereg_2999a6c.json`. The **closed/open comparison numbers** come
-  from the F2b results `314ed95`, copied in at `scripts/llm_direct_baseline/out/f2b_results_314ed95.json`.
+  `supplement_experiment/llm_direct_baseline/out/f2b_prereg_2999a6c.json`. The **closed/open comparison numbers** come
+  from the F2b results `314ed95`, copied in at `supplement_experiment/llm_direct_baseline/out/f2b_results_314ed95.json`.
   Those two arms are **not** rerun.
 
 ## 1. Arm definition: `llm_direct`
@@ -134,5 +134,5 @@ JSON parse failure or zero valid formulas is an infra crash (above), not shortfa
   touched. Concurrency ≤ 2 seeds at a time (recorded in the runner log). Hard stop
   2026-11-18 23:00 America/New_York.
 - After the runs, the run logs, generator run logs, propose instrumentation, baselines, and
-  computed metrics are copied out into `scripts/llm_direct_baseline/out/llm_direct/` and committed, so nothing
+  computed metrics are copied out into `supplement_experiment/llm_direct_baseline/out/llm_direct/` and committed, so nothing
   depends on the `/tmp` snapshot.

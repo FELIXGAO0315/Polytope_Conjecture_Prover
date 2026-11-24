@@ -83,5 +83,5 @@ for rel, root in targets:
     print("  inventory symbols used (root closure):", r["inventory_symbols_used_by_root_closure"])
     print("  ^ of which are SORRIED base lemmas:", r["inventory_used_that_are_sorried_base"])
 
-json.dump(out, open(os.path.join(ROOT, "scripts/ablation/out/proof_deps.json"), "w"), indent=1)
-print("\nwrote scripts/ablation/out/proof_deps.json")
+json.dump(out, open(os.path.join(ROOT, "supplement_experiment/ablation/out/proof_deps.json"), "w"), indent=1)
+print("\nwrote supplement_experiment/ablation/out/proof_deps.json")
