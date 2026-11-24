@@ -8,7 +8,7 @@ off, so the LLM co-proposer is the only conjecture source. Everything else
 advisory LLM review, deterministic downstream B, prover disabled, 2 generations,
 no outcome feedback between generations) is byte-for-byte the open arm.
 
-Patches applied (in order), all on a FRESH copy of /tmp/ldno_snap_a1eab93
+Patches applied (in order), all on a FRESH copy of /tmp/llm_direct_snap_a1eab93
 (verified byte-identical to commit a1eab93):
 
   1. patch_validator  — check-level logging in check_pvector.py (additive; VERBATIM
@@ -32,13 +32,13 @@ Patches applied (in order), all on a FRESH copy of /tmp/ldno_snap_a1eab93
 
 Writes NOTHING into the repo/main tree and never touches the F2b closed/open
 workspaces. Usage:
-  python3 f2b_llmdirect_setup.py <seed_int>     # -> /home/felix_gao/ldno_exp/f2b_llmdirect/seed<seed>/llm_direct
+  python3 f2b_llmdirect_setup.py <seed_int>     # -> /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed<seed>/llm_direct
   (library)  prepare_arm(dest)                  # used by the smoke check on a temp dir
 """
 import os, shutil, subprocess, sys
 
-SNAP = "/tmp/ldno_snap_a1eab93"
-ROOT = "/home/felix_gao/ldno_exp/f2b_llmdirect"
+SNAP = "/tmp/llm_direct_snap_a1eab93"
+ROOT = "/home/felix_gao/llm_direct_exp/f2b_llmdirect"
 
 # ── 1. validator check-level logging (VERBATIM from original f2b_setup.py) ──
 LOG_HELPER = '''

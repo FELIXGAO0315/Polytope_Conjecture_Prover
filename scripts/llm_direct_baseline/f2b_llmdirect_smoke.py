@@ -20,9 +20,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from f2b_llmdirect_setup import prepare_arm  # noqa: E402
 
-SMOKE_ARM = "/home/felix_gao/ldno_exp/f2b_llmdirect_smoke/arm"      # outside seed workspaces
-INVALID_LOG = "/home/felix_gao/ldno_exp/f2b_llmdirect_smoke/llm_invalid.jsonl"
-PROMPT_LOG = "/home/felix_gao/ldno_exp/f2b_llmdirect_smoke/propose_prompt.txt"
+SMOKE_ARM = "/home/felix_gao/llm_direct_exp/f2b_llmdirect_smoke/arm"      # outside seed workspaces
+INVALID_LOG = "/home/felix_gao/llm_direct_exp/f2b_llmdirect_smoke/llm_invalid.jsonl"
+PROMPT_LOG = "/home/felix_gao/llm_direct_exp/f2b_llmdirect_smoke/propose_prompt.txt"
 
 
 def main():

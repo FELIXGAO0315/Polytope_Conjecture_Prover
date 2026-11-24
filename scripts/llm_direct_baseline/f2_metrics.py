@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """F2 metrics for one arm, computed against a pre-run baseline snapshot.
-READ-ONLY over an isolated arm workspace (/home/felix_gao/ldno_exp/<arm>).
+READ-ONLY over an isolated arm workspace (/home/felix_gao/llm_direct_exp/<arm>).
 Usage: f2_metrics.py <arm_dir> <baseline.json> <out_checkpoint.json> <gen_label>
 If baseline.json is missing, writes it (the pre-run frozen state) and exits."""
 import sys, os, json, glob, re, csv

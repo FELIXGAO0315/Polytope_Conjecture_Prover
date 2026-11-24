@@ -5,7 +5,7 @@
 #
 # Concurrency: <= 2 seeds at a time (recorded in this log). Each seed is a FRESH
 # patched copy of the a1eab93 snapshot under
-#   /home/felix_gao/ldno_exp/f2b_llmdirect/seed<seed>/llm_direct
+#   /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed<seed>/llm_direct
 # Infra failures (driver exit 3: API error / rate-limit / timeout / empty-or-
 # truncated propose response) rerun the seed from scratch (unchanged settings),
 # up to MAX_ATTEMPTS; every occurrence is logged. Budget: timeout 600s /
@@ -17,7 +17,7 @@ SETUP="$HERE/f2b_llmdirect_setup.py"
 DRIVER="$HERE/f2b_llmdirect_driver.py"
 METRICS="$HERE/f2_metrics.py"
 CAPS="$HERE/f2b_caps.json"
-ROOT=/home/felix_gao/ldno_exp/f2b_llmdirect
+ROOT=/home/felix_gao/llm_direct_exp/f2b_llmdirect
 SEEDS=(41 7 123 2024 99)
 K=2
 MAX_ATTEMPTS=3

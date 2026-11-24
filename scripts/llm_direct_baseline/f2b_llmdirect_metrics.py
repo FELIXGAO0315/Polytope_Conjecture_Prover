@@ -21,7 +21,7 @@ Usage: f2b_llmdirect_metrics.py <out_results.json>
 import sys, os, json, glob, subprocess, statistics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = "/home/felix_gao/ldno_exp/f2b_llmdirect"
+ROOT = "/home/felix_gao/llm_direct_exp/f2b_llmdirect"
 CAPS = json.load(open(os.path.join(HERE, "f2b_caps.json")))["caps"]
 F2B = json.load(open(os.path.join(HERE, "out/f2b_results_314ed95.json")))
 SEEDS = [41, 7, 123, 2024, 99]

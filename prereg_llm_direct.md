@@ -12,24 +12,24 @@ identical to the F2b open-loop ablation. The result will be reported whatever it
 ## Code under test
 
 - **Arm code commit (the exact code that will be run):** `1131a269` on `revision-iclr27`
-  (`scripts/ldno/f2b_llmdirect_{setup,driver,smoke,metrics}.py`, `run_f2b_llmdirect.sh`,
+  (`scripts/llm_direct_baseline/f2b_llmdirect_{setup,driver,smoke,metrics}.py`, `run_f2b_llmdirect.sh`,
   `f2b_caps.json`, plus `f2_metrics.py` / `f2b_metrics.py` copied verbatim from the F2b
   harness).
-- **Pipeline snapshot:** `/tmp/ldno_snap_a1eab93`, verified byte-identical (`diff -r` exit 0,
+- **Pipeline snapshot:** `/tmp/llm_direct_snap_a1eab93`, verified byte-identical (`diff -r` exit 0,
   `agent/` tree) to commit `a1eab93`, which is confirmed to be the exact pipeline code the
   F2b closed/open runs used (same snapshot each F2b arm was copied from; `a1eab93` is an
   ancestor of `revision-iclr27`).
 - **Unchanged metric definitions and novelty baseline** are inherited from the F2b
-  pre-registration `2999a6c` (on `analysis/reviewer-ldno`), copied into the repo at
-  `scripts/ldno/out/f2b_prereg_2999a6c.json`. The **closed/open comparison numbers** come
-  from the F2b results `314ed95`, copied in at `scripts/ldno/out/f2b_results_314ed95.json`.
+  pre-registration `2999a6c` (on `analysis/revision-baseline`), copied into the repo at
+  `scripts/llm_direct_baseline/out/f2b_prereg_2999a6c.json`. The **closed/open comparison numbers** come
+  from the F2b results `314ed95`, copied in at `scripts/llm_direct_baseline/out/f2b_results_314ed95.json`.
   Those two arms are **not** rerun.
 
 ## 1. Arm definition: `llm_direct`
 
 `llm_direct` is the F2b **open** arm with every non-LLM Stage-1 source turned off, so the LLM
 co-proposer is the only conjecture source. All patches are applied, arm-isolated, to a fresh
-copy of the snapshot under `/home/felix_gao/ldno_exp/f2b_llmdirect/seed<seed>/llm_direct`.
+copy of the snapshot under `/home/felix_gao/llm_direct_exp/f2b_llmdirect/seed<seed>/llm_direct`.
 Relative to the open arm, the ONLY changes are:
 
 - **Sources off.** Graffiti3 full-table pass, Graffiti3 stratified pass, and the
@@ -129,10 +129,10 @@ JSON parse failure or zero valid formulas is an infra crash (above), not shortfa
 - **All results will be reported regardless of outcome**, including any seed where
   `llm_direct` wins, and every deviation from this pre-registration however small.
 - Isolation: each seed is a fresh full copy of the `a1eab93` snapshot under
-  `/home/felix_gao/ldno_exp/f2b_llmdirect/seed<seed>/llm_direct`. The F2b closed/open
+  `/home/felix_gao/llm_direct_exp/f2b_llmdirect/seed<seed>/llm_direct`. The F2b closed/open
   workspaces and all repo/registry/witness-pool/cache state outside that tree are never
   touched. Concurrency ≤ 2 seeds at a time (recorded in the runner log). Hard stop
   2026-11-18 23:00 America/New_York.
 - After the runs, the run logs, generator run logs, propose instrumentation, baselines, and
-  computed metrics are copied out into `scripts/ldno/out/llm_direct/` and committed, so nothing
+  computed metrics are copied out into `scripts/llm_direct_baseline/out/llm_direct/` and committed, so nothing
   depends on the `/tmp` snapshot.
