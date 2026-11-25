@@ -1,5 +1,5 @@
 {
- "_provenance": "closed-arm per_run.evaluated (accepted+rejected = pre-gate proposal count) from scripts/out/llm_direct/f2b/results.json @ commit 314ed95; see f2b prereg @ 2999a6c for metric defs + novelty baseline.",
+ "_provenance": "closed-arm per_run.evaluated (accepted+rejected = pre-gate proposal count) from supplement_experiment/llm_direct_baseline/out/f2b_results_314ed95.json @ commit 314ed95; see f2b prereg @ 2999a6c for metric defs + novelty baseline.",
  "caps": {
   "41": {
    "1": 113,

@@ -33,7 +33,7 @@
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C225: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 = 12) and (f_2>=_20)), then p6 >= (2)
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C226: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (p_5 = 12) and (f_2>=_80)), then p6 >= (((1/2) * p5) + 50)
 [conjecture generator] conjectures stored with status=new (10)
-[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed2024/llm_direct/output/conjecture_generator/run_20261118_155706.json
+[conjecture generator] run log → /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed2024/llm_direct/output/conjecture_generator/run_20261118_155706.json
 [llm_direct] gen1 generation wall=282.5s
 [llm_direct] gen1: 10 new conjecture(s) -> downstream
 [Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...
@@ -184,7 +184,7 @@
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C260: if ((is_simple) and (p_3 = 0) and (p_4 = 0) and (f_2>=_12)), then p6 >= (12 - p5 - sum_pk_after_p6)
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C263: if ((is_simple) and (p_4 = 0) and (p_5 = 0) and (f_2>=_4)), then p6 >= (4 - p3 - sum_pk_after_p6)
 [conjecture generator] conjectures stored with status=new (37)
-[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed2024/llm_direct/output/conjecture_generator/run_20261118_160407.json
+[conjecture generator] run log → /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed2024/llm_direct/output/conjecture_generator/run_20261118_160407.json
 [llm_direct] gen2 generation wall=275.7s
 [llm_direct] gen2: 37 new conjecture(s) -> downstream
 [Stage 0] Witness pool replay — re-checking 207 sibling witness(es) ...

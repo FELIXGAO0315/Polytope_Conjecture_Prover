@@ -23,7 +23,7 @@
 [conjecture generator] calling LLM review on 11 candidate(s) (claude-opus-4-7, effort=low, ≤180s, no retry)…
 [conjecture generator] LLM review dropped 11 candidate(s)
 [conjecture generator] accepted 0, rejected 113
-[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154132.json
+[conjecture generator] run log → /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154132.json
 [llm_direct] gen1 generation wall=203.4s
 [llm_direct] gen1: 0 new conjecture(s) -> downstream
 [llm_direct] gen1 downstream done: 0 refuted, 0 survivors
@@ -142,7 +142,7 @@
 [conjecture generator] WARNING degenerate IRIS (TRL=6.52e-05 < 1e-04) C220: if ((is_simple) and (f_2>=_7)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 7)
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C234: if ((is_simple) and (f_2>=_127)), then p6 >= (-1*p3 + -1*p4 + -1*p5 + -1*sum_pk_after_p6 + 127)
 [conjecture generator] conjectures stored with status=new (18)
-[conjecture generator] run log → /home/felix_gao/ldno_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154520.json
+[conjecture generator] run log → /home/felix_gao/llm_direct_exp/f2b_llmdirect/seed41/llm_direct/output/conjecture_generator/run_20261118_154520.json
 [llm_direct] gen2 generation wall=229.0s
 [llm_direct] gen2: 18 new conjecture(s) -> downstream
 [Stage 0] Witness pool replay — re-checking 206 sibling witness(es) ...

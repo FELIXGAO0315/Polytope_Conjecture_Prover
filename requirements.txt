@@ -38,6 +38,9 @@ threadpoolctl==3.5.0          # pins BLAS/MKL pools to 1 thread in finder proces
 scikit-learn==1.7.2           # TF-IDF vectorizer + cosine similarity for Mathlib search
 numpy==2.3.5                  # Numerical arrays (TF-IDF matrix, p-vector arithmetic)
 
+# ── Supplementary experiments (supplement_experiment/) ───────────────────────
+pytest==8.3.4                 # supplement_experiment/tests — export re-verification suite
+
 # ── Transitive dependencies (pinned for reproducibility) ─────────────────────
 
 # torch transitive

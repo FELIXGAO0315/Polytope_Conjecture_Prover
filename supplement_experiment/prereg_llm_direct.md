@@ -4,7 +4,7 @@
 run started. This file is committed on branch `revision-iclr27` **before** the first run
 log timestamp.
 
-**Purpose.** Reviewer z7Pb notes the loop is compared "only against its own components."
+**Purpose.** A reviewer notes the loop is compared "only against its own components."
 This pre-registers ONE external-style baseline: an LLM proposes conjectures directly — no
 Graffiti3, no other conjecture source, no outcome feedback — with everything downstream
 identical to the F2b open-loop ablation. The result will be reported whatever it is.

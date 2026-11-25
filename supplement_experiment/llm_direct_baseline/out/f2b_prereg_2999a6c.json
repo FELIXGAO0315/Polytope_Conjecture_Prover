@@ -1,12 +1,12 @@
 {
   "experiment": "F2b — closed-vs-open-loop generation ablation (re-run of the invalid F2)",
   "preregistered_at_ny": "2026-11-17 13:06 America/New_York",
-  "branch": "analysis/reviewer-ldno",
+  "branch": "analysis/revision-baseline",
   "worktree": "/home/felix_gao/polib-fix-quadocc",
-  "snapshot_under_test": "a1eab93 (read-only export /tmp/ldno_snap_a1eab93)",
-  "why_f2_was_invalid": "run_f2.sh passed --generator-limit 12; the break at agent/conjecture_generator/agent.py:299 stopped the hard-filter loop at 12 hard-filter accepts, which were drawn from the graffiti3-family candidates that lead the candidate list, so dynamic cells, the mutation engine, the support-function miner and the LLM co-proposer were never evaluated. Evidence: ldno_exp/closed/output/conjecture_generator/run_20261117_023840.json and run_20261117_025135.json contain ONLY sources 'graffiti3' and 'graffiti3:strat:p3_eq_0' (19 and 18 evaluated candidates); the limit=0 campaign logs contain all six source families.",
+  "snapshot_under_test": "a1eab93 (read-only export /tmp/llm_direct_snap_a1eab93)",
+  "why_f2_was_invalid": "run_f2.sh passed --generator-limit 12; the break at agent/conjecture_generator/agent.py:299 stopped the hard-filter loop at 12 hard-filter accepts, which were drawn from the graffiti3-family candidates that lead the candidate list, so dynamic cells, the mutation engine, the support-function miner and the LLM co-proposer were never evaluated. Evidence: llm_direct_exp/closed/output/conjecture_generator/run_20261117_023840.json and run_20261117_025135.json contain ONLY sources 'graffiti3' and 'graffiti3:strat:p3_eq_0' (19 and 18 evaluated candidates); the limit=0 campaign logs contain all six source families.",
 
-  "only_allowed_change": "generator limit set from 12 to 0 in both arms (f2b_setup.py / f2b_driver.py / run_f2b.sh). Every F2 patch is byte-identical to scripts/ldno/f2_setup.py: validator check-level logging (additive); prover DISABLED in the evolution loop (no-CE => survivor); open arm only: derive_signals()->empty, _dynamic_cells->[], generate_mutations->[]. LLM co-proposer + LLM review still run in BOTH arms (empty hint blocks in the open arm). No other code or configuration change.",
+  "only_allowed_change": "generator limit set from 12 to 0 in both arms (f2b_setup.py / f2b_driver.py / run_f2b.sh). Every F2 patch is byte-identical to supplement_experiment/llm_direct_baseline/f2_setup.py: validator check-level logging (additive); prover DISABLED in the evolution loop (no-CE => survivor); open arm only: derive_signals()->empty, _dynamic_cells->[], generate_mutations->[]. LLM co-proposer + LLM review still run in BOTH arms (empty hint blocks in the open arm). No other code or configuration change.",
 
   "seeds": [41, 7, 123, 2024, 99],
   "seed_injection": "PYTHONHASHSEED=<seed> and CE_CONSTRUCT_SEED=<seed> (both read by existing code; no code change). The LLM propose/review adds uncontrolled API stochasticity on top. Seed 41 was the smoke-test seed and is included as pre-approved by the protocol.",
@@ -26,14 +26,14 @@
   "runtime_estimate": {
     "measured_inputs": {
       "accepted_per_generation_smoke_gen1_limit0": {"closed": 37, "open": 22,
-        "source": "ldno_exp/f2b/seed41/{closed,open}/output/conjecture_generator/run_20261117_125515.json & run_20261117_125317.json 'accepted'; smoke_gen.log 'accepted 37/22'"},
+        "source": "llm_direct_exp/f2b/seed41/{closed,open}/output/conjecture_generator/run_20261117_125515.json & run_20261117_125317.json 'accepted'; smoke_gen.log 'accepted 37/22'"},
       "generation_wall_s_smoke_gen1": {"closed": 432, "open": 313,
-        "source": "ldno_exp/f2b/seed41 smoke parallel run 12:48:04 start; closed done 12:55:16, open done 12:53:17"},
+        "source": "llm_direct_exp/f2b/seed41 smoke parallel run 12:48:04 start; closed done 12:55:16, open done 12:53:17"},
       "per_conjecture_downstream_s": {
         "B": {"mean": 15.4, "median": 13.1, "max": 32.9, "n": 12, "refuted": 1, "survivors": 11,
               "source": "calibration on seed41/closed first 12 status=new specs, this box idle"},
         "A": {"refuted_fast": 89, "survivor_blended": 190,
-              "source": "invalid F2 run closed gen1 total 789s (run_f2.log) minus ~432s generation = ~357s / 4 refuted-fast conjectures = ~89s; F1-lite hopper mean 147.7s (ldno_exp/f1lite/f1lite_units) + RL/LLM/constructor in parallel => survivor >=160s; calibration shows 92% survive the deterministic stages and would reach the expensive tracks under A, so blended ~190s"}
+              "source": "invalid F2 run closed gen1 total 789s (run_f2.log) minus ~432s generation = ~357s / 4 refuted-fast conjectures = ~89s; F1-lite hopper mean 147.7s (llm_direct_exp/f1lite/f1lite_units) + RL/LLM/constructor in parallel => survivor >=160s; calibration shows 92% survive the deterministic stages and would reach the expensive tracks under A, so blended ~190s"}
       },
       "free_cores": 16,
       "cores_per_arm": {"A": "6-8 (plantri screen 3 + RL proc + Hopper proc + constructor pool + LLM)", "B": "2-3 (plantri screen up to 3, lattice/replay single-thread)"},
@@ -62,6 +62,6 @@
   },
 
   "hard_stop_ny": "2026-11-17 21:00 America/New_York (epoch 1794967200). Unfinished runs are stopped; only seeds whose BOTH arms completed count; all completed seeds are reported.",
-  "isolation": "Each of the 5 seeds x 2 arms is a FRESH full copy of the a1eab93 snapshot (frozen registry + witness pool + caches) under /home/felix_gao/ldno_exp/f2b/seed<seed>/<arm>. No output/, registry, witness pool, or campaign cache outside that tree is ever touched. The invalid F2 outputs in ldno_exp/{closed,open} are kept.",
+  "isolation": "Each of the 5 seeds x 2 arms is a FRESH full copy of the a1eab93 snapshot (frozen registry + witness pool + caches) under /home/felix_gao/llm_direct_exp/f2b/seed<seed>/<arm>. No output/, registry, witness pool, or campaign cache outside that tree is ever touched. The invalid F2 outputs in llm_direct_exp/{closed,open} are kept.",
   "commitment": "Report ALL seeds and ALL metrics, whatever they show."
 }
