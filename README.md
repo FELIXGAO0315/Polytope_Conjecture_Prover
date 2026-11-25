@@ -1457,6 +1457,7 @@ lemma eulerInductiveStep (v e f : ℤ) (h : v - e + f = 2) : v - (e + 1) + (f + 
 ```
 Polytope_Conjecture_Prover/
 ├── run.py                              # CLI entry point (python -m run [project|<id>])
+├── formalize.py                        # CLI entry point (python -m formalize <id>) — shim to agent/prover
 ├── conjectures/
 │   ├── conjectures.json                # All conjectures (unsolved / failed / proved) — single truth source
 │   └── registry.json                   # CE-attempt counters for the survivor signal (auto-created)
@@ -1509,7 +1510,16 @@ Polytope_Conjecture_Prover/
 ├── polib/
 │   ├── Inventory.lean                  # Foundational lemma library
 │   └── lakefile.lean                   # Lake build config for polib
-└── requirements.txt
+├── requirements.txt
+└── supplement_experiment/              # Reviewer-requested supplements — NOT part of the core loop
+    ├── README.md                       # index of this folder
+    ├── ablation/                       # E4/E6/E7/E8 ablation studies (code + out/ results)
+    ├── llm_direct_baseline/            # F2b llm_direct external baseline (code + out/ run logs)
+    ├── export_training_data.py         # export decided conjectures → labeled dataset
+    ├── export/                         # exported dataset artifacts
+    ├── tests/                          # end-to-end export tests (pytest)
+    ├── independence_check.py           # offline independence check vs. known theorems
+    └── prereg_llm_direct.md            # pre-registration for the llm_direct baseline
 ```
 
 ---
