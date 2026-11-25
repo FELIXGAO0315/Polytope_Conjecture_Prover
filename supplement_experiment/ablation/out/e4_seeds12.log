@@ -35,7 +35,7 @@
   degenerate (TRL<1e-4)     : 4
   source composition        : {'graffiti3': 20, 'miner': 7}
 [delta] hypothesis cells reached ONLY with feedback: 14
-wrote /home/felix_gao/Polytope_Conjecture_Prover/scripts/ablation/out/e4_feedback_ablation_seed1.json
+wrote /home/felix_gao/Polytope_Conjecture_Prover/supplement_experiment/ablation/out/e4_feedback_ablation_seed1.json
 ######## SEED 2 ########
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C239: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_17)), then p6 >= ((((-0.5 * p5) + 6)) - 0.5)
 [conjecture generator] WARNING degenerate IRIS (TRL=0.00e+00 < 1e-04) C240: if ((is_simple) and (p_3 <= 2) and (p_4 <= 2) and (f_2>=_18)), then p6 >= (((-0.5 * p5) + 6))
@@ -73,7 +73,7 @@ wrote /home/felix_gao/Polytope_Conjecture_Prover/scripts/ablation/out/e4_feedbac
   degenerate (TRL<1e-4)     : 4
   source composition        : {'graffiti3': 20, 'miner': 7}
 [delta] hypothesis cells reached ONLY with feedback: 14
-wrote /home/felix_gao/Polytope_Conjecture_Prover/scripts/ablation/out/e4_feedback_ablation_seed2.json
+wrote /home/felix_gao/Polytope_Conjecture_Prover/supplement_experiment/ablation/out/e4_feedback_ablation_seed2.json
 ######## REGISTRY DIFF ########
 REGISTRY UNCHANGED
 ALL_DONE_E4_SEEDS
